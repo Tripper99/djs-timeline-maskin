@@ -1,0 +1,3 @@
+ttkbootstrap
+PyPDF2
+openpyxl
