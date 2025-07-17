@@ -253,6 +253,11 @@ class PDFProcessorApp:
         # Custom undo system for Entry widgets
         self.entry_undo_stacks = {}  # Dictionary to store undo history for each Entry widget
         self.entry_redo_stacks = {}  # Dictionary to store redo history for each Entry widget
+        
+        # Custom undo system for Text widgets (for problematic operations)
+        self.text_undo_stacks = {}  # Dictionary to store undo history for each Text widget
+        self.text_redo_stacks = {}  # Dictionary to store redo history for each Text widget
+        
         self.max_undo_levels = 20  # Maximum number of undo levels
         
         # Lock switches for ALL fields except Dag, Händelse and Inlagd datum (which is read-only)
@@ -2218,7 +2223,7 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
         return None  # Allow default select-all to proceed
     
     def handle_paste_undo(self, event):
-        """Handle Ctrl+V - add undo separator before paste if there's a selection"""
+        """Handle Ctrl+V - save current content before paste operation"""
         try:
             focused_widget = self.root.focus_get()
             if isinstance(focused_widget, tk.Text):
@@ -2229,8 +2234,11 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
                 select_all_pending = getattr(focused_widget, '_select_all_pending', False)
                 
                 if has_selection or select_all_pending:
-                    focused_widget.edit_separator()
-                    logger.info("Added undo separator before paste operation")
+                    # Save current content to our custom undo stack
+                    current_content = focused_widget.get("1.0", "end-1c")
+                    self.save_text_undo_state(focused_widget, current_content)
+                    
+                    logger.info("Saved undo state before paste operation")
                 
                 # Clear the select-all pending flag
                 if hasattr(focused_widget, '_select_all_pending'):
@@ -2240,7 +2248,7 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
         return None  # Allow default paste to proceed
     
     def handle_delete_with_undo(self, event):
-        """Handle Delete/BackSpace - add undo separator if there's a selection"""
+        """Handle Delete/BackSpace - prepare undo state before deletion"""
         try:
             focused_widget = self.root.focus_get()
             if isinstance(focused_widget, tk.Text):
@@ -2251,8 +2259,11 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
                 select_all_pending = getattr(focused_widget, '_select_all_pending', False)
                 
                 if has_selection or select_all_pending:
-                    focused_widget.edit_separator()
-                    logger.info(f"Added undo separator before {event.keysym} operation")
+                    # Save current content to our custom undo stack
+                    current_content = focused_widget.get("1.0", "end-1c")
+                    self.save_text_undo_state(focused_widget, current_content)
+                    
+                    logger.info(f"Saved undo state before {event.keysym} operation")
                 
                 # Clear the select-all pending flag
                 if hasattr(focused_widget, '_select_all_pending'):
@@ -2359,14 +2370,19 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
         """Global undo function that works on focused widget"""
         focused_widget = self.root.focus_get()
         if focused_widget and focused_widget in self.undo_widgets:
-            # For Text widgets, use edit_undo
+            # For Text widgets, try custom undo first, then fallback to edit_undo
             if isinstance(focused_widget, tk.Text):
-                try:
-                    focused_widget.edit_undo()
+                # Try custom undo first for problematic operations
+                if self.text_widget_undo(focused_widget):
                     return "break"  # Prevent default handling
-                except tk.TclError:
-                    # No undo available
-                    pass
+                else:
+                    # Fallback to built-in undo
+                    try:
+                        focused_widget.edit_undo()
+                        return "break"  # Prevent default handling
+                    except tk.TclError:
+                        # No undo available
+                        pass
             # For Entry widgets, use our custom undo system
             elif hasattr(focused_widget, 'get') and hasattr(focused_widget, 'delete'):
                 if self.undo_entry_widget(focused_widget):
@@ -2377,14 +2393,19 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
         """Global redo function that works on focused widget"""
         focused_widget = self.root.focus_get()
         if focused_widget and focused_widget in self.undo_widgets:
-            # For Text widgets, use edit_redo
+            # For Text widgets, try custom redo first, then fallback to edit_redo
             if isinstance(focused_widget, tk.Text):
-                try:
-                    focused_widget.edit_redo()
+                # Try custom redo first for problematic operations
+                if self.text_widget_redo(focused_widget):
                     return "break"  # Prevent default handling
-                except tk.TclError:
-                    # No redo available
-                    pass
+                else:
+                    # Fallback to built-in redo
+                    try:
+                        focused_widget.edit_redo()
+                        return "break"  # Prevent default handling
+                    except tk.TclError:
+                        # No redo available
+                        pass
             # For Entry widgets, use our custom redo system
             elif hasattr(focused_widget, 'get') and hasattr(focused_widget, 'delete'):
                 if self.redo_entry_widget(focused_widget):
@@ -2489,6 +2510,73 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
         entry_widget.delete(0, tk.END)
         entry_widget.insert(0, redo_value)
         
+        return True
+    
+    def save_text_undo_state(self, text_widget, content):
+        """Save text widget state to custom undo stack"""
+        widget_id = id(text_widget)
+        
+        # Initialize stacks if not exists
+        if widget_id not in self.text_undo_stacks:
+            self.text_undo_stacks[widget_id] = []
+            self.text_redo_stacks[widget_id] = []
+        
+        # Add to undo stack
+        self.text_undo_stacks[widget_id].append(content)
+        
+        # Limit stack size
+        if len(self.text_undo_stacks[widget_id]) > self.max_undo_levels:
+            self.text_undo_stacks[widget_id].pop(0)
+        
+        # Clear redo stack when new state is saved
+        self.text_redo_stacks[widget_id] = []
+    
+    def text_widget_undo(self, text_widget):
+        """Perform undo on Text widget using custom stack"""
+        widget_id = id(text_widget)
+        
+        if widget_id not in self.text_undo_stacks or not self.text_undo_stacks[widget_id]:
+            return False
+        
+        undo_stack = self.text_undo_stacks[widget_id]
+        redo_stack = self.text_redo_stacks[widget_id]
+        
+        # Save current content to redo stack
+        current_content = text_widget.get("1.0", "end-1c")
+        redo_stack.append(current_content)
+        
+        # Get previous content from undo stack
+        previous_content = undo_stack.pop()
+        
+        # Restore content
+        text_widget.delete("1.0", tk.END)
+        text_widget.insert("1.0", previous_content)
+        
+        logger.info("Performed custom undo on Text widget")
+        return True
+    
+    def text_widget_redo(self, text_widget):
+        """Perform redo on Text widget using custom stack"""
+        widget_id = id(text_widget)
+        
+        if widget_id not in self.text_redo_stacks or not self.text_redo_stacks[widget_id]:
+            return False
+        
+        undo_stack = self.text_undo_stacks[widget_id]
+        redo_stack = self.text_redo_stacks[widget_id]
+        
+        # Save current content to undo stack
+        current_content = text_widget.get("1.0", "end-1c")
+        undo_stack.append(current_content)
+        
+        # Get next content from redo stack
+        next_content = redo_stack.pop()
+        
+        # Restore content
+        text_widget.delete("1.0", tk.END)
+        text_widget.insert("1.0", next_content)
+        
+        logger.info("Performed custom redo on Text widget")
         return True
     
     def run(self):
