@@ -2205,6 +2205,62 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
             # Error accessing selection or widget - let default handling proceed
             return None
     
+    def handle_select_all_undo(self, event):
+        """Handle Ctrl+A - prepare for potential undo separator if next operation modifies content"""
+        try:
+            focused_widget = self.root.focus_get()
+            if isinstance(focused_widget, tk.Text):
+                # Mark that we just did a select all - next destructive operation should add separator
+                focused_widget._select_all_pending = True
+                logger.debug("Marked select-all pending for undo tracking")
+        except (tk.TclError, AttributeError):
+            pass
+        return None  # Allow default select-all to proceed
+    
+    def handle_paste_undo(self, event):
+        """Handle Ctrl+V - add undo separator before paste if there's a selection"""
+        try:
+            focused_widget = self.root.focus_get()
+            if isinstance(focused_widget, tk.Text):
+                # Check if there's selected text that will be replaced
+                has_selection = bool(focused_widget.tag_ranges(tk.SEL))
+                
+                # Or if we just did a select-all
+                select_all_pending = getattr(focused_widget, '_select_all_pending', False)
+                
+                if has_selection or select_all_pending:
+                    focused_widget.edit_separator()
+                    logger.info("Added undo separator before paste operation")
+                
+                # Clear the select-all pending flag
+                if hasattr(focused_widget, '_select_all_pending'):
+                    delattr(focused_widget, '_select_all_pending')
+        except (tk.TclError, AttributeError):
+            pass
+        return None  # Allow default paste to proceed
+    
+    def handle_delete_with_undo(self, event):
+        """Handle Delete/BackSpace - add undo separator if there's a selection"""
+        try:
+            focused_widget = self.root.focus_get()
+            if isinstance(focused_widget, tk.Text):
+                # Check if there's selected text that will be deleted
+                has_selection = bool(focused_widget.tag_ranges(tk.SEL))
+                
+                # Or if we just did a select-all
+                select_all_pending = getattr(focused_widget, '_select_all_pending', False)
+                
+                if has_selection or select_all_pending:
+                    focused_widget.edit_separator()
+                    logger.info(f"Added undo separator before {event.keysym} operation")
+                
+                # Clear the select-all pending flag
+                if hasattr(focused_widget, '_select_all_pending'):
+                    delattr(focused_widget, '_select_all_pending')
+        except (tk.TclError, AttributeError):
+            pass
+        return None  # Allow default delete to proceed
+    
     def handle_delete_key_undo(self, event):
         """Handle Delete/BackSpace key press - create undo separator when deleting selection"""
         try:
@@ -2292,6 +2348,12 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
         self.root.bind_all('<Control-z>', self.global_undo)
         self.root.bind_all('<Control-y>', self.global_redo)
         self.root.bind_all('<Control-Shift-Z>', self.global_redo)  # Alternative redo binding
+        
+        # Add enhanced bindings for Text widgets to handle problematic operations
+        self.root.bind_all('<Control-a>', self.handle_select_all_undo)
+        self.root.bind_all('<Control-v>', self.handle_paste_undo)
+        self.root.bind_all('<Delete>', self.handle_delete_with_undo)
+        self.root.bind_all('<BackSpace>', self.handle_delete_with_undo)
     
     def global_undo(self, event=None):
         """Global undo function that works on focused widget"""
