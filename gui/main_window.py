@@ -521,27 +521,23 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
         
         # Pages
         tb.Label(components_frame, text="Sidor:", font=('Arial', 10)).grid(
-            row=1, column=0, sticky="w", padx=(0, 10), pady=(0, 5))
+            row=0, column=4, sticky="w", padx=(0, 10), pady=(0, 5))
         pages_entry = tb.Entry(components_frame, textvariable=self.pages_var, width=5)
-        pages_entry.grid(row=1, column=1, sticky="w", padx=(0, 20), pady=(0, 5))
+        pages_entry.grid(row=0, column=5, sticky="w", padx=(0, 20), pady=(0, 5))
         self.enable_undo_for_widget(pages_entry)
         
         # Comment
         tb.Label(components_frame, text="Kommentar:", font=('Arial', 10)).grid(
-            row=1, column=2, sticky="w", padx=(0, 10), pady=(0, 5))
-        comment_entry = tb.Entry(components_frame, textvariable=self.comment_var, width=48)
-        comment_entry.grid(row=1, column=3, sticky="w", pady=(0, 5))
+            row=0, column=6, sticky="w", padx=(0, 10), pady=(0, 5))
+        comment_entry = tb.Entry(components_frame, textvariable=self.comment_var, width=40)
+        comment_entry.grid(row=0, column=7, sticky="w", padx=(0, 20), pady=(0, 5))
         self.enable_undo_for_widget(comment_entry)
         
-        # Button frame
-        button_frame = tb.Frame(components_frame)
-        button_frame.grid(row=2, column=1, columnspan=3, pady=(10, 5))
-        
-        # Copy to Excel button
-        self.copy_to_excel_btn = tb.Button(button_frame, text="Kopiera filnamn till Excel-fältet",
+        # Copy to Excel button (moved to same row, made 25% smaller)
+        self.copy_to_excel_btn = tb.Button(components_frame, text="Kopiera filnamn till Excel-fältet",
                                          command=self.copy_filename_to_excel,
-                                         bootstyle=INFO, width=35)
-        self.copy_to_excel_btn.pack(side="left")
+                                         bootstyle=INFO, width=26)
+        self.copy_to_excel_btn.grid(row=0, column=8, sticky="w", padx=(10, 0), pady=(0, 5))
     
     def create_group3(self, parent):
         """Group 3: Excel Integration"""
