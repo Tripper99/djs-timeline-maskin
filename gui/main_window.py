@@ -2536,6 +2536,10 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
             self.text_undo_stacks[widget_id] = []
             self.text_redo_stacks[widget_id] = []
         
+        # Don't add duplicate content to avoid double-undo issues
+        if self.text_undo_stacks[widget_id] and self.text_undo_stacks[widget_id][-1] == content:
+            return
+        
         # Add to undo stack
         self.text_undo_stacks[widget_id].append(content)
         
