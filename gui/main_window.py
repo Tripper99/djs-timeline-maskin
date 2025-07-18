@@ -2243,9 +2243,24 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
                 # Clear the select-all pending flag
                 if hasattr(focused_widget, '_select_all_pending'):
                     delattr(focused_widget, '_select_all_pending')
+                
+                # Schedule saving the post-paste content to our undo stack
+                # This ensures the pasted content is captured for future undo operations
+                self.root.after_idle(self.save_post_paste_state, focused_widget)
         except (tk.TclError, AttributeError):
             pass
         return None  # Allow default paste to proceed
+    
+    def save_post_paste_state(self, text_widget):
+        """Save the state after a paste operation completes"""
+        try:
+            if isinstance(text_widget, tk.Text):
+                # Get the content after paste operation
+                post_paste_content = text_widget.get("1.0", "end-1c")
+                self.save_text_undo_state(text_widget, post_paste_content)
+                logger.info("Saved post-paste content to undo stack")
+        except (tk.TclError, AttributeError):
+            pass
     
     def handle_delete_with_undo(self, event):
         """Handle Delete/BackSpace - prepare undo state before deletion"""
