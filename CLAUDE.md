@@ -85,13 +85,49 @@ The application uses JSON configuration stored in `pdf_processor_config.json` wi
 - ✅ Added proper imports to all extracted modules
 - ✅ Fixed icon path reference
 - ✅ Tested the refactored application - all modules import successfully
-- ✅ Final CLAUDE.md update
+- ✅ Set up GitHub repository with proper .gitignore
+- ✅ Implemented new versioning system starting with v1.1.0
 
 ### Refactoring Results:
 - **GUI Layout Preserved**: The PDFProcessorApp class and all GUI components remain exactly as they were in the original file
 - **Functionality Preserved**: All methods and features work identically to the original
 - **Modular Structure**: Code is now organized into logical modules for better maintainability
 - **Original file**: "APP DJs Timeline-verktyg v170 FUNKAR.py" can be kept as reference or backup
+
+## Current Work: Undo/Redo Enhancement
+
+**STATUS: IN PROGRESS** - Fixing undo/redo functionality in Text widgets
+
+### Problem Identified:
+- Text widgets (Händelse, Note1, Note2, Note3) have poor undo/redo for certain operations
+- **Ctrl+A + Del + Ctrl+Z**: Text disappears instead of being restored
+- **Ctrl+A + Ctrl+V + Ctrl+Z**: Text disappears instead of being restored
+- Entry widgets work fine, only Text widgets affected
+
+### Solutions Implemented:
+- ✅ **v1.1.1**: Added enhanced bindings for Ctrl+A, Ctrl+V, Delete, BackSpace
+- ✅ **v1.1.2**: Implemented custom undo/redo stack for Text widgets
+- ✅ **Hybrid system**: Custom stack for problematic operations, tkinter's built-in for normal editing
+- ✅ **Preserved functionality**: Entry widgets still work as before
+
+### Current Version: v1.1.2
+
+### Next Steps for Testing:
+1. Test Ctrl+A + Del + Ctrl+Z in Text widgets (should restore original text)
+2. Test Ctrl+A + Ctrl+V + Ctrl+Z in Text widgets (should restore original text)
+3. Verify normal typing + Ctrl+Z still works in Text widgets
+4. Verify Entry widgets still work normally
+5. If tests pass, mark as completed and update to v1.1.3
+
+### Key Files Modified:
+- `gui/main_window.py`: Enhanced undo/redo implementation
+- `utils/constants.py`: Version updates
+- All changes committed to GitHub repository
+
+### Technical Details:
+- Custom undo/redo stacks: `self.text_undo_stacks` and `self.text_redo_stacks`
+- Enhanced event handlers: `handle_select_all_undo()`, `handle_paste_undo()`, `handle_delete_with_undo()`
+- Fallback system: Custom stack first, then tkinter's built-in system
 
 ## Important Development Rules
 

@@ -2535,18 +2535,21 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
         """Perform undo on Text widget using custom stack"""
         widget_id = id(text_widget)
         
-        if widget_id not in self.text_undo_stacks or not self.text_undo_stacks[widget_id]:
+        if widget_id not in self.text_undo_stacks or len(self.text_undo_stacks[widget_id]) < 2:
             return False
         
         undo_stack = self.text_undo_stacks[widget_id]
         redo_stack = self.text_redo_stacks[widget_id]
         
-        # Save current content to redo stack
+        # Save current content to redo stack (this is the state after the operation)
         current_content = text_widget.get("1.0", "end-1c")
         redo_stack.append(current_content)
         
-        # Get previous content from undo stack
-        previous_content = undo_stack.pop()
+        # Remove the current state from undo stack (this was just saved by the operation)
+        undo_stack.pop()
+        
+        # Get the actual previous content from undo stack
+        previous_content = undo_stack[-1] if undo_stack else ""
         
         # Restore content
         text_widget.delete("1.0", tk.END)
@@ -2565,12 +2568,12 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
         undo_stack = self.text_undo_stacks[widget_id]
         redo_stack = self.text_redo_stacks[widget_id]
         
+        # Get next content from redo stack
+        next_content = redo_stack.pop()
+        
         # Save current content to undo stack
         current_content = text_widget.get("1.0", "end-1c")
         undo_stack.append(current_content)
-        
-        # Get next content from redo stack
-        next_content = redo_stack.pop()
         
         # Restore content
         text_widget.delete("1.0", tk.END)
