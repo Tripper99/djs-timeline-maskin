@@ -243,9 +243,10 @@ class PDFProcessorApp:
         # Excel column variables
         self.excel_vars = {}
         
-        # Character counters for text fields (1000 char limit)
+        # Character counters for text fields (1000 char limit for most, 1500 for Händelse)
         self.char_counters = {}
-        self.char_limit = 1000;
+        self.char_limit = 1000
+        self.handelse_char_limit = 1500
         
         # Undo/Redo functionality - track widgets that support undo
         self.undo_widgets = []  # List of widgets with undo enabled
@@ -275,7 +276,7 @@ class PDFProcessorApp:
             'Källa1': tk.BooleanVar(),
             'Källa2': tk.BooleanVar(),
             'Källa3': tk.BooleanVar(),
-            'Historiskt': tk.BooleanVar()  # Updated from "Korrelerande historisk händelse"
+            'Övrigt': tk.BooleanVar()  # Updated from "Korrelerande historisk händelse"
         }
         
         # Move to subfolder switch - DEFAULT ON
@@ -423,7 +424,7 @@ class PDFProcessorApp:
 📝 TEXTBEARBETNING:
 • Kopiering av filnamnsdata till Excel-fält
 • Automatisk rensning av PDF-text (tar bort onödiga radbrytningar)
-• Teckengräns på 1000 tecken per textfält (Händelse, Note1-3)
+• Teckengräns på 1500 tecken för Händelse, 1000 tecken för Note1-3
 • Realtidsräknare som visar återstående tecken med färgkodning
 • Smart inklistring med automatisk textuppdelning över flera fält
 • Word wrap för bättre läsbarhet i långa textfält
@@ -590,7 +591,7 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
     
     def create_group4(self, parent):
         """Group 4: Excel Operations Buttons"""
-        group4 = tb.LabelFrame(parent, text="4. Excel-operationer", padding=15)
+        group4 = tb.LabelFrame(parent, text="Spara nya pdf-namnet och/eller nya excelraden", padding=15)
         group4.pack(fill="x", pady=(0, 15))
         
         # First row: Buttons for Excel operations
@@ -698,7 +699,7 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
         
         # Define column groupings (updated with new field name)
         column1_fields = ['OBS', 'Inlagd datum', 'Kategori', 'Underkategori', 'Person/sak', 
-                         'Egen grupp', 'Dag', 'Tid start', 'Tid slut', 'Källa1', 'Källa2', 'Källa3', 'Historiskt']
+                         'Egen grupp', 'Dag', 'Tid start', 'Tid slut', 'Källa1', 'Källa2', 'Källa3', 'Övrigt']
         column2_fields = ['Händelse']
         column3_fields = ['Note1', 'Note2', 'Note3']
         
@@ -715,7 +716,7 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
         
         # Create Column 1
         if any(col in column_names for col in column1_fields):
-            col1_frame = tb.LabelFrame(fields_container, text="Grundläggande information", padding=5)
+            col1_frame = tb.LabelFrame(fields_container, text="", padding=5)
             col1_frame.grid(row=0, column=0, sticky="nsew", padx=2, pady=2)
             col1_frame.grid_columnconfigure(0, weight=0)  # Field labels - fixed width
             col1_frame.grid_columnconfigure(1, weight=1)  # Entry fields - expand to fill space
@@ -729,7 +730,7 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
         
         # Create Column 2
         if any(col in column_names for col in column2_fields):
-            col2_frame = tb.LabelFrame(fields_container, text="Anteckningar", padding=5)
+            col2_frame = tb.LabelFrame(fields_container, text="", padding=5)
             col2_frame.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
             col2_frame.grid_columnconfigure(0, weight=1)  # Make all content expand full width
             
@@ -741,7 +742,7 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
         
         # Create Column 3
         if column3_fields:
-            col3_frame = tb.LabelFrame(fields_container, text="Källor och övrigt", padding=5)
+            col3_frame = tb.LabelFrame(fields_container, text="", padding=5)
             col3_frame.grid(row=0, column=2, sticky="nsew", padx=2, pady=2)
             col3_frame.grid_columnconfigure(0, weight=1)  # Make all content expand full width
             
@@ -805,7 +806,7 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
             
             # Row 2: Text widget (full width)
             if col_name == 'Händelse':
-                height = 8
+                height = 16  # Match combined height of Note1-3 (6+6+4=16)
             elif col_name in ['Note1', 'Note2']:
                 height = 6
             else:
@@ -842,7 +843,8 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
 
             
             # Row 3: Character counter (left aligned, compact)
-            counter_label = tb.Label(parent_frame, text=f"{self.char_limit}", 
+            limit = self.handelse_char_limit if col_name == 'Händelse' else self.char_limit
+            counter_label = tb.Label(parent_frame, text=f"{limit}", 
                                    font=('Arial', 8), bootstyle="success")
             counter_label.grid(row=row+2, column=0, sticky="w", pady=(0, 5))
             self.char_counters[col_name] = counter_label
@@ -1098,7 +1100,7 @@ OBLIGATORISKA KOLUMNER:
 • Källa1
 • Källa2
 • Källa3
-• Historiskt
+• Övrigt
 
 VIKTIGT:
 - Kolumnnamnen måste vara exakt som ovan (inklusive stora/små bokstäver)
@@ -1161,7 +1163,7 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
                 "OBS", "Inlagd datum", "Kategori", "Underkategori", "Person/sak", 
                 "Egen grupp", "Händelse", "Dag", "Tid start", "Tid slut",
                 "Note1", "Note2", "Note3", "Källa1", "Källa2", "Källa3",
-                "Historiskt"  # Updated from "Korrelerande historisk händelse"
+                "Övrigt"  # Updated from "Korrelerande historisk händelse"
             ]
             
             # Add headers to first row
@@ -1469,7 +1471,7 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
         # Check if any important field has content
         important_fields = ['Tid start', 'Händelse', 'OBS', 'Kategori', 'Underkategori', 
                            'Person/sak', 'Egen grupp', 'Tid slut', 'Note1', 'Note2', 'Note3',
-                           'Källa1', 'Källa2', 'Källa3', 'Historiskt']
+                           'Källa1', 'Källa2', 'Källa3', 'Övrigt']
         
         for field_name in important_fields:
             if field_name in self.excel_vars:
@@ -1560,7 +1562,8 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
                 var.delete("1.0", tk.END)
                 # Reset character counter for text fields
                 if col_name in self.char_counters:
-                    self.char_counters[col_name].config(text=f"Tecken kvar: {self.char_limit}", bootstyle="success")
+                    limit = self.handelse_char_limit if col_name == 'Händelse' else self.char_limit
+                    self.char_counters[col_name].config(text=f"Tecken kvar: {limit}", bootstyle="success")
             else:  # StringVar
                 var.set("")
     
@@ -1758,7 +1761,8 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
             content = content[:-1]
         
         char_count = len(content)
-        remaining = self.char_limit - char_count
+        limit = self.handelse_char_limit if column_name == 'Händelse' else self.char_limit
+        remaining = limit - char_count
         
         # Update counter display
         if column_name in self.char_counters:
@@ -1778,9 +1782,9 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
             counter_label.config(text=f"Tecken kvar: {remaining}", bootstyle=style)
         
         # Hard limit enforcement
-        if char_count > self.char_limit:
+        if char_count > limit:
             # Truncate to exact limit
-            truncated_content = content[:self.char_limit]
+            truncated_content = content[:limit]
             text_widget.delete("1.0", tk.END)
             text_widget.insert("1.0", truncated_content)
             
@@ -1806,7 +1810,8 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
             clipboard_content = self.root.clipboard_get()
             
             # Check if clipboard content exceeds limit
-            if len(clipboard_content) <= self.char_limit:
+            limit = self.handelse_char_limit if column_name == 'Händelse' else self.char_limit
+            if len(clipboard_content) <= limit:
                 # Normal paste - let it proceed but ensure undo separator was added
                 logger.info(f"Normal paste in {column_name}: {len(clipboard_content)} chars")
                 return False  # Don't block the event
@@ -1833,7 +1838,7 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
             
             # Message
             message_text = (f"Den inklistrade texten är {len(clipboard_content)} tecken lång, "
-                          f"vilket överstiger gränsen på {self.char_limit} tecken.\n\n"
+                          f"vilket överstiger gränsen på {limit} tecken.\n\n"
                           f"Vad vill du göra?")
             tb.Label(main_frame, text=message_text, font=('Arial', 10), 
                     wraplength=580, justify="left").pack(pady=(0, 20))
@@ -1855,7 +1860,7 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
                 dialog_win.destroy()
             
             # Buttons with clear labels
-            tb.Button(button_frame, text="Klipp av texten (första 1000 tecken)",
+            tb.Button(button_frame, text=f"Klipp av texten (första {limit} tecken)",
                      command=on_truncate, bootstyle=WARNING, width=35).pack(pady=(0, 5))
             
             tb.Button(button_frame, text="Dela upp på flera fält",
@@ -1870,8 +1875,8 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
             
             if result == 'cancel':  # Cancel
                 return True  # Block the paste
-            elif result == 'truncate':  # Truncate - paste first 1000 characters
-                truncated_content = clipboard_content[:self.char_limit]
+            elif result == 'truncate':  # Truncate - paste first characters up to limit
+                truncated_content = clipboard_content[:limit]
                 text_widget = event.widget
                 
                 # Add undo separator before making changes
@@ -1949,7 +1954,8 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
             if len(remaining_text) == 0:
                 break
                 
-            if len(remaining_text) <= self.char_limit:
+            field_limit = self.handelse_char_limit if field_name == 'Händelse' else self.char_limit
+            if len(remaining_text) <= field_limit:
                 # Remaining text fits in this field
                 chunks.append((field_name, remaining_text))
                 logger.info(f"Final chunk for {field_name}: {len(remaining_text)} chars")
@@ -1958,9 +1964,9 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
             else:
                 # Find a good break point (try to break at word boundary)
                 # Try to break at last space, newline, or punctuation within last 100 chars
-                break_point = self.char_limit
-                for i in range(min(100, self.char_limit)):
-                    char_idx = self.char_limit - 1 - i
+                break_point = field_limit
+                for i in range(min(100, field_limit)):
+                    char_idx = field_limit - 1 - i
                     if char_idx < 0:
                         break
                     if char_idx < len(remaining_text):

@@ -175,7 +175,7 @@ class ExcelManager:
                     # Text format with text wrapping for source fields - medium width
                     cell.number_format = '@'
                     cell.alignment = Alignment(wrap_text=True, vertical='bottom', horizontal='left')
-                elif col_name == 'Historiskt':
+                elif col_name == 'Övrigt':
                     # Text format with text wrapping for historical field - wider column expected
                     cell.number_format = '@'
                     cell.alignment = Alignment(wrap_text=True, vertical='bottom', horizontal='left')
