@@ -698,9 +698,9 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
         
         # Define column groupings (updated with new field name)
         column1_fields = ['OBS', 'Inlagd datum', 'Kategori', 'Underkategori', 'Person/sak', 
-                         'Egen grupp', 'Dag', 'Tid start', 'Tid slut', 'Händelse']
-        column2_fields = ['Note1', 'Note2', 'Note3']
-        column3_fields = ['Källa1', 'Källa2', 'Källa3', 'Historiskt']  # Updated from "Korrelerande historisk händelse"
+                         'Egen grupp', 'Dag', 'Tid start', 'Tid slut', 'Källa1', 'Källa2', 'Källa3', 'Historiskt']
+        column2_fields = ['Händelse']
+        column3_fields = ['Note1', 'Note2', 'Note3']
         
         # Add remaining columns to column 3
         for col_name in column_names:
