@@ -840,13 +840,22 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
             text_widget.bind('<BackSpace>', 
                            lambda e: self.handle_delete_key_undo(e))
             
-
+            # Configure formatting tags for rich text
+            self.setup_text_formatting_tags(text_widget)
             
-            # Row 3: Character counter (left aligned, compact)
+            # Row 2.5: Formatting toolbar (compact)
+            toolbar_frame = tb.Frame(parent_frame)
+            toolbar_frame.grid(row=row+1, column=0, columnspan=2, sticky="w", pady=(2, 2))
+            self.create_formatting_toolbar(toolbar_frame, text_widget, col_name)
+            
+            # Move text widget to row+2 to make room for toolbar
+            text_widget.grid(row=row+2, column=0, columnspan=2, sticky="ew", pady=(0, 2))
+            
+            # Row 4: Character counter (left aligned, compact)
             limit = self.handelse_char_limit if col_name == 'Händelse' else self.char_limit
             counter_label = tb.Label(parent_frame, text=f"{limit}", 
                                    font=('Arial', 8), bootstyle="success")
-            counter_label.grid(row=row+2, column=0, sticky="w", pady=(0, 5))
+            counter_label.grid(row=row+3, column=0, sticky="w", pady=(0, 5))
             self.char_counters[col_name] = counter_label
             
             # Store reference to text widget
@@ -1506,12 +1515,20 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
         for col_name, var in self.excel_vars.items():
             if hasattr(var, 'get'):
                 if hasattr(var, 'delete'):  # It's a Text widget
-                    raw_text = var.get("1.0", tk.END).strip()
+                    # Extract formatted text for Excel
+                    formatted_text = self.get_formatted_text_for_excel(var)
+                    
                     # Clean PDF text for text fields that commonly contain pasted PDF content
                     if col_name in ['Händelse', 'Note1', 'Note2', 'Note3']:
-                        excel_data[col_name] = FilenameParser.clean_pdf_text(raw_text)
+                        # If it's a RichText object, we need to handle cleaning differently
+                        if hasattr(formatted_text, '__class__') and formatted_text.__class__.__name__ == 'RichText':
+                            # For RichText, we keep the formatting but clean the plain text fallback
+                            excel_data[col_name] = formatted_text
+                        else:
+                            # Plain text, clean it
+                            excel_data[col_name] = FilenameParser.clean_pdf_text(formatted_text)
                     else:
-                        excel_data[col_name] = raw_text
+                        excel_data[col_name] = formatted_text
                 else:  # It's a StringVar (Entry widget)
                     excel_data[col_name] = var.get()
             else:
@@ -2602,6 +2619,179 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
         
         logger.info("Performed custom redo on Text widget")
         return True
+    
+    def setup_text_formatting_tags(self, text_widget):
+        """Configure formatting tags for rich text support"""
+        # Bold tag
+        text_widget.tag_configure("bold", font=('Arial', 9, 'bold'))
+        
+        # Italic tag
+        text_widget.tag_configure("italic", font=('Arial', 9, 'italic'))
+        
+        # Color tags
+        text_widget.tag_configure("red", foreground="red")
+        text_widget.tag_configure("blue", foreground="blue")
+        text_widget.tag_configure("green", foreground="green")
+        text_widget.tag_configure("black", foreground="black")
+    
+    def create_formatting_toolbar(self, parent_frame, text_widget, col_name):
+        """Create formatting toolbar with buttons and bind keyboard shortcuts"""
+        # Bold button
+        bold_btn = tb.Button(parent_frame, text="B", width=3, 
+                           command=lambda: self.toggle_format(text_widget, "bold"))
+        bold_btn.pack(side="left", padx=(0, 2))
+        bold_btn.configure(bootstyle="outline")
+        
+        # Italic button
+        italic_btn = tb.Button(parent_frame, text="I", width=3, 
+                             command=lambda: self.toggle_format(text_widget, "italic"))
+        italic_btn.pack(side="left", padx=(0, 2))
+        italic_btn.configure(bootstyle="outline")
+        
+        # Color buttons
+        colors = [("R", "red"), ("B", "blue"), ("G", "green"), ("K", "black")]
+        for btn_text, color in colors:
+            color_btn = tb.Button(parent_frame, text=btn_text, width=3,
+                                command=lambda c=color: self.toggle_format(text_widget, c))
+            color_btn.pack(side="left", padx=(0, 2))
+            color_btn.configure(bootstyle="outline")
+        
+        # Bind keyboard shortcuts for this text widget
+        text_widget.bind('<Control-b>', lambda e: self.toggle_format(text_widget, "bold"))
+        text_widget.bind('<Control-i>', lambda e: self.toggle_format(text_widget, "italic"))
+        text_widget.bind('<Control-r>', lambda e: self.toggle_format(text_widget, "red"))
+        text_widget.bind('<Control-1>', lambda e: self.toggle_format(text_widget, "blue"))
+        text_widget.bind('<Control-g>', lambda e: self.toggle_format(text_widget, "green"))
+        text_widget.bind('<Control-k>', lambda e: self.toggle_format(text_widget, "black"))
+    
+    def toggle_format(self, text_widget, format_type):
+        """Toggle formatting on selected text"""
+        try:
+            # Get current selection
+            try:
+                start = text_widget.index(tk.SEL_FIRST)
+                end = text_widget.index(tk.SEL_LAST)
+            except tk.TclError:
+                # No selection, use current cursor position for word
+                cursor = text_widget.index(tk.INSERT)
+                # Find word boundaries
+                start = text_widget.index(f"{cursor} wordstart")
+                end = text_widget.index(f"{cursor} wordend")
+            
+            # Check if the selection already has this format
+            current_tags = text_widget.tag_names(start)
+            
+            if format_type in current_tags:
+                # Remove the format
+                text_widget.tag_remove(format_type, start, end)
+            else:
+                # Add the format
+                text_widget.tag_add(format_type, start, end)
+            
+            # For colors, remove other color tags when applying a new one
+            if format_type in ["red", "blue", "green", "black"]:
+                color_tags = ["red", "blue", "green", "black"]
+                for color_tag in color_tags:
+                    if color_tag != format_type:
+                        text_widget.tag_remove(color_tag, start, end)
+        
+        except tk.TclError:
+            # Handle any errors silently
+            pass
+    
+    def get_formatted_text_for_excel(self, text_widget):
+        """Extract formatted text from Text widget and convert to Excel RichText format"""
+        try:
+            from openpyxl.cell.text import RichText
+            from openpyxl.styles import Font
+            
+            # Get plain text
+            plain_text = text_widget.get("1.0", "end-1c")
+            
+            # Check if there are any formatting tags
+            all_tags = text_widget.tag_names()
+            format_tags = [tag for tag in all_tags if tag in ["bold", "italic", "red", "blue", "green", "black"]]
+            
+            if not format_tags:
+                # No formatting, return plain text
+                return plain_text
+            
+            # Build RichText with formatting
+            rich_text_parts = []
+            current_pos = "1.0"
+            
+            while True:
+                # Find next tag start
+                next_tag_start = None
+                next_tag = None
+                
+                for tag in format_tags:
+                    tag_ranges = text_widget.tag_ranges(tag)
+                    for i in range(0, len(tag_ranges), 2):
+                        start_idx = tag_ranges[i]
+                        if text_widget.compare(start_idx, ">=", current_pos):
+                            if next_tag_start is None or text_widget.compare(start_idx, "<", next_tag_start):
+                                next_tag_start = start_idx
+                                next_tag = tag
+                                break
+                
+                if next_tag_start is None:
+                    # No more tags, add remaining text
+                    remaining_text = text_widget.get(current_pos, "end-1c")
+                    if remaining_text:
+                        rich_text_parts.append(remaining_text)
+                    break
+                
+                # Add text before the tag
+                before_text = text_widget.get(current_pos, next_tag_start)
+                if before_text:
+                    rich_text_parts.append(before_text)
+                
+                # Find the end of this tag
+                tag_ranges = text_widget.tag_ranges(next_tag)
+                tag_end = None
+                for i in range(0, len(tag_ranges), 2):
+                    if text_widget.compare(tag_ranges[i], "<=", next_tag_start):
+                        tag_end = tag_ranges[i + 1]
+                        break
+                
+                if tag_end is None:
+                    break
+                
+                # Get the formatted text
+                formatted_text = text_widget.get(next_tag_start, tag_end)
+                if formatted_text:
+                    # Create Font object based on tag
+                    font_kwargs = {}
+                    if next_tag == "bold":
+                        font_kwargs['bold'] = True
+                    elif next_tag == "italic":
+                        font_kwargs['italic'] = True
+                    elif next_tag == "red":
+                        font_kwargs['color'] = "FF0000"
+                    elif next_tag == "blue":
+                        font_kwargs['color'] = "0000FF"
+                    elif next_tag == "green":
+                        font_kwargs['color'] = "008000"
+                    elif next_tag == "black":
+                        font_kwargs['color'] = "000000"
+                    
+                    font = Font(**font_kwargs)
+                    rich_text_parts.append(RichText(formatted_text, font))
+                
+                current_pos = tag_end
+            
+            # If we have formatting, return RichText object
+            if any(isinstance(part, RichText) for part in rich_text_parts):
+                return RichText(*rich_text_parts)
+            else:
+                # No actual formatting found, return plain text
+                return plain_text
+                
+        except Exception as e:
+            logger.warning(f"Error extracting formatted text: {e}")
+            # Fallback to plain text
+            return text_widget.get("1.0", "end-1c")
     
     def run(self):
         """Start the application"""
