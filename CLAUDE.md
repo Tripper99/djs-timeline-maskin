@@ -94,40 +94,67 @@ The application uses JSON configuration stored in `pdf_processor_config.json` wi
 - **Modular Structure**: Code is now organized into logical modules for better maintainability
 - **Original file**: "APP DJs Timeline-verktyg v170 FUNKAR.py" can be kept as reference or backup
 
-## Current Work: Undo/Redo Enhancement
+## Current Work: Text Formatting Issues
 
-**STATUS: IN PROGRESS** - Fixing undo/redo functionality in Text widgets
+**STATUS: PROBLEMS IDENTIFIED** - Text formatting function has critical issues
 
-### Problem Identified:
-- Text widgets (Händelse, Note1, Note2, Note3) have poor undo/redo for certain operations
-- **Ctrl+A + Del + Ctrl+Z**: Text disappears instead of being restored
-- **Ctrl+A + Ctrl+V + Ctrl+Z**: Text disappears instead of being restored
-- Entry widgets work fine, only Text widgets affected
+### Problems Identified:
 
-### Solutions Implemented:
+#### 1. **Disabled Rich Text Feature**
+- `gui/main_window.py:2704-2710`: Text formatting is disabled with "TEMPORARY FIX"
+- Function `get_formatted_text_for_excel()` only returns plain text instead of formatted RichText objects
+- This disables the entire rich text formatting feature added in v1.2.0
+
+#### 2. **Class Name Mismatch**
+- Code checks for `'CellRichText'` class name in multiple places:
+  - `gui/main_window.py:1524`: Checks for `'CellRichText'`
+  - `core/excel_manager.py:75`: Also checks for `'CellRichText'`
+- But the actual openpyxl class is `RichText`, not `CellRichText`
+
+#### 3. **Import Issues**
+- The RichText import happens inside the function, causing reference issues
+- `core/excel_manager.py` references `CellRichText` but doesn't import it properly
+
+#### 4. **Inconsistent Implementation**
+- Original git commit `ba727fe` shows proper RichText implementation
+- Current code has reverted to plain text due to "Excel corruption" concerns
+
+### Solutions Required:
+
+1. **Fix Class Name References**:
+   - Change `'CellRichText'` to `'RichText'` in both files
+   - Update `gui/main_window.py:1524` and `core/excel_manager.py:75`
+
+2. **Restore Rich Text Implementation**:
+   - Remove the "TEMPORARY FIX" and restore the original rich text extraction code
+   - Ensure proper error handling to prevent Excel corruption
+
+3. **Fix Import Structure**:
+   - Ensure consistent imports of `RichText` from `openpyxl.cell.text`
+   - Add proper error handling for import failures
+
+### Current Version: v1.2.8
+
+### Key Files Affected:
+- `gui/main_window.py`: Rich text extraction disabled
+- `core/excel_manager.py`: Incorrect class name references
+- `utils/constants.py`: Version tracking
+
+### Technical Details:
+- Formatting toolbar is functional (Bold, Italic, Colors with keyboard shortcuts)
+- Text widget formatting tags work correctly in GUI
+- Problem is specifically in converting tkinter tags to Excel RichText objects
+- Need to fix the conversion process without breaking Excel file integrity
+
+## Previous Work: Undo/Redo Enhancement
+
+**STATUS: COMPLETED** - Undo/redo functionality fixed in Text widgets
+
+### Completed Solutions:
 - ✅ **v1.1.1**: Added enhanced bindings for Ctrl+A, Ctrl+V, Delete, BackSpace
 - ✅ **v1.1.2**: Implemented custom undo/redo stack for Text widgets
 - ✅ **Hybrid system**: Custom stack for problematic operations, tkinter's built-in for normal editing
 - ✅ **Preserved functionality**: Entry widgets still work as before
-
-### Current Version: v1.1.2
-
-### Next Steps for Testing:
-1. Test Ctrl+A + Del + Ctrl+Z in Text widgets (should restore original text)
-2. Test Ctrl+A + Ctrl+V + Ctrl+Z in Text widgets (should restore original text)
-3. Verify normal typing + Ctrl+Z still works in Text widgets
-4. Verify Entry widgets still work normally
-5. If tests pass, mark as completed and update to v1.1.3
-
-### Key Files Modified:
-- `gui/main_window.py`: Enhanced undo/redo implementation
-- `utils/constants.py`: Version updates
-- All changes committed to GitHub repository
-
-### Technical Details:
-- Custom undo/redo stacks: `self.text_undo_stacks` and `self.text_redo_stacks`
-- Enhanced event handlers: `handle_select_all_undo()`, `handle_paste_undo()`, `handle_delete_with_undo()`
-- Fallback system: Custom stack first, then tkinter's built-in system
 
 ## Important Development Rules
 

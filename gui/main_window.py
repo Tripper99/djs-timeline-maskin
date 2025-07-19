@@ -1520,12 +1520,14 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
                     
                     # Clean PDF text for text fields that commonly contain pasted PDF content
                     if col_name in ['Händelse', 'Note1', 'Note2', 'Note3']:
-                        # If it's a RichText object, we need to handle cleaning differently
-                        if hasattr(formatted_text, '__class__') and formatted_text.__class__.__name__ == 'RichText':
-                            # For RichText, we keep the formatting but clean the plain text fallback
+                        # If it's a CellRichText object, we keep the formatting
+                        if hasattr(formatted_text, '__class__') and formatted_text.__class__.__name__ == 'CellRichText':
+                            # For CellRichText, we keep the formatting as-is
+                            logger.info(f"Keeping CellRichText formatting for {col_name}")
                             excel_data[col_name] = formatted_text
                         else:
                             # Plain text, clean it
+                            logger.info(f"Cleaning plain text for {col_name}")
                             excel_data[col_name] = FilenameParser.clean_pdf_text(formatted_text)
                     else:
                         excel_data[col_name] = formatted_text
@@ -2702,8 +2704,8 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
     def get_formatted_text_for_excel(self, text_widget):
         """Extract formatted text from Text widget and convert to Excel RichText format"""
         try:
-            from openpyxl.cell.text import RichText
-            from openpyxl.styles import Font
+            from openpyxl.cell.rich_text import CellRichText, TextBlock
+            from openpyxl.cell.text import InlineFont
             
             # Get plain text
             plain_text = text_widget.get("1.0", "end-1c")
@@ -2716,76 +2718,89 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
                 # No formatting, return plain text
                 return plain_text
             
-            # Build RichText with formatting
+            # Build CellRichText with formatting using improved algorithm
             rich_text_parts = []
-            current_pos = "1.0"
+            text_length = len(plain_text)
             
-            while True:
-                # Find next tag start
-                next_tag_start = None
-                next_tag = None
+            # Process character by character to handle overlapping tags correctly
+            i = 0
+            while i < text_length:
+                char_pos = f"1.{i}"
                 
+                # Find all active tags at this position
+                active_tags = []
                 for tag in format_tags:
                     tag_ranges = text_widget.tag_ranges(tag)
-                    for i in range(0, len(tag_ranges), 2):
-                        start_idx = tag_ranges[i]
-                        if text_widget.compare(start_idx, ">=", current_pos):
-                            if next_tag_start is None or text_widget.compare(start_idx, "<", next_tag_start):
-                                next_tag_start = start_idx
-                                next_tag = tag
+                    for j in range(0, len(tag_ranges), 2):
+                        start_idx = tag_ranges[j]
+                        end_idx = tag_ranges[j + 1]
+                        # Check if current position is within this tag range
+                        if (text_widget.compare(char_pos, ">=", start_idx) and 
+                            text_widget.compare(char_pos, "<", end_idx)):
+                            active_tags.append(tag)
+                            break
+                
+                # Find the end of current formatting block
+                block_end = i + 1
+                while block_end < text_length:
+                    next_pos = f"1.{block_end}"
+                    # Check if tags are still the same
+                    current_tags = []
+                    for tag in format_tags:
+                        tag_ranges = text_widget.tag_ranges(tag)
+                        for j in range(0, len(tag_ranges), 2):
+                            start_idx = tag_ranges[j]
+                            end_idx = tag_ranges[j + 1]
+                            if (text_widget.compare(next_pos, ">=", start_idx) and 
+                                text_widget.compare(next_pos, "<", end_idx)):
+                                current_tags.append(tag)
                                 break
-                
-                if next_tag_start is None:
-                    # No more tags, add remaining text
-                    remaining_text = text_widget.get(current_pos, "end-1c")
-                    if remaining_text:
-                        rich_text_parts.append(remaining_text)
-                    break
-                
-                # Add text before the tag
-                before_text = text_widget.get(current_pos, next_tag_start)
-                if before_text:
-                    rich_text_parts.append(before_text)
-                
-                # Find the end of this tag
-                tag_ranges = text_widget.tag_ranges(next_tag)
-                tag_end = None
-                for i in range(0, len(tag_ranges), 2):
-                    if text_widget.compare(tag_ranges[i], "<=", next_tag_start):
-                        tag_end = tag_ranges[i + 1]
-                        break
-                
-                if tag_end is None:
-                    break
-                
-                # Get the formatted text
-                formatted_text = text_widget.get(next_tag_start, tag_end)
-                if formatted_text:
-                    # Create Font object based on tag
-                    font_kwargs = {}
-                    if next_tag == "bold":
-                        font_kwargs['bold'] = True
-                    elif next_tag == "italic":
-                        font_kwargs['italic'] = True
-                    elif next_tag == "red":
-                        font_kwargs['color'] = "FF0000"
-                    elif next_tag == "blue":
-                        font_kwargs['color'] = "0000FF"
-                    elif next_tag == "green":
-                        font_kwargs['color'] = "008000"
-                    elif next_tag == "black":
-                        font_kwargs['color'] = "000000"
                     
-                    font = Font(**font_kwargs)
-                    rich_text_parts.append(RichText(formatted_text, font))
+                    if set(current_tags) != set(active_tags):
+                        break
+                    block_end += 1
                 
-                current_pos = tag_end
+                # Extract the text block
+                block_text = plain_text[i:block_end]
+                
+                if active_tags:
+                    # Create InlineFont object with all active formatting
+                    font_kwargs = {}
+                    for tag in active_tags:
+                        if tag == "bold":
+                            font_kwargs['b'] = True
+                        elif tag == "italic":
+                            font_kwargs['i'] = True
+                        elif tag == "red":
+                            font_kwargs['color'] = "FF0000"
+                        elif tag == "blue":
+                            font_kwargs['color'] = "0000FF"
+                        elif tag == "green":
+                            font_kwargs['color'] = "008000"
+                        elif tag == "black":
+                            font_kwargs['color'] = "000000"
+                    
+                    font = InlineFont(**font_kwargs)
+                    rich_text_parts.append(TextBlock(font, block_text))
+                else:
+                    # No formatting, add as plain text
+                    rich_text_parts.append(block_text)
+                
+                i = block_end
             
-            # If we have formatting, return RichText object
-            if any(isinstance(part, RichText) for part in rich_text_parts):
-                return RichText(*rich_text_parts)
+            # If we have formatting, create CellRichText object
+            if rich_text_parts:
+                # Check if any part has formatting
+                has_formatting = any(isinstance(part, TextBlock) for part in rich_text_parts)
+                
+                if has_formatting:
+                    # Create CellRichText with all parts
+                    return CellRichText(*rich_text_parts)
+                else:
+                    # No actual formatting found, return plain text
+                    return plain_text
             else:
-                # No actual formatting found, return plain text
+                # No parts found, return plain text
                 return plain_text
                 
         except Exception as e:
