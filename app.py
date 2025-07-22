@@ -35,6 +35,11 @@ def check_dependencies() -> bool:
     except ImportError:
         missing_packages.append("openpyxl")
     
+    try:
+        import xlsxwriter
+    except ImportError:
+        missing_packages.append("xlsxwriter")
+    
     if missing_packages:
         print("Missing required packages:")
         for package in missing_packages:

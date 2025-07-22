@@ -1,9 +1,11 @@
 """
-Excel file management for the DJ Timeline application
+BACKUP: Excel file management from v1.6.5 - WORKING VERSION
+This contains the breakthrough hybrid Excel writing mechanism
 """
 
 import logging
 import os
+import tempfile
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
@@ -53,165 +55,6 @@ class ExcelManager:
     def get_column_names(self) -> List[str]:
         """Get list of column names from Excel file"""
         return self.column_names.copy() if self.column_names else []
-    
-    def add_row(self, data: Dict[str, str], filename: str, row_color: str = "none") -> bool:
-        """Add new row to Excel file with special column handling and optional background color"""
-        try:
-            if not self.worksheet:
-                return False
-            
-            # Double-check that the Excel file still exists before writing
-            if not self.excel_path or not Path(self.excel_path).exists():
-                logger.error(f"Excel file not found: {self.excel_path}")
-                return False
-            
-            # Find next empty row
-            next_row = self.worksheet.max_row + 1
-            
-            # Handle special columns
-            special_data = data.copy()
-            
-            # Händelse - preserve user content and add filename if filename exists and not already there
-            if 'Händelse' in self.columns:
-                current_content = data.get('Händelse', '')
-                # Handle both string and CellRichText objects
-                if hasattr(current_content, '__class__') and current_content.__class__.__name__ == 'CellRichText':
-                    # For CellRichText, we consider it as having content if it has any parts
-                    has_content = len(current_content) > 0
-                    if has_content and filename:
-                        # For CellRichText, we can't easily check if filename is already included
-                        # so we'll just keep the current content as-is
-                        special_data['Händelse'] = current_content
-                    elif not has_content:
-                        # Empty CellRichText, add filename if it exists
-                        special_data['Händelse'] = filename if filename else ""
-                    else:
-                        # Has content but no filename, keep as-is
-                        special_data['Händelse'] = current_content
-                else:
-                    # Handle string content
-                    current_content = str(current_content).strip()
-                    if current_content:
-                        # User has added content, check if filename exists and is already included
-                        if filename and filename not in current_content:
-                            # Add filename at the end if filename exists and not already present
-                            special_data['Händelse'] = f"{current_content}\n{filename}"
-                        else:
-                            # Keep user content as is
-                            special_data['Händelse'] = current_content
-                    else:
-                        # No user content, only add filename if it exists
-                        if filename:
-                            special_data['Händelse'] = f"\n\n{filename}"
-                        else:
-                            special_data['Händelse'] = ""
-            
-            # Tid start - only use date from filename if user hasn't filled it in
-            if 'Tid start' in self.columns and 'date' in data:
-                user_tid_start = special_data.get('Tid start', '').strip()
-                if not user_tid_start:  # Only set if user hasn't provided their own value
-                    try:
-                        date_obj = datetime.strptime(data['date'], '%Y-%m-%d')
-                        special_data['Tid start'] = date_obj.date()
-                    except ValueError:
-                        special_data['Tid start'] = data.get('date', '')
-            
-            # Källa1 - full filename (only if filename exists)
-            if 'Källa1' in self.columns:
-                special_data['Källa1'] = filename if filename else ""
-            
-            # Write data to row
-            for col_name, col_idx in self.columns.items():
-                value = special_data.get(col_name, '')
-                cell = self.worksheet.cell(row=next_row, column=col_idx)
-                cell.value = value
-                
-                # Define border style for all cells (thin black borders on all sides)
-                thin_border = Border(
-                    left=Side(style='thin', color='000000'),
-                    right=Side(style='thin', color='000000'),
-                    top=Side(style='thin', color='000000'),
-                    bottom=Side(style='thin', color='000000')
-                )
-                
-                # Apply borders to all cells
-                cell.border = thin_border
-                
-                # Apply background color if specified
-                if row_color and row_color != "none":
-                    color_map = {
-                        "yellow": "FFFF99",
-                        "green": "CCFFCC", 
-                        "blue": "CCE5FF",
-                        "pink": "FFCCEE",
-                        "gray": "E6E6E6"
-                    }
-                    if row_color in color_map:
-                        fill = PatternFill(start_color=color_map[row_color], 
-                                         end_color=color_map[row_color], 
-                                         fill_type="solid")
-                        cell.fill = fill
-                
-                # Column-specific formatting (different alignment for different content types)
-                if col_name == 'OBS':
-                    # Text format for OBS field - basic text field
-                    cell.number_format = '@'  # @ means Text format in Excel
-                    cell.alignment = Alignment(wrap_text=True, vertical='bottom', horizontal='left')
-                elif col_name == 'Inlagd datum':
-                    # Date format YYYY-MM-DD for Inlagd datum field - same as other date fields
-                    cell.number_format = 'YYYY-MM-DD'
-                    cell.alignment = Alignment(wrap_text=True, vertical='bottom', horizontal='left')
-                elif col_name in ['Kategori', 'Underkategori', 'Person/sak', 'Egen grupp']:
-                    # Text format for basic text fields with text wrapping
-                    cell.number_format = '@'  # @ means Text format in Excel
-                    cell.alignment = Alignment(wrap_text=True, vertical='bottom', horizontal='left')
-                elif col_name == 'Händelse':
-                    # Text format with text wrapping - wider cells expected
-                    cell.number_format = '@'
-                    cell.alignment = Alignment(wrap_text=True, vertical='bottom', horizontal='left')
-                elif col_name == 'Dag':
-                    # Text format for the formula result (mån, tis, ons, etc.) - narrow column
-                    # Add formula that references Tid start column
-                    tid_start_col_idx = self.columns.get('Tid start')
-                    if tid_start_col_idx:
-                        tid_start_col_letter = get_column_letter(tid_start_col_idx)
-                        cell.value = f"=TEXT({tid_start_col_letter}{next_row},\"ddd\")"
-                    cell.number_format = '@'  # Text format for day names
-                    cell.alignment = Alignment(wrap_text=True, vertical='bottom', horizontal='left')
-                elif col_name in ['Tid start', 'Tid slut']:
-                    # Date format YYYY-MM-DD for date fields - medium width columns
-                    if col_name == 'Tid start' and hasattr(value, 'year'):
-                        # Value is already a date object, format it properly
-                        cell.number_format = 'YYYY-MM-DD'
-                    else:
-                        # For text date values or Tid slut field
-                        cell.number_format = 'YYYY-MM-DD'
-                    cell.alignment = Alignment(wrap_text=True, vertical='bottom', horizontal='left')
-                elif col_name.startswith('Note'):
-                    # Text format with text wrapping for Note fields - expect wider columns
-                    cell.number_format = '@'
-                    cell.alignment = Alignment(wrap_text=True, vertical='bottom', horizontal='left')
-                elif col_name.startswith('Källa'):
-                    # Text format with text wrapping for source fields - medium width
-                    cell.number_format = '@'
-                    cell.alignment = Alignment(wrap_text=True, vertical='bottom', horizontal='left')
-                elif col_name == 'Övrigt':
-                    # Text format with text wrapping for historical field - wider column expected
-                    cell.number_format = '@'
-                    cell.alignment = Alignment(wrap_text=True, vertical='bottom', horizontal='left')
-                else:
-                    # Default: Text format for any other fields - basic formatting
-                    cell.number_format = '@'
-                    cell.alignment = Alignment(wrap_text=True, vertical='bottom', horizontal='left')
-            
-            # Save workbook
-            self.workbook.save(self.excel_path)
-            logger.info(f"Added row to Excel file at row {next_row}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Error adding row to Excel: {e}")
-            return False
     
     def add_row_with_xlsxwriter(self, data: Dict[str, str], filename: str, row_color: str = "none") -> bool:
         """BREAKTHROUGH METHOD: Add new row using hybrid approach: openpyxl for reading, xlsxwriter for writing"""
@@ -299,6 +142,7 @@ class ExcelManager:
             
             # Copy existing data with formatting to new workbook
             for row_idx, (row_data, row_formats) in enumerate(zip(existing_data, existing_formats)):
+                logger.info(f"DEBUG: Processing existing row {row_idx}")
                 for col_idx, ((data_type, value), cell_format) in enumerate(zip(row_data, row_formats)):
                     # Create xlsxwriter format from openpyxl format
                     format_dict = {}
@@ -312,6 +156,7 @@ class ExcelManager:
                         # Skip default black color to avoid overriding normal text
                         if color_hex and color_hex not in ['#000000', '#000']:
                             format_dict['color'] = color_hex
+                            logger.info(f"DEBUG: Row {row_idx}, Col {col_idx} - Font color: {color_hex}")
                     if cell_format['font_size']:
                         format_dict['size'] = cell_format['font_size']
                     if cell_format['fill_color']:
@@ -320,6 +165,7 @@ class ExcelManager:
                         # Skip default white/transparent background to avoid overriding normal cells
                         if color_hex and color_hex not in ['#FFFFFF', '#FFF', '#000000', '#000']:
                             format_dict['bg_color'] = color_hex
+                            logger.info(f"DEBUG: Row {row_idx}, Col {col_idx} - Background color: {color_hex}")
                     # Always enable text wrap to preserve user's worksheet setting
                     format_dict['text_wrap'] = True
                     if cell_format['alignment_horizontal']:
@@ -329,6 +175,10 @@ class ExcelManager:
                     
                     # Create format object - always include text_wrap to preserve worksheet setting
                     cell_format_obj = write_workbook.add_format(format_dict) if format_dict else write_workbook.add_format({'text_wrap': True})
+                    
+                    # Debug logging for problematic cases
+                    if format_dict and ('color' in format_dict or 'bg_color' in format_dict):
+                        logger.info(f"DEBUG: Row {row_idx}, Col {col_idx} - Created format: {format_dict}")
                     
                     # Write data with formatting
                     if data_type == 'formula' and value:
@@ -469,106 +319,4 @@ class ExcelManager:
     
     def _write_rich_text_xlsxwriter(self, worksheet, row, col, rich_text_obj, workbook):
         """BREAKTHROUGH METHOD: Convert openpyxl CellRichText to xlsxwriter rich string"""
-        try:
-            if not hasattr(rich_text_obj, '__iter__'):
-                # Plain text
-                worksheet.write(row, col, str(rich_text_obj))
-                return
-            
-            # Build rich string for xlsxwriter
-            rich_parts = []
-            for part in rich_text_obj:
-                if hasattr(part, 'text') and hasattr(part, 'font'):
-                    # TextBlock with formatting
-                    format_dict = {}
-                    if hasattr(part.font, 'b') and part.font.b:
-                        format_dict['bold'] = True
-                    if hasattr(part.font, 'i') and part.font.i:
-                        format_dict['italic'] = True
-                    if hasattr(part.font, 'color') and part.font.color:
-                        # Convert color to xlsxwriter format using the helper function
-                        color_hex = self._convert_color_to_hex(part.font.color.rgb)
-                        if color_hex and color_hex not in ['#000000', '#000']:
-                            format_dict['color'] = color_hex
-                    
-                    if format_dict:
-                        format_obj = workbook.add_format(format_dict)
-                        rich_parts.extend([format_obj, part.text])
-                    else:
-                        rich_parts.append(part.text)
-                elif isinstance(part, str):
-                    # Plain text string part
-                    rich_parts.append(part)
-                else:
-                    # Other type - convert to string
-                    part_str = str(part)
-                    rich_parts.append(part_str)
-            
-            # Use simple rich_string without complex filtering to avoid text ordering issues
-            if rich_parts:
-                worksheet.write_rich_string(row, col, *rich_parts)
-            else:
-                worksheet.write(row, col, str(rich_text_obj))
-                
-        except Exception as e:
-            logger.warning(f"Error converting rich text to xlsxwriter format: {e}")
-            # Fallback to plain text
-            worksheet.write(row, col, str(rich_text_obj))
-
-    def _repair_corrupted_cellrichtext(self, rich_text_obj):
-        """
-        Repair corrupted CellRichText objects that result from openpyxl reading xlsxwriter files.
-        
-        Problem: When xlsxwriter writes rich text and openpyxl reads it back, we get:
-        Part 0: str('WHOLE TEXT CONTENT...')  # Duplicated full text
-        Part 1: TextBlock('Formatted part 1')  # Individual formatted parts
-        Part 2: TextBlock('Formatted part 2')  
-        
-        Solution: Remove the duplicated first part and keep only the TextBlocks.
-        """
-        try:
-            if not hasattr(rich_text_obj, '__iter__') or len(rich_text_obj) <= 1:
-                return rich_text_obj
-                
-            # Check if first part is a plain string containing most/all of the text
-            first_part = rich_text_obj[0]
-            if not isinstance(first_part, str):
-                return rich_text_obj
-                
-            # Get total length of TextBlock parts
-            textblock_length = 0
-            textblock_count = 0
-            for part in rich_text_obj[1:]:
-                if hasattr(part, 'text') and hasattr(part, 'font'):  # TextBlock
-                    textblock_length += len(part.text)
-                    textblock_count += 1
-                elif isinstance(part, str):
-                    textblock_length += len(part)
-                    
-            # If first part is significantly longer than sum of other parts,
-            # and we have TextBlocks, this is likely a corruption
-            first_part_len = len(first_part)
-            if (first_part_len > textblock_length * 0.7 and  # First part contains 70%+ of text
-                textblock_count > 0):  # We have actual TextBlocks
-                
-                logger.info(f"REPAIR: Detected corrupted CellRichText - first part ({first_part_len} chars) vs TextBlocks ({textblock_length} chars)")
-                
-                # Create new CellRichText without the duplicated first part
-                from openpyxl.cell.rich_text import CellRichText
-                repaired_parts = list(rich_text_obj[1:])  # Skip first duplicated part
-                
-                if repaired_parts:
-                    repaired = CellRichText(*repaired_parts)
-                    logger.info(f"REPAIR: Created repaired CellRichText with {len(repaired)} parts")
-                    return repaired
-                else:
-                    # Fallback to original if repair fails
-                    logger.warning("REPAIR: No parts left after repair, using original")
-                    return rich_text_obj
-            else:
-                # Not corrupted, return as-is
-                return rich_text_obj
-                
-        except Exception as e:
-            logger.warning(f"Error repairing CellRichText: {e}")
-            return rich_text_obj
+        # TO BE CONTINUED - This method needs the rest of the implementation

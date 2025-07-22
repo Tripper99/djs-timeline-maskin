@@ -1556,7 +1556,7 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
         # Add filename components for special handling
         excel_data['date'] = self.date_var.get()
         
-        if self.excel_manager.add_row(excel_data, filename, self.row_color_var.get()):
+        if self.excel_manager.add_row_with_xlsxwriter(excel_data, filename, self.row_color_var.get()):
             self.stats['excel_rows_added'] += 1
             self.excel_row_saved.set(True)
             self.update_stats_display()
