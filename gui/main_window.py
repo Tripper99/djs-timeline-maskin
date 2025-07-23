@@ -159,6 +159,14 @@ class PDFProcessorApp:
 
     def setup_gui(self):
         """Setup the main GUI"""
+        # Fix Windows DPI scaling issues that can cause geometry problems
+        try:
+            import ctypes
+            ctypes.windll.shcore.SetProcessDpiAwareness(2)  # For Windows 10
+            logger.info("DPI awareness set successfully")
+        except Exception as e:
+            logger.warning(f"Could not set DPI awareness: {e}")
+        
         # Get saved theme or use default
         current_theme = self.config.get('theme', 'simplex')
         self.root = tb.Window(themename=current_theme)
@@ -193,7 +201,10 @@ class PDFProcessorApp:
             available_height = screen_height - 80  # Fallback
             
         window_height = min(max(int(available_height * 0.75), 700), 800)  # Much more aggressive height reduction for laptops
-        logger.info(f"Screen: {screen_width}x{screen_height}, work area: {available_height}, window: {window_height}")
+        logger.info(f"Screen: {screen_width}x{screen_height}, work area: {available_height}, calculated window height: {window_height}")
+        
+        # Debug actual screen measurements after DPI fix
+        logger.info(f"DPI aware measurements - Screen: {self.root.winfo_screenwidth()}x{self.root.winfo_screenheight()}")
         
         # Check if saved geometry exceeds our height limit and adjust it
         saved_geometry = self.config.get('window_geometry', '')
@@ -588,8 +599,8 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
 
     def create_group3(self, parent):
         """Group 3: Excel Integration"""
-        group3 = tb.LabelFrame(parent, text="3. Excel-integration", padding=15)
-        group3.pack(fill="x", pady=(0, 15))
+        group3 = tb.LabelFrame(parent, text="3. Excel-integration", padding=8)
+        group3.pack(fill="x", pady=(0, 8))
 
         # Excel file selection
         excel_file_frame = tb.Frame(group3)
@@ -628,7 +639,7 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
 
         # Excel column fields (scrollable, three-column layout)
         self.excel_fields_frame = tb.Frame(group3)
-        self.excel_fields_frame.pack(fill="both", expand=False, pady=(10, 0))  # Removed expand=True to prevent pushing status text off screen
+        self.excel_fields_frame.pack(fill="both", expand=False, pady=(5, 0))  # Reduced padding to save vertical space
 
         # Configure the excel_fields_frame for responsive layout
         self.excel_fields_frame.grid_columnconfigure(0, weight=1)
@@ -637,8 +648,8 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
 
     def create_group4(self, parent):
         """Group 4: Excel Operations Buttons"""
-        group4 = tb.LabelFrame(parent, text="Spara nya pdf-namnet och/eller nya excelraden", padding=15)
-        group4.pack(fill="x", pady=(0, 15))
+        group4 = tb.LabelFrame(parent, text="Spara nya pdf-namnet och/eller nya excelraden", padding=8)
+        group4.pack(fill="x", pady=(0, 8))
 
         # First row: Buttons for Excel operations
         excel_buttons_frame = tb.Frame(group4)
@@ -738,7 +749,7 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
 
         # Create frame for Excel fields (responsive grid layout)
         fields_container = tb.Frame(self.excel_fields_frame)
-        fields_container.pack(fill="both", expand=True, pady=(10, 0))
+        fields_container.pack(fill="both", expand=True, pady=(5, 0))
 
         # Configure responsive row expansion
         fields_container.grid_rowconfigure(0, weight=1)
