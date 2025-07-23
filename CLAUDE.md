@@ -12,7 +12,7 @@ The application has been refactored from a single large file into a modular stru
 -- Be direct; avoid ungrounded or sycophantic flattery. 
 -- Be modest. Never clasim that a problem is solved before testruns.  
 -- **Never start to write code without user saying that it is OK. 
--- **Always run test for syntax errors before letting the user do test runs.
+-- **Always run test for syntax errors using Ruff before letting the user do test runs.
 -- **Always update version number after changing the code. 
 -- **Always assume that the user is using Windows.
 -- If you want the user to do a test run of the code then don't start the app yourself. Tell the user to start it and explain what tests should be done.  
