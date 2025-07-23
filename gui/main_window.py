@@ -710,7 +710,7 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
 
         # Create Column 1
         if any(col in column_names for col in column1_fields):
-            col1_frame = tb.LabelFrame(fields_container, text="", padding=5)
+            col1_frame = tb.LabelFrame(fields_container, text="", padding=2)
             col1_frame.grid(row=0, column=0, sticky="nsew", padx=2, pady=2)
             col1_frame.grid_columnconfigure(0, weight=0)  # Field labels - fixed width
             col1_frame.grid_columnconfigure(1, weight=1)  # Entry fields - expand to fill space
@@ -727,12 +727,9 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
 
         # Create Column 2
         if any(col in column_names for col in column2_fields):
-            col2_frame = tb.LabelFrame(fields_container, text="", padding=5)
+            col2_frame = tb.LabelFrame(fields_container, text="", padding=2)
             col2_frame.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
             col2_frame.grid_columnconfigure(0, weight=1)  # Make all content expand full width
-            # Configure rows to expand and use available vertical space
-            for i in range(len([col for col in column2_fields if col in column_names])):
-                col2_frame.grid_rowconfigure(i, weight=1)
 
             row = 0
             for col_name in column2_fields:
@@ -742,12 +739,9 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
 
         # Create Column 3
         if column3_fields:
-            col3_frame = tb.LabelFrame(fields_container, text="", padding=5)
+            col3_frame = tb.LabelFrame(fields_container, text="", padding=2)
             col3_frame.grid(row=0, column=2, sticky="nsew", padx=2, pady=2)
             col3_frame.grid_columnconfigure(0, weight=1)  # Make all content expand full width
-            # Configure rows to expand and use available vertical space
-            for i in range(len([col for col in column3_fields if col in column_names])):
-                col3_frame.grid_rowconfigure(i, weight=1)
 
             row = 0
             for col_name in column3_fields:
@@ -818,7 +812,14 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
             text_widget = tk.Text(parent_frame, height=height,
                                 wrap=tk.WORD, font=('Arial', 9),
                                 undo=True, maxundo=20)
-            text_widget.grid(row=row+1, column=0, columnspan=2, sticky="ew", pady=(0, 2))
+            
+            # Make Händelse expand vertically to fill available space
+            if col_name == 'Händelse':
+                text_widget.grid(row=row+1, column=0, columnspan=2, sticky="nsew", pady=(0, 2))
+                # Configure the text widget row to expand vertically
+                parent_frame.grid_rowconfigure(row+1, weight=1)
+            else:
+                text_widget.grid(row=row+1, column=0, columnspan=2, sticky="ew", pady=(0, 2))
 
             # Enable undo functionality for text widget
             self.enable_undo_for_widget(text_widget)
