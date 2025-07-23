@@ -163,7 +163,7 @@ class PDFProcessorApp:
         current_theme = self.config.get('theme', 'simplex')
         self.root = tb.Window(themename=current_theme)
         self.root.title(f"DJs Timeline-maskin {VERSION}")
-        self.root.geometry("2000x1400")  # Optimal size - wide enough and sufficient height
+        self.root.geometry("2000x1320")  # Optimal size - wide enough, reduced height to show status bar
 
         # Set application icon
         try:
@@ -182,7 +182,7 @@ class PDFProcessorApp:
         screen_height = self.root.winfo_screenheight()
         x = (screen_width // 2) - (2000 // 2)  # Center horizontally
         y = 0  # Position at the very top of screen
-        self.root.geometry(f"2000x1400+{x}+{y}")  # Final size and position
+        self.root.geometry(f"2000x1320+{x}+{y}")  # Final size and position
 
         # Create menu bar
         self.create_menu_bar()
