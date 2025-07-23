@@ -119,7 +119,10 @@ The application uses JSON configuration stored in `pdf_processor_config.json` wi
 - ✅ **v1.1.2**: Implemented custom undo/redo stack for Text widgets
 - ✅ **Hybrid system**: Custom stack for problematic operations, tkinter's built-in for normal editing
 - ✅ **Preserved functionality**: Entry widgets still work as before
-- ✅ **v1.7.4** Excel hybrid method successfully implemented in Excel writing.  
+- ✅ **v1.7.4** Excel hybrid method successfully implemented in Excel writing
+- ✅ **v1.8.2 - v1.8.8**: Multiple attempts to fix window height for laptop compatibility
+- ✅ **v1.9.0**: Added Windows DPI awareness to fix geometry detection issues
+- ✅ **v1.9.1**: Fixed laptop status bar visibility by reducing Excel area padding  
 
 ## Excel hybrid methods
 v1.7.4 contains the COMPLETE WORKING Excel hybrid method. 
@@ -130,12 +133,30 @@ The breakthrough hybrid approach consista of:
 - Method 2 character-by-character algorithm for text extraction
 This method might seem complicated but is important to understand that this is the only way we've found to make the app to write perfect Excel rich text formatting with colors, bold, italic, line breaks. 
 
+## Current Issues (v1.9.1)
+
+### Window Height/Layout Problem
+**CURRENT STATUS**: Partially solved with significant trade-offs
+- ✅ **Laptop screens**: Status bar now visible, app fully functional
+- ❌ **External monitors**: Window too short (800px max), buttons cut off, app unusable
+
+**Technical Details:**
+- Window height limited to 75% of available height, min 700px, max 800px
+- Added Windows DPI awareness: `ctypes.windll.shcore.SetProcessDpiAwareness(2)`
+- Reduced padding in Excel integration areas (Group 3/4) from 15px to 8px
+- Status bar visibility achieved by reducing vertical spacing throughout Excel sections
+
+**Root Cause Identified**: The excessive padding in Excel integration area was pushing the status bar off-screen on laptop displays. The solution worked for laptops but created new problems for external monitors.
+
+**FUTURE SOLUTION NEEDED**: Dynamic height adjustment based on actual screen size rather than fixed maximum limits.
+
 ## Important Development Rules
 - **Never edit** `APP DJs Timeline-verktyg v170 FUNKAR.py` - this is the old single-file version (kept as backup)
 - **Always use** `app.py` as the starting point for the refactored modular version
 - **Never** try to change the Excel hybrid methods without asking the user. 
 - The GUI layout and functionality must be preserved exactly as designed
 - Any changes should be made to the modular files in core/ and gui/ directories
+- **Window geometry issues**: Be very careful with height limits - what works for laptops may break external monitors
 
 ## Development Notes
 
