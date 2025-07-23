@@ -150,6 +150,35 @@ This method might seem complicated but is important to understand that this is t
 
 **FUTURE SOLUTION NEEDED**: Dynamic height adjustment based on actual screen size rather than fixed maximum limits.
 
+## Future Refactoring Opportunities
+
+### File Size Issue: main_window.py (2930 lines)
+The `gui/main_window.py` file has grown to 2930 lines, making it too large for Claude Code to read efficiently in a single operation. This limits Claude's ability to understand and modify the codebase effectively.
+
+**Recommended Splitting Approach (in order of safety):**
+
+1. **Extract Dialog Classes** (Safest - Recommended First Step)
+   - Create `gui/dialogs.py` 
+   - Move dialog methods: `show_program_help()`, `show_excel_help()`, `create_excel_template()`
+   - Move all paste/truncate dialog methods
+   - **Impact**: Remove ~500-800 lines safely without touching core layout
+
+2. **Extract Excel Field Management** (Medium Safe)
+   - Create `gui/excel_fields.py`
+   - Move `create_excel_fields()`, `setup_excel_field_widget()` and related logic
+   - **Impact**: Remove ~300-500 lines
+
+3. **Extract Event Handlers** (Medium Safe)
+   - Create `gui/event_handlers.py`
+   - Move button click handlers, file selection methods, copy/paste handlers
+   - **Impact**: Varies based on scope
+
+4. **Extract GUI Group Creation** (Riskiest but Biggest Impact)
+   - Move `create_group1()`, `create_group2()`, etc. to separate files
+   - **Risk**: Touches core layout logic, requires careful handling
+
+**Benefits**: Improved maintainability, better Claude Code compatibility, cleaner code organization.
+
 ## Important Development Rules
 - **Never edit** `APP DJs Timeline-verktyg v170 FUNKAR.py` - this is the old single-file version (kept as backup)
 - **Always use** `app.py` as the starting point for the refactored modular version
