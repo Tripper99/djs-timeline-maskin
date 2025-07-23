@@ -812,14 +812,6 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
             text_widget = tk.Text(parent_frame, height=height,
                                 wrap=tk.WORD, font=('Arial', 9),
                                 undo=True, maxundo=20)
-            
-            # Make Händelse expand vertically to fill available space
-            if col_name == 'Händelse':
-                text_widget.grid(row=row+1, column=0, columnspan=2, sticky="nsew", pady=(0, 2))
-                # Configure the text widget row to expand vertically
-                parent_frame.grid_rowconfigure(row+1, weight=1)
-            else:
-                text_widget.grid(row=row+1, column=0, columnspan=2, sticky="ew", pady=(0, 2))
 
             # Enable undo functionality for text widget
             self.enable_undo_for_widget(text_widget)
@@ -853,7 +845,13 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
             self.create_formatting_toolbar(toolbar_frame, text_widget, col_name)
 
             # Move text widget to row+2 to make room for toolbar
-            text_widget.grid(row=row+2, column=0, columnspan=2, sticky="ew", pady=(0, 2))
+            # Make Händelse expand vertically to fill available space
+            if col_name == 'Händelse':
+                text_widget.grid(row=row+2, column=0, columnspan=2, sticky="nsew", pady=(0, 2))
+                # Configure the text widget row to expand vertically
+                parent_frame.grid_rowconfigure(row+2, weight=1)
+            else:
+                text_widget.grid(row=row+2, column=0, columnspan=2, sticky="ew", pady=(0, 2))
 
             # Row 4: Character counter (left aligned, compact)
             limit = self.handelse_char_limit if col_name == 'Händelse' else self.char_limit
