@@ -739,7 +739,7 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
 
         # Create Column 3
         if column3_fields:
-            col3_frame = tb.LabelFrame(fields_container, text="", padding=2)
+            col3_frame = tb.LabelFrame(fields_container, text="", padding=(2, 2, 10, 2))  # Extra bottom padding for character counters
             col3_frame.grid(row=0, column=2, sticky="nsew", padx=2, pady=2)
             col3_frame.grid_columnconfigure(0, weight=1)  # Make all content expand full width
 
@@ -857,14 +857,14 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
             limit = self.handelse_char_limit if col_name == 'Händelse' else self.char_limit
             counter_label = tb.Label(parent_frame, text=f"{limit}",
                                    font=('Arial', 8), bootstyle="success")
-            counter_label.grid(row=row+3, column=0, sticky="w", pady=(0, 5))
+            counter_label.grid(row=row+3, column=0, sticky="w", pady=(5, 8))
             self.char_counters[col_name] = counter_label
 
             # Store reference to text widget
             self.excel_vars[col_name] = text_widget
 
-            # Return the number of rows used (3 rows for text fields)
-            return 3
+            # Return the number of rows used (4 rows for text fields: header, toolbar, text, counter)
+            return 4
 
         # Layout depends on column type
         elif column_type == "column1":
