@@ -1,0 +1,42 @@
+[tool.ruff]
+# Exclude backup files and temporary files
+extend-exclude = [
+    "APP DJs Timeline-verktyg v170 FUNKAR.py",
+    "BACKUP_*.py",
+    "*.tmp.*",
+    "__pycache__",
+    "*.pyc"
+]
+
+# Target Python 3.8+ (adjust based on your Python version)
+target-version = "py38"
+
+# Line length to match your code style
+line-length = 120
+
+[tool.ruff.lint]
+# Enable commonly useful rules
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings  
+    "F",    # pyflakes
+    "I",    # isort (import sorting)
+    "N",    # pep8-naming
+    "UP",   # pyupgrade (modern Python syntax)
+    "B",    # flake8-bugbear (likely bugs)
+]
+
+# Ignore specific rules that might be too strict for GUI code
+ignore = [
+    "E501",   # Line too long (handled by formatter)
+    "N803",   # Argument name should be lowercase (tkinter uses mixed case)
+    "N806",   # Variable should be lowercase (tkinter uses mixed case)
+    "N813",   # Camelcase imported as lowercase (tkinter conventions)
+]
+
+[tool.ruff.format]
+# Use double quotes for strings
+quote-style = "double"
+
+# Indent with 4 spaces
+indent-style = "space"

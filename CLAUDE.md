@@ -4,7 +4,27 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline Machine) that processes PDF files and updates Excel spreadsheets. The application has been refactored from a single large file into a modular structure.
+This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline Machine). It is designed to help investigative journalists and researchers to quickly renaming pdf files and/or create timelines i excel. The first part of the app processes PDF files extracts different parts of the filename. User can then edit these parts and rename the file. It is also possible to copy the old or new file name to the second part of the app: The excel integration. Here the user can add information to a number of fields. By cklicking a button user can then both rename the pdf-file and add a row to a selected excel-document. 
+A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
+The application has been refactored from a single large file into a modular structure.
+
+## General guidelines for Claude Code
+-- Be direct; avoid ungrounded or sycophantic flattery. 
+-- Be modest. Never clasim that a problem is solved before testruns.  
+-- **Never start to write code without user saying that it is OK. 
+-- **Always run test for syntax errors before letting the user do test runs.
+-- **Always update version number after changing the code. 
+-- **Always assume that the user is using Windows.
+-- If you want the user to do a test run of the code then don't start the app yourself. Tell the user to start it and explain what tests should be done.  
+-- If problems persist suggest writing test scripts for analyzing problems in a systematic way.
+
+## Git Commit Guidelines
+-- Please do not mention yourself (Claude) as a co-author when committing, och include any links to Claude Code or any other sites. 
+-- Always git add . and commit with a new version number before writing code. 
+-- Add comments on the performance after testing the new version.
+
+## Documentation Memories
+-- Please use context7 to find relevant, up-to-date documentation for libraries etc. 
 
 ## Running the Application
 
@@ -21,7 +41,7 @@ The application requires these Python packages:
 
 Install dependencies:
 ```bash
-pip install ttkbootstrap PyPDF2 openpyxl
+pip install ttkbootstrap PyPDF2 openpyxl xlsxwriter
 ```
 
 ## Architecture
@@ -94,51 +114,31 @@ The application uses JSON configuration stored in `pdf_processor_config.json` wi
 - **Modular Structure**: Code is now organized into logical modules for better maintainability
 - **Original file**: "APP DJs Timeline-verktyg v170 FUNKAR.py" can be kept as reference or backup
 
-## Current Work: Undo/Redo Enhancement
-
-**STATUS: IN PROGRESS** - Fixing undo/redo functionality in Text widgets
-
-### Problem Identified:
-- Text widgets (Händelse, Note1, Note2, Note3) have poor undo/redo for certain operations
-- **Ctrl+A + Del + Ctrl+Z**: Text disappears instead of being restored
-- **Ctrl+A + Ctrl+V + Ctrl+Z**: Text disappears instead of being restored
-- Entry widgets work fine, only Text widgets affected
-
-### Solutions Implemented:
+### Completed Solutions:
 - ✅ **v1.1.1**: Added enhanced bindings for Ctrl+A, Ctrl+V, Delete, BackSpace
 - ✅ **v1.1.2**: Implemented custom undo/redo stack for Text widgets
 - ✅ **Hybrid system**: Custom stack for problematic operations, tkinter's built-in for normal editing
 - ✅ **Preserved functionality**: Entry widgets still work as before
+- ✅ **v1.7.4** Excel hybrid method successfully implemented in Excel writing.  
 
-### Current Version: v1.1.2
-
-### Next Steps for Testing:
-1. Test Ctrl+A + Del + Ctrl+Z in Text widgets (should restore original text)
-2. Test Ctrl+A + Ctrl+V + Ctrl+Z in Text widgets (should restore original text)
-3. Verify normal typing + Ctrl+Z still works in Text widgets
-4. Verify Entry widgets still work normally
-5. If tests pass, mark as completed and update to v1.1.3
-
-### Key Files Modified:
-- `gui/main_window.py`: Enhanced undo/redo implementation
-- `utils/constants.py`: Version updates
-- All changes committed to GitHub repository
-
-### Technical Details:
-- Custom undo/redo stacks: `self.text_undo_stacks` and `self.text_redo_stacks`
-- Enhanced event handlers: `handle_select_all_undo()`, `handle_paste_undo()`, `handle_delete_with_undo()`
-- Fallback system: Custom stack first, then tkinter's built-in system
+## Excel hybrid methods
+v1.7.4 contains the COMPLETE WORKING Excel hybrid method. 
+These methods solved persistant problems that the app had with writing corrextly formatted text to excel cells. 
+The breakthrough hybrid approach consista of:
+- openpyxl for reading existing Excel data (preserves formulas)  
+- xlsxwriter for writing new data (handles rich text perfectly)
+- Method 2 character-by-character algorithm for text extraction
+This method might seem complicated but is important to understand that this is the only way we've found to make the app to write perfect Excel rich text formatting with colors, bold, italic, line breaks. 
 
 ## Important Development Rules
-
 - **Never edit** `APP DJs Timeline-verktyg v170 FUNKAR.py` - this is the old single-file version (kept as backup)
 - **Always use** `app.py` as the starting point for the refactored modular version
+- **Never** try to change the Excel hybrid methods without asking the user. 
 - The GUI layout and functionality must be preserved exactly as designed
 - Any changes should be made to the modular files in core/ and gui/ directories
 
 ## Development Notes
 
-- The application is version v170 (defined in utils/constants.py)
 - All GUI components are built using ttkbootstrap
 - Logging is configured for debugging
 - No automated tests are present in the codebase
