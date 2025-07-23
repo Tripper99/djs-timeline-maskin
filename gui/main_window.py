@@ -715,6 +715,9 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
             col1_frame.grid_columnconfigure(0, weight=0)  # Field labels - fixed width
             col1_frame.grid_columnconfigure(1, weight=1)  # Entry fields - expand to fill space
             col1_frame.grid_columnconfigure(2, weight=0)  # Lock switches - fixed width
+            # Configure rows to expand and use available vertical space
+            for i in range(len([col for col in column1_fields if col in column_names])):
+                col1_frame.grid_rowconfigure(i, weight=1)
 
             row = 0
             for col_name in column1_fields:
@@ -727,6 +730,9 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
             col2_frame = tb.LabelFrame(fields_container, text="", padding=5)
             col2_frame.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
             col2_frame.grid_columnconfigure(0, weight=1)  # Make all content expand full width
+            # Configure rows to expand and use available vertical space
+            for i in range(len([col for col in column2_fields if col in column_names])):
+                col2_frame.grid_rowconfigure(i, weight=1)
 
             row = 0
             for col_name in column2_fields:
@@ -739,6 +745,9 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
             col3_frame = tb.LabelFrame(fields_container, text="", padding=5)
             col3_frame.grid(row=0, column=2, sticky="nsew", padx=2, pady=2)
             col3_frame.grid_columnconfigure(0, weight=1)  # Make all content expand full width
+            # Configure rows to expand and use available vertical space
+            for i in range(len([col for col in column3_fields if col in column_names])):
+                col3_frame.grid_rowconfigure(i, weight=1)
 
             row = 0
             for col_name in column3_fields:
@@ -800,11 +809,11 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
 
             # Row 2: Text widget (full width)
             if col_name == 'Händelse':
-                height = 16  # Match combined height of Note1-3 (6+6+4=16)
+                height = 22  # Match combined height of Note1-3 (8+8+6=22)
             elif col_name in ['Note1', 'Note2']:
-                height = 6
+                height = 8  # Increased from 6 to make character counters visible
             else:
-                height = 4
+                height = 6  # Increased from 4 (Note3 and other text fields)
 
             text_widget = tk.Text(parent_frame, height=height,
                                 wrap=tk.WORD, font=('Arial', 9),
