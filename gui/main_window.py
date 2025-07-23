@@ -576,7 +576,7 @@ Programmet är designat för effektiv bearbetning av många PDF-filer med konsek
 
         # Excel column fields (scrollable, three-column layout)
         self.excel_fields_frame = tb.Frame(group3)
-        self.excel_fields_frame.pack(fill="both", expand=True, pady=(10, 0))
+        self.excel_fields_frame.pack(fill="both", expand=False, pady=(10, 0))  # Removed expand=True to prevent pushing status text off screen
 
         # Configure the excel_fields_frame for responsive layout
         self.excel_fields_frame.grid_columnconfigure(0, weight=1)
