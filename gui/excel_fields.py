@@ -1,0 +1,392 @@
+"""
+Excel field management for DJs Timeline-maskin
+Contains all Excel field creation and management methods extracted from main_window.py
+"""
+
+# Standard library imports
+import logging
+import tkinter as tk
+from typing import Dict, Tuple
+
+# Third-party GUI imports
+import ttkbootstrap as tb
+from ttkbootstrap.constants import *
+
+# Local imports
+
+logger = logging.getLogger(__name__)
+
+
+class ExcelFieldManager:
+    """Manages Excel field creation, layout, and state management"""
+
+    def __init__(self, parent_app):
+        """Initialize Excel field manager with reference to parent application"""
+        self.parent = parent_app
+
+    def collect_locked_field_data(self) -> Tuple[Dict[str, bool], Dict[str, str]]:
+        """Collect current locked field states and their contents"""
+        try:
+            locked_states = {}
+            locked_contents = {}
+
+            # Collect lock states
+            for field_name, lock_var in self.parent.lock_vars.items():
+                locked_states[field_name] = lock_var.get()
+
+            # Collect field contents for locked fields
+            for field_name in self.parent.lock_vars.keys():
+                if locked_states.get(field_name, False):  # Only collect if locked
+                    if field_name in self.parent.excel_vars:
+                        var = self.parent.excel_vars[field_name]
+
+                        # Handle different widget types
+                        if hasattr(var, 'get') and hasattr(var, 'delete'):  # Text widget
+                            content = var.get("1.0", "end-1c")  # Get all text except final newline
+                        elif hasattr(var, 'get'):  # StringVar or Entry
+                            content = var.get()
+                        else:
+                            content = ""
+
+                        if content.strip():  # Only save non-empty content
+                            locked_contents[field_name] = content
+
+            logger.info(f"Collected {len(locked_contents)} locked fields with content")
+            return locked_states, locked_contents
+
+        except Exception as e:
+            logger.error(f"Error collecting locked field data: {e}")
+            return {}, {}
+
+    def restore_locked_fields(self) -> None:
+        """Restore locked field states and contents from saved configuration"""
+        try:
+            # Load saved locked fields data
+            locked_states, locked_contents = self.parent.config_manager.load_locked_fields()
+
+            if not locked_states and not locked_contents:
+                logger.info("No saved locked fields to restore")
+                return
+
+            # Restore lock states
+            for field_name, is_locked in locked_states.items():
+                if field_name in self.parent.lock_vars:
+                    self.parent.lock_vars[field_name].set(is_locked)
+                    logger.debug(f"Restored lock state for {field_name}: {is_locked}")
+
+            # Restore field contents for locked fields
+            for field_name, content in locked_contents.items():
+                if field_name in self.parent.excel_vars and locked_states.get(field_name, False):
+                    var = self.parent.excel_vars[field_name]
+
+                    # Handle different widget types
+                    if hasattr(var, 'delete') and hasattr(var, 'insert'):  # Text widget
+                        var.delete("1.0", tk.END)
+                        var.insert("1.0", content)
+                    elif hasattr(var, 'set'):  # StringVar
+                        var.set(content)
+
+                    logger.debug(f"Restored content for locked field {field_name}: {content[:50]}...")
+
+            logger.info(f"Restored {len(locked_states)} lock states and {len(locked_contents)} field contents")
+
+        except Exception as e:
+            logger.error(f"Error restoring locked fields: {e}")
+
+    def save_locked_fields_on_exit(self) -> None:
+        """Save current locked field states and contents before exit"""
+        try:
+            locked_states, locked_contents = self.collect_locked_field_data()
+
+            if locked_states or locked_contents:
+                self.parent.config_manager.save_locked_fields(locked_states, locked_contents)
+                logger.info("Saved locked fields before exit")
+            else:
+                logger.info("No locked fields to save")
+
+        except Exception as e:
+            logger.error(f"Error saving locked fields on exit: {e}")
+
+    def clear_excel_fields(self):
+        """Clear Excel fields except locked ones and Inlagd datum"""
+        for col_name, var in self.parent.excel_vars.items():
+            # Skip locked fields
+            if col_name in self.parent.lock_vars and self.parent.lock_vars[col_name].get():
+                continue
+            # Skip Inlagd datum - it should always maintain today's date
+            if col_name == 'Inlagd datum':
+                continue
+
+            if hasattr(var, 'delete'):  # Text widget
+                var.delete("1.0", tk.END)
+                # Reset character counter for text fields
+                if col_name in self.parent.char_counters:
+                    limit = self.parent.handelse_char_limit if col_name == 'Händelse' else self.parent.char_limit
+                    self.parent.char_counters[col_name].config(text=f"Tecken kvar: {limit}", bootstyle="success")
+            else:  # StringVar
+                var.set("")
+
+    def create_excel_fields(self):
+        """Create input fields for Excel columns in three-column layout"""
+        # Clear existing fields
+        for widget in self.parent.excel_fields_frame.winfo_children():
+            widget.destroy()
+
+        # Get column names from loaded Excel file
+        column_names = self.parent.excel_manager.get_column_names()
+        if not column_names:
+            tb.Label(self.parent.excel_fields_frame, text="Välj en Excel-fil först",
+                    font=('Arial', 10)).pack(pady=20)
+            return
+
+        # Clear and recreate excel_vars for current columns
+        self.parent.excel_vars.clear()
+        for col_name in column_names:
+            # Don't create variables for automatically calculated fields
+            if col_name != 'Dag':
+                self.parent.excel_vars[col_name] = tk.StringVar()
+
+        # Auto-fill today's date in "Inlagd datum" field
+        if 'Inlagd datum' in self.parent.excel_vars:
+            from datetime import datetime
+            today_date = datetime.now().strftime('%Y-%m-%d')
+            self.parent.excel_vars['Inlagd datum'].set(today_date)
+
+        # Create frame for Excel fields (responsive grid layout)
+        fields_container = tb.Frame(self.parent.excel_fields_frame)
+        fields_container.pack(fill="both", expand=True, pady=(5, 0))
+
+        # Configure responsive row expansion
+        fields_container.grid_rowconfigure(0, weight=1)
+
+        # Define column groupings (updated with new field name)
+        column1_fields = ['OBS', 'Inlagd datum', 'Kategori', 'Underkategori', 'Person/sak',
+                         'Egen grupp', 'Dag', 'Tid start', 'Tid slut', 'Källa1', 'Källa2', 'Källa3', 'Övrigt']
+        column2_fields = ['Händelse']
+        column3_fields = ['Note1', 'Note2', 'Note3']
+
+        # Add remaining columns to column 3
+        for col_name in column_names:
+            if col_name not in column1_fields and col_name not in column2_fields and col_name not in column3_fields:
+                column3_fields.append(col_name)
+
+        # Configure column weights for equal spacing - each column gets exactly 1/3 of available width
+        # Use uniform to force exactly equal column distribution
+        fields_container.grid_columnconfigure(0, weight=1, uniform="col")  # Left column - 1/3 of width
+        fields_container.grid_columnconfigure(1, weight=1, uniform="col")  # Middle column - 1/3 of width
+        fields_container.grid_columnconfigure(2, weight=1, uniform="col")  # Right column - 1/3 of width
+
+        # Create Column 1
+        if any(col in column_names for col in column1_fields):
+            col1_frame = tb.LabelFrame(fields_container, text="", padding=2)
+            col1_frame.grid(row=0, column=0, sticky="nsew", padx=2, pady=2)
+            col1_frame.grid_columnconfigure(0, weight=0)  # Field labels - fixed width
+            col1_frame.grid_columnconfigure(1, weight=1)  # Entry fields - expand to fill space
+            col1_frame.grid_columnconfigure(2, weight=0)  # Lock switches - fixed width
+            # Configure rows to expand and use available vertical space
+            for i in range(len([col for col in column1_fields if col in column_names])):
+                col1_frame.grid_rowconfigure(i, weight=1)
+
+            row = 0
+            for col_name in column1_fields:
+                if col_name in column_names:
+                    rows_used = self.create_field_in_frame(col1_frame, col_name, row, column_type="column1")
+                    row += rows_used
+
+        # Create Column 2
+        if any(col in column_names for col in column2_fields):
+            col2_frame = tb.LabelFrame(fields_container, text="", padding=2)
+            col2_frame.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
+            col2_frame.grid_columnconfigure(0, weight=1)  # Make all content expand full width
+
+            row = 0
+            for col_name in column2_fields:
+                if col_name in column_names:
+                    rows_used = self.create_field_in_frame(col2_frame, col_name, row, column_type="column2")
+                    row += rows_used
+
+        # Create Column 3
+        if column3_fields:
+            col3_frame = tb.LabelFrame(fields_container, text="", padding=(2, 2, 10, 2))  # Extra bottom padding for character counters
+            col3_frame.grid(row=0, column=2, sticky="nsew", padx=2, pady=2)
+            col3_frame.grid_columnconfigure(0, weight=1)  # Make all content expand full width
+
+            row = 0
+            for col_name in column3_fields:
+                if col_name in column_names:
+                    rows_used = self.create_field_in_frame(col3_frame, col_name, row, column_type="column3")
+                    row += rows_used
+
+    def create_field_in_frame(self, parent_frame, col_name, row, column_type="column1"):
+        """Create a single field in the specified frame with layout optimized per column type"""
+        # Check if this field should have a lock switch (all except Dag, Händelse and Inlagd datum)
+        has_lock = col_name in self.parent.lock_vars
+
+        # Special handling for Dag column - make it read-only with explanation
+        if col_name == 'Dag':
+            # Standard horizontal layout for Dag field
+            tb.Label(parent_frame, text=f"{col_name}:",
+                    font=('Arial', 10)).grid(row=row, column=0, sticky="w", pady=(0, 5))
+
+            dag_var = tk.StringVar(value="Formel läggs till automatiskt")
+            entry = tb.Entry(parent_frame,
+                           textvariable=dag_var,
+                           state="readonly",
+                           font=('Arial', 9, 'italic'))
+            entry.grid(row=row, column=1, sticky="ew", pady=(0, 5))
+
+            # Return 1 row used for Dag field
+            return 1
+
+        # Special handling for Inlagd datum - read-only, always today's date
+        elif col_name == 'Inlagd datum':
+            # Standard horizontal layout for Inlagd datum field
+            tb.Label(parent_frame, text=f"{col_name}:",
+                    font=('Arial', 10)).grid(row=row, column=0, sticky="w", pady=(0, 5))
+
+            entry = tb.Entry(parent_frame, textvariable=self.parent.excel_vars[col_name],
+                           state="readonly",
+                           font=('Arial', 9))
+            entry.grid(row=row, column=1, sticky="ew", pady=(0, 5))
+
+            # Return 1 row used for Inlagd datum field
+            return 1
+
+        # Special vertical layout for text fields with character counters (Händelse, Note1-3)
+        elif col_name.startswith('Note') or col_name == 'Händelse':
+            # Row 1: Field name and lock switch (if applicable)
+            header_frame = tb.Frame(parent_frame)
+            header_frame.grid(row=row, column=0, columnspan=2, sticky="ew", pady=(0, 2))
+
+            tb.Label(header_frame, text=f"{col_name}:",
+                    font=('Arial', 10)).pack(side="left")
+
+            # Add lock switch for text fields that should have one
+            if has_lock and col_name != 'Händelse':
+                lock_switch = tb.Checkbutton(header_frame,
+                                           text="Lås",
+                                           variable=self.parent.lock_vars[col_name],
+                                           bootstyle="success-round-toggle")
+                lock_switch.pack(side="right")
+
+            # Row 2: Text widget (full width)
+            if col_name == 'Händelse':
+                height = 22  # Match combined height of Note1-3 (8+8+6=22)
+            elif col_name in ['Note1', 'Note2']:
+                height = 8  # Increased from 6 to make character counters visible
+            else:
+                height = 6  # Increased from 4 (Note3 and other text fields)
+
+            text_widget = tk.Text(parent_frame, height=height,
+                                wrap=tk.WORD, font=('Arial', 9),
+                                undo=True, maxundo=20)
+
+            # Enable undo functionality for text widget
+            self.parent.enable_undo_for_widget(text_widget)
+
+            # Bind character count checking and paste handling
+            text_widget.bind('<KeyRelease>',
+                           lambda e, col=col_name: self.parent.check_character_count(e, col))
+            text_widget.bind('<Button-1>',
+                           lambda e, col=col_name: self.parent.root.after(1, lambda: self.parent.check_character_count(e, col)))
+            text_widget.bind('<Control-v>',
+                           lambda e, col=col_name: self.parent.dialog_manager.handle_paste_event(e, col))
+            text_widget.bind('<<Paste>>',
+                           lambda e, col=col_name: self.parent.dialog_manager.handle_paste_event(e, col))
+
+            # Add improved undo handling for key presses that replace selected text
+            text_widget.bind('<KeyPress>',
+                           lambda e: self.parent.handle_text_key_press_undo(e))
+
+            # Specific binding for Delete key to handle selection deletion
+            text_widget.bind('<Delete>',
+                           lambda e: self.parent.handle_delete_key_undo(e))
+            text_widget.bind('<BackSpace>',
+                           lambda e: self.parent.handle_delete_key_undo(e))
+
+            # Configure formatting tags for rich text
+            self.parent.setup_text_formatting_tags(text_widget)
+
+            # Row 2.5: Formatting toolbar (compact)
+            toolbar_frame = tb.Frame(parent_frame)
+            toolbar_frame.grid(row=row+1, column=0, columnspan=2, sticky="w", pady=(2, 2))
+            self.parent.create_formatting_toolbar(toolbar_frame, text_widget, col_name)
+
+            # Move text widget to row+2 to make room for toolbar
+            # Make Händelse expand vertically to fill available space
+            if col_name == 'Händelse':
+                text_widget.grid(row=row+2, column=0, columnspan=2, sticky="nsew", pady=(0, 2))
+                # Configure the text widget row to expand vertically
+                parent_frame.grid_rowconfigure(row+2, weight=1)
+            else:
+                text_widget.grid(row=row+2, column=0, columnspan=2, sticky="ew", pady=(0, 2))
+
+            # Row 4: Character counter (left aligned, compact)
+            limit = self.parent.handelse_char_limit if col_name == 'Händelse' else self.parent.char_limit
+            counter_label = tb.Label(parent_frame, text=f"{limit}",
+                                   font=('Arial', 8), bootstyle="success")
+            counter_label.grid(row=row+3, column=0, sticky="w", pady=(5, 8))
+            self.parent.char_counters[col_name] = counter_label
+
+            # Store reference to text widget
+            self.parent.excel_vars[col_name] = text_widget
+
+            # Return the number of rows used (4 rows for text fields: header, toolbar, text, counter)
+            return 4
+
+        # Layout depends on column type
+        elif column_type == "column1":
+            # Horizontal layout for column 1 - saves vertical space
+            tb.Label(parent_frame, text=f"{col_name}:",
+                    font=('Arial', 10)).grid(row=row, column=0, sticky="w", pady=(0, 5))
+
+            entry = tb.Entry(parent_frame, textvariable=self.parent.excel_vars[col_name],
+                           font=('Arial', 9))
+            entry.grid(row=row, column=1, sticky="ew", pady=(0, 5))
+
+            # Enable undo tracking for Entry widget
+            self.parent.enable_undo_for_widget(entry)
+
+            # Add lock switch for fields that should have one (in column 2)
+            if has_lock:
+                lock_switch = tb.Checkbutton(parent_frame,
+                                           text="Lås",
+                                           variable=self.parent.lock_vars[col_name],
+                                           bootstyle="success-round-toggle")
+                lock_switch.grid(row=row, column=2, sticky="w", padx=(5, 0), pady=(0, 5))
+
+            # Return 1 row used for horizontal layout
+            return 1
+
+        else:
+            # Vertical layout for columns 2&3 - maximizes input field width
+            # Row 1: Field name and lock switch
+            header_frame = tb.Frame(parent_frame)
+            header_frame.grid(row=row, column=0, columnspan=2, sticky="ew", pady=(0, 2))
+
+            tb.Label(header_frame, text=f"{col_name}:",
+                    font=('Arial', 10)).pack(side="left")
+
+            # Add lock switch for fields that should have one
+            if has_lock:
+                lock_switch = tb.Checkbutton(header_frame,
+                                           text="Lås",
+                                           variable=self.parent.lock_vars[col_name],
+                                           bootstyle="success-round-toggle")
+                lock_switch.pack(side="right")
+
+            # Row 2: Entry field (full width)
+            entry = tb.Entry(parent_frame, textvariable=self.parent.excel_vars[col_name],
+                           font=('Arial', 9))
+            entry.grid(row=row+1, column=0, columnspan=2, sticky="ew", pady=(0, 5))
+
+            # Enable undo tracking for Entry widget
+            self.parent.enable_undo_for_widget(entry)
+
+            # Return 2 rows used for vertical layout
+            return 2
+
+        # Configure column weight for proper resizing (for all field types)
+        parent_frame.grid_columnconfigure(0, weight=1)
+        if parent_frame.grid_size()[0] > 1:  # If there are multiple columns
+            parent_frame.grid_columnconfigure(1, weight=1)
