@@ -81,8 +81,43 @@ class PDFProcessorApp:
         # Load and restore locked fields after GUI is created
         self.excel_field_manager.restore_locked_fields()
 
+    def parse_geometry(self, geometry_string):
+        """
+        Parse tkinter geometry string safely handling negative coordinates.
+        
+        Args:
+            geometry_string (str): Format "widthxheight+x+y" or "widthxheight+x-y" etc.
+            
+        Returns:
+            tuple: (width, height, x, y) or None if parsing fails
+        """
+        try:
+            import re
+            # Match pattern: widthxheight+x+y (where x,y can be negative)
+            match = re.match(r'(\d+)x(\d+)([\+\-]\d+)([\+\-]\d+)', geometry_string)
+            if match:
+                width = int(match.group(1))
+                height = int(match.group(2))
+                x = int(match.group(3))
+                y = int(match.group(4))
+                return (width, height, x, y)
+            return None
+        except Exception:
+            return None
 
-
+    def build_geometry(self, width, height, x, y):
+        """
+        Build tkinter geometry string from components.
+        
+        Args:
+            width, height, x, y (int): Window dimensions and position
+            
+        Returns:
+            str: Geometry string in format "widthxheight+x+y"
+        """
+        x_sign = '+' if x >= 0 else ''
+        y_sign = '+' if y >= 0 else ''
+        return f"{width}x{height}{x_sign}{x}{y_sign}{y}"
 
     def setup_gui(self):
         """Setup the main GUI"""
@@ -137,17 +172,14 @@ class PDFProcessorApp:
         saved_geometry = self.config.get('window_geometry', '')
         if saved_geometry:
             try:
-                # Parse saved geometry: "widthxheight+x+y"
-                if 'x' in saved_geometry and ('+' in saved_geometry or '-' in saved_geometry):
-                    parts = saved_geometry.replace('-', '+-').split('+')
-                    size_part = parts[0]
-                    saved_width, saved_height = map(int, size_part.split('x'))
+                # Parse saved geometry using safe parser
+                parsed = self.parse_geometry(saved_geometry)
+                if parsed:
+                    saved_width, saved_height, x_pos, y_pos = parsed
                     
                     if saved_height > window_height:
                         # Reconstruct geometry with limited height
-                        x_pos = parts[1] if len(parts) > 1 else "0"
-                        y_pos = parts[2] if len(parts) > 2 else "0"
-                        limited_geometry = f"{saved_width}x{window_height}+{x_pos}+{y_pos}"
+                        limited_geometry = self.build_geometry(saved_width, window_height, x_pos, y_pos)
                         self.root.geometry(limited_geometry)
                         logger.info(f"Limited saved geometry: {saved_geometry} -> {limited_geometry}")
                     else:
@@ -1490,17 +1522,14 @@ class PDFProcessorApp:
                 available_height = screen_height - 80
             max_height = min(max(int(available_height * 0.75), 700), 800)
             
-            # Parse and limit geometry if needed
-            if 'x' in current_geometry and ('+' in current_geometry or '-' in current_geometry):
-                parts = current_geometry.replace('-', '+-').split('+')
-                size_part = parts[0]
-                width, height = map(int, size_part.split('x'))
+            # Parse and limit geometry if needed using safe parser
+            parsed = self.parse_geometry(current_geometry)
+            if parsed:
+                width, height, x_pos, y_pos = parsed
                 
                 if height > max_height:
                     # Save with limited height
-                    x_pos = parts[1] if len(parts) > 1 else "0"
-                    y_pos = parts[2] if len(parts) > 2 else "0"
-                    limited_geometry = f"{width}x{max_height}+{x_pos}+{y_pos}"
+                    limited_geometry = self.build_geometry(width, max_height, x_pos, y_pos)
                     self.config['window_geometry'] = limited_geometry
                     logger.info(f"Saved geometry with height limit: {current_geometry} -> {limited_geometry}")
                 else:
@@ -1535,29 +1564,32 @@ class PDFProcessorApp:
         if time.time() - self._startup_time < 3:  # Skip first 3 seconds
             return
             
-        try:
-            # Check if window height exceeds our limit
-            current_geometry = self.root.geometry()
-            if 'x' in current_geometry and ('+' in current_geometry or '-' in current_geometry):
-                parts = current_geometry.replace('-', '+-').split('+')
-                size_part = parts[0]
-                width, height = map(int, size_part.split('x'))
-                
-                # Calculate max allowed height
-                screen_height = self.root.winfo_screenheight()
-                available_height = screen_height - 80  # Conservative estimate
-                max_height = min(max(int(available_height * 0.75), 700), 800)
-                
-                if height > max_height:
-                    # Resize to max height
-                    x_pos = parts[1] if len(parts) > 1 else "0"
-                    y_pos = parts[2] if len(parts) > 2 else "0"
-                    limited_geometry = f"{width}x{max_height}+{x_pos}+{y_pos}"
-                    self.root.after_idle(lambda: self.root.geometry(limited_geometry))
-                    logger.info(f"Limited window height during configure: {height} -> {max_height}")
-                    
-        except Exception as e:
-            logger.warning(f"Error in window configure handler: {e}")
+        # DISABLED: Aggressive height limiting that prevented manual resizing
+        # This was causing the window to jump back to 800px height on every resize attempt
+        # Initial height limiting is still enforced during startup in setup_gui()
+        
+        # try:
+        #     # Check if window height exceeds our limit
+        #     current_geometry = self.root.geometry()
+        #     parsed = self.parse_geometry(current_geometry)
+        #     if parsed:
+        #         width, height, x_pos, y_pos = parsed
+        #         
+        #         # Calculate max allowed height
+        #         screen_height = self.root.winfo_screenheight()
+        #         available_height = screen_height - 80  # Conservative estimate
+        #         max_height = min(max(int(available_height * 0.75), 700), 800)
+        #         
+        #         if height > max_height:
+        #             # Resize to max height
+        #             limited_geometry = self.build_geometry(width, max_height, x_pos, y_pos)
+        #             self.root.after_idle(lambda: self.root.geometry(limited_geometry))
+        #             logger.info(f"Limited window height during configure: {height} -> {max_height}")
+        #             
+        # except Exception as e:
+        #     logger.warning(f"Error in window configure handler: {e}")
+        
+        pass  # Allow free resizing by user
 
     def setup_undo_functionality(self):
         """Setup keyboard bindings for undo/redo"""
