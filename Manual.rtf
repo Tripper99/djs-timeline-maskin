@@ -1,0 +1,166 @@
+{\rtf1\ansi\deff0 {\fonttbl {\f0 Times New Roman;} {\f1 Arial;} {\f2 Courier New;}}
+{\colortbl;\red0\green0\blue0;\red0\green0\blue255;\red255\green0\blue0;\red0\green128\blue0;}
+
+\f0\fs24
+{\b\fs32\cf2 DJs Timeline-maskin - Manual}
+\par\par
+
+{\b\fs28 Vad är DJs Timeline-maskin?}
+\par
+DJs Timeline-maskin är ett verktyg utvecklat för undersökande journalister och forskare. Programmet hjälper dig att snabbt bearbeta PDF-dokument och skapa strukturerade tidslinjer i Excel.
+\par\par
+
+{\b\fs28 Tre sätt att använda programmet:}
+\par\par
+
+{\b\cf3 1. PDF till Excel (Komplett arbetsflöde)}
+\par
+• Välj en PDF-fil som automatiskt analyseras
+\par
+• Redigera filnamnskomponenter (datum, tidning, kommentar, sidor)
+\par
+• Kopiera information till Excel-fälten
+\par
+• Spara både nytt filnamn och Excel-rad med en knapptryckning
+\par\par
+
+{\b\cf3 2. Endast PDF-bearbetning}
+\par
+• Välj PDF-fil för analys
+\par
+• Redigera filnamnskomponenter
+\par  
+• Byt namn på filen utan Excel-integration
+\par\par
+
+{\b\cf3 3. Endast Excel-registrering}  
+\par
+• Lägg till information direkt i Excel-fälten
+\par
+• Praktiskt för data från böcker eller andra källor
+\par
+• Skapa Excel-rader utan PDF-fil
+\par\par
+
+{\b\fs28 Programlayout - Fyra huvudområden:}
+\par\par
+
+{\b Område 1: PDF-filval}
+\par
+Välj PDF-fil som ska bearbetas. Filens sökväg visas i ett skrivskyddat fält.
+\par\par
+
+{\b Område 2: Filnamnsredigering}
+\par
+• {\b Datum:} Extraherat datum från filnamnet (ÅÅÅÅ-MM-DD format)
+\par
+• {\b Tidning:} Tidningsnamn (första ordet efter datum + eventuella versaler)
+\par  
+• {\b Kommentar:} Övrig text från filnamnet
+\par
+• {\b Sidor:} Antal sidor i dokumentet
+\par
+• {\cf2 "Kopiera till Excel"}-knapp överför data till Excel-fälten
+\par\par
+
+{\b Område 3: Excel-integration}
+\par
+Dynamiska fält som skapas baserat på din Excel-fils kolumnstruktur:
+\par
+• {\b Kolumn 1:} Grundfält (OBS, Datum, Kategori, etc.)
+\par
+• {\b Kolumn 2:} Huvudinnehåll (Händelse-beskrivning)  
+\par
+• {\b Kolumn 3:} Anteckningsfält (Note1, Note2, Note3)
+\par\par
+
+{\b Område 4: Excel-operationer}
+\par
+Knappar för att spara data, rensa fält och byta namn på filer.
+\par\par
+
+{\b\fs28 Specialfunktioner:}
+\par\par
+
+{\b\cf4 Fältlåsning}
+\par
+Högerklicka på Excel-fält för att låsa innehållet. Låsta fält behåller sitt innehåll mellan sessioner.
+\par\par
+
+{\b\cf4 Textformatering}
+\par
+Excel-fält stöder rich text-formatering:
+\par
+• {\b Fet text}
+\par
+• {\i Kursiv text}  
+\par
+• \cf2 Färgad text\cf0
+\par
+• Radbrytningar bevaras
+\par\par
+
+{\b\cf4 Automatisk textbehandling}
+\par
+PDF-text rensas automatiskt från oönskade radbrytningar och formateringsfel som ofta uppstår vid kopiering från PDF-dokument.
+\par\par
+
+{\b\cf4 Specialkolumner}
+\par
+• {\b Händelse:} Behåller användarinnehåll och lägger till filnamn vid behov
+\par
+• {\b Tid start:} Fylls automatiskt med datum från filnamn om tomt
+\par
+• {\b Källa1:} Sätts till fullt filnamn om tomt
+\par
+• {\b Dag:} Skapar Excel-formel för dagnamn baserat på datum
+\par\par
+
+{\b\fs28 Tekniska krav:}
+\par\par
+
+{\b Python-paket som krävs:}
+\par
+{\f2 pip install ttkbootstrap PyPDF2 openpyxl xlsxwriter}
+\par\par
+
+{\b Starta programmet:}
+\par
+{\f2 python app.py}
+\par\par
+
+{\b\fs28 Tips för bästa resultat:}
+\par\par
+
+• Använd PDF-filer med tydliga filnamn i format: ÅÅÅÅ-MM-DD Tidning Kommentar (X sid)
+\par
+• Se till att Excel-filen inte är öppen i annat program när du sparar
+\par
+• Använd fältlåsning för information som ofta upprepas
+\par
+• Ångra/Gör om fungerar i alla textfält (Ctrl+Z / Ctrl+Y)
+\par\par
+
+{\b\fs28 Felsökning:}
+\par\par
+
+{\b Problem med PDF-filer:}
+\par
+• Kontrollera att PDF-filen inte är skadad eller lösenordsskyddad
+\par
+• Se till att filen har .pdf-filnamnstillägg
+\par\par
+
+{\b Problem med Excel:}
+\par
+• Stäng Excel-filen om den är öppen i annat program
+\par
+• Kontrollera att du har skrivbehörighet till mappen
+\par
+• Säkerhetskopiera din Excel-fil innan du använder programmet
+\par\par
+
+{\b\cf2\fs24 Version: v1.9.1}
+\par
+{\i Utvecklad för Windows-miljö med stöd för moderna skärmupplösningar.}
+}

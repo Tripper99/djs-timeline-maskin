@@ -8,24 +8,6 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## General guidelines for Claude Code
--- Be direct; avoid ungrounded or sycophantic flattery. 
--- Be modest. Never clasim that a problem is solved before testruns.  
--- **Never start to write code without user saying that it is OK. 
--- **Always run test for syntax errors using Ruff before letting the user do test runs.
--- **Always update version number after changing the code. 
--- **Always assume that the user is using Windows.
--- If you want the user to do a test run of the code then don't start the app yourself. Tell the user to start it and explain what tests should be done.  
--- If problems persist suggest writing test scripts for analyzing problems in a systematic way.
-
-## Git Commit Guidelines
--- Please do not mention yourself (Claude) as a co-author when committing, och include any links to Claude Code or any other sites. 
--- Always git add . and commit with a new version number before writing code. 
--- Add comments on the performance after testing the new version.
-
-## Documentation Memories
--- Please use context7 to find relevant, up-to-date documentation for libraries etc. 
-
 ## Running the Application
 
 ```bash
