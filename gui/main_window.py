@@ -6,6 +6,9 @@ Contains the PDFProcessorApp class with GUI implementation
 
 # Standard library imports
 import logging
+import os
+import platform
+import subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Tuple
@@ -436,101 +439,27 @@ class PDFProcessorApp:
             logger.error(f"Error changing theme to {theme_name}: {e}")
 
     def show_program_help(self):
-        """Show comprehensive help about what the program does"""
-        help_win = tb.Toplevel()
-        help_win.title("Om APP DJs Timeline-verktyg")
-        help_win.geometry("700x600")
-        help_win.transient(self.root)
-        help_win.grab_set()
-
-        # Center dialog
-        help_win.update_idletasks()
-        x = (help_win.winfo_screenwidth() // 2) - (700 // 2)
-        y = (help_win.winfo_screenheight() // 2) - (600 // 2)
-        help_win.geometry(f"700x600+{x}+{y}")
-
-        # Main frame
-        main_frame = tb.Frame(help_win)
-        main_frame.pack(fill="both", expand=True, padx=20, pady=20)
-
-        # Header
-        tb.Label(main_frame, text=f"DJs Timeline-maskin {VERSION}",
-                font=('Arial', 16, 'bold')).pack(pady=(0, 15))
-
-        # Help text
-        help_text = """HUVUDFUNKTIONER:
-
-📄 PDF-FILHANTERING:
-• Välj PDF-filer för bearbetning
-• Programmet öppnar PDF:en automatiskt för visning
-• Parsning av filnamn till komponenter (datum, tidning, kommentar, sidor)
-• Automatisk räkning av sidantal från PDF-filen
-
-🏷️ FILNAMNÄNDRING:
-• Redigera filnamnskomponenter: Datum, Tidning, Kommentar, Sidor
-• Validering av filnamn för Windows-kompatibilitet
-• Omdöpning av PDF-filer med nytt konstruerat namn
-• Alternativ att flytta omdöpta filer till undermapp "Omdöpta filer"
-
-📊 EXCEL-INTEGRATION:
-• Stöd för Excel-filer (.xlsx) med fördefinierade kolumner
-• Alternativ att skapa säkerhetskopia av Excel-fil innan bearbetning
-• Automatisk mall-skapare med rätt kolumnnamn och formatering
-• Låsfunktion för viktiga fält (alla fält utom Dag, Händelse och Inlagd datum)
-
-📝 TEXTBEARBETNING:
-• Kopiering av filnamnsdata till Excel-fält
-• Automatisk rensning av PDF-text (tar bort onödiga radbrytningar)
-• Teckengräns på 1500 tecken för Händelse, 1000 tecken för Note1-3
-• Realtidsräknare som visar återstående tecken med färgkodning
-• Smart inklistring med automatisk textuppdelning över flera fält
-• Word wrap för bättre läsbarhet i långa textfält
-
-🗓️ AUTOMATISK DATAHANTERING:
-• "Dag"-kolumn fylls automatiskt med Excel-formel =SUM(Tid_start)
-• Formateras som DDD (mån, tis, ons, etc.)
-• Automatisk datum-formatering för datum-kolumner
-• Automatisk ifyllning av dagens datum i "Inlagd datum"
-
-💾 SPARFUNKTIONER:
-• "Spara allt och rensa fälten" - genomför alla operationer på en gång
-• Villkorlig sparning: PDF döps om OM filnamnet ändrats
-• Villkorlig Excel-rad: sparas OM "Tid start" OCH "Händelse" har innehåll
-• Automatisk rensning av alla fält efter sparning (utom låsta)
-• Färgkodning av rader - välj bakgrundsfärg för visuell kategorisering
-
-⚙️ ÖVRIGA FUNKTIONER:
-• Minneshantering av Excel-fil mellan sessioner
-• Statistik över öppnade PDF:er, omdöpta filer och Excel-rader
-• Validering av alla inställningar innan bearbetning
-• Säker filhantering med felkontroll och återställningsmöjligheter
-• Radbackgrundsfärger för enkel kategorisering (gul, grön, blå, rosa, grå)
-
-ARBETSFLÖDE:
-1. Välj Excel-fil (skapa kopia rekommenderas)
-2. Välj PDF-fil (öppnas automatiskt)
-3. Justera filnamnskomponenter vid behov
-4. Kopiera filnamn till Excel-fält
-5. Fyll i ytterligare Excel-information
-6. Klicka "Spara allt och rensa fälten"
-7. Upprepa för nästa PDF
-
-Programmet är designat för effektiv bearbetning av många PDF-filer med konsekvent dokumentation i Excel."""
-
-        # Scrollable text area
-        text_frame = tb.Frame(main_frame)
-        text_frame.pack(fill="both", expand=True, pady=(0, 15))
-
-        text_area = scrolledtext.ScrolledText(text_frame, wrap=tk.WORD,
-                                            font=('Arial', 10), height=20)
-        text_area.pack(fill="both", expand=True)
-        text_area.insert("1.0", help_text)
-        text_area.config(state=tk.DISABLED)
-
-        # Close button
-        tb.Button(main_frame, text="Stäng",
-                 command=help_win.destroy,
-                 bootstyle=PRIMARY, width=15).pack(pady=(10, 0))
+        """Open Manual.rtf with external application"""
+        try:
+            manual_path = Path(__file__).parent.parent / "Manual.rtf"
+            
+            if not manual_path.exists():
+                messagebox.showerror("Fel", f"Manualen hittades inte: {manual_path}")
+                return
+                
+            # Open RTF file with default system application
+            if platform.system() == 'Windows':
+                os.startfile(str(manual_path))
+            elif platform.system() == 'Darwin':  # macOS
+                subprocess.run(['open', str(manual_path)])
+            else:  # Linux
+                subprocess.run(['xdg-open', str(manual_path)])
+                
+            logger.info(f"Opened manual: {manual_path}")
+            
+        except Exception as e:
+            messagebox.showerror("Fel", f"Kunde inte öppna manualen: {str(e)}")
+            logger.error(f"Error opening manual: {e}")
 
     def create_group1(self, parent):
         """Group 1: PDF Selection"""
