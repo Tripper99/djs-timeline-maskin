@@ -199,5 +199,37 @@ This method might seem complicated but is important to understand that this is t
 - Logging is configured for debugging
 - No automated tests are present in the codebase
 - No build process required - runs directly with Python interpreter
-- **Current version**: v1.9.5 (stable, fully functional)
-- **Last tested**: 2025-07-24 - All features working correctly
+- **Current version**: v1.9.8 (stable, fully functional, restored baseline)
+- **Last tested**: 2025-07-24 - Excel hybrid method preserved and GUI layout correct
+
+## Critical Reversion (2025-07-24) - v1.9.8 Restored
+
+### Background
+An attempt to implement date/time field separation (v1.9.12) inadvertently broke the sacred Excel hybrid method from v1.7.4. The changes included:
+- Automatic Excel header migration functionality
+- Direct openpyxl saving during file loading
+- Increased column count from 17 to 19 fields
+- GUI layout issues with misplaced date/time fields
+
+### The Mistake
+Added `self.workbook.save(self.excel_path)` calls that bypassed the critical openpyxl/xlsxwriter hybrid method, causing Excel file corruption and formatting errors.
+
+### Resolution 
+Complete reversion to v1.9.8 using `git reset --hard 02b77d4` to restore:
+- ✅ Original 17-column template structure
+- ✅ Sacred Excel hybrid method (v1.7.4) preserved
+- ✅ Correct GUI field layout with proper column placement
+- ✅ No automatic Excel file modification
+
+### Lessons Reinforced
+1. **Excel hybrid method is untouchable** - Any Excel writing changes require explicit user permission
+2. **Column count affects GUI layout** - Template changes impact field placement and window height
+3. **Test immediately** - Excel functionality must be verified after any changes
+4. **Clean baselines are invaluable** - Having a known working state enables quick recovery
+
+### Future Date/Time Enhancement Approach
+Any future attempts to separate date/time fields must:
+1. Get explicit user approval for Excel writing modifications
+2. Implement GUI changes first (without Excel modifications)
+3. Test thoroughly at each step
+4. Maintain backward compatibility with existing Excel files
