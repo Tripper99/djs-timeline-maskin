@@ -245,13 +245,14 @@ class PDFProcessorApp:
 
         self.max_undo_levels = 20  # Maximum number of undo levels
 
-        # Lock switches for ALL fields except Dag, Händelse and Inlagd datum (which is read-only)
+        # Lock switches for ALL fields except Dag and Inlagd datum (which is read-only)
         self.lock_vars = {
             'OBS': tk.BooleanVar(),
             'Kategori': tk.BooleanVar(),
             'Underkategori': tk.BooleanVar(),
             'Person/sak': tk.BooleanVar(),
             'Egen grupp': tk.BooleanVar(),
+            'Händelse': tk.BooleanVar(),
             'Tid start': tk.BooleanVar(),
             'Tid slut': tk.BooleanVar(),
             'Note1': tk.BooleanVar(),

@@ -219,7 +219,7 @@ class ExcelFieldManager:
 
     def create_field_in_frame(self, parent_frame, col_name, row, column_type="column1"):
         """Create a single field in the specified frame with layout optimized per column type"""
-        # Check if this field should have a lock switch (all except Dag, Händelse and Inlagd datum)
+        # Check if this field should have a lock switch (all except Dag and Inlagd datum)
         has_lock = col_name in self.parent.lock_vars
 
         # Special handling for Dag column - make it read-only with explanation
@@ -262,7 +262,7 @@ class ExcelFieldManager:
                     font=('Arial', 10)).pack(side="left")
 
             # Add lock switch for text fields that should have one
-            if has_lock and col_name != 'Händelse':
+            if has_lock:
                 lock_switch = tb.Checkbutton(header_frame,
                                            text="Lås",
                                            variable=self.parent.lock_vars[col_name],
