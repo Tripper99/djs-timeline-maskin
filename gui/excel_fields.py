@@ -337,7 +337,7 @@ class ExcelFieldManager:
         elif col_name.startswith('Note') or col_name == 'Händelse':
             # Row 1: Field name and lock switch (if applicable)
             header_frame = tb.Frame(parent_frame)
-            header_frame.grid(row=row, column=0, columnspan=2, sticky="ew", pady=(0, 2))
+            header_frame.grid(row=row, column=0, columnspan=2, sticky="new", pady=(0, 2))
 
             tb.Label(header_frame, text=f"{col_name}:",
                     font=('Arial', 10)).pack(side="left")
