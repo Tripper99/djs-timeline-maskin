@@ -602,7 +602,7 @@ class PDFProcessorApp:
         if excel_path and Path(excel_path).exists():
             if self.excel_manager.load_excel_file(excel_path):
                 self.excel_path_var.set(Path(excel_path).name)
-                self.excel_field_manager.create_excel_fields()
+                # No need to create fields - they're already created in setup_gui
                 # Enable the "Open Excel" button for previously loaded file
                 self.open_excel_btn.config(state="normal")
                 logger.info(f"Loaded saved Excel file: {excel_path}")
@@ -727,8 +727,26 @@ class PDFProcessorApp:
 
             # Load the Excel file (original or copy)
             if self.excel_manager.load_excel_file(working_path):
+                # Validate that all required columns exist
+                missing_columns = self.excel_manager.validate_excel_columns()
+                if missing_columns:
+                    error_msg = (
+                        "Excel-filen saknar följande obligatoriska kolumner:\n\n" +
+                        "• " + "\n• ".join(missing_columns) + "\n\n" +
+                        "Vill du skapa en ny Excel-mall med alla rätta kolumner?"
+                    )
+                    
+                    if messagebox.askyesno("Kolumner saknas", error_msg):
+                        # User wants to create template
+                        self.dialog_manager.create_excel_template()
+                        return
+                    else:
+                        # User doesn't want template, clear the selection
+                        self.excel_path_var.set("")
+                        self.excel_manager.excel_path = None
+                        return
+                
                 # self.config['excel_file'] = working_path  # Temporarily disabled - no persistence
-                self.excel_field_manager.create_excel_fields()
                 # Enable the "Open Excel" button after successful load
                 self.open_excel_btn.config(state="normal")
                 logger.info(f"Selected Excel file: {working_path}")

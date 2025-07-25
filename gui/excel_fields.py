@@ -13,6 +13,7 @@ import ttkbootstrap as tb
 from ttkbootstrap.constants import *
 
 # Local imports
+from utils.constants import REQUIRED_EXCEL_COLUMNS
 
 logger = logging.getLogger(__name__)
 
@@ -132,14 +133,10 @@ class ExcelFieldManager:
         for widget in self.parent.excel_fields_frame.winfo_children():
             widget.destroy()
 
-        # Get column names from loaded Excel file
-        column_names = self.parent.excel_manager.get_column_names()
-        if not column_names:
-            tb.Label(self.parent.excel_fields_frame, text="Välj en Excel-fil först",
-                    font=('Arial', 10)).pack(pady=20)
-            return
+        # Use static list of required columns instead of reading from Excel
+        column_names = REQUIRED_EXCEL_COLUMNS
 
-        # Clear and recreate excel_vars for current columns
+        # Clear and recreate excel_vars for all required columns
         self.parent.excel_vars.clear()
         for col_name in column_names:
             # Don't create variables for automatically calculated fields
@@ -165,11 +162,6 @@ class ExcelFieldManager:
         column2_fields = ['Händelse']
         column3_fields = ['Note1', 'Note2', 'Note3']
 
-        # Add remaining columns to column 3
-        for col_name in column_names:
-            if col_name not in column1_fields and col_name not in column2_fields and col_name not in column3_fields:
-                column3_fields.append(col_name)
-
         # Configure column weights for equal spacing - each column gets exactly 1/3 of available width
         # Use uniform to force exactly equal column distribution
         fields_container.grid_columnconfigure(0, weight=1, uniform="col")  # Left column - 1/3 of width
@@ -177,45 +169,39 @@ class ExcelFieldManager:
         fields_container.grid_columnconfigure(2, weight=1, uniform="col")  # Right column - 1/3 of width
 
         # Create Column 1
-        if any(col in column_names for col in column1_fields):
-            col1_frame = tb.LabelFrame(fields_container, text="", padding=2)
-            col1_frame.grid(row=0, column=0, sticky="nsew", padx=2, pady=2)
-            col1_frame.grid_columnconfigure(0, weight=0)  # Field labels - fixed width
-            col1_frame.grid_columnconfigure(1, weight=1)  # Entry fields - expand to fill space
-            col1_frame.grid_columnconfigure(2, weight=0)  # Lock switches - fixed width
-            # Configure rows to expand and use available vertical space
-            for i in range(len([col for col in column1_fields if col in column_names])):
-                col1_frame.grid_rowconfigure(i, weight=1)
+        col1_frame = tb.LabelFrame(fields_container, text="", padding=2)
+        col1_frame.grid(row=0, column=0, sticky="nsew", padx=2, pady=2)
+        col1_frame.grid_columnconfigure(0, weight=0)  # Field labels - fixed width
+        col1_frame.grid_columnconfigure(1, weight=1)  # Entry fields - expand to fill space
+        col1_frame.grid_columnconfigure(2, weight=0)  # Lock switches - fixed width
+        # Configure rows to expand and use available vertical space
+        for i in range(len(column1_fields)):
+            col1_frame.grid_rowconfigure(i, weight=1)
 
-            row = 0
-            for col_name in column1_fields:
-                if col_name in column_names:
-                    rows_used = self.create_field_in_frame(col1_frame, col_name, row, column_type="column1")
-                    row += rows_used
+        row = 0
+        for col_name in column1_fields:
+            rows_used = self.create_field_in_frame(col1_frame, col_name, row, column_type="column1")
+            row += rows_used
 
         # Create Column 2
-        if any(col in column_names for col in column2_fields):
-            col2_frame = tb.LabelFrame(fields_container, text="", padding=2)
-            col2_frame.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
-            col2_frame.grid_columnconfigure(0, weight=1)  # Make all content expand full width
+        col2_frame = tb.LabelFrame(fields_container, text="", padding=2)
+        col2_frame.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
+        col2_frame.grid_columnconfigure(0, weight=1)  # Make all content expand full width
 
-            row = 0
-            for col_name in column2_fields:
-                if col_name in column_names:
-                    rows_used = self.create_field_in_frame(col2_frame, col_name, row, column_type="column2")
-                    row += rows_used
+        row = 0
+        for col_name in column2_fields:
+            rows_used = self.create_field_in_frame(col2_frame, col_name, row, column_type="column2")
+            row += rows_used
 
         # Create Column 3
-        if column3_fields:
-            col3_frame = tb.LabelFrame(fields_container, text="", padding=(2, 2, 10, 2))  # Extra bottom padding for character counters
-            col3_frame.grid(row=0, column=2, sticky="nsew", padx=2, pady=2)
-            col3_frame.grid_columnconfigure(0, weight=1)  # Make all content expand full width
+        col3_frame = tb.LabelFrame(fields_container, text="", padding=(2, 2, 10, 2))  # Extra bottom padding for character counters
+        col3_frame.grid(row=0, column=2, sticky="nsew", padx=2, pady=2)
+        col3_frame.grid_columnconfigure(0, weight=1)  # Make all content expand full width
 
-            row = 0
-            for col_name in column3_fields:
-                if col_name in column_names:
-                    rows_used = self.create_field_in_frame(col3_frame, col_name, row, column_type="column3")
-                    row += rows_used
+        row = 0
+        for col_name in column3_fields:
+            rows_used = self.create_field_in_frame(col3_frame, col_name, row, column_type="column3")
+            row += rows_used
 
     def create_field_in_frame(self, parent_frame, col_name, row, column_type="column1"):
         """Create a single field in the specified frame with layout optimized per column type"""

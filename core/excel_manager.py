@@ -13,6 +13,8 @@ import xlsxwriter
 from openpyxl.styles import Alignment, Border, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
+from utils.constants import REQUIRED_EXCEL_COLUMNS
+
 logger = logging.getLogger(__name__)
 
 
@@ -53,6 +55,22 @@ class ExcelManager:
     def get_column_names(self) -> List[str]:
         """Get list of column names from Excel file"""
         return self.column_names.copy() if self.column_names else []
+
+    def validate_excel_columns(self) -> List[str]:
+        """Validate that all required columns exist in the Excel file
+        
+        Returns:
+            List of missing column names (empty if all columns present)
+        """
+        if not self.column_names:
+            return REQUIRED_EXCEL_COLUMNS.copy()  # All columns missing if no file loaded
+        
+        missing_columns = []
+        for required_col in REQUIRED_EXCEL_COLUMNS:
+            if required_col not in self.column_names:
+                missing_columns.append(required_col)
+        
+        return missing_columns
 
     def add_row(self, data: Dict[str, str], filename: str, row_color: str = "none") -> bool:
         """Add new row to Excel file with special column handling and optional background color"""
