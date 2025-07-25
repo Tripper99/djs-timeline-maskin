@@ -201,9 +201,10 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 3. Close the app (formatting automatically saved)
 4. Restart the app (formatting automatically restored)
 
-## Current Status (v1.14.0)
+## Current Status (v1.15.0)
 
-**NEW MASTER VERSION**: Rich text format preservation for locked fields successfully implemented
+**NEW MASTER VERSION**: Improved date/time field layout with two-column subgroup
+- ✅ **Date/Time Field Layout**: New two-column subgroup above Händelse for better space utilization
 - ✅ **Rich Text Persistence**: Bold, italic, and color formatting preserved across app sessions
 - ✅ **Locked Field Formatting**: Text formatting in Note1, Note2, Note3, Händelse saved/restored
 - ✅ **Time Fields**: Starttid and Sluttid with HH:MM validation and auto-formatting (HHMM→HH:MM)
@@ -301,10 +302,32 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 - Logging is configured for debugging
 - No automated tests are present in the codebase
 - No build process required - runs directly with Python interpreter
-- **Current version**: v1.14.0 (stable master with rich text format preservation)
-- **Last tested**: 2025-07-25 - Rich text format preservation working perfectly, all functionality stable
+- **Current version**: v1.15.0 (stable master with improved date/time field layout)
+- **Last tested**: 2025-07-25 - Improved date/time field layout working perfectly, all functionality stable
 
 ## Recent Development History
+
+### v1.15.0 Success (2025-07-25) - Improved Date/Time Field Layout
+**Achievement**: Successfully implemented two-column subgroup for date/time fields
+
+**New Features Added**:
+- ✅ **Two-Column Subgroup**: Date/time fields organized in a compact 2x2 grid above Händelse
+- ✅ **Space Optimization**: Date/time fields only use minimal required space
+- ✅ **Better Visual Grouping**: Related fields (start date/time, end date/time) side by side
+- ✅ **Händelse Expansion**: Händelse field now gets all remaining vertical space
+
+**Technical Implementation**:
+- Created `_create_datetime_fields_in_subframe()` method for specialized layout
+- Modified column 2 structure with fixed-height date/time row (weight=0)
+- Händelse placed in expandable row (weight=1) to fill available space
+- Left column: Startdatum + Starttid with lock switches
+- Right column: Slutdatum + Sluttid with lock switches
+
+**Layout Benefits**:
+- More efficient use of vertical space in middle column
+- Logical grouping of related date/time fields
+- Maximum space for Händelse text entry
+- All functionality preserved (validation, lock switches, etc.)
 
 ### v1.14.0 Success (2025-07-25) - Rich Text Format Preservation
 **Achievement**: Successfully implemented rich text format preservation for locked fields
