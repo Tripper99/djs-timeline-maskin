@@ -76,7 +76,7 @@ class PDFProcessorApp:
 
         # Setup GUI
         self.setup_gui()
-        self.load_saved_excel_file()
+        # self.load_saved_excel_file()  # Temporarily disabled - require manual Excel selection
 
         # Load and restore locked fields after GUI is created
         self.excel_field_manager.restore_locked_fields()
@@ -727,7 +727,7 @@ class PDFProcessorApp:
 
             # Load the Excel file (original or copy)
             if self.excel_manager.load_excel_file(working_path):
-                self.config['excel_file'] = working_path
+                # self.config['excel_file'] = working_path  # Temporarily disabled - no persistence
                 self.excel_field_manager.create_excel_fields()
                 # Enable the "Open Excel" button after successful load
                 self.open_excel_btn.config(state="normal")
