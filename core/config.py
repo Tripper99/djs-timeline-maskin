@@ -5,7 +5,7 @@ Configuration management for the DJ Timeline application
 import json
 import logging
 from pathlib import Path
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Any
 
 from utils.constants import CONFIG_FILE
 
@@ -23,7 +23,8 @@ class ConfigManager:
             "window_geometry": "2000x1400",
             "theme": "simplex",
             "locked_fields": {},  # Store which fields are locked (field_name: True/False)
-            "locked_field_contents": {}  # Store content of locked fields (field_name: content)
+            "locked_field_contents": {},  # Store content of locked fields (field_name: content)
+            "locked_field_formats": {}  # Store rich text formatting of locked fields (field_name: format_data)
         }
 
     def load_config(self) -> Dict:
@@ -45,8 +46,8 @@ class ConfigManager:
         except OSError as e:
             logger.error(f"Failed to save config: {e}")
 
-    def save_locked_fields(self, locked_states: Dict[str, bool], locked_contents: Dict[str, str]) -> None:
-        """Save locked field states and their contents"""
+    def save_locked_fields(self, locked_states: Dict[str, bool], locked_contents: Dict[str, str], locked_formats: Dict[str, Any] = None) -> None:
+        """Save locked field states, their contents, and rich text formatting"""
         try:
             # Load current config
             current_config = self.load_config()
@@ -55,23 +56,32 @@ class ConfigManager:
             current_config["locked_fields"] = locked_states
             current_config["locked_field_contents"] = locked_contents
 
+            # Update locked field formats if provided
+            if locked_formats is not None:
+                current_config["locked_field_formats"] = locked_formats
+
             # Save updated config
             self.save_config(current_config)
             logger.info(f"Saved locked fields: {list(locked_states.keys())}")
+            if locked_formats:
+                logger.info(f"Saved rich text formats for: {list(locked_formats.keys())}")
 
         except Exception as e:
             logger.error(f"Failed to save locked fields: {e}")
 
-    def load_locked_fields(self) -> Tuple[Dict[str, bool], Dict[str, str]]:
-        """Load locked field states and their contents"""
+    def load_locked_fields(self) -> Tuple[Dict[str, bool], Dict[str, str], Dict[str, Any]]:
+        """Load locked field states, their contents, and rich text formatting"""
         try:
             config = self.load_config()
             locked_states = config.get("locked_fields", {})
             locked_contents = config.get("locked_field_contents", {})
+            locked_formats = config.get("locked_field_formats", {})
 
             logger.info(f"Loaded locked fields: {list(locked_states.keys())}")
-            return locked_states, locked_contents
+            if locked_formats:
+                logger.info(f"Loaded rich text formats for: {list(locked_formats.keys())}")
+            return locked_states, locked_contents, locked_formats
 
         except Exception as e:
             logger.error(f"Failed to load locked fields: {e}")
-            return {}, {}
+            return {}, {}, {}

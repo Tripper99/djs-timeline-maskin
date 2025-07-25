@@ -6,7 +6,7 @@ Contains all Excel field creation and management methods extracted from main_win
 # Standard library imports
 import logging
 import tkinter as tk
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Any, List
 
 # Third-party GUI imports
 import ttkbootstrap as tb
@@ -24,18 +24,78 @@ class ExcelFieldManager:
     def __init__(self, parent_app):
         """Initialize Excel field manager with reference to parent application"""
         self.parent = parent_app
+        
+        # Text fields that support rich text formatting
+        self.text_fields = {'Note1', 'Note2', 'Note3', 'Händelse'}
 
-    def collect_locked_field_data(self) -> Tuple[Dict[str, bool], Dict[str, str]]:
-        """Collect current locked field states and their contents"""
+    def serialize_text_widget_formatting(self, text_widget) -> List[Dict[str, Any]]:
+        """Serialize tkinter Text widget formatting to JSON-compatible format"""
+        try:
+            # Get all text content
+            text_content = text_widget.get("1.0", "end-1c")
+            if not text_content:
+                return []
+            
+            # Get all tag ranges in the widget
+            tag_ranges = []
+            available_tags = ['bold', 'italic', 'red', 'blue', 'green', 'black']
+            
+            for tag in available_tags:
+                ranges = text_widget.tag_ranges(tag)
+                # tag_ranges returns pairs: (start1, end1, start2, end2, ...)
+                for i in range(0, len(ranges), 2):
+                    start_idx = ranges[i]
+                    end_idx = ranges[i + 1]
+                    
+                    # Convert tkinter indices to character positions
+                    start_pos = text_widget.index(start_idx)
+                    end_pos = text_widget.index(end_idx)
+                    
+                    tag_ranges.append({
+                        'tag': tag,
+                        'start': start_pos,
+                        'end': end_pos
+                    })
+            
+            return tag_ranges
+            
+        except Exception as e:
+            logger.error(f"Error serializing text widget formatting: {e}")
+            return []
+
+    def restore_text_widget_formatting(self, text_widget, format_data: List[Dict[str, Any]]) -> None:
+        """Restore tkinter Text widget formatting from serialized format"""
+        try:
+            if not format_data:
+                return
+            
+            # Apply each tag range
+            for tag_info in format_data:
+                tag = tag_info.get('tag')
+                start = tag_info.get('start')
+                end = tag_info.get('end')
+                
+                if tag and start and end:
+                    try:
+                        text_widget.tag_add(tag, start, end)
+                    except tk.TclError as e:
+                        logger.warning(f"Could not apply tag {tag} from {start} to {end}: {e}")
+                        
+        except Exception as e:
+            logger.error(f"Error restoring text widget formatting: {e}")
+
+    def collect_locked_field_data(self) -> Tuple[Dict[str, bool], Dict[str, str], Dict[str, Any]]:
+        """Collect current locked field states, their contents, and rich text formatting"""
         try:
             locked_states = {}
             locked_contents = {}
+            locked_formats = {}
 
             # Collect lock states
             for field_name, lock_var in self.parent.lock_vars.items():
                 locked_states[field_name] = lock_var.get()
 
-            # Collect field contents for locked fields
+            # Collect field contents and formatting for locked fields
             for field_name in self.parent.lock_vars.keys():
                 if locked_states.get(field_name, False):  # Only collect if locked
                     if field_name in self.parent.excel_vars:
@@ -44,6 +104,14 @@ class ExcelFieldManager:
                         # Handle different widget types
                         if hasattr(var, 'get') and hasattr(var, 'delete'):  # Text widget
                             content = var.get("1.0", "end-1c")  # Get all text except final newline
+                            
+                            # Collect rich text formatting for text fields
+                            if field_name in self.text_fields and content.strip():
+                                format_data = self.serialize_text_widget_formatting(var)
+                                if format_data:
+                                    locked_formats[field_name] = format_data
+                                    logger.debug(f"Collected {len(format_data)} format tags for {field_name}")
+                                    
                         elif hasattr(var, 'get'):  # StringVar or Entry
                             content = var.get()
                         else:
@@ -53,17 +121,18 @@ class ExcelFieldManager:
                             locked_contents[field_name] = content
 
             logger.info(f"Collected {len(locked_contents)} locked fields with content")
-            return locked_states, locked_contents
+            logger.info(f"Collected {len(locked_formats)} fields with rich text formatting")
+            return locked_states, locked_contents, locked_formats
 
         except Exception as e:
             logger.error(f"Error collecting locked field data: {e}")
-            return {}, {}
+            return {}, {}, {}
 
     def restore_locked_fields(self) -> None:
-        """Restore locked field states and contents from saved configuration"""
+        """Restore locked field states, contents, and rich text formatting from saved configuration"""
         try:
             # Load saved locked fields data
-            locked_states, locked_contents = self.parent.config_manager.load_locked_fields()
+            locked_states, locked_contents, locked_formats = self.parent.config_manager.load_locked_fields()
 
             if not locked_states and not locked_contents:
                 logger.info("No saved locked fields to restore")
@@ -84,24 +153,35 @@ class ExcelFieldManager:
                     if hasattr(var, 'delete') and hasattr(var, 'insert'):  # Text widget
                         var.delete("1.0", tk.END)
                         var.insert("1.0", content)
+                        
+                        # Restore rich text formatting for text fields
+                        if field_name in self.text_fields and field_name in locked_formats:
+                            format_data = locked_formats[field_name]
+                            self.restore_text_widget_formatting(var, format_data)
+                            logger.debug(f"Restored {len(format_data)} format tags for {field_name}")
+                            
                     elif hasattr(var, 'set'):  # StringVar
                         var.set(content)
 
                     logger.debug(f"Restored content for locked field {field_name}: {content[:50]}...")
 
             logger.info(f"Restored {len(locked_states)} lock states and {len(locked_contents)} field contents")
+            if locked_formats:
+                logger.info(f"Restored rich text formatting for {len(locked_formats)} fields")
 
         except Exception as e:
             logger.error(f"Error restoring locked fields: {e}")
 
     def save_locked_fields_on_exit(self) -> None:
-        """Save current locked field states and contents before exit"""
+        """Save current locked field states, contents, and rich text formatting before exit"""
         try:
-            locked_states, locked_contents = self.collect_locked_field_data()
+            locked_states, locked_contents, locked_formats = self.collect_locked_field_data()
 
             if locked_states or locked_contents:
-                self.parent.config_manager.save_locked_fields(locked_states, locked_contents)
+                self.parent.config_manager.save_locked_fields(locked_states, locked_contents, locked_formats)
                 logger.info("Saved locked fields before exit")
+                if locked_formats:
+                    logger.info(f"Saved rich text formatting for {len(locked_formats)} fields")
             else:
                 logger.info("No locked fields to save")
 
