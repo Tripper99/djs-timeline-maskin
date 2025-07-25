@@ -71,11 +71,40 @@ The application is structured with the following modular organization:
 ## Configuration
 
 The application uses JSON configuration stored in `pdf_processor_config.json` with:
-- Excel file path
-- Last PDF directory
-- Window geometry
-- Theme settings
-- Locked field configurations
+- **Excel file path** - Path to selected Excel file
+- **Last PDF directory** - Last used PDF directory for file dialog
+- **Window geometry** - Window size and position
+- **Theme settings** - ttkbootstrap theme selection
+- **Locked field configurations** - Which fields are locked (true/false)
+- **Locked field contents** - Plain text content of locked fields
+- **Locked field formats** *(v1.14.0)* - Rich text formatting data for locked fields
+
+### Configuration Structure (v1.14.0)
+```json
+{
+  "excel_file": "path/to/excel/file.xlsx",
+  "window_geometry": "2560x1320+-112+21",
+  "theme": "simplex",
+  "locked_fields": {
+    "Note1": true,
+    "Händelse": false
+  },
+  "locked_field_contents": {
+    "Note1": "Plain text content"
+  },
+  "locked_field_formats": {
+    "Note1": [
+      {
+        "tag": "bold",
+        "start": "1.0", 
+        "end": "1.15"
+      }
+    ]
+  }
+}
+```
+
+**Backward Compatibility**: Configuration files from previous versions work seamlessly. Missing `locked_field_formats` section is treated as empty formatting.
 
 ## Refactoring Status
 
@@ -121,20 +150,74 @@ The breakthrough hybrid approach consista of:
 - Method 2 character-by-character algorithm for text extraction
 This method might seem complicated but is important to understand that this is the only way we've found to make the app to write perfect Excel rich text formatting with colors, bold, italic, line breaks. 
 
-## Current Status (v1.13.0)
+## Rich Text Format Preservation (v1.14.0)
+**NEW SYSTEM**: Complete format preservation for locked text fields across app sessions
 
-**NEW MASTER VERSION**: Time fields implemented with partial rich text functionality
+### Text Fields with Format Preservation
+The following 4 text fields support rich text formatting and preservation:
+- **Note1** - Research notes with formatting
+- **Note2** - Additional notes with formatting  
+- **Note3** - Supplementary notes with formatting
+- **Händelse** - Event description with formatting
+
+### Supported Formatting
+- **Bold** - Applied via toolbar "B" button
+- **Italic** - Applied via toolbar "I" button
+- **Colors** - Applied via toolbar color buttons:
+  - **Red** (R button)
+  - **Blue** (B button) 
+  - **Green** (G button)
+  - **Black** (K button)
+
+### Format Storage System
+Rich text formatting is stored as JSON-compatible tag ranges in the configuration file:
+```json
+"locked_field_formats": {
+  "Note1": [
+    {
+      "tag": "bold",
+      "start": "1.0",
+      "end": "1.25"
+    },
+    {
+      "tag": "red", 
+      "start": "2.0",
+      "end": "2.50"
+    }
+  ]
+}
+```
+
+### Technical Implementation
+- **Tag Serialization**: `serialize_text_widget_formatting()` scans tkinter Text widgets for formatting tags
+- **Position Storage**: Tag ranges stored as tkinter index positions (line.character format)
+- **Format Restoration**: `restore_text_widget_formatting()` reapplies tags on app startup
+- **Selective Processing**: Only locked fields with formatting are serialized
+- **Error Handling**: Invalid tag positions are safely ignored during restoration
+
+### Usage Workflow
+1. Apply formatting to text using toolbar buttons
+2. Lock the field using the lock switch
+3. Close the app (formatting automatically saved)
+4. Restart the app (formatting automatically restored)
+
+## Current Status (v1.14.0)
+
+**NEW MASTER VERSION**: Rich text format preservation for locked fields successfully implemented
+- ✅ **Rich Text Persistence**: Bold, italic, and color formatting preserved across app sessions
+- ✅ **Locked Field Formatting**: Text formatting in Note1, Note2, Note3, Händelse saved/restored
 - ✅ **Time Fields**: Starttid and Sluttid with HH:MM validation and auto-formatting (HHMM→HH:MM)
 - ✅ **19 Excel Columns**: All original fields plus new time fields (was 17, now 19)
 - ✅ **Core Functionality**: PDF processing, Excel integration, locked fields all working
 - ✅ **Layout**: Three-column Excel fields display correctly with time fields in column 2
 - ✅ **Mixed Rich Text**: Format changes within text work correctly in Excel
-- ⚠️ **Uniform Rich Text Bug**: Single format text disappears (see Known Issues below)
+- ⚠️ **Uniform Rich Text Bug**: Single format text disappears in Excel output (see Known Issues below)
 
 ## Known Issues
 
-### Rich Text Uniform Formatting Bug (v1.13.0)
-**STATUS**: Partial functionality - mixed formats work, uniform formats fail
+### Rich Text Uniform Formatting Bug (Excel Export Only)
+**STATUS**: Partial functionality in Excel export - mixed formats work, uniform formats fail
+**NOTE**: This bug only affects Excel output. GUI formatting and persistence work perfectly.
 
 **What Works**:
 - ✅ Mixed formatting displays correctly (e.g., plain text followed by red text)
@@ -218,10 +301,34 @@ This method might seem complicated but is important to understand that this is t
 - Logging is configured for debugging
 - No automated tests are present in the codebase
 - No build process required - runs directly with Python interpreter
-- **Current version**: v1.13.0 (stable master with time fields)
-- **Last tested**: 2025-07-25 - Core functionality working, uniform rich text bug documented
+- **Current version**: v1.14.0 (stable master with rich text format preservation)
+- **Last tested**: 2025-07-25 - Rich text format preservation working perfectly, all functionality stable
 
 ## Recent Development History
+
+### v1.14.0 Success (2025-07-25) - Rich Text Format Preservation
+**Achievement**: Successfully implemented rich text format preservation for locked fields
+
+**New Features Added**:
+- ✅ **Rich Text Persistence**: Bold, italic, and color formatting preserved across app sessions
+- ✅ **Format Serialization**: Tkinter text tags converted to JSON-compatible format
+- ✅ **Locked Field Enhancement**: Note1, Note2, Note3, Händelse fields preserve formatting when locked
+- ✅ **Configuration Integration**: Format data stored in new "locked_field_formats" config section
+- ✅ **Backward Compatibility**: Works seamlessly with existing configuration files
+
+**Technical Implementation**:
+- `serialize_text_widget_formatting()`: Converts tkinter tags to JSON format
+- `restore_text_widget_formatting()`: Restores tags from JSON data
+- Updated `collect_locked_field_data()` to include formatting data
+- Updated `restore_locked_fields()` to apply saved formatting
+- Support for tags: bold, italic, red, blue, green, black
+
+**Testing Results**:
+- ✅ **Perfect Format Preservation**: All tested formatting combinations work correctly
+- ✅ **Mixed Formatting**: Complex combinations within single field preserved
+- ✅ **Session Persistence**: Formatting survives app close/restart cycles
+- ✅ **Error Handling**: Safe recovery from invalid tag positions
+- ✅ **Performance**: Minimal overhead, only processes locked fields with formatting
 
 ### v1.13.0 Success (2025-07-25) - Time Fields Implementation
 **Achievement**: Successfully implemented time fields with validation while preserving Excel hybrid method
