@@ -121,16 +121,35 @@ The breakthrough hybrid approach consista of:
 - Method 2 character-by-character algorithm for text extraction
 This method might seem complicated but is important to understand that this is the only way we've found to make the app to write perfect Excel rich text formatting with colors, bold, italic, line breaks. 
 
-## Current Status (v1.9.5)
+## Current Status (v1.13.0)
 
-**STABLE VERSION**: All major refactoring phases completed successfully
-- ✅ **Phase 1**: Dialog extraction (v1.9.3) - Working perfectly
-- ✅ **Phase 2**: Excel field extraction (v1.9.5) - Layout fixed and tested
-- ✅ **Layout**: Three-column Excel fields display correctly with equal 1/3 width distribution
-- ✅ **Functionality**: All features working - PDF processing, Excel integration, locked fields
-- ✅ **DPI Awareness**: Windows scaling issues resolved
+**NEW MASTER VERSION**: Time fields implemented with partial rich text functionality
+- ✅ **Time Fields**: Starttid and Sluttid with HH:MM validation and auto-formatting (HHMM→HH:MM)
+- ✅ **19 Excel Columns**: All original fields plus new time fields (was 17, now 19)
+- ✅ **Core Functionality**: PDF processing, Excel integration, locked fields all working
+- ✅ **Layout**: Three-column Excel fields display correctly with time fields in column 2
+- ✅ **Mixed Rich Text**: Format changes within text work correctly in Excel
+- ⚠️ **Uniform Rich Text Bug**: Single format text disappears (see Known Issues below)
 
-### Known Minor Issue: Window Height on External Monitors
+## Known Issues
+
+### Rich Text Uniform Formatting Bug (v1.13.0)
+**STATUS**: Partial functionality - mixed formats work, uniform formats fail
+
+**What Works**:
+- ✅ Mixed formatting displays correctly (e.g., plain text followed by red text)
+- ✅ Format changes within text preserve all formatting correctly
+- ✅ All text content is preserved and visible in Excel cells
+- ✅ Complex combinations work (e.g., plain + red + blue text)
+
+**What Doesn't Work**:
+- ❌ Single uniform formatting disappears (e.g., text that is only red)
+- ❌ Combined uniform formatting disappears (e.g., text that is only bold + red)
+- **Pattern**: Text disappears if there's only one format applied to entire cell content
+
+**Technical Note**: The issue is in the xlsxwriter rich text API handling of uniform formatting in `core/excel_manager.py`. There needs to be a change of format within the text for it to be preserved.
+
+### Window Height on External Monitors
 **STATUS**: Functional workaround in place
 - ✅ **Laptop screens**: Full functionality, all elements visible
 - ⚠️ **External monitors**: Slightly shortened window (800px max) but fully functional
@@ -199,37 +218,27 @@ This method might seem complicated but is important to understand that this is t
 - Logging is configured for debugging
 - No automated tests are present in the codebase
 - No build process required - runs directly with Python interpreter
-- **Current version**: v1.9.8 (stable, fully functional, restored baseline)
-- **Last tested**: 2025-07-24 - Excel hybrid method preserved and GUI layout correct
+- **Current version**: v1.13.0 (stable master with time fields)
+- **Last tested**: 2025-07-25 - Core functionality working, uniform rich text bug documented
 
-## Critical Reversion (2025-07-24) - v1.9.8 Restored
+## Recent Development History
 
-### Background
-An attempt to implement date/time field separation (v1.9.12) inadvertently broke the sacred Excel hybrid method from v1.7.4. The changes included:
-- Automatic Excel header migration functionality
-- Direct openpyxl saving during file loading
-- Increased column count from 17 to 19 fields
-- GUI layout issues with misplaced date/time fields
+### v1.13.0 Success (2025-07-25) - Time Fields Implementation
+**Achievement**: Successfully implemented time fields with validation while preserving Excel hybrid method
 
-### The Mistake
-Added `self.workbook.save(self.excel_path)` calls that bypassed the critical openpyxl/xlsxwriter hybrid method, causing Excel file corruption and formatting errors.
+**New Features Added**:
+- ✅ **Starttid and Sluttid fields**: HH:MM format with auto-formatting and validation
+- ✅ **Time validation**: 24-hour format (00:00-23:59) with HHMM→HH:MM conversion
+- ✅ **19 Excel columns**: Expanded from 17 to include new time fields
+- ✅ **Column 2 layout**: Time fields positioned above Händelse field
+- ✅ **Lock switches**: Added for new time fields (17 total lock states)
 
-### Resolution 
-Complete reversion to v1.9.8 using `git reset --hard 02b77d4` to restore:
-- ✅ Original 17-column template structure
-- ✅ Sacred Excel hybrid method (v1.7.4) preserved
-- ✅ Correct GUI field layout with proper column placement
-- ✅ No automatic Excel file modification
+**Preserved Functionality**:
+- ✅ **Excel hybrid method**: Sacred v1.7.4 approach maintained
+- ✅ **GUI layout**: Three-column structure with proper field distribution
+- ✅ **Mixed rich text**: Format changes within text work correctly
 
-### Lessons Reinforced
-1. **Excel hybrid method is untouchable** - Any Excel writing changes require explicit user permission
-2. **Column count affects GUI layout** - Template changes impact field placement and window height
-3. **Test immediately** - Excel functionality must be verified after any changes
-4. **Clean baselines are invaluable** - Having a known working state enables quick recovery
+### Critical Reversion History (2025-07-24)
+**Background**: Previous attempt (v1.9.12) broke Excel hybrid method with automatic header migration and direct openpyxl saving calls. Complete reversion to v1.9.8 was required to restore working baseline.
 
-### Future Date/Time Enhancement Approach
-Any future attempts to separate date/time fields must:
-1. Get explicit user approval for Excel writing modifications
-2. Implement GUI changes first (without Excel modifications)
-3. Test thoroughly at each step
-4. Maintain backward compatibility with existing Excel files
+**Key Lesson**: Excel hybrid method changes require explicit user permission and thorough testing.
