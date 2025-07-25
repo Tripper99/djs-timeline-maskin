@@ -411,9 +411,22 @@ class ExcelFieldManager:
             tb.Label(parent_frame, text=f"{col_name}:",
                     font=('Arial', 10)).grid(row=row, column=0, sticky="w", pady=(0, 5))
 
-            entry = tb.Entry(parent_frame, textvariable=self.parent.excel_vars[col_name],
-                           font=('Arial', 9))
-            entry.grid(row=row, column=1, sticky="ew", pady=(0, 5))
+            # Set appropriate width based on field type
+            if col_name in ['Startdatum', 'Slutdatum']:
+                # Date fields: 2025-07-25 (10 chars + padding)
+                entry = tb.Entry(parent_frame, textvariable=self.parent.excel_vars[col_name],
+                               font=('Arial', 9), width=12)
+                entry.grid(row=row, column=1, sticky="w", pady=(0, 5))
+            elif col_name in ['Starttid', 'Sluttid']:
+                # Time fields: 18:45 (5 chars + padding)
+                entry = tb.Entry(parent_frame, textvariable=self.parent.excel_vars[col_name],
+                               font=('Arial', 9), width=7)
+                entry.grid(row=row, column=1, sticky="w", pady=(0, 5))
+            else:
+                # Other fields: expand to fill available space
+                entry = tb.Entry(parent_frame, textvariable=self.parent.excel_vars[col_name],
+                               font=('Arial', 9))
+                entry.grid(row=row, column=1, sticky="ew", pady=(0, 5))
 
             # Enable undo tracking for Entry widget
             self.parent.enable_undo_for_widget(entry)
