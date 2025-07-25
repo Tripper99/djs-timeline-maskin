@@ -201,10 +201,12 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 3. Close the app (formatting automatically saved)
 4. Restart the app (formatting automatically restored)
 
-## Current Status (v1.15.0)
+## Current Status (v1.15.3)
 
-**NEW MASTER VERSION**: Improved date/time field layout with two-column subgroup
-- ✅ **Date/Time Field Layout**: New two-column subgroup above Händelse for better space utilization
+**NEW MASTER VERSION**: Refined date/time field layout with proper alignment and positioning
+- ✅ **Date/Time Field Layout**: Polished two-column subgroup above Händelse with perfect alignment
+- ✅ **Field Alignment**: Grid-based layout ensures consistent positioning of labels, entries, and lock switches
+- ✅ **Header Positioning**: Händelse header properly positioned directly above formatting toolbar
 - ✅ **Rich Text Persistence**: Bold, italic, and color formatting preserved across app sessions
 - ✅ **Locked Field Formatting**: Text formatting in Note1, Note2, Note3, Händelse saved/restored
 - ✅ **Time Fields**: Starttid and Sluttid with HH:MM validation and auto-formatting (HHMM→HH:MM)
@@ -239,6 +241,46 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 - ⚠️ **External monitors**: Slightly shortened window (800px max) but fully functional
 - **Impact**: Minimal - all features accessible, status bar visible
 - **Future improvement**: Dynamic height adjustment based on screen size
+
+## Things That Remain To Do
+
+### High Priority Issues
+1. **Rich Text Uniform Formatting Bug** (Excel Export)
+   - **Status**: Affects Excel output only, GUI works perfectly
+   - **Issue**: Text with uniform formatting (all red, all bold) disappears in Excel
+   - **Location**: `core/excel_manager.py` xlsxwriter rich text API handling
+   - **Workaround**: Use mixed formatting within text
+
+2. **Code Quality Improvements**
+   - **Ruff Warnings**: 96 style/import warnings to clean up
+   - **Location**: Multiple files, mostly whitespace and import organization
+   - **Impact**: No functional issues, but affects code maintainability
+
+### Medium Priority Enhancements
+3. **Window Height Optimization**
+   - **Goal**: Dynamic height adjustment based on screen size
+   - **Current**: Fixed 800px max height workaround
+   - **Impact**: Slightly shortened window on large external monitors
+
+4. **Performance Optimizations**
+   - **GUI Responsiveness**: Consider lazy loading for large Excel files
+   - **Memory Usage**: Review memory footprint for long sessions
+
+### Low Priority Future Features
+5. **Excel Macro Support** (.xlsm files)
+   - **Status**: Previously attempted but reverted due to hybrid method conflicts
+   - **Challenge**: Cannot compromise critical hybrid Excel writing approach
+   - **Alternative**: Consider separate handling for .xlsm vs .xlsx files
+
+6. **Enhanced Rich Text Features**
+   - **Underline Support**: Add underline formatting option
+   - **Font Size Control**: Variable font sizes within text fields
+   - **Additional Colors**: Expand color palette beyond current 4 colors
+
+7. **User Experience Improvements**
+   - **Keyboard Shortcuts**: More comprehensive shortcut support
+   - **Drag & Drop**: PDF file drag and drop functionality
+   - **Undo/Redo**: Enhanced undo system across all components
 
 ## Modular Refactoring Progress - COMPLETED ✅
 
@@ -302,12 +344,45 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 - Logging is configured for debugging
 - No automated tests are present in the codebase
 - No build process required - runs directly with Python interpreter
-- **Current version**: v1.15.0 (stable master with improved date/time field layout)
-- **Last tested**: 2025-07-25 - Improved date/time field layout working perfectly, all functionality stable
+- **Current version**: v1.15.3 (stable master with refined date/time field layout and perfect positioning)
+- **Last tested**: 2025-07-25 - Refined date/time field layout working perfectly, all functionality stable
 
 ## Recent Development History
 
-### v1.15.0 Success (2025-07-25) - Improved Date/Time Field Layout
+### v1.15.3 Success (2025-07-25) - Final Header Positioning Fix
+**Achievement**: Perfect positioning of Händelse header directly above toolbar
+
+**Layout Fix**:
+- ✅ **Header Positioning**: Changed sticky parameter to "sew" (south-east-west)
+- ✅ **Visual Flow**: Header now sits directly above formatting toolbar as intended
+- ✅ **Professional Appearance**: Clean transition from date/time fields to Händelse section
+
+**Technical Implementation**:
+- Modified header_frame sticky parameter from "new" to "sew"
+- Header anchors to bottom of expandable row, placing it above toolbar
+- Maintains proper spacing and visual hierarchy
+
+### v1.15.2 (2025-07-25) - Header Positioning Attempt
+**Goal**: Fix Händelse header vertical centering issue
+**Result**: Header stuck at very top (overcorrection)
+**Lesson**: Need bottom alignment, not top alignment
+
+### v1.15.1 Success (2025-07-25) - Date/Time Field Alignment Refinement
+**Achievement**: Perfected symmetrical alignment of date/time fields
+
+**Alignment Improvements**:
+- ✅ **Grid-Based Layout**: Replaced pack with grid for precise positioning
+- ✅ **Fixed Label Width**: Set minsize=85px for consistent label alignment
+- ✅ **Column Structure**: Organized as Label | Entry | Lock Switch
+- ✅ **Visual Symmetry**: Perfect alignment between left/right columns
+
+**Technical Implementation**:
+- Implemented grid layout with fixed column widths
+- Left column: Startdatum + Starttid with consistent spacing
+- Right column: Slutdatum + Sluttid with matching alignment
+- Increased inter-column spacing (10px) for better visual separation
+
+### v1.15.0 Success (2025-07-25) - Initial Date/Time Field Layout
 **Achievement**: Successfully implemented two-column subgroup for date/time fields
 
 **New Features Added**:
