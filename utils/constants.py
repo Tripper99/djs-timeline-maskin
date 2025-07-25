@@ -8,8 +8,8 @@ VERSION = "v1.11.0"
 
 # Required Excel columns - these must exist in the Excel file
 REQUIRED_EXCEL_COLUMNS = [
-    'OBS', 'Inlagd datum', 'Kategori', 'Underkategori',
-    'Person/sak', 'Egen grupp', 'Händelse', 'Dag',
-    'Tid start', 'Tid slut', 'Note1', 'Note2', 'Note3',
+    'OBS', 'Inlagd', 'Kategori', 'Underkategori',
+    'Person/sak', 'Special', 'Händelse', 'Dag',
+    'Startdatum', 'Slutdatum', 'Note1', 'Note2', 'Note3',
     'Källa1', 'Källa2', 'Källa3', 'Övrigt'
 ]

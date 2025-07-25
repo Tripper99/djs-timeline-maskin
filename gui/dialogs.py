@@ -53,15 +53,15 @@ class DialogManager:
 
 OBLIGATORISKA KOLUMNER:
 • OBS
-• Inlagd datum
+• Inlagd
 • Kategori  
 • Underkategori
 • Person/sak
-• Egen grupp
+• Special
 • Händelse
 • Dag
-• Tid start
-• Tid slut
+• Startdatum
+• Slutdatum
 • Note1
 • Note2
 • Note3
@@ -128,8 +128,8 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
 
             # Define column headers in the specified order (updated with new field name)
             headers = [
-                "OBS", "Inlagd datum", "Kategori", "Underkategori", "Person/sak",
-                "Egen grupp", "Händelse", "Dag", "Tid start", "Tid slut",
+                "OBS", "Inlagd", "Kategori", "Underkategori", "Person/sak",
+                "Special", "Händelse", "Dag", "Startdatum", "Slutdatum",
                 "Note1", "Note2", "Note3", "Källa1", "Källa2", "Källa3",
                 "Övrigt"  # Updated from "Korrelerande historisk händelse"
             ]
@@ -154,7 +154,7 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
                 if header == 'OBS':
                     # Text format for OBS column - ensure it's formatted as text
                     pass  # Formatting will be applied when data is added
-                elif header in ['Tid start', 'Tid slut']:
+                elif header in ['Startdatum', 'Slutdatum']:
                     # Date format for date columns - don't pre-format empty rows
                     pass  # Formatting will be applied when data is added
                 elif header == 'Dag':

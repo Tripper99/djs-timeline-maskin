@@ -124,15 +124,15 @@ class ExcelManager:
                         else:
                             special_data['Händelse'] = ""
 
-            # Tid start - only use date from filename if user hasn't filled it in
-            if 'Tid start' in self.columns and 'date' in data:
-                user_tid_start = special_data.get('Tid start', '').strip()
+            # Startdatum - only use date from filename if user hasn't filled it in
+            if 'Startdatum' in self.columns and 'date' in data:
+                user_tid_start = special_data.get('Startdatum', '').strip()
                 if not user_tid_start:  # Only set if user hasn't provided their own value
                     try:
                         date_obj = datetime.strptime(data['date'], '%Y-%m-%d')
-                        special_data['Tid start'] = date_obj.date()
+                        special_data['Startdatum'] = date_obj.date()
                     except ValueError:
-                        special_data['Tid start'] = data.get('date', '')
+                        special_data['Startdatum'] = data.get('date', '')
 
             # Källa1 - full filename (only if filename exists)
             if 'Källa1' in self.columns:
@@ -175,8 +175,8 @@ class ExcelManager:
                     # Text format for OBS field - basic text field
                     cell.number_format = '@'  # @ means Text format in Excel
                     cell.alignment = Alignment(wrap_text=True, vertical='bottom', horizontal='left')
-                elif col_name == 'Inlagd datum':
-                    # Date format YYYY-MM-DD for Inlagd datum field - same as other date fields
+                elif col_name == 'Inlagd':
+                    # Date format YYYY-MM-DD for Inlagd field - same as other date fields
                     cell.number_format = 'YYYY-MM-DD'
                     cell.alignment = Alignment(wrap_text=True, vertical='bottom', horizontal='left')
                 elif col_name in ['Kategori', 'Underkategori', 'Person/sak', 'Egen grupp']:
@@ -189,16 +189,16 @@ class ExcelManager:
                     cell.alignment = Alignment(wrap_text=True, vertical='bottom', horizontal='left')
                 elif col_name == 'Dag':
                     # Text format for the formula result (mån, tis, ons, etc.) - narrow column
-                    # Add formula that references Tid start column
-                    tid_start_col_idx = self.columns.get('Tid start')
+                    # Add formula that references Startdatum column
+                    tid_start_col_idx = self.columns.get('Startdatum')
                     if tid_start_col_idx:
                         tid_start_col_letter = get_column_letter(tid_start_col_idx)
                         cell.value = f"=TEXT({tid_start_col_letter}{next_row},\"ddd\")"
                     cell.number_format = '@'  # Text format for day names
                     cell.alignment = Alignment(wrap_text=True, vertical='bottom', horizontal='left')
-                elif col_name in ['Tid start', 'Tid slut']:
+                elif col_name in ['Startdatum', 'Slutdatum']:
                     # Date format YYYY-MM-DD for date fields - medium width columns
-                    if col_name == 'Tid start' and hasattr(value, 'year'):
+                    if col_name == 'Startdatum' and hasattr(value, 'year'):
                         # Value is already a date object, format it properly
                         cell.number_format = 'YYYY-MM-DD'
                     else:
@@ -373,8 +373,8 @@ class ExcelManager:
 
                 # Special handling for Dag column - create formula
                 if col_name == 'Dag' and not value:
-                    # Create formula =TEXT(I{row};"ddd") where I is the Tid start column
-                    tid_start_col_idx = self.columns.get('Tid start', 9)  # Default to column I (9)
+                    # Create formula =TEXT(I{row};"ddd") where I is the Startdatum column
+                    tid_start_col_idx = self.columns.get('Startdatum', 9)  # Default to column I (9)
                     formula = f'=TEXT({get_column_letter(tid_start_col_idx)}{next_row + 1},"ddd")'
                     logger.info(f"Creating Dag formula for new row: {formula}")
                     write_worksheet.write_formula(next_row, col_idx-1, formula, default_format)
@@ -431,15 +431,15 @@ class ExcelManager:
                     else:
                         special_data['Händelse'] = ""
 
-        # Tid start - use date from filename if user hasn't filled it in
-        if 'Tid start' in self.columns and 'date' in data:
-            user_tid_start = str(special_data.get('Tid start', '')).strip()
+        # Startdatum - use date from filename if user hasn't filled it in
+        if 'Startdatum' in self.columns and 'date' in data:
+            user_tid_start = str(special_data.get('Startdatum', '')).strip()
             if not user_tid_start:
                 try:
                     date_obj = datetime.strptime(data['date'], '%Y-%m-%d')
-                    special_data['Tid start'] = date_obj.date()
+                    special_data['Startdatum'] = date_obj.date()
                 except ValueError:
-                    special_data['Tid start'] = data.get('date', '')
+                    special_data['Startdatum'] = data.get('date', '')
 
         # Källa1 - only use generated filename if field is empty AND we have a filename
         if 'Källa1' in self.columns:

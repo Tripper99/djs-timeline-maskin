@@ -109,13 +109,13 @@ class ExcelFieldManager:
             logger.error(f"Error saving locked fields on exit: {e}")
 
     def clear_excel_fields(self):
-        """Clear Excel fields except locked ones and Inlagd datum"""
+        """Clear Excel fields except locked ones and Inlagd"""
         for col_name, var in self.parent.excel_vars.items():
             # Skip locked fields
             if col_name in self.parent.lock_vars and self.parent.lock_vars[col_name].get():
                 continue
-            # Skip Inlagd datum - it should always maintain today's date
-            if col_name == 'Inlagd datum':
+            # Skip Inlagd - it should always maintain today's date
+            if col_name == 'Inlagd':
                 continue
 
             if hasattr(var, 'delete'):  # Text widget
@@ -143,11 +143,11 @@ class ExcelFieldManager:
             if col_name != 'Dag':
                 self.parent.excel_vars[col_name] = tk.StringVar()
 
-        # Auto-fill today's date in "Inlagd datum" field
-        if 'Inlagd datum' in self.parent.excel_vars:
+        # Auto-fill today's date in "Inlagd" field
+        if 'Inlagd' in self.parent.excel_vars:
             from datetime import datetime
             today_date = datetime.now().strftime('%Y-%m-%d')
-            self.parent.excel_vars['Inlagd datum'].set(today_date)
+            self.parent.excel_vars['Inlagd'].set(today_date)
 
         # Create frame for Excel fields (responsive grid layout)
         fields_container = tb.Frame(self.parent.excel_fields_frame)
@@ -157,8 +157,8 @@ class ExcelFieldManager:
         fields_container.grid_rowconfigure(0, weight=1)
 
         # Define column groupings (updated with new field name)
-        column1_fields = ['OBS', 'Inlagd datum', 'Kategori', 'Underkategori', 'Person/sak',
-                         'Egen grupp', 'Dag', 'Tid start', 'Tid slut', 'Källa1', 'Källa2', 'Källa3', 'Övrigt']
+        column1_fields = ['OBS', 'Inlagd', 'Kategori', 'Underkategori', 'Person/sak',
+                         'Special', 'Dag', 'Startdatum', 'Slutdatum', 'Källa1', 'Källa2', 'Källa3', 'Övrigt']
         column2_fields = ['Händelse']
         column3_fields = ['Note1', 'Note2', 'Note3']
 
@@ -205,7 +205,7 @@ class ExcelFieldManager:
 
     def create_field_in_frame(self, parent_frame, col_name, row, column_type="column1"):
         """Create a single field in the specified frame with layout optimized per column type"""
-        # Check if this field should have a lock switch (all except Dag and Inlagd datum)
+        # Check if this field should have a lock switch (all except Dag and Inlagd)
         has_lock = col_name in self.parent.lock_vars
 
         # Special handling for Dag column - make it read-only with explanation
@@ -224,9 +224,9 @@ class ExcelFieldManager:
             # Return 1 row used for Dag field
             return 1
 
-        # Special handling for Inlagd datum - read-only, always today's date
-        elif col_name == 'Inlagd datum':
-            # Standard horizontal layout for Inlagd datum field
+        # Special handling for Inlagd - read-only, always today's date
+        elif col_name == 'Inlagd':
+            # Standard horizontal layout for Inlagd field
             tb.Label(parent_frame, text=f"{col_name}:",
                     font=('Arial', 10)).grid(row=row, column=0, sticky="w", pady=(0, 5))
 
@@ -235,7 +235,7 @@ class ExcelFieldManager:
                            font=('Arial', 9))
             entry.grid(row=row, column=1, sticky="ew", pady=(0, 5))
 
-            # Return 1 row used for Inlagd datum field
+            # Return 1 row used for Inlagd field
             return 1
 
         # Special vertical layout for text fields with character counters (Händelse, Note1-3)

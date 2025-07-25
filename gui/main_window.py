@@ -277,16 +277,16 @@ class PDFProcessorApp:
 
         self.max_undo_levels = 20  # Maximum number of undo levels
 
-        # Lock switches for ALL fields except Dag and Inlagd datum (which is read-only)
+        # Lock switches for ALL fields except Dag and Inlagd (which is read-only)
         self.lock_vars = {
             'OBS': tk.BooleanVar(),
             'Kategori': tk.BooleanVar(),
             'Underkategori': tk.BooleanVar(),
             'Person/sak': tk.BooleanVar(),
-            'Egen grupp': tk.BooleanVar(),
+            'Special': tk.BooleanVar(),
             'Händelse': tk.BooleanVar(),
-            'Tid start': tk.BooleanVar(),
-            'Tid slut': tk.BooleanVar(),
+            'Startdatum': tk.BooleanVar(),
+            'Slutdatum': tk.BooleanVar(),
             'Note1': tk.BooleanVar(),
             'Note2': tk.BooleanVar(),
             'Note3': tk.BooleanVar(),
@@ -806,8 +806,8 @@ class PDFProcessorApp:
             # Skip locked fields when checking for content
             if col_name in self.lock_vars and self.lock_vars[col_name].get():
                 continue
-            # Skip automatically calculated fields and Inlagd datum (will be preserved)
-            if col_name == 'Dag' or col_name == 'Inlagd datum':
+            # Skip automatically calculated fields and Inlagd (will be preserved)
+            if col_name == 'Dag' or col_name == 'Inlagd':
                 continue
 
             if hasattr(var, 'get'):
@@ -837,14 +837,14 @@ class PDFProcessorApp:
         # Construct the new filename
         new_filename = FilenameParser.construct_filename(date, newspaper, comment, pages)
 
-        # Clear all Excel fields first (except locked ones and Inlagd datum)
+        # Clear all Excel fields first (except locked ones and Inlagd)
         for col_name, var in self.excel_vars.items():
             # Skip locked fields and automatically calculated fields
             if col_name in self.lock_vars and self.lock_vars[col_name].get():
                 continue
             if col_name == 'Dag':  # Skip automatically calculated fields
                 continue
-            if col_name == 'Inlagd datum':  # Skip Inlagd datum to preserve today's date
+            if col_name == 'Inlagd':  # Skip Inlagd to preserve today's date
                 continue
 
             if hasattr(var, 'delete'):  # Text widget
@@ -868,10 +868,10 @@ class PDFProcessorApp:
             else:
                 self.excel_vars['Händelse'].set(content)
 
-        if 'Tid start' in self.excel_vars and date:
+        if 'Startdatum' in self.excel_vars and date:
             # Only set if not locked
-            if not (self.lock_vars.get('Tid start', tk.BooleanVar()).get()):
-                self.excel_vars['Tid start'].set(date)
+            if not (self.lock_vars.get('Startdatum', tk.BooleanVar()).get()):
+                self.excel_vars['Startdatum'].set(date)
 
         if 'Källa1' in self.excel_vars:
             # Only set if not locked
@@ -1007,8 +1007,8 @@ class PDFProcessorApp:
             return False
 
         # Check if any important field has content
-        important_fields = ['Tid start', 'Händelse', 'OBS', 'Kategori', 'Underkategori',
-                           'Person/sak', 'Egen grupp', 'Tid slut', 'Note1', 'Note2', 'Note3',
+        important_fields = ['Startdatum', 'Händelse', 'OBS', 'Kategori', 'Underkategori',
+                           'Person/sak', 'Special', 'Slutdatum', 'Note1', 'Note2', 'Note3',
                            'Källa1', 'Källa2', 'Källa3', 'Övrigt']
 
         for field_name in important_fields:
@@ -1063,9 +1063,9 @@ class PDFProcessorApp:
             else:
                 excel_data[col_name] = ""
 
-        # Handle Inlagd datum - always set today's date (field is read-only)
-        if 'Inlagd datum' in self.excel_vars:
-            excel_data['Inlagd datum'] = datetime.now().strftime('%Y-%m-%d')
+        # Handle Inlagd - always set today's date (field is read-only)
+        if 'Inlagd' in self.excel_vars:
+            excel_data['Inlagd'] = datetime.now().strftime('%Y-%m-%d')
 
         # Get filename for special handling
         filename = excel_data.get('Källa1', '')
@@ -1225,17 +1225,17 @@ class PDFProcessorApp:
                 else:  # StringVar
                     handelse_content = self.excel_vars['Händelse'].get().strip()
 
-        # Check if Tid start has content
+        # Check if Startdatum has content
         tid_start_content = ""
-        if 'Tid start' in self.excel_vars:
-            if hasattr(self.excel_vars['Tid start'], 'get'):
-                tid_start_content = self.excel_vars['Tid start'].get().strip()
+        if 'Startdatum' in self.excel_vars:
+            if hasattr(self.excel_vars['Startdatum'], 'get'):
+                tid_start_content = self.excel_vars['Startdatum'].get().strip()
 
-        # Warning if Händelse has content but Tid start is missing
+        # Warning if Händelse has content but Startdatum is missing
         if handelse_content and not tid_start_content:
             result = messagebox.askyesno(
                 "Saknas datum?",
-                "Du har fyllt i 'Händelse' men inte 'Tid start' (datum).\n\n" +
+                "Du har fyllt i 'Händelse' men inte 'Startdatum' (datum).\n\n" +
                 "Excel-raden kommer att sparas, men utan datum blir det svårt att sortera och hitta händelsen senare.\n\n" +
                 "Vill du:\n" +
                 "• JA - Fortsätta och spara utan datum\n" +
@@ -1243,9 +1243,9 @@ class PDFProcessorApp:
             )
 
             if result is False:  # No - let user add date
-                # Focus on Tid start field if possible
-                if 'Tid start' in self.excel_vars and hasattr(self.excel_vars['Tid start'], 'focus'):
-                    self.excel_vars['Tid start'].focus()
+                # Focus on Startdatum field if possible
+                if 'Startdatum' in self.excel_vars and hasattr(self.excel_vars['Startdatum'], 'focus'):
+                    self.excel_vars['Startdatum'].focus()
                 return False
             # If result is True (Yes), continue and save row even without date
 
@@ -1499,7 +1499,7 @@ class PDFProcessorApp:
                 if col_name in self.lock_vars and self.lock_vars[col_name].get():
                     continue
                 # Skip automatic fields that should be ignored
-                if col_name in ['Dag', 'Inlagd datum']:
+                if col_name in ['Dag', 'Inlagd']:
                     continue
 
                 # Check if field has content
