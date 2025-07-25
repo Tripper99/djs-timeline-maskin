@@ -490,85 +490,82 @@ class ExcelFieldManager:
             parent_frame.grid_columnconfigure(1, weight=1)
     
     def _create_datetime_fields_in_subframe(self, datetime_frame):
-        """Create date/time fields in a 2-column subframe layout"""
+        """Create date/time fields in a 2-column subframe layout with proper alignment"""
         # Left column: Startdatum and Starttid
         left_frame = tb.Frame(datetime_frame)
-        left_frame.grid(row=0, column=0, sticky="ew", padx=(0, 5))
+        left_frame.grid(row=0, column=0, sticky="ew", padx=(0, 10))
         
         # Right column: Slutdatum and Sluttid
         right_frame = tb.Frame(datetime_frame)
-        right_frame.grid(row=0, column=1, sticky="ew", padx=(5, 0))
+        right_frame.grid(row=0, column=1, sticky="ew", padx=(10, 0))
         
-        # Create Startdatum field
-        start_date_container = tb.Frame(left_frame)
-        start_date_container.pack(fill="x", pady=(0, 5))
+        # Configure column weights for proper alignment within each side
+        left_frame.grid_columnconfigure(0, weight=0, minsize=85)   # Label column - fixed width
+        left_frame.grid_columnconfigure(1, weight=0)              # Entry column - fixed width
+        left_frame.grid_columnconfigure(2, weight=1)              # Lock column - remaining space
         
-        tb.Label(start_date_container, text="Startdatum:", 
-                font=('Arial', 10)).pack(side="left")
+        right_frame.grid_columnconfigure(0, weight=0, minsize=85)  # Label column - fixed width  
+        right_frame.grid_columnconfigure(1, weight=0)             # Entry column - fixed width
+        right_frame.grid_columnconfigure(2, weight=1)             # Lock column - remaining space
         
-        entry = tb.Entry(start_date_container, textvariable=self.parent.excel_vars['Startdatum'],
+        # Create Startdatum field (left side, row 0)
+        tb.Label(left_frame, text="Startdatum:", 
+                font=('Arial', 10)).grid(row=0, column=0, sticky="w", pady=(0, 5))
+        
+        entry = tb.Entry(left_frame, textvariable=self.parent.excel_vars['Startdatum'],
                         font=('Arial', 9), width=12)
-        entry.pack(side="left", padx=(5, 5))
+        entry.grid(row=0, column=1, sticky="w", padx=(5, 5), pady=(0, 5))
         self.parent.enable_undo_for_widget(entry)
         
-        lock_switch = tb.Checkbutton(start_date_container,
+        lock_switch = tb.Checkbutton(left_frame,
                                     text="Lås",
                                     variable=self.parent.lock_vars['Startdatum'],
                                     bootstyle="success-round-toggle")
-        lock_switch.pack(side="left")
+        lock_switch.grid(row=0, column=2, sticky="w", pady=(0, 5))
         
-        # Create Starttid field
-        start_time_container = tb.Frame(left_frame)
-        start_time_container.pack(fill="x")
+        # Create Starttid field (left side, row 1)
+        tb.Label(left_frame, text="Starttid:", 
+                font=('Arial', 10)).grid(row=1, column=0, sticky="w")
         
-        tb.Label(start_time_container, text="Starttid:", 
-                font=('Arial', 10)).pack(side="left")
-        
-        entry = tb.Entry(start_time_container, textvariable=self.parent.excel_vars['Starttid'],
+        entry = tb.Entry(left_frame, textvariable=self.parent.excel_vars['Starttid'],
                         font=('Arial', 9), width=7)
-        entry.pack(side="left", padx=(5, 5))
+        entry.grid(row=1, column=1, sticky="w", padx=(5, 5))
         entry.bind('<FocusOut>', lambda e: self.parent.validate_time_field(e, 'Starttid'))
         self.parent.enable_undo_for_widget(entry)
         
-        lock_switch = tb.Checkbutton(start_time_container,
+        lock_switch = tb.Checkbutton(left_frame,
                                     text="Lås",
                                     variable=self.parent.lock_vars['Starttid'],
                                     bootstyle="success-round-toggle")
-        lock_switch.pack(side="left")
+        lock_switch.grid(row=1, column=2, sticky="w")
         
-        # Create Slutdatum field
-        end_date_container = tb.Frame(right_frame)
-        end_date_container.pack(fill="x", pady=(0, 5))
+        # Create Slutdatum field (right side, row 0)
+        tb.Label(right_frame, text="Slutdatum:", 
+                font=('Arial', 10)).grid(row=0, column=0, sticky="w", pady=(0, 5))
         
-        tb.Label(end_date_container, text="Slutdatum:", 
-                font=('Arial', 10)).pack(side="left")
-        
-        entry = tb.Entry(end_date_container, textvariable=self.parent.excel_vars['Slutdatum'],
+        entry = tb.Entry(right_frame, textvariable=self.parent.excel_vars['Slutdatum'],
                         font=('Arial', 9), width=12)
-        entry.pack(side="left", padx=(5, 5))
+        entry.grid(row=0, column=1, sticky="w", padx=(5, 5), pady=(0, 5))
         self.parent.enable_undo_for_widget(entry)
         
-        lock_switch = tb.Checkbutton(end_date_container,
+        lock_switch = tb.Checkbutton(right_frame,
                                     text="Lås",
                                     variable=self.parent.lock_vars['Slutdatum'],
                                     bootstyle="success-round-toggle")
-        lock_switch.pack(side="left")
+        lock_switch.grid(row=0, column=2, sticky="w", pady=(0, 5))
         
-        # Create Sluttid field
-        end_time_container = tb.Frame(right_frame)
-        end_time_container.pack(fill="x")
+        # Create Sluttid field (right side, row 1)
+        tb.Label(right_frame, text="Sluttid:", 
+                font=('Arial', 10)).grid(row=1, column=0, sticky="w")
         
-        tb.Label(end_time_container, text="Sluttid:", 
-                font=('Arial', 10)).pack(side="left")
-        
-        entry = tb.Entry(end_time_container, textvariable=self.parent.excel_vars['Sluttid'],
+        entry = tb.Entry(right_frame, textvariable=self.parent.excel_vars['Sluttid'],
                         font=('Arial', 9), width=7)
-        entry.pack(side="left", padx=(5, 5))
+        entry.grid(row=1, column=1, sticky="w", padx=(5, 5))
         entry.bind('<FocusOut>', lambda e: self.parent.validate_time_field(e, 'Sluttid'))
         self.parent.enable_undo_for_widget(entry)
         
-        lock_switch = tb.Checkbutton(end_time_container,
+        lock_switch = tb.Checkbutton(right_frame,
                                     text="Lås",
                                     variable=self.parent.lock_vars['Sluttid'],
                                     bootstyle="success-round-toggle")
-        lock_switch.pack(side="left")
+        lock_switch.grid(row=1, column=2, sticky="w")
