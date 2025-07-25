@@ -159,7 +159,7 @@ class ExcelFieldManager:
         # Define column groupings (updated with new field name)
         column1_fields = ['OBS', 'Inlagd', 'Kategori', 'Underkategori', 'Person/sak',
                          'Special', 'Dag', 'Källa1', 'Källa2', 'Källa3', 'Övrigt']
-        column2_fields = ['Startdatum', 'Slutdatum', 'Händelse']
+        column2_fields = ['Startdatum', 'Starttid', 'Slutdatum', 'Sluttid', 'Händelse']
         column3_fields = ['Note1', 'Note2', 'Note3']
 
         # Configure column weights for equal spacing - each column gets exactly 1/3 of available width
@@ -326,7 +326,7 @@ class ExcelFieldManager:
             return 4
 
         # Layout depends on column type and field type
-        elif column_type == "column1" or (column_type == "column2" and col_name in ['Startdatum', 'Slutdatum']):
+        elif column_type == "column1" or (column_type == "column2" and col_name in ['Startdatum', 'Starttid', 'Slutdatum', 'Sluttid']):
             # Horizontal layout for column 1 and date fields in column 2 - saves vertical space
             tb.Label(parent_frame, text=f"{col_name}:",
                     font=('Arial', 10)).grid(row=row, column=0, sticky="w", pady=(0, 5))
@@ -337,6 +337,10 @@ class ExcelFieldManager:
 
             # Enable undo tracking for Entry widget
             self.parent.enable_undo_for_widget(entry)
+
+            # Add time validation for time fields
+            if col_name in ['Starttid', 'Sluttid']:
+                entry.bind('<FocusOut>', lambda e, field=col_name: self.parent.validate_time_field(e, field))
 
             # Add lock switch for fields that should have one (in column 2)
             if has_lock:

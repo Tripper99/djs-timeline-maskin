@@ -10,6 +10,6 @@ VERSION = "v1.13.0"
 REQUIRED_EXCEL_COLUMNS = [
     'OBS', 'Inlagd', 'Kategori', 'Underkategori',
     'Person/sak', 'Special', 'Händelse', 'Dag',
-    'Startdatum', 'Slutdatum', 'Note1', 'Note2', 'Note3',
+    'Startdatum', 'Starttid', 'Slutdatum', 'Sluttid', 'Note1', 'Note2', 'Note3',
     'Källa1', 'Källa2', 'Källa3', 'Övrigt'
 ]

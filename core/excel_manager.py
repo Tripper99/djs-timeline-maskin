@@ -64,12 +64,12 @@ class ExcelManager:
         """
         if not self.column_names:
             return REQUIRED_EXCEL_COLUMNS.copy()  # All columns missing if no file loaded
-        
+
         missing_columns = []
         for required_col in REQUIRED_EXCEL_COLUMNS:
             if required_col not in self.column_names:
                 missing_columns.append(required_col)
-        
+
         return missing_columns
 
     def add_row(self, data: Dict[str, str], filename: str, row_color: str = "none") -> bool:

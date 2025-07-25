@@ -128,7 +128,7 @@ class PDFProcessorApp:
             logger.info("DPI awareness set successfully")
         except Exception as e:
             logger.warning(f"Could not set DPI awareness: {e}")
-        
+
         # Get saved theme or use default
         current_theme = self.config.get('theme', 'simplex')
         self.root = tb.Window(themename=current_theme)
@@ -150,7 +150,7 @@ class PDFProcessorApp:
         self.root.update_idletasks()
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
-        
+
         # Get actual available screen area (excludes taskbar)
         try:
             # Try to get the actual working area height
@@ -161,13 +161,13 @@ class PDFProcessorApp:
                 available_height = screen_height - 80  # Fallback: assume larger taskbar
         except:
             available_height = screen_height - 80  # Fallback
-            
+
         window_height = min(max(int(available_height * 0.75), 700), 800)  # Much more aggressive height reduction for laptops
         logger.info(f"Screen: {screen_width}x{screen_height}, work area: {available_height}, calculated window height: {window_height}")
-        
+
         # Debug actual screen measurements after DPI fix
         logger.info(f"DPI aware measurements - Screen: {self.root.winfo_screenwidth()}x{self.root.winfo_screenheight()}")
-        
+
         # Check if saved geometry exceeds our height limit and adjust it
         saved_geometry = self.config.get('window_geometry', '')
         if saved_geometry:
@@ -176,7 +176,7 @@ class PDFProcessorApp:
                 parsed = self.parse_geometry(saved_geometry)
                 if parsed:
                     saved_width, saved_height, x_pos, y_pos = parsed
-                    
+
                     if saved_height > window_height:
                         # Reconstruct geometry with limited height
                         limited_geometry = self.build_geometry(saved_width, window_height, x_pos, y_pos)
@@ -239,7 +239,7 @@ class PDFProcessorApp:
 
         # Bind window close event
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
-        
+
         # Bind window configuration events to prevent saving maximized geometry
         self.root.bind('<Configure>', self.on_window_configure)
 
@@ -286,7 +286,9 @@ class PDFProcessorApp:
             'Special': tk.BooleanVar(),
             'Händelse': tk.BooleanVar(),
             'Startdatum': tk.BooleanVar(),
+            'Starttid': tk.BooleanVar(),
             'Slutdatum': tk.BooleanVar(),
+            'Sluttid': tk.BooleanVar(),
             'Note1': tk.BooleanVar(),
             'Note2': tk.BooleanVar(),
             'Note3': tk.BooleanVar(),
@@ -399,11 +401,11 @@ class PDFProcessorApp:
         """Open Manual.rtf with external application"""
         try:
             manual_path = Path(__file__).parent.parent / "Manual.rtf"
-            
+
             if not manual_path.exists():
                 messagebox.showerror("Fel", f"Manualen hittades inte: {manual_path}")
                 return
-                
+
             # Open RTF file with default system application
             if platform.system() == 'Windows':
                 os.startfile(str(manual_path))
@@ -411,9 +413,9 @@ class PDFProcessorApp:
                 subprocess.run(['open', str(manual_path)])
             else:  # Linux
                 subprocess.run(['xdg-open', str(manual_path)])
-                
+
             logger.info(f"Opened manual: {manual_path}")
-            
+
         except Exception as e:
             messagebox.showerror("Fel", f"Kunde inte öppna manualen: {str(e)}")
             logger.error(f"Error opening manual: {e}")
@@ -735,7 +737,7 @@ class PDFProcessorApp:
                         "• " + "\n• ".join(missing_columns) + "\n\n" +
                         "Vill du skapa en ny Excel-mall med alla rätta kolumner?"
                     )
-                    
+
                     if messagebox.askyesno("Kolumner saknas", error_msg):
                         # User wants to create template
                         self.dialog_manager.create_excel_template()
@@ -745,7 +747,7 @@ class PDFProcessorApp:
                         self.excel_path_var.set("")
                         self.excel_manager.excel_path = None
                         return
-                
+
                 # self.config['excel_file'] = working_path  # Temporarily disabled - no persistence
                 # Enable the "Open Excel" button after successful load
                 self.open_excel_btn.config(state="normal")
@@ -1320,7 +1322,103 @@ class PDFProcessorApp:
             if column_name in self.char_counters:
                 self.char_counters[column_name].config(text="Tecken kvar: 0", bootstyle="danger")
 
+    def validate_time_format(self, time_input):
+        """
+        Validate and format time input for HH:MM format (24-hour system).
+        
+        Args:
+            time_input (str): Time input from user
+            
+        Returns:
+            tuple: (is_valid, formatted_time, error_message)
+        """
+        try:
+            import re
 
+            # Remove whitespace
+            time_input = time_input.strip()
+
+            # Return empty for empty input
+            if not time_input:
+                return True, "", ""
+
+            # Pattern for HHMM format (auto-format to HH:MM)
+            hhmm_pattern = r'^(\d{4})$'
+            hhmm_match = re.match(hhmm_pattern, time_input)
+
+            if hhmm_match:
+                # Convert HHMM to HH:MM
+                time_digits = hhmm_match.group(1)
+                hour = int(time_digits[:2])
+                minute = int(time_digits[2:])
+
+                # Validate hour and minute ranges
+                if hour > 23:
+                    return False, time_input, f"Ogiltig timme: {hour}. Timme måste vara 00-23."
+                if minute > 59:
+                    return False, time_input, f"Ogiltig minut: {minute}. Minut måste vara 00-59."
+
+                formatted_time = f"{hour:02d}:{minute:02d}"
+                return True, formatted_time, ""
+
+            # Pattern for HH:MM format
+            hhMM_pattern = r'^(\d{1,2}):(\d{1,2})$'
+            hhMM_match = re.match(hhMM_pattern, time_input)
+
+            if hhMM_match:
+                hour = int(hhMM_match.group(1))
+                minute = int(hhMM_match.group(2))
+
+                # Validate hour and minute ranges
+                if hour > 23:
+                    return False, time_input, f"Ogiltig timme: {hour}. Timme måste vara 00-23."
+                if minute > 59:
+                    return False, time_input, f"Ogiltig minut: {minute}. Minut måste vara 00-59."
+
+                formatted_time = f"{hour:02d}:{minute:02d}"
+                return True, formatted_time, ""
+
+            # Invalid format
+            return False, time_input, "Ogiltigt tidsformat. Använd HH:MM eller HHMM (24-timmars format)."
+
+        except ValueError as e:
+            return False, time_input, f"Ogiltigt tidsformat: {str(e)}"
+        except Exception as e:
+            logger.error(f"Error validating time format: {e}")
+            return False, time_input, "Fel vid validering av tidsformat."
+
+    def validate_time_field(self, event, field_name):
+        """
+        Validate time field on FocusOut event.
+        
+        Args:
+            event: FocusOut event
+            field_name (str): Name of the time field ('Starttid' or 'Sluttid')
+        """
+        try:
+            entry_widget = event.widget
+            current_value = entry_widget.get()
+
+            # Validate the time format
+            is_valid, formatted_time, error_message = self.validate_time_format(current_value)
+
+            if is_valid:
+                # Update the field with the formatted time
+                if current_value != formatted_time:
+                    entry_widget.delete(0, tk.END)
+                    entry_widget.insert(0, formatted_time)
+                    logger.info(f"Auto-formatted {field_name}: '{current_value}' → '{formatted_time}'")
+            else:
+                # Show error message
+                messagebox.showerror(
+                    "Ogiltigt tidsformat",
+                    f"Fel i fält '{field_name}': {error_message}"
+                )
+                # Focus back to the field for correction
+                entry_widget.focus_set()
+
+        except Exception as e:
+            logger.error(f"Error validating time field {field_name}: {e}")
 
     def verify_insertion(self, widget, field_name, expected_chunk):
         """Verify that the inserted text hasn't been corrupted by other events"""
@@ -1539,12 +1637,12 @@ class PDFProcessorApp:
             except:
                 available_height = screen_height - 80
             max_height = min(max(int(available_height * 0.75), 700), 800)
-            
+
             # Parse and limit geometry if needed using safe parser
             parsed = self.parse_geometry(current_geometry)
             if parsed:
                 width, height, x_pos, y_pos = parsed
-                
+
                 if height > max_height:
                     # Save with limited height
                     limited_geometry = self.build_geometry(width, max_height, x_pos, y_pos)
@@ -1558,7 +1656,7 @@ class PDFProcessorApp:
         except Exception as e:
             logger.warning(f"Error limiting geometry on save: {e}")
             self.config['window_geometry'] = current_geometry
-            
+
         self.config_manager.save_config(self.config)
 
         # Save locked fields data
@@ -1571,42 +1669,42 @@ class PDFProcessorApp:
         # Only process events for the main window
         if event and event.widget != self.root:
             return
-            
+
         # Skip processing for a few seconds after startup to avoid interfering with initial setup
         if not hasattr(self, '_startup_time'):
             import time
             self._startup_time = time.time()
             return
-        
+
         import time
         if time.time() - self._startup_time < 3:  # Skip first 3 seconds
             return
-            
+
         # DISABLED: Aggressive height limiting that prevented manual resizing
         # This was causing the window to jump back to 800px height on every resize attempt
         # Initial height limiting is still enforced during startup in setup_gui()
-        
+
         # try:
         #     # Check if window height exceeds our limit
         #     current_geometry = self.root.geometry()
         #     parsed = self.parse_geometry(current_geometry)
         #     if parsed:
         #         width, height, x_pos, y_pos = parsed
-        #         
+        #
         #         # Calculate max allowed height
         #         screen_height = self.root.winfo_screenheight()
         #         available_height = screen_height - 80  # Conservative estimate
         #         max_height = min(max(int(available_height * 0.75), 700), 800)
-        #         
+        #
         #         if height > max_height:
         #             # Resize to max height
         #             limited_geometry = self.build_geometry(width, max_height, x_pos, y_pos)
         #             self.root.after_idle(lambda: self.root.geometry(limited_geometry))
         #             logger.info(f"Limited window height during configure: {height} -> {max_height}")
-        #             
+        #
         # except Exception as e:
         #     logger.warning(f"Error in window configure handler: {e}")
-        
+
         pass  # Allow free resizing by user
 
     def setup_undo_functionality(self):

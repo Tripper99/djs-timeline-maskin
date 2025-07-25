@@ -21,11 +21,11 @@ logger = logging.getLogger(__name__)
 
 class DialogManager:
     """Manages all dialog operations for the main application"""
-    
+
     def __init__(self, parent_app):
         """Initialize dialog manager with reference to parent application"""
         self.parent = parent_app
-        
+
     def show_excel_help(self):
         """Show help dialog for Excel file requirements"""
         help_win = tb.Toplevel()
@@ -61,7 +61,9 @@ OBLIGATORISKA KOLUMNER:
 • Händelse
 • Dag
 • Startdatum
+• Starttid
 • Slutdatum
+• Sluttid
 • Note1
 • Note2
 • Note3
@@ -129,7 +131,7 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
             # Define column headers in the specified order (updated with new field name)
             headers = [
                 "OBS", "Inlagd", "Kategori", "Underkategori", "Person/sak",
-                "Special", "Händelse", "Dag", "Startdatum", "Slutdatum",
+                "Special", "Händelse", "Dag", "Startdatum", "Starttid", "Slutdatum", "Sluttid",
                 "Note1", "Note2", "Note3", "Källa1", "Källa2", "Källa3",
                 "Övrigt"  # Updated from "Korrelerande historisk händelse"
             ]
