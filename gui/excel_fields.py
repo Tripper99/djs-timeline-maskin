@@ -158,8 +158,8 @@ class ExcelFieldManager:
 
         # Define column groupings (updated with new field name)
         column1_fields = ['OBS', 'Inlagd', 'Kategori', 'Underkategori', 'Person/sak',
-                         'Special', 'Dag', 'Startdatum', 'Slutdatum', 'Källa1', 'Källa2', 'Källa3', 'Övrigt']
-        column2_fields = ['Händelse']
+                         'Special', 'Dag', 'Källa1', 'Källa2', 'Källa3', 'Övrigt']
+        column2_fields = ['Startdatum', 'Slutdatum', 'Händelse']
         column3_fields = ['Note1', 'Note2', 'Note3']
 
         # Configure column weights for equal spacing - each column gets exactly 1/3 of available width
@@ -186,11 +186,16 @@ class ExcelFieldManager:
         # Create Column 2
         col2_frame = tb.LabelFrame(fields_container, text="", padding=2)
         col2_frame.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
-        col2_frame.grid_columnconfigure(0, weight=1)  # Make all content expand full width
+        col2_frame.grid_columnconfigure(0, weight=0)  # Field labels - fixed width
+        col2_frame.grid_columnconfigure(1, weight=1)  # Entry fields - expand to fill space
+        col2_frame.grid_columnconfigure(2, weight=0)  # Lock switches - fixed width
 
         row = 0
         for col_name in column2_fields:
             rows_used = self.create_field_in_frame(col2_frame, col_name, row, column_type="column2")
+            # If this is Händelse, make its text widget row expandable
+            if col_name == 'Händelse':
+                col2_frame.grid_rowconfigure(row+2, weight=1)  # Text widget is at row+2
             row += rows_used
 
         # Create Column 3
@@ -320,9 +325,9 @@ class ExcelFieldManager:
             # Return the number of rows used (4 rows for text fields: header, toolbar, text, counter)
             return 4
 
-        # Layout depends on column type
-        elif column_type == "column1":
-            # Horizontal layout for column 1 - saves vertical space
+        # Layout depends on column type and field type
+        elif column_type == "column1" or (column_type == "column2" and col_name in ['Startdatum', 'Slutdatum']):
+            # Horizontal layout for column 1 and date fields in column 2 - saves vertical space
             tb.Label(parent_frame, text=f"{col_name}:",
                     font=('Arial', 10)).grid(row=row, column=0, sticky="w", pady=(0, 5))
 
