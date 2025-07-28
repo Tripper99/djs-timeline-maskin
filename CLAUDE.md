@@ -8,6 +8,11 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
+## Additional guideline on github commit
+**Never* mention yourself (Claude) in comment when doing commit. *Never* write stuff like "🤖 Generated with [Claude Code](https://claude.ai/code) Co-Authored-By: Claude <noreply@anthropic.com>". 
+
+
+
 ## Running the Application
 
 ```bash
@@ -214,13 +219,9 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 - ✅ **Core Functionality**: PDF processing, Excel integration, locked fields all working
 - ✅ **Layout**: Three-column Excel fields display correctly with time fields in column 2
 - ✅ **Mixed Rich Text**: Format changes within text work correctly in Excel
-- ⚠️ **Uniform Rich Text Bug**: Single format text disappears in Excel output (see Known Issues below)
+- ✅ **Uniform Rich Text Bug**: Single format text disappears in Excel output
 
 ## Known Issues
-
-### Rich Text Uniform Formatting Bug (Excel Export Only)
-**STATUS**: Partial functionality in Excel export - mixed formats work, uniform formats fail
-**NOTE**: This bug only affects Excel output. GUI formatting and persistence work perfectly.
 
 **What Works**:
 - ✅ Mixed formatting displays correctly (e.g., plain text followed by red text)

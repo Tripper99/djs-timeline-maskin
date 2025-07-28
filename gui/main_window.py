@@ -1389,9 +1389,11 @@ class PDFProcessorApp:
             event: FocusOut event
             field_name (str): Name of the time field ('Starttid' or 'Sluttid')
         """
+        print(f"DEBUG: validate_time_field called for {field_name}")
         try:
             entry_widget = event.widget
             current_value = entry_widget.get()
+            print(f"DEBUG: Current value in {field_name}: '{current_value}'")
 
             # Validate the time format
             is_valid, formatted_time, error_message = self.validate_time_format(current_value)
@@ -1399,8 +1401,15 @@ class PDFProcessorApp:
             if is_valid:
                 # Update the field with the formatted time
                 if current_value != formatted_time:
+                    print(f"DEBUG: Updating {field_name} - '{current_value}' → '{formatted_time}'")
                     entry_widget.delete(0, tk.END)
                     entry_widget.insert(0, formatted_time)
+                    
+                    # CRITICAL: Update the StringVar that Excel uses
+                    if field_name in self.excel_vars:
+                        self.excel_vars[field_name].set(formatted_time)
+                        print(f"DEBUG: StringVar updated for {field_name}: '{formatted_time}'")
+                    
                     logger.info(f"Auto-formatted {field_name}: '{current_value}' → '{formatted_time}'")
             else:
                 # Show error message
@@ -1432,11 +1441,13 @@ class PDFProcessorApp:
         Returns:
             tuple: (is_valid, formatted_date, error_message)
         """
+        print(f"DEBUG: validate_date_format called with input: '{date_input}'")
         try:
             import re
 
             # Remove whitespace
             date_input = date_input.strip()
+            print(f"DEBUG: After trim: '{date_input}'")
 
             # Return empty for empty input
             if not date_input:
@@ -1460,11 +1471,22 @@ class PDFProcessorApp:
                 except ValueError:
                     return False, date_input, "Ogiltigt datum. Kontrollera år, månad och dag."
 
+            # Check for ambiguous century formats FIRST (before YYYYMMDD check)
+            yy_mm_dd_pattern = r'^(\d{2})-(\d{1,2})-(\d{1,2})$'
+            yymmdd_pattern = r'^(\d{6})$'
+            
+            print(f"DEBUG: Checking century patterns for: '{date_input}'")
+            if re.match(yy_mm_dd_pattern, date_input) or re.match(yymmdd_pattern, date_input):
+                print(f"DEBUG: Century validation triggered - rejecting '{date_input}'")
+                return False, date_input, "Du måste ange århundrade"
+
             # Pattern for YYYYMMDD format (8 digits, convert to YYYY-MM-DD)
             yyyymmdd_pattern = r'^(\d{8})$'
             yyyymmdd_match = re.match(yyyymmdd_pattern, date_input)
 
+            print(f"DEBUG: Checking YYYYMMDD pattern for: '{date_input}'")
             if yyyymmdd_match:
+                print(f"DEBUG: YYYYMMDD pattern matched")
                 date_digits = yyyymmdd_match.group(1)
                 year = int(date_digits[:4])
                 month = int(date_digits[4:6])
@@ -1475,16 +1497,11 @@ class PDFProcessorApp:
                     from datetime import datetime
                     datetime.strptime(f"{year}-{month:02d}-{day:02d}", '%Y-%m-%d')
                     formatted_date = f"{year}-{month:02d}-{day:02d}"
+                    print(f"DEBUG: YYYYMMDD converted: '{date_input}' → '{formatted_date}'")
                     return True, formatted_date, ""
                 except ValueError:
+                    print(f"DEBUG: YYYYMMDD validation failed - invalid date")
                     return False, date_input, "Ogiltigt datum. Kontrollera år, månad och dag."
-
-            # Check for ambiguous century formats and provide specific error
-            yy_mm_dd_pattern = r'^(\d{2})-(\d{1,2})-(\d{1,2})$'
-            yymmdd_pattern = r'^(\d{6})$'
-            
-            if re.match(yy_mm_dd_pattern, date_input) or re.match(yymmdd_pattern, date_input):
-                return False, date_input, "Du måste ange århundrade"
 
             # Invalid format
             return False, date_input, "Ogiltigt datumformat. Använd YYYY-MM-DD eller YYYYMMDD."
@@ -1503,9 +1520,11 @@ class PDFProcessorApp:
             event: FocusOut event
             field_name (str): Name of the date field ('Startdatum' or 'Slutdatum')
         """
+        print(f"DEBUG: validate_date_field called for {field_name}")
         try:
             entry_widget = event.widget
             current_value = entry_widget.get()
+            print(f"DEBUG: Current value in {field_name}: '{current_value}'")
 
             # Validate the date format
             is_valid, formatted_date, error_message = self.validate_date_format(current_value)
@@ -1513,8 +1532,15 @@ class PDFProcessorApp:
             if is_valid:
                 # Update the field with the formatted date
                 if current_value != formatted_date:
+                    print(f"DEBUG: Updating {field_name} - '{current_value}' → '{formatted_date}'")
                     entry_widget.delete(0, tk.END)
                     entry_widget.insert(0, formatted_date)
+                    
+                    # CRITICAL: Update the StringVar that Excel uses
+                    if field_name in self.excel_vars:
+                        self.excel_vars[field_name].set(formatted_date)
+                        print(f"DEBUG: StringVar updated for {field_name}: '{formatted_date}'")
+                    
                     logger.info(f"Auto-formatted {field_name}: '{current_value}' → '{formatted_date}'")
             else:
                 # Show error message
