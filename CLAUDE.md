@@ -206,20 +206,22 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 3. Close the app (formatting automatically saved)
 4. Restart the app (formatting automatically restored)
 
-## Current Status (v1.15.3)
+## Current Status (v1.16.4)
 
-**NEW MASTER VERSION**: Refined date/time field layout with proper alignment and positioning
-- ✅ **Date/Time Field Layout**: Polished two-column subgroup above Händelse with perfect alignment
-- ✅ **Field Alignment**: Grid-based layout ensures consistent positioning of labels, entries, and lock switches
-- ✅ **Header Positioning**: Händelse header properly positioned directly above formatting toolbar
+**NEW MASTER VERSION**: Complete date/time validation system with proper user interaction triggers
+- ✅ **Full-Window Scrollbar**: Canvas-based scrolling for low-resolution screen support
+- ✅ **Code Quality**: Reduced Ruff warnings from 117 to 36 (69% improvement)
+- ✅ **Date/Time Validation**: Comprehensive validation system with multiple trigger events
+- ✅ **Tab Navigation**: Validation triggers correctly on Tab key press with format conversion
+- ✅ **Save Button Validation**: Pre-save validation runs before other checks, prevents bad data
+- ✅ **Format Conversion**: Automatic formatting (1530→15:30, 20250728→2025-07-28)
+- ✅ **Century Validation**: Rejects YY-MM-DD/YYMMDD with "Du måste ange århundrade" error
+- ✅ **User Experience**: Clear error messages with field names and current values
+- ✅ **Event Bindings**: FocusOut, Return, Tab triggers for natural user workflow
 - ✅ **Rich Text Persistence**: Bold, italic, and color formatting preserved across app sessions
-- ✅ **Locked Field Formatting**: Text formatting in Note1, Note2, Note3, Händelse saved/restored
-- ✅ **Time Fields**: Starttid and Sluttid with HH:MM validation and auto-formatting (HHMM→HH:MM)
-- ✅ **19 Excel Columns**: All original fields plus new time fields (was 17, now 19)
+- ✅ **Time Fields**: Starttid and Sluttid with HH:MM validation and auto-formatting
+- ✅ **19 Excel Columns**: All original fields plus new time fields
 - ✅ **Core Functionality**: PDF processing, Excel integration, locked fields all working
-- ✅ **Layout**: Three-column Excel fields display correctly with time fields in column 2
-- ✅ **Mixed Rich Text**: Format changes within text work correctly in Excel
-- ✅ **Uniform Rich Text Bug**: Single format text disappears in Excel output
 
 ## Known Issues
 
@@ -345,10 +347,55 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 - Logging is configured for debugging
 - No automated tests are present in the codebase
 - No build process required - runs directly with Python interpreter
-- **Current version**: v1.15.3 (stable master with refined date/time field layout and perfect positioning)
-- **Last tested**: 2025-07-25 - Refined date/time field layout working perfectly, all functionality stable
+- **Current version**: v1.16.4 (stable master with complete date/time validation system)
+- **Last tested**: 2025-07-28 - Complete validation system working perfectly, all user interactions covered
 
 ## Recent Development History
+
+### v1.16.4 Success (2025-07-28) - Complete Date/Time Validation System
+**Achievement**: Fully functional date/time validation with proper user interaction triggers
+
+**Key Features**:
+- ✅ **Multiple Event Triggers**: FocusOut, Return, Tab bindings for natural user workflow
+- ✅ **Pre-Save Validation**: validate_all_date_time_fields() runs before other save checks
+- ✅ **Format Conversion**: Automatic formatting (1530→15:30, 20250728→2025-07-28)
+- ✅ **Century Validation**: Rejects YY-MM-DD/YYMMDD with "Du måste ange århundrade" error
+- ✅ **Clear Error Messages**: Shows field name and current invalid value
+- ✅ **Bytecode Cache Fix**: Cleared Python cache to ensure new validation code executes
+
+**User Experience**:
+- Tab navigation triggers validation correctly
+- Save button catches all invalid data with clear feedback
+- Format conversion works seamlessly during user input
+- Error messages guide users to fix specific field issues
+
+### v1.16.3 (2025-07-28) - Date/Time Validation Implementation
+**Goal**: Implement comprehensive date and time field validation
+**Result**: Initial implementation completed but bytecode cache prevented execution
+**Lesson**: Python bytecode cache can prevent new code from running - clear __pycache__ directories
+
+### v1.16.2 (2025-07-28) - Date/Time Validation Planning
+**Goal**: Add validation for date fields (Startdatum, Slutdatum) and time fields (Starttid, Sluttid)
+**Challenge**: User clarification that YY-MM-DD and YYMMDD should be rejected (no century assumption)
+
+### v1.16.1 Success (2025-07-28) - Code Quality Improvements
+**Achievement**: Reduced Ruff code quality issues from 117 to 36 errors (69% improvement)
+
+**Fixes Applied**:
+- ✅ **Import Cleanup**: Removed unused imports and replaced star imports
+- ✅ **Error Handling**: Fixed bare exception clauses
+- ✅ **Variable Cleanup**: Removed unused variables
+- ✅ **Whitespace**: Auto-fixed 67 whitespace and formatting issues
+
+### v1.16.0 Success (2025-07-28) - Full-Window Scrollbar Implementation
+**Achievement**: Added Canvas-based scrolling system for low-resolution screen support
+
+**Implementation**:
+- ✅ **ScrollableFrame Class**: Created in gui/utils.py with Canvas and Scrollbar
+- ✅ **Theme Preservation**: Maintains ttkbootstrap theming throughout scrollable content
+- ✅ **Mouse Wheel Support**: Platform-specific scrolling for Windows/Mac/Linux
+- ✅ **Dynamic Resizing**: Content adjusts to window size changes
+- ✅ **User Feedback**: "It works very well!" - confirmed by user testing
 
 ### v1.15.3 Success (2025-07-25) - Final Header Positioning Fix
 **Achievement**: Perfect positioning of Händelse header directly above toolbar
