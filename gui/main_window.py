@@ -1414,6 +1414,120 @@ class PDFProcessorApp:
         except Exception as e:
             logger.error(f"Error validating time field {field_name}: {e}")
 
+    def validate_date_format(self, date_input):
+        """
+        Validate and format date input for YYYY-MM-DD format.
+        
+        Supported input formats:
+        - YYYY-MM-DD (target format, validated and kept as-is)
+        - YYYYMMDD (converted to YYYY-MM-DD format)
+        
+        Rejected formats (require century specification):
+        - YY-MM-DD (ambiguous century - could be 1900s or 2000s)
+        - YYMMDD (ambiguous century - could be 1900s or 2000s)
+        
+        Args:
+            date_input (str): Date input from user
+            
+        Returns:
+            tuple: (is_valid, formatted_date, error_message)
+        """
+        try:
+            import re
+
+            # Remove whitespace
+            date_input = date_input.strip()
+
+            # Return empty for empty input
+            if not date_input:
+                return True, "", ""
+
+            # Pattern for YYYY-MM-DD format (already correct)
+            yyyy_mm_dd_pattern = r'^(\d{4})-(\d{1,2})-(\d{1,2})$'
+            yyyy_mm_dd_match = re.match(yyyy_mm_dd_pattern, date_input)
+
+            if yyyy_mm_dd_match:
+                year = int(yyyy_mm_dd_match.group(1))
+                month = int(yyyy_mm_dd_match.group(2))
+                day = int(yyyy_mm_dd_match.group(3))
+
+                # Validate the date using datetime
+                try:
+                    from datetime import datetime
+                    datetime.strptime(f"{year}-{month:02d}-{day:02d}", '%Y-%m-%d')
+                    formatted_date = f"{year}-{month:02d}-{day:02d}"
+                    return True, formatted_date, ""
+                except ValueError:
+                    return False, date_input, "Ogiltigt datum. Kontrollera år, månad och dag."
+
+            # Pattern for YYYYMMDD format (8 digits, convert to YYYY-MM-DD)
+            yyyymmdd_pattern = r'^(\d{8})$'
+            yyyymmdd_match = re.match(yyyymmdd_pattern, date_input)
+
+            if yyyymmdd_match:
+                date_digits = yyyymmdd_match.group(1)
+                year = int(date_digits[:4])
+                month = int(date_digits[4:6])
+                day = int(date_digits[6:8])
+
+                # Validate the date using datetime
+                try:
+                    from datetime import datetime
+                    datetime.strptime(f"{year}-{month:02d}-{day:02d}", '%Y-%m-%d')
+                    formatted_date = f"{year}-{month:02d}-{day:02d}"
+                    return True, formatted_date, ""
+                except ValueError:
+                    return False, date_input, "Ogiltigt datum. Kontrollera år, månad och dag."
+
+            # Check for ambiguous century formats and provide specific error
+            yy_mm_dd_pattern = r'^(\d{2})-(\d{1,2})-(\d{1,2})$'
+            yymmdd_pattern = r'^(\d{6})$'
+            
+            if re.match(yy_mm_dd_pattern, date_input) or re.match(yymmdd_pattern, date_input):
+                return False, date_input, "Du måste ange århundrade"
+
+            # Invalid format
+            return False, date_input, "Ogiltigt datumformat. Använd YYYY-MM-DD eller YYYYMMDD."
+
+        except ValueError as e:
+            return False, date_input, f"Ogiltigt datumformat: {str(e)}"
+        except Exception as e:
+            logger.error(f"Error validating date format: {e}")
+            return False, date_input, "Fel vid validering av datumformat."
+
+    def validate_date_field(self, event, field_name):
+        """
+        Validate date field on FocusOut event.
+        
+        Args:
+            event: FocusOut event
+            field_name (str): Name of the date field ('Startdatum' or 'Slutdatum')
+        """
+        try:
+            entry_widget = event.widget
+            current_value = entry_widget.get()
+
+            # Validate the date format
+            is_valid, formatted_date, error_message = self.validate_date_format(current_value)
+
+            if is_valid:
+                # Update the field with the formatted date
+                if current_value != formatted_date:
+                    entry_widget.delete(0, tk.END)
+                    entry_widget.insert(0, formatted_date)
+                    logger.info(f"Auto-formatted {field_name}: '{current_value}' → '{formatted_date}'")
+            else:
+                # Show error message
+                messagebox.showerror(
+                    "Ogiltigt datumformat",
+                    f"Fel i fält '{field_name}': {error_message}"
+                )
+                # Focus back to the field for correction
+                entry_widget.focus_set()
+
+        except Exception as e:
+            logger.error(f"Error validating date field {field_name}: {e}")
+
     def verify_insertion(self, widget, field_name, expected_chunk):
         """Verify that the inserted text hasn't been corrupted by other events"""
         try:

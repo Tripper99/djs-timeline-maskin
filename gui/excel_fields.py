@@ -515,6 +515,7 @@ class ExcelFieldManager:
         entry = tb.Entry(left_frame, textvariable=self.parent.excel_vars['Startdatum'],
                         font=('Arial', 9), width=12)
         entry.grid(row=0, column=1, sticky="w", padx=(5, 5), pady=(0, 5))
+        entry.bind('<FocusOut>', lambda e: self.parent.validate_date_field(e, 'Startdatum'))
         self.parent.enable_undo_for_widget(entry)
 
         lock_switch = tb.Checkbutton(left_frame,
@@ -546,6 +547,7 @@ class ExcelFieldManager:
         entry = tb.Entry(right_frame, textvariable=self.parent.excel_vars['Slutdatum'],
                         font=('Arial', 9), width=12)
         entry.grid(row=0, column=1, sticky="w", padx=(5, 5), pady=(0, 5))
+        entry.bind('<FocusOut>', lambda e: self.parent.validate_date_field(e, 'Slutdatum'))
         self.parent.enable_undo_for_widget(entry)
 
         lock_switch = tb.Checkbutton(right_frame,
