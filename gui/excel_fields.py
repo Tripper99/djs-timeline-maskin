@@ -517,7 +517,9 @@ class ExcelFieldManager:
         entry.grid(row=0, column=1, sticky="w", padx=(5, 5), pady=(0, 5))
         entry.bind('<FocusOut>', lambda e: self.parent.validate_date_field(e, 'Startdatum'))
         entry.bind('<Return>', lambda e: self.parent.validate_date_field(e, 'Startdatum'))
-        print(f"DEBUG: Date validation bindings added for Startdatum")
+        entry.bind('<Tab>', lambda e: self.parent.validate_date_field(e, 'Startdatum'))
+        entry.bind('<Button-1>', lambda e: self.parent.root.after(10, lambda: self.parent.validate_date_field(e, 'Startdatum')))
+        print(f"DEBUG: Date validation bindings added for Startdatum (FocusOut, Return, Tab, Button-1)")
         self.parent.enable_undo_for_widget(entry)
 
         lock_switch = tb.Checkbutton(left_frame,
@@ -535,7 +537,9 @@ class ExcelFieldManager:
         entry.grid(row=1, column=1, sticky="w", padx=(5, 5))
         entry.bind('<FocusOut>', lambda e: self.parent.validate_time_field(e, 'Starttid'))
         entry.bind('<Return>', lambda e: self.parent.validate_time_field(e, 'Starttid'))
-        print(f"DEBUG: Time validation bindings added for Starttid")
+        entry.bind('<Tab>', lambda e: self.parent.validate_time_field(e, 'Starttid'))
+        entry.bind('<Button-1>', lambda e: self.parent.root.after(10, lambda: self.parent.validate_time_field(e, 'Starttid')))
+        print(f"DEBUG: Time validation bindings added for Starttid (FocusOut, Return, Tab, Button-1)")
         self.parent.enable_undo_for_widget(entry)
 
         lock_switch = tb.Checkbutton(left_frame,
@@ -553,7 +557,9 @@ class ExcelFieldManager:
         entry.grid(row=0, column=1, sticky="w", padx=(5, 5), pady=(0, 5))
         entry.bind('<FocusOut>', lambda e: self.parent.validate_date_field(e, 'Slutdatum'))
         entry.bind('<Return>', lambda e: self.parent.validate_date_field(e, 'Slutdatum'))
-        print(f"DEBUG: Date validation bindings added for Slutdatum")
+        entry.bind('<Tab>', lambda e: self.parent.validate_date_field(e, 'Slutdatum'))
+        entry.bind('<Button-1>', lambda e: self.parent.root.after(10, lambda: self.parent.validate_date_field(e, 'Slutdatum')))
+        print(f"DEBUG: Date validation bindings added for Slutdatum (FocusOut, Return, Tab, Button-1)")
         self.parent.enable_undo_for_widget(entry)
 
         lock_switch = tb.Checkbutton(right_frame,
@@ -571,7 +577,9 @@ class ExcelFieldManager:
         entry.grid(row=1, column=1, sticky="w", padx=(5, 5))
         entry.bind('<FocusOut>', lambda e: self.parent.validate_time_field(e, 'Sluttid'))
         entry.bind('<Return>', lambda e: self.parent.validate_time_field(e, 'Sluttid'))
-        print(f"DEBUG: Time validation bindings added for Sluttid")
+        entry.bind('<Tab>', lambda e: self.parent.validate_time_field(e, 'Sluttid'))
+        entry.bind('<Button-1>', lambda e: self.parent.root.after(10, lambda: self.parent.validate_time_field(e, 'Sluttid')))
+        print(f"DEBUG: Time validation bindings added for Sluttid (FocusOut, Return, Tab, Button-1)")
         self.parent.enable_undo_for_widget(entry)
 
         lock_switch = tb.Checkbutton(right_frame,

@@ -1209,10 +1209,67 @@ class PDFProcessorApp:
                               "Inga ändringar att spara (alla fält var tomma eller oförändrade). " +
                               "Alla fält har rensats.")
 
+    def validate_all_date_time_fields(self) -> bool:
+        """Validate all date and time fields before saving. Returns False if validation fails."""
+        try:
+            date_fields = ['Startdatum', 'Slutdatum']
+            time_fields = ['Starttid', 'Sluttid']
+            
+            # Validate date fields
+            for field_name in date_fields:
+                if field_name in self.excel_vars:
+                    current_value = self.excel_vars[field_name].get().strip()
+                    if current_value:  # Only validate non-empty fields
+                        is_valid, formatted_date, error_msg = self.validate_date_format(current_value)
+                        if not is_valid:
+                            messagebox.showerror(
+                                "Ogiltigt datumformat",
+                                f"Fel i fältet '{field_name}':\n\n{error_msg}\n\n"
+                                f"Nuvarande värde: '{current_value}'\n\n"
+                                "Korrigera datumet och försök igen."
+                            )
+                            return False
+                        else:
+                            # Update field with validated format
+                            self.excel_vars[field_name].set(formatted_date)
+            
+            # Validate time fields  
+            for field_name in time_fields:
+                if field_name in self.excel_vars:
+                    current_value = self.excel_vars[field_name].get().strip()
+                    if current_value:  # Only validate non-empty fields
+                        is_valid, formatted_time, error_msg = self.validate_time_format(current_value)
+                        if not is_valid:
+                            messagebox.showerror(
+                                "Ogiltigt tidsformat", 
+                                f"Fel i fältet '{field_name}':\n\n{error_msg}\n\n"
+                                f"Nuvarande värde: '{current_value}'\n\n"
+                                "Korrigera tiden och försök igen."
+                            )
+                            return False
+                        else:
+                            # Update field with validated format
+                            self.excel_vars[field_name].set(formatted_time)
+            
+            return True  # All validations passed
+            
+        except Exception as e:
+            logger.error(f"Error during date/time validation: {e}")
+            messagebox.showerror(
+                "Valideringsfel",
+                f"Ett oväntat fel uppstod vid validering av datum/tid:\n\n{e}\n\n"
+                "Kontrollera alla datum- och tidsfält och försök igen."
+            )
+            return False
+
     def validate_excel_data_before_save(self) -> bool:
         """Validate Excel data before saving and warn user of potential issues"""
         if not self.excel_vars:
             return True  # No Excel file loaded, nothing to validate
+        
+        # First validate all date and time fields before other checks
+        if not self.validate_all_date_time_fields():
+            return False  # Date/time validation failed, cancel save
 
         # Check if Händelse has content
         handelse_content = ""
