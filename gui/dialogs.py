@@ -197,7 +197,9 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
                 # Load the created template
                 if self.parent.excel_manager.load_excel_file(template_path):
                     self.parent.excel_path_var.set(Path(template_path).name)
-                    # self.parent.config['excel_file'] = template_path  # Temporarily disabled - no persistence
+                    # Save Excel file path to config for persistence  
+                    self.parent.config['excel_file'] = template_path
+                    self.parent.config_manager.save_config(self.parent.config)
                     # No need to create fields - they're already created in setup_gui
                     # Enable the "Open Excel" button for newly created template
                     self.parent.open_excel_btn.config(state="normal")
