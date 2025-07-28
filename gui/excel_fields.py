@@ -6,7 +6,7 @@ Contains all Excel field creation and management methods extracted from main_win
 # Standard library imports
 import logging
 import tkinter as tk
-from typing import Dict, Tuple, Any, List
+from typing import Any, Dict, List, Tuple
 
 # Third-party GUI imports
 import ttkbootstrap as tb
@@ -24,7 +24,7 @@ class ExcelFieldManager:
     def __init__(self, parent_app):
         """Initialize Excel field manager with reference to parent application"""
         self.parent = parent_app
-        
+
         # Text fields that support rich text formatting
         self.text_fields = {'Note1', 'Note2', 'Note3', 'Händelse'}
 
@@ -35,30 +35,30 @@ class ExcelFieldManager:
             text_content = text_widget.get("1.0", "end-1c")
             if not text_content:
                 return []
-            
+
             # Get all tag ranges in the widget
             tag_ranges = []
             available_tags = ['bold', 'italic', 'red', 'blue', 'green', 'black']
-            
+
             for tag in available_tags:
                 ranges = text_widget.tag_ranges(tag)
                 # tag_ranges returns pairs: (start1, end1, start2, end2, ...)
                 for i in range(0, len(ranges), 2):
                     start_idx = ranges[i]
                     end_idx = ranges[i + 1]
-                    
+
                     # Convert tkinter indices to character positions
                     start_pos = text_widget.index(start_idx)
                     end_pos = text_widget.index(end_idx)
-                    
+
                     tag_ranges.append({
                         'tag': tag,
                         'start': start_pos,
                         'end': end_pos
                     })
-            
+
             return tag_ranges
-            
+
         except Exception as e:
             logger.error(f"Error serializing text widget formatting: {e}")
             return []
@@ -68,19 +68,19 @@ class ExcelFieldManager:
         try:
             if not format_data:
                 return
-            
+
             # Apply each tag range
             for tag_info in format_data:
                 tag = tag_info.get('tag')
                 start = tag_info.get('start')
                 end = tag_info.get('end')
-                
+
                 if tag and start and end:
                     try:
                         text_widget.tag_add(tag, start, end)
                     except tk.TclError as e:
                         logger.warning(f"Could not apply tag {tag} from {start} to {end}: {e}")
-                        
+
         except Exception as e:
             logger.error(f"Error restoring text widget formatting: {e}")
 
@@ -104,14 +104,14 @@ class ExcelFieldManager:
                         # Handle different widget types
                         if hasattr(var, 'get') and hasattr(var, 'delete'):  # Text widget
                             content = var.get("1.0", "end-1c")  # Get all text except final newline
-                            
+
                             # Collect rich text formatting for text fields
                             if field_name in self.text_fields and content.strip():
                                 format_data = self.serialize_text_widget_formatting(var)
                                 if format_data:
                                     locked_formats[field_name] = format_data
                                     logger.debug(f"Collected {len(format_data)} format tags for {field_name}")
-                                    
+
                         elif hasattr(var, 'get'):  # StringVar or Entry
                             content = var.get()
                         else:
@@ -153,13 +153,13 @@ class ExcelFieldManager:
                     if hasattr(var, 'delete') and hasattr(var, 'insert'):  # Text widget
                         var.delete("1.0", tk.END)
                         var.insert("1.0", content)
-                        
+
                         # Restore rich text formatting for text fields
                         if field_name in self.text_fields and field_name in locked_formats:
                             format_data = locked_formats[field_name]
                             self.restore_text_widget_formatting(var, format_data)
                             logger.debug(f"Restored {len(format_data)} format tags for {field_name}")
-                            
+
                     elif hasattr(var, 'set'):  # StringVar
                         var.set(content)
 
@@ -267,24 +267,24 @@ class ExcelFieldManager:
         col2_frame = tb.LabelFrame(fields_container, text="", padding=2)
         col2_frame.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
         col2_frame.grid_columnconfigure(0, weight=1)  # Content takes full width
-        
+
         # Row 0: Date/Time subframe (fixed height, no expansion)
         col2_frame.grid_rowconfigure(0, weight=0)
-        
+
         # Row 1: Händelse (expands to fill available space)
         col2_frame.grid_rowconfigure(1, weight=1)
-        
+
         # Create subframe for date/time fields
         datetime_frame = tb.Frame(col2_frame)
         datetime_frame.grid(row=0, column=0, sticky="ew", pady=(0, 5))
-        
+
         # Configure two columns in the datetime subframe
         datetime_frame.grid_columnconfigure(0, weight=1)  # Left column
         datetime_frame.grid_columnconfigure(1, weight=1)  # Right column
-        
+
         # Create date/time fields in the subframe
         self._create_datetime_fields_in_subframe(datetime_frame)
-        
+
         # Create Händelse field below the subframe
         self.create_field_in_frame(col2_frame, 'Händelse', 1, column_type="column2")
 
@@ -488,82 +488,82 @@ class ExcelFieldManager:
         parent_frame.grid_columnconfigure(0, weight=1)
         if parent_frame.grid_size()[0] > 1:  # If there are multiple columns
             parent_frame.grid_columnconfigure(1, weight=1)
-    
+
     def _create_datetime_fields_in_subframe(self, datetime_frame):
         """Create date/time fields in a 2-column subframe layout with proper alignment"""
         # Left column: Startdatum and Starttid
         left_frame = tb.Frame(datetime_frame)
         left_frame.grid(row=0, column=0, sticky="ew", padx=(0, 10))
-        
+
         # Right column: Slutdatum and Sluttid
         right_frame = tb.Frame(datetime_frame)
         right_frame.grid(row=0, column=1, sticky="ew", padx=(10, 0))
-        
+
         # Configure column weights for proper alignment within each side
         left_frame.grid_columnconfigure(0, weight=0, minsize=85)   # Label column - fixed width
         left_frame.grid_columnconfigure(1, weight=0)              # Entry column - fixed width
         left_frame.grid_columnconfigure(2, weight=1)              # Lock column - remaining space
-        
-        right_frame.grid_columnconfigure(0, weight=0, minsize=85)  # Label column - fixed width  
+
+        right_frame.grid_columnconfigure(0, weight=0, minsize=85)  # Label column - fixed width
         right_frame.grid_columnconfigure(1, weight=0)             # Entry column - fixed width
         right_frame.grid_columnconfigure(2, weight=1)             # Lock column - remaining space
-        
+
         # Create Startdatum field (left side, row 0)
-        tb.Label(left_frame, text="Startdatum:", 
+        tb.Label(left_frame, text="Startdatum:",
                 font=('Arial', 10)).grid(row=0, column=0, sticky="w", pady=(0, 5))
-        
+
         entry = tb.Entry(left_frame, textvariable=self.parent.excel_vars['Startdatum'],
                         font=('Arial', 9), width=12)
         entry.grid(row=0, column=1, sticky="w", padx=(5, 5), pady=(0, 5))
         self.parent.enable_undo_for_widget(entry)
-        
+
         lock_switch = tb.Checkbutton(left_frame,
                                     text="Lås",
                                     variable=self.parent.lock_vars['Startdatum'],
                                     bootstyle="success-round-toggle")
         lock_switch.grid(row=0, column=2, sticky="w", pady=(0, 5))
-        
+
         # Create Starttid field (left side, row 1)
-        tb.Label(left_frame, text="Starttid:", 
+        tb.Label(left_frame, text="Starttid:",
                 font=('Arial', 10)).grid(row=1, column=0, sticky="w")
-        
+
         entry = tb.Entry(left_frame, textvariable=self.parent.excel_vars['Starttid'],
                         font=('Arial', 9), width=7)
         entry.grid(row=1, column=1, sticky="w", padx=(5, 5))
         entry.bind('<FocusOut>', lambda e: self.parent.validate_time_field(e, 'Starttid'))
         self.parent.enable_undo_for_widget(entry)
-        
+
         lock_switch = tb.Checkbutton(left_frame,
                                     text="Lås",
                                     variable=self.parent.lock_vars['Starttid'],
                                     bootstyle="success-round-toggle")
         lock_switch.grid(row=1, column=2, sticky="w")
-        
+
         # Create Slutdatum field (right side, row 0)
-        tb.Label(right_frame, text="Slutdatum:", 
+        tb.Label(right_frame, text="Slutdatum:",
                 font=('Arial', 10)).grid(row=0, column=0, sticky="w", pady=(0, 5))
-        
+
         entry = tb.Entry(right_frame, textvariable=self.parent.excel_vars['Slutdatum'],
                         font=('Arial', 9), width=12)
         entry.grid(row=0, column=1, sticky="w", padx=(5, 5), pady=(0, 5))
         self.parent.enable_undo_for_widget(entry)
-        
+
         lock_switch = tb.Checkbutton(right_frame,
                                     text="Lås",
                                     variable=self.parent.lock_vars['Slutdatum'],
                                     bootstyle="success-round-toggle")
         lock_switch.grid(row=0, column=2, sticky="w", pady=(0, 5))
-        
+
         # Create Sluttid field (right side, row 1)
-        tb.Label(right_frame, text="Sluttid:", 
+        tb.Label(right_frame, text="Sluttid:",
                 font=('Arial', 10)).grid(row=1, column=0, sticky="w")
-        
+
         entry = tb.Entry(right_frame, textvariable=self.parent.excel_vars['Sluttid'],
                         font=('Arial', 9), width=7)
         entry.grid(row=1, column=1, sticky="w", padx=(5, 5))
         entry.bind('<FocusOut>', lambda e: self.parent.validate_time_field(e, 'Sluttid'))
         self.parent.enable_undo_for_widget(entry)
-        
+
         lock_switch = tb.Checkbutton(right_frame,
                                     text="Lås",
                                     variable=self.parent.lock_vars['Sluttid'],

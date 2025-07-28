@@ -5,7 +5,7 @@ Configuration management for the DJ Timeline application
 import json
 import logging
 from pathlib import Path
-from typing import Dict, Tuple, Any
+from typing import Any, Dict, Tuple
 
 from utils.constants import CONFIG_FILE
 

@@ -11,33 +11,18 @@ import platform
 import subprocess
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Tuple
 
 # GUI imports
 try:
     import tkinter as tk
-    from tkinter import filedialog, messagebox, scrolledtext
+    from tkinter import filedialog, messagebox
 
     import ttkbootstrap as tb
-    from ttkbootstrap.constants import *
+    from ttkbootstrap.constants import INFO, SUCCESS, SECONDARY, PRIMARY
 except ImportError:
     print("Error: ttkbootstrap not installed. Install with: pip install ttkbootstrap")
     exit(1)
 
-# PDF processing
-try:
-    import PyPDF2
-except ImportError:
-    print("Error: PyPDF2 not installed. Install with: pip install PyPDF2")
-    exit(1)
-
-# Excel processing
-try:
-    import openpyxl
-    from openpyxl.styles import NamedStyle
-except ImportError:
-    print("Error: openpyxl not installed. Install with: pip install openpyxl")
-    exit(1)
 
 # Local imports
 from core.config import ConfigManager
@@ -46,7 +31,7 @@ from core.filename_parser import FilenameParser
 from core.pdf_processor import PDFProcessor
 from gui.dialogs import DialogManager
 from gui.excel_fields import ExcelFieldManager
-from gui.utils import ToolTip, ScrollableFrame
+from gui.utils import ScrollableFrame, ToolTip
 from utils.constants import VERSION
 
 # Setup logging
@@ -159,7 +144,7 @@ class PDFProcessorApp:
                 available_height = work_area_height
             else:
                 available_height = screen_height - 80  # Fallback: assume larger taskbar
-        except:
+        except Exception:
             available_height = screen_height - 80  # Fallback
 
         window_height = min(max(int(available_height * 0.75), 700), 800)  # Much more aggressive height reduction for laptops
@@ -211,14 +196,14 @@ class PDFProcessorApp:
         # Create main container that fills window
         container = tb.Frame(self.root)
         container.pack(fill="both", expand=True)
-        
+
         # Create scrollable frame
         self.scrollable_frame = ScrollableFrame(container)
         self.scrollable_frame.pack(fill="both", expand=True)
-        
+
         # Get interior frame for content
         content_frame = self.scrollable_frame.interior
-        
+
         # Main container - removed expand=True to ensure bottom frame remains visible
         main_frame = tb.Frame(content_frame)
         main_frame.pack(fill="x", expand=False, padx=20, pady=20)
@@ -1314,10 +1299,8 @@ class PDFProcessorApp:
                 color = "green"
                 style = "success"
             elif remaining >= 50:
-                color = "orange"
                 style = "warning"
             else:
-                color = "red"
                 style = "danger"
 
             counter_label.config(text=f"Tecken kvar: {remaining}", bootstyle=style)
@@ -1645,7 +1628,7 @@ class PDFProcessorApp:
             screen_height = self.root.winfo_screenheight()
             try:
                 available_height = self.root.winfo_height() if hasattr(self.root, 'winfo_height') else screen_height - 80
-            except:
+            except Exception:
                 available_height = screen_height - 80
             max_height = min(max(int(available_height * 0.75), 700), 800)
 
