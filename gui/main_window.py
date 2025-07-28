@@ -46,7 +46,7 @@ from core.filename_parser import FilenameParser
 from core.pdf_processor import PDFProcessor
 from gui.dialogs import DialogManager
 from gui.excel_fields import ExcelFieldManager
-from gui.utils import ToolTip
+from gui.utils import ToolTip, ScrollableFrame
 from utils.constants import VERSION
 
 # Setup logging
@@ -208,8 +208,19 @@ class PDFProcessorApp:
         # Setup undo functionality
         self.setup_undo_functionality()
 
+        # Create main container that fills window
+        container = tb.Frame(self.root)
+        container.pack(fill="both", expand=True)
+        
+        # Create scrollable frame
+        self.scrollable_frame = ScrollableFrame(container)
+        self.scrollable_frame.pack(fill="both", expand=True)
+        
+        # Get interior frame for content
+        content_frame = self.scrollable_frame.interior
+        
         # Main container - removed expand=True to ensure bottom frame remains visible
-        main_frame = tb.Frame(self.root)
+        main_frame = tb.Frame(content_frame)
         main_frame.pack(fill="x", expand=False, padx=20, pady=20)
 
         # Variables
@@ -222,7 +233,7 @@ class PDFProcessorApp:
         self.create_group4(main_frame)  # Excel Operations Buttons
 
         # Bottom frame for statistics and version
-        bottom_frame = tb.Frame(self.root)
+        bottom_frame = tb.Frame(content_frame)
         bottom_frame.pack(fill="x", padx=20, pady=(0, 10))
 
         # Statistics label (left side)

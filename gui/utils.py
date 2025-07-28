@@ -2,7 +2,10 @@
 GUI utility classes for the DJ Timeline application
 """
 
+import platform
 import tkinter as tk
+import ttkbootstrap as tb
+from ttkbootstrap.constants import *
 
 
 class ToolTip:
@@ -38,3 +41,93 @@ class ToolTip:
         if self.tooltip_window:
             self.tooltip_window.destroy()
             self.tooltip_window = None
+
+
+class ScrollableFrame(tb.Frame):
+    """
+    A scrollable frame widget that provides vertical scrolling capability
+    while preserving ttkbootstrap theming.
+    """
+    
+    def __init__(self, parent, *args, **kwargs):
+        """
+        Initialize scrollable frame with:
+        - Canvas for content rendering
+        - Vertical scrollbar
+        - Interior frame for actual content
+        """
+        super().__init__(parent, *args, **kwargs)
+        
+        # Create canvas and scrollbar
+        self.canvas = tk.Canvas(self, highlightthickness=0)
+        self.scrollbar = tb.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.scrollable_frame = tb.Frame(self.canvas)
+        
+        # Configure canvas
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        )
+        
+        # Create window inside canvas
+        self.canvas_frame = self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        
+        # Configure canvas scrolling
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        
+        # Pack widgets
+        self.canvas.pack(side="left", fill="both", expand=True)
+        self.scrollbar.pack(side="right", fill="y")
+        
+        # Bind canvas resize to frame resize
+        self.canvas.bind('<Configure>', self.on_canvas_configure)
+        
+        # Bind mousewheel events
+        self.bind_mouse_wheel()
+        
+    def on_canvas_configure(self, event):
+        """Reset the canvas window to encompass inner frame when canvas size changes"""
+        canvas_width = event.width
+        self.canvas.itemconfig(self.canvas_frame, width=canvas_width)
+        
+    def bind_mouse_wheel(self):
+        """Bind mouse wheel events for scrolling"""
+        # Windows and MacOS
+        self.canvas.bind_all("<MouseWheel>", self.on_mouse_wheel)
+        # Linux
+        self.canvas.bind_all("<Button-4>", self.on_mouse_wheel)
+        self.canvas.bind_all("<Button-5>", self.on_mouse_wheel)
+        
+    def unbind_mouse_wheel(self):
+        """Unbind mouse wheel events"""
+        self.canvas.unbind_all("<MouseWheel>")
+        self.canvas.unbind_all("<Button-4>")
+        self.canvas.unbind_all("<Button-5>")
+        
+    def on_mouse_wheel(self, event):
+        """Handle mouse wheel scrolling with platform-specific logic"""
+        # Check if the mouse is over a text widget (which might have its own scrolling)
+        widget_under_mouse = event.widget.winfo_containing(event.x_root, event.y_root)
+        if widget_under_mouse and isinstance(widget_under_mouse, (tk.Text, tk.Listbox)):
+            return
+            
+        if platform.system() == 'Windows':
+            self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        else:  # Linux/Mac
+            if event.num == 4:
+                self.canvas.yview_scroll(-1, "units")
+            elif event.num == 5:
+                self.canvas.yview_scroll(1, "units")
+                
+    @property
+    def interior(self):
+        """Return the interior frame where content should be placed"""
+        return self.scrollable_frame
+        
+    def scroll_to_top(self):
+        """Scroll to the top of the canvas"""
+        self.canvas.yview_moveto(0)
+        
+    def scroll_to_bottom(self):
+        """Scroll to the bottom of the canvas"""
+        self.canvas.yview_moveto(1)
