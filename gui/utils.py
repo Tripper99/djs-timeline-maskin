@@ -43,6 +43,34 @@ class ToolTip:
             self.tooltip_window = None
 
 
+class ScrollableText(tb.Frame):
+    """A Text widget with vertical scrollbar"""
+    
+    def __init__(self, parent, **text_options):
+        super().__init__(parent)
+        
+        # Create text widget with all provided options
+        self.text_widget = tk.Text(self, **text_options)
+        
+        # Create scrollbar (always visible for consistent behavior)
+        self.scrollbar = tb.Scrollbar(self, orient="vertical", 
+                                     command=self.text_widget.yview)
+        
+        # Configure text widget scrolling
+        self.text_widget.configure(yscrollcommand=self.scrollbar.set)
+        
+        # Layout widgets - use grid for better control
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+        
+        self.text_widget.grid(row=0, column=0, sticky="nsew")
+        self.scrollbar.grid(row=0, column=1, sticky="ns")
+    
+    def __getattr__(self, name):
+        """Delegate unknown attributes to the text widget"""
+        return getattr(self.text_widget, name)
+
+
 class ScrollableFrame(tb.Frame):
     """
     A scrollable frame widget that provides vertical scrolling capability

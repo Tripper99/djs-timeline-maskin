@@ -14,6 +14,7 @@ from ttkbootstrap.constants import *
 
 # Local imports
 from utils.constants import REQUIRED_EXCEL_COLUMNS
+from gui.utils import ScrollableText
 
 logger = logging.getLogger(__name__)
 
@@ -358,9 +359,13 @@ class ExcelFieldManager:
             else:
                 height = 6  # Increased from 4 (Note3 and other text fields)
 
-            text_widget = tk.Text(parent_frame, height=height,
-                                wrap=tk.WORD, font=('Arial', 9),
-                                undo=True, maxundo=20)
+            # Create scrollable text widget container
+            scrollable_text = ScrollableText(parent_frame, height=height,
+                                           wrap=tk.WORD, font=('Arial', 9),
+                                           undo=True, maxundo=20)
+
+            # Get reference to the actual text widget for bindings
+            text_widget = scrollable_text.text_widget
 
             # Enable undo functionality for text widget
             self.parent.enable_undo_for_widget(text_widget)
@@ -393,14 +398,14 @@ class ExcelFieldManager:
             toolbar_frame.grid(row=row+1, column=0, columnspan=2, sticky="w", pady=(2, 2))
             self.parent.create_formatting_toolbar(toolbar_frame, text_widget, col_name)
 
-            # Move text widget to row+2 to make room for toolbar
+            # Move scrollable text container to row+2 to make room for toolbar
             # Make Händelse expand vertically to fill available space
             if col_name == 'Händelse':
-                text_widget.grid(row=row+2, column=0, columnspan=2, sticky="nsew", pady=(0, 2))
+                scrollable_text.grid(row=row+2, column=0, columnspan=2, sticky="nsew", pady=(0, 2))
                 # Configure the text widget row to expand vertically
                 parent_frame.grid_rowconfigure(row+2, weight=1)
             else:
-                text_widget.grid(row=row+2, column=0, columnspan=2, sticky="ew", pady=(0, 2))
+                scrollable_text.grid(row=row+2, column=0, columnspan=2, sticky="ew", pady=(0, 2))
 
             # Row 4: Character counter (left aligned, compact)
             limit = self.parent.handelse_char_limit if col_name == 'Händelse' else self.parent.char_limit
@@ -409,8 +414,8 @@ class ExcelFieldManager:
             counter_label.grid(row=row+3, column=0, sticky="w", pady=(5, 8))
             self.parent.char_counters[col_name] = counter_label
 
-            # Store reference to text widget
-            self.parent.excel_vars[col_name] = text_widget
+            # Store reference to scrollable text container (delegation will handle method calls)
+            self.parent.excel_vars[col_name] = scrollable_text
 
             # Return the number of rows used (4 rows for text fields: header, toolbar, text, counter)
             return 4
