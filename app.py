@@ -18,27 +18,14 @@ logger = logging.getLogger(__name__)
 
 def check_dependencies() -> bool:
     """Check if all required packages are installed"""
+    import importlib.util
+
+    required_packages = ["ttkbootstrap", "PyPDF2", "openpyxl", "xlsxwriter"]
     missing_packages = []
 
-    try:
-        import ttkbootstrap
-    except ImportError:
-        missing_packages.append("ttkbootstrap")
-
-    try:
-        import PyPDF2
-    except ImportError:
-        missing_packages.append("PyPDF2")
-
-    try:
-        import openpyxl
-    except ImportError:
-        missing_packages.append("openpyxl")
-
-    try:
-        import xlsxwriter
-    except ImportError:
-        missing_packages.append("xlsxwriter")
+    for package in required_packages:
+        if importlib.util.find_spec(package) is None:
+            missing_packages.append(package)
 
     if missing_packages:
         print("Missing required packages:")

@@ -267,7 +267,8 @@ class ExcelManager:
                             if color_obj and hasattr(color_obj, 'rgb'):
                                 return str(color_obj.rgb) if color_obj.rgb else None
                             return None
-                        except:
+                        except (AttributeError, TypeError, ValueError) as e:
+                            logger.warning(f"Could not extract color: {e}")
                             return None
 
                     cell_format = {

@@ -120,7 +120,7 @@ class PDFProcessor:
         """Check if file is locked/in use by another application"""
         try:
             # Try to open file in exclusive mode
-            with open(file_path, 'r+b') as f:
+            with open(file_path, 'r+b'):
                 pass
             return False
         except (OSError, PermissionError):

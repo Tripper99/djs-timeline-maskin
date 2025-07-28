@@ -18,7 +18,7 @@ try:
     from tkinter import filedialog, messagebox
 
     import ttkbootstrap as tb
-    from ttkbootstrap.constants import INFO, SUCCESS, SECONDARY, PRIMARY
+    from ttkbootstrap.constants import INFO, PRIMARY, SECONDARY, SUCCESS
 except ImportError:
     print("Error: ttkbootstrap not installed. Install with: pip install ttkbootstrap")
     exit(1)
@@ -1216,7 +1216,7 @@ class PDFProcessorApp:
         try:
             date_fields = ['Startdatum', 'Slutdatum']
             time_fields = ['Starttid', 'Sluttid']
-            
+
             # Validate date fields
             for field_name in date_fields:
                 if field_name in self.excel_vars:
@@ -1234,8 +1234,8 @@ class PDFProcessorApp:
                         else:
                             # Update field with validated format
                             self.excel_vars[field_name].set(formatted_date)
-            
-            # Validate time fields  
+
+            # Validate time fields
             for field_name in time_fields:
                 if field_name in self.excel_vars:
                     current_value = self.excel_vars[field_name].get().strip()
@@ -1243,7 +1243,7 @@ class PDFProcessorApp:
                         is_valid, formatted_time, error_msg = self.validate_time_format(current_value)
                         if not is_valid:
                             messagebox.showerror(
-                                "Ogiltigt tidsformat", 
+                                "Ogiltigt tidsformat",
                                 f"Fel i fältet '{field_name}':\n\n{error_msg}\n\n"
                                 f"Nuvarande värde: '{current_value}'\n\n"
                                 "Korrigera tiden och försök igen."
@@ -1252,9 +1252,9 @@ class PDFProcessorApp:
                         else:
                             # Update field with validated format
                             self.excel_vars[field_name].set(formatted_time)
-            
+
             return True  # All validations passed
-            
+
         except Exception as e:
             logger.error(f"Error during date/time validation: {e}")
             messagebox.showerror(
@@ -1268,7 +1268,7 @@ class PDFProcessorApp:
         """Validate Excel data before saving and warn user of potential issues"""
         if not self.excel_vars:
             return True  # No Excel file loaded, nothing to validate
-        
+
         # First validate all date and time fields before other checks
         if not self.validate_all_date_time_fields():
             return False  # Date/time validation failed, cancel save
@@ -1463,12 +1463,12 @@ class PDFProcessorApp:
                     print(f"DEBUG: Updating {field_name} - '{current_value}' → '{formatted_time}'")
                     entry_widget.delete(0, tk.END)
                     entry_widget.insert(0, formatted_time)
-                    
+
                     # CRITICAL: Update the StringVar that Excel uses
                     if field_name in self.excel_vars:
                         self.excel_vars[field_name].set(formatted_time)
                         print(f"DEBUG: StringVar updated for {field_name}: '{formatted_time}'")
-                    
+
                     logger.info(f"Auto-formatted {field_name}: '{current_value}' → '{formatted_time}'")
             else:
                 # Show error message
@@ -1533,7 +1533,7 @@ class PDFProcessorApp:
             # Check for ambiguous century formats FIRST (before YYYYMMDD check)
             yy_mm_dd_pattern = r'^(\d{2})-(\d{1,2})-(\d{1,2})$'
             yymmdd_pattern = r'^(\d{6})$'
-            
+
             print(f"DEBUG: Checking century patterns for: '{date_input}'")
             if re.match(yy_mm_dd_pattern, date_input) or re.match(yymmdd_pattern, date_input):
                 print(f"DEBUG: Century validation triggered - rejecting '{date_input}'")
@@ -1545,7 +1545,7 @@ class PDFProcessorApp:
 
             print(f"DEBUG: Checking YYYYMMDD pattern for: '{date_input}'")
             if yyyymmdd_match:
-                print(f"DEBUG: YYYYMMDD pattern matched")
+                print("DEBUG: YYYYMMDD pattern matched")
                 date_digits = yyyymmdd_match.group(1)
                 year = int(date_digits[:4])
                 month = int(date_digits[4:6])
@@ -1559,7 +1559,7 @@ class PDFProcessorApp:
                     print(f"DEBUG: YYYYMMDD converted: '{date_input}' → '{formatted_date}'")
                     return True, formatted_date, ""
                 except ValueError:
-                    print(f"DEBUG: YYYYMMDD validation failed - invalid date")
+                    print("DEBUG: YYYYMMDD validation failed - invalid date")
                     return False, date_input, "Ogiltigt datum. Kontrollera år, månad och dag."
 
             # Invalid format
@@ -1594,12 +1594,12 @@ class PDFProcessorApp:
                     print(f"DEBUG: Updating {field_name} - '{current_value}' → '{formatted_date}'")
                     entry_widget.delete(0, tk.END)
                     entry_widget.insert(0, formatted_date)
-                    
+
                     # CRITICAL: Update the StringVar that Excel uses
                     if field_name in self.excel_vars:
                         self.excel_vars[field_name].set(formatted_date)
                         print(f"DEBUG: StringVar updated for {field_name}: '{formatted_date}'")
-                    
+
                     logger.info(f"Auto-formatted {field_name}: '{current_value}' → '{formatted_date}'")
             else:
                 # Show error message
