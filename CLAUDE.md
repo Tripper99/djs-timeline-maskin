@@ -63,7 +63,7 @@ The application is structured with the following modular organization:
 - **FilenameParser** (core/filename_parser.py): Filename parsing and text cleaning
 - **ExcelManager** (core/excel_manager.py): Excel file operations and formatting
 - **ConfigManager** (core/config.py): Application configuration persistence
-- **ToolTip** (gui/utils.py): GUI tooltip utility
+- **ToolTip, ScrollableText, ScrollableFrame** (gui/utils.py): GUI utilities including tooltips, scrollable text widgets, and full-window scrolling
 
 ## Key Features
 
@@ -206,9 +206,11 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 3. Close the app (formatting automatically saved)
 4. Restart the app (formatting automatically restored)
 
-## Current Status (v1.16.4)
+## Current Status (v1.16.6)
 
-**NEW MASTER VERSION**: Complete date/time validation system with proper user interaction triggers
+**NEW MASTER VERSION**: Complete application with scrollable text widgets and comprehensive validation
+- ✅ **Scrollable Text Widgets**: All text fields (Händelse, Note1-3) now have vertical scrollbars
+- ✅ **Excel File Persistence**: App remembers selected Excel file between sessions
 - ✅ **Full-Window Scrollbar**: Canvas-based scrolling for low-resolution screen support
 - ✅ **Code Quality**: Reduced Ruff warnings from 117 to 36 (69% improvement)
 - ✅ **Date/Time Validation**: Comprehensive validation system with multiple trigger events
@@ -255,7 +257,7 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
    - **Workaround**: Use mixed formatting within text
 
 2. **Code Quality Improvements**
-   - **Ruff Warnings**: 96 style/import warnings to clean up
+   - **Ruff Warnings**: 36 remaining style/import warnings to clean up (reduced from 117)
    - **Location**: Multiple files, mostly whitespace and import organization
    - **Impact**: No functional issues, but affects code maintainability
 
@@ -347,10 +349,51 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 - Logging is configured for debugging
 - No automated tests are present in the codebase
 - No build process required - runs directly with Python interpreter
-- **Current version**: v1.16.4 (stable master with complete date/time validation system)
-- **Last tested**: 2025-07-28 - Complete validation system working perfectly, all user interactions covered
+- **Current version**: v1.16.6 (stable master with scrollable text widgets and Excel file persistence)
+- **Last tested**: 2025-07-28 - Scrollable text widgets working perfectly, Excel file persistence restored
 
 ## Recent Development History
+
+### v1.16.6 Success (2025-07-28) - Scrollable Text Widgets Implementation
+**Achievement**: Added vertical scrollbars to all text fields for improved usability
+
+**Key Features**:
+- ✅ **ScrollableText Component**: New reusable component in gui/utils.py
+- ✅ **All Text Fields Enhanced**: Händelse, Note1, Note2, Note3 now have scrollbars
+- ✅ **Grid Layout Integration**: Proper expansion control with existing layout system
+- ✅ **Always Visible Scrollbars**: Consistent behavior, functional when content overflows
+- ✅ **Full Compatibility**: All existing features preserved through delegation pattern
+
+**Technical Implementation**:
+- Created ScrollableText class with Text widget and Scrollbar components
+- Used grid layout for better expansion control than pack
+- Delegation pattern ensures all existing method calls work unchanged
+- Maintains character counting, formatting, undo, and paste handling
+
+**User Experience**:
+- Long text content in any field can now be scrolled
+- Consistent scrollbar appearance across all text fields
+- No loss of existing functionality or visual layout
+
+### v1.16.5 Success (2025-07-28) - Excel File Persistence Restoration
+**Achievement**: Restored Excel file path memory between application sessions
+
+**Key Features**:
+- ✅ **Startup Loading**: App automatically loads previously selected Excel file
+- ✅ **File Selection Memory**: Saves path when user selects Excel file
+- ✅ **Template Creation Memory**: Saves path when user creates Excel template
+- ✅ **JSON Config Integration**: Uses existing config system for persistence
+
+**Fixes Applied**:
+- Uncommented `load_saved_excel_file()` call on application startup
+- Restored `config['excel_file'] = working_path` in file selection
+- Added `config_manager.save_config()` calls to persist changes immediately
+- Restored template creation persistence in dialogs.py
+
+**User Experience**:
+- Select Excel file once, it's remembered forever
+- Create template once, it's remembered forever
+- No need to re-select Excel file every session
 
 ### v1.16.4 Success (2025-07-28) - Complete Date/Time Validation System
 **Achievement**: Fully functional date/time validation with proper user interaction triggers
