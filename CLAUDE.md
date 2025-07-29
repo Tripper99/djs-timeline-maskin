@@ -335,10 +335,11 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 
 ### Current Application Features:
 - ✅ **Output Folder Selection**: Flexible destination for renamed PDFs with session-only lock and folder opening
+- ✅ **Font Size Toggle**: A+ button in text fields for cycling through 9pt → 12pt → 15pt with proper bold/italic formatting
 - ✅ **Scrollable Text Widgets**: All text fields (Händelse, Note1-3) now have vertical scrollbars
 - ✅ **Excel File Persistence**: App remembers selected Excel file between sessions
 - ✅ **Full-Window Scrollbar**: Canvas-based scrolling for low-resolution screen support
-- ✅ **Code Quality**: Reduced Ruff warnings from 117 to 36 (69% improvement)
+- ✅ **Code Quality**: All major code issues resolved, clean Ruff validation
 - ✅ **Date/Time Validation**: Comprehensive validation system with multiple trigger events
 - ✅ **Tab Navigation**: Validation triggers correctly on Tab key press with format conversion
 - ✅ **Save Button Validation**: Pre-save validation runs before other checks, prevents bad data
@@ -375,7 +376,7 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 
 ## Things That Remain To Do
 
-**NOTE**: The major text field editing bugs (undo/paste/formatting) have been completely resolved in v1.16.18. Remaining issues are lower priority enhancements.
+**NOTE**: The major text field editing bugs (undo/paste/formatting) and font sizing issues have been completely resolved in v1.16.18-v1.17.6. Remaining issues are lower priority enhancements.
 
 ### High Priority Issues
 1. **Rich Text Uniform Formatting Bug** (Excel Export)
@@ -384,10 +385,11 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
    - **Location**: `core/excel_manager.py` xlsxwriter rich text API handling
    - **Workaround**: Use mixed formatting within text
 
-2. **Code Quality Improvements**
-   - **Ruff Warnings**: 36 remaining style/import warnings to clean up (reduced from 117)
-   - **Location**: Multiple files, mostly whitespace and import organization
-   - **Impact**: No functional issues, but affects code maintainability
+2. ~~**Code Quality Improvements**~~ ✅ **RESOLVED in v1.17.6**
+   - ~~**Ruff Warnings**: 36 remaining style/import warnings to clean up (reduced from 117)~~
+   - ✅ **Status**: All major code quality issues resolved, clean Ruff validation
+   - ~~**Location**: Multiple files, mostly whitespace and import organization~~
+   - ~~**Impact**: No functional issues, but affects code maintainability~~
 
 ### Medium Priority Enhancements
 3. **Window Height Optimization**
@@ -407,7 +409,7 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 
 6. **Enhanced Rich Text Features**
    - **Underline Support**: Add underline formatting option
-   - **Font Size Control**: Variable font sizes within text fields
+   - ~~**Font Size Control**: Variable font sizes within text fields~~ ✅ **COMPLETED in v1.17.6**
    - **Additional Colors**: Expand color palette beyond current 4 colors
 
 7. **User Experience Improvements**
@@ -477,10 +479,44 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 - Logging is configured for debugging
 - No automated tests are present in the codebase
 - No build process required - runs directly with Python interpreter
-- **Current version**: v1.17.4 (stable master with improved error handling and retry/cancel dialogs)
-- **Last tested**: 2025-07-29 - All v1.17.4 improvements verified working, enhanced error handling confirmed
+- **Current version**: v1.17.6 (stable master with fixed bold/italic font sizing)
+- **Last tested**: 2025-07-29 - All v1.17.6 improvements verified working, font sizing bug completely resolved
 
 ## Recent Development History
+
+### v1.17.6 Success (2025-07-29) - Bold and Italic Font Sizing Fix ✅
+**Achievement**: Completely resolved the bug where bold and italic formatting didn't resize with the A+ font size toggle button
+
+**Critical Problem Solved**:
+When using the A+ button to change text size in the text fields (Händelse, Note1-3), text formatted with bold or italic would remain at the default 9pt size while normal text would resize correctly. This made formatted text appear inconsistent with the selected font size.
+
+**Technical Root Cause**:
+The `setup_text_formatting_tags()` method had hardcoded font sizes for bold and italic tags:
+```python
+text_widget.tag_configure("bold", font=('Arial', 9, 'bold'))      # Always 9pt
+text_widget.tag_configure("italic", font=('Arial', 9, 'italic'))  # Always 9pt
+```
+
+**Complete Solution Implemented**:
+- ✅ **Dynamic Tag Configuration**: Updated `setup_text_formatting_tags()` to read font size from config instead of hardcoded 9pt
+- ✅ **Tag Update Method**: Added `update_formatting_tags()` method to update bold/italic tag fonts dynamically
+- ✅ **Enhanced Font Application**: Modified `apply_text_font_size()` to update both main text font AND formatting tags
+- ✅ **A+ Button Integration**: Added A+ button to all text field toolbars for easy font size toggling (9pt → 12pt → 15pt)
+- ✅ **Startup Application**: Font size is now applied correctly when app starts and when text fields are created
+- ✅ **Code Cleanup**: Removed duplicate method definitions and fixed all Ruff syntax issues
+
+**User Benefits**:
+- Font size toggle now works correctly for ALL text formatting including bold and italic
+- Consistent text appearance regardless of formatting applied
+- Improved readability on high-resolution monitors
+- All text fields (Händelse, Note1-3) support the enhanced font size feature
+
+**Testing Results**:
+- ✅ Bold text resizes correctly with A+ button (9pt → 12pt → 15pt)
+- ✅ Italic text resizes correctly with A+ button
+- ✅ Mixed formatting (bold + colors, italic + colors) all resize properly
+- ✅ Font size persists between app sessions
+- ✅ No syntax errors or code quality issues remain
 
 ### v1.17.1 Success (2025-07-29) - Output Folder UI and Behavior Improvements
 **Achievement**: Enhanced user experience with refined output folder selection interface and behavior
