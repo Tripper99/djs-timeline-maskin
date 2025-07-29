@@ -303,6 +303,9 @@ class PDFProcessorApp:
         self.output_folder_lock_var = tk.BooleanVar(value=False)
         self._actual_output_folder = ""  # Store actual path while display shows friendly text
 
+        # Text font size for text fields (Händelse, Note1-3) - load from config
+        self.text_font_size = self.config.get('text_font_size', 9)
+
         # Row background color selection - DEFAULT: none (white)
         self.row_color_var = tk.StringVar(value="none")
 
@@ -560,7 +563,15 @@ class PDFProcessorApp:
         help_btn = tb.Button(excel_btn_frame, text="?",
                            command=self.dialog_manager.show_excel_help,
                            bootstyle=SECONDARY, width=3)
-        help_btn.pack(side="left")
+        help_btn.pack(side="left", padx=(0, 5))
+
+        # Font size toggle button
+        self.font_size_btn = tb.Button(excel_btn_frame, text="A+",
+                                      command=self.toggle_text_font_size,
+                                      bootstyle=INFO, width=3)
+        self.font_size_btn.pack(side="left")
+        ToolTip(self.font_size_btn, "Ändra textstorlek i textfält (Händelse, Note1-3). " +
+                                   "Cyklar mellan 9pt → 12pt → 15pt.")
 
         # Excel column fields (scrollable, three-column layout)
         self.excel_fields_frame = tb.Frame(group3)
@@ -570,6 +581,13 @@ class PDFProcessorApp:
         self.excel_fields_frame.grid_columnconfigure(0, weight=1)
 
         self.excel_field_manager.create_excel_fields()
+        
+        # Apply saved font size to text fields after they're created
+        self.apply_text_font_size()
+        
+        # Set initial button text based on current font size
+        size_labels = {9: "A", 12: "A+", 15: "A++"}
+        self.font_size_btn.configure(text=size_labels.get(self.text_font_size, "A"))
 
     def create_group4(self, parent):
         """Group 4: Excel Operations Buttons"""
@@ -718,6 +736,42 @@ class PDFProcessorApp:
         dialog.wait_window()
         
         return result['choice']
+
+    def toggle_text_font_size(self):
+        """Toggle font size for text fields (Händelse, Note1-3) between 9pt, 12pt, 15pt"""
+        # Cycle through font sizes: 9 → 12 → 15 → 9
+        font_sizes = [9, 12, 15]
+        try:
+            current_index = font_sizes.index(self.text_font_size)
+            self.text_font_size = font_sizes[(current_index + 1) % len(font_sizes)]
+        except ValueError:
+            # If current size is not in list, reset to default
+            self.text_font_size = 9
+        
+        # Update button text to show current size
+        size_labels = {9: "A", 12: "A+", 15: "A++"}
+        self.font_size_btn.configure(text=size_labels.get(self.text_font_size, "A"))
+        
+        # Save font size to config
+        self.config['text_font_size'] = self.text_font_size
+        self.config_manager.save_config(self.config)
+        
+        # Apply new font size to all text fields (Händelse, Note1-3)
+        self.apply_text_font_size()
+        
+        logger.info(f"Changed text font size to {self.text_font_size}pt")
+
+    def apply_text_font_size(self):
+        """Apply current font size to all text fields"""
+        text_field_names = ['Händelse', 'Note1', 'Note2', 'Note3']
+        
+        if hasattr(self, 'excel_vars'):
+            for field_name in text_field_names:
+                if field_name in self.excel_vars:
+                    widget = self.excel_vars[field_name]
+                    # Check if it's a ScrollableText widget (has text_widget attribute)
+                    if hasattr(widget, 'text_widget'):
+                        widget.text_widget.configure(font=('Arial', self.text_font_size))
 
     def select_pdf_file(self):
         """Select PDF file for processing"""

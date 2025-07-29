@@ -24,6 +24,7 @@ class ConfigManager:
             "theme": "simplex",
             "output_folder": "",  # Store output folder path for renamed PDFs
             "output_folder_locked": False,  # Store if output folder selection is locked
+            "text_font_size": 9,  # Store text font size for Händelse and Note fields
             "locked_fields": {},  # Store which fields are locked (field_name: True/False)
             "locked_field_contents": {},  # Store content of locked fields (field_name: content)
             "locked_field_formats": {}  # Store rich text formatting of locked fields (field_name: format_data)
