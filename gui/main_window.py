@@ -2060,9 +2060,13 @@ class PDFProcessorApp:
         self.root.bind_all('<Delete>', self.handle_delete_with_undo)
         self.root.bind_all('<BackSpace>', self.handle_delete_with_undo)
         
-        # CRITICAL: Disable built-in <<Paste>> virtual event to prevent duplication
-        # The Text widget has a built-in <<Paste>> binding that runs independently
-        # of our <Control-v> handler, causing text to be pasted twice
+        # CRITICAL: Disable built-in paste events to prevent duplication and allow our handler
+        # The Text widget has BOTH a <Control-v> class binding AND a <<Paste>> virtual event
+        # The <Control-v> class binding intercepts our global bind_all handler
+        print("DEBUG: Disabling built-in Text class <Control-v> binding...")
+        self.root.bind_class('Text', '<Control-v>', lambda e: 'break')
+        print("DEBUG: Control-v class binding disabled")
+        
         print("DEBUG: Disabling built-in <<Paste>> virtual event...")
         self.root.bind_class('Text', '<<Paste>>', lambda e: 'break')
         print("DEBUG: Virtual event disabled")
