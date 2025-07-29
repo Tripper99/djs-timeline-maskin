@@ -206,9 +206,27 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 3. Close the app (formatting automatically saved)
 4. Restart the app (formatting automatically restored)
 
-## Current Status (v1.17.0)
+## Current Status (v1.17.1)
 
-**MAJOR FEATURE UPDATE**: Flexible output folder selection system replaces rigid subfolder approach
+**UI AND BEHAVIOR REFINEMENTS**: Enhanced output folder selection with improved user experience
+
+### v1.17.1 Success (2025-07-29) - Output Folder UI and Behavior Improvements ✅
+**Achievement**: Refined the output folder selection system with better layout, user-friendly display, and improved behavior
+
+**UI Improvements**:
+- ✅ **Compact Layout**: Moved "Nollställ mapp" button to same row as lock switch
+- ✅ **User-Friendly Display**: Shows "Samma mapp som pdf-filen" instead of long file paths when folder matches PDF's parent directory
+- ✅ **Smart Validation**: Prevents enabling lock switch when output folder is empty with clear error message
+
+**Behavior Improvements**:
+- ✅ **Always Update When Unlocked**: PDF selection now ALWAYS updates output folder when lock is off (removed empty folder restriction)
+- ✅ **Consistent Experience**: Lock switch is the only control that prevents folder updates
+- ✅ **Clear Error Messages**: User guidance when trying to lock empty folder selection
+
+**Technical Enhancements**:
+- Internal storage system separates actual paths from display text
+- Enhanced validation and user feedback
+- Improved folder path handling throughout the application
 
 ### v1.17.0 Success (2025-07-29) - Output Folder Selection System ✅
 **Achievement**: Replaced the fixed "Omdöpta filer" subfolder switch with a comprehensive output folder selection system
@@ -400,10 +418,31 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 - Logging is configured for debugging
 - No automated tests are present in the codebase
 - No build process required - runs directly with Python interpreter
-- **Current version**: v1.17.0 (stable master with flexible output folder selection)
-- **Last tested**: 2025-07-29 - Output folder selection working perfectly, all previous features intact
+- **Current version**: v1.17.1 (stable master with enhanced output folder UX)
+- **Last tested**: 2025-07-29 - All v1.17.1 improvements verified working, UI refinements successful
 
 ## Recent Development History
+
+### v1.17.1 Success (2025-07-29) - Output Folder UI and Behavior Improvements
+**Achievement**: Enhanced user experience with refined output folder selection interface and behavior
+
+**Key UI Improvements**:
+- **Compact Layout**: Moved "Nollställ mapp" button from separate row to same row as lock switch
+- **Smart Display Text**: Shows "Samma mapp som pdf-filen" for PDF's parent directory instead of long paths
+- **Validation Feedback**: Prevents lock activation on empty folders with clear error message
+
+**Behavior Changes**:
+- **Always Auto-Fill**: PDF selection always updates output folder when lock is off (removed empty folder check)
+- **Lock-Only Control**: Only the lock switch prevents automatic folder updates
+- **Internal Path Storage**: Separates actual file paths from user-friendly display text
+
+**User Benefits**:
+- More intuitive interface with better space utilization
+- Clearer understanding of current folder selection
+- Consistent behavior regardless of current folder state
+- Better error guidance for invalid operations
+
+**Testing**: All functionality verified working, user tested and confirmed successful
 
 ### v1.17.0 Success (2025-07-29) - Output Folder Selection System
 **Achievement**: Replaced fixed subfolder approach with flexible output folder selection
