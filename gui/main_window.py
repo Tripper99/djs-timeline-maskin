@@ -703,13 +703,13 @@ class PDFProcessorApp:
             dialog.destroy()
         
         # Buttons
-        retry_btn = tk.Button(btn_frame, text="Försök igen", command=on_retry, 
-                             font=('Arial', 10), width=12, bg='#4CAF50', fg='white')
-        retry_btn.pack(side="right", padx=(10, 0))
-        
         cancel_btn = tk.Button(btn_frame, text="Avbryt", command=on_cancel,
                               font=('Arial', 10), width=12, bg='#f44336', fg='white')
         cancel_btn.pack(side="right")
+        
+        retry_btn = tk.Button(btn_frame, text="Försök igen", command=on_retry, 
+                             font=('Arial', 10), width=12, bg='#4CAF50', fg='white')
+        retry_btn.pack(side="right", padx=(10, 0))
         
         # Handle window close button (X) as cancel
         dialog.protocol("WM_DELETE_WINDOW", on_cancel)
