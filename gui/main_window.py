@@ -1678,13 +1678,17 @@ class PDFProcessorApp:
 
     def handle_paste_undo(self, event):
         """Handle Ctrl+V - paste with format preservation if available"""
+        print("DEBUG: handle_paste_undo called!")
+        logger.info("Paste handler executed")
         try:
             focused_widget = self.root.focus_get()
+            print(f"DEBUG: Focused widget: {focused_widget}, type: {type(focused_widget)}")
             if isinstance(focused_widget, tk.Text):
                 # Add edit separator before paste
                 focused_widget.edit_separator()
                 
                 # Check if we have formatted content in internal clipboard
+                print(f"DEBUG: Internal clipboard: {self.internal_clipboard}")
                 if self.internal_clipboard:
                     text, tags_data = self.internal_clipboard
                     
@@ -1721,6 +1725,7 @@ class PDFProcessorApp:
                     try:
                         # Get clipboard content - this was the MISSING CRITICAL CODE
                         clipboard_content = self.root.clipboard_get()
+                        print(f"DEBUG: Clipboard content: '{clipboard_content}'")
                         
                         # Check if there's selected text that will be replaced
                         has_selection = bool(focused_widget.tag_ranges(tk.SEL))
@@ -1746,7 +1751,9 @@ class PDFProcessorApp:
                         
                         # Insert clipboard content at cursor position
                         insert_pos = focused_widget.index(tk.INSERT)
+                        print(f"DEBUG: Inserting '{clipboard_content}' at position {insert_pos}")
                         focused_widget.insert(insert_pos, clipboard_content)
+                        print("DEBUG: Text inserted successfully")
 
                         # Schedule saving the post-paste content to our undo stack
                         self.root.after_idle(self.save_post_paste_state, focused_widget)
@@ -2047,14 +2054,18 @@ class PDFProcessorApp:
         self.root.bind_all('<Control-a>', self.handle_select_all_undo)
         self.root.bind_all('<Control-c>', self.handle_copy_with_format)
         self.root.bind_all('<Control-x>', self.handle_cut_with_format)
+        print("DEBUG: Setting up paste binding...")
         self.root.bind_all('<Control-v>', self.handle_paste_undo)
+        print("DEBUG: Paste binding set up successfully")
         self.root.bind_all('<Delete>', self.handle_delete_with_undo)
         self.root.bind_all('<BackSpace>', self.handle_delete_with_undo)
         
         # CRITICAL: Disable built-in <<Paste>> virtual event to prevent duplication
         # The Text widget has a built-in <<Paste>> binding that runs independently
         # of our <Control-v> handler, causing text to be pasted twice
+        print("DEBUG: Disabling built-in <<Paste>> virtual event...")
         self.root.bind_class('Text', '<<Paste>>', lambda e: 'break')
+        print("DEBUG: Virtual event disabled")
 
     def global_undo(self, event=None):
         """Global undo function that works on focused widget"""
