@@ -118,12 +118,13 @@ The breakthrough hybrid approach consista of:
 - Method 2 character-by-character algorithm for text extraction
 This method might seem complicated but is important to understand that this is the only way we've found to make the app to write perfect Excel rich text formatting with colors, bold, italic, line breaks.
 
-## Current Status (v1.17.15)
+## Current Status (v1.17.16)
 
-**COMPLETED ✅ - T BUTTON CLEAR FORMATTING FIX**: T button now clears ALL formatting and uses text widget's actual default color
+**COMPLETED ✅ - UNIFORM FORMATTING BUG FIX**: Text with uniform formatting (all red, all bold, etc.) now displays correctly in Excel
 
-### Working Features (v1.17.15):
+### Working Features (v1.17.16):
 - ✅ **Rich Text Background Colors**: All text fields (including rich text) support background colors correctly ✅ FIXED!
+- ✅ **Uniform Formatting Excel Export**: Text with uniform formatting (all red, all bold, etc.) now displays correctly in Excel ✅ FIXED!
 - ✅ **Output Folder Selection**: Flexible destination for renamed PDFs with session-only lock and folder opening
 - ✅ **Font Size Toggle**: A+ button in text fields for cycling through 9pt → 12pt → 15pt with proper bold/italic formatting
 - ✅ **Scrollable Text Widgets**: All text fields (Händelse, Note1-3) now have vertical scrollbars
@@ -139,9 +140,10 @@ This method might seem complicated but is important to understand that this is t
 - ✅ **T Button Clear Formatting**: T button removes ALL formatting (bold, italic, colors) and restores text widget's default color
 - ✅ **Error Handling**: Professional retry/cancel dialogs for file lock scenarios
 
-### Completed Major Fixes (v1.17.13-v1.17.15):
+### Completed Major Fixes (v1.17.13-v1.17.16):
 - ✅ **Rich Text Background Colors**: Successfully resolved with correct xlsxwriter API usage and color preservation system
 - ✅ **T Button Clear Formatting**: Fixed to remove ALL formatting and use text widget's actual default color instead of theme system color
+- ✅ **Uniform Formatting Excel Export**: Fixed xlsxwriter edge case where uniformly formatted text disappeared in Excel
 
 ### Rich Text Format Preservation (v1.14.0)
 **NEW SYSTEM**: Complete format preservation for locked text fields across app sessions
@@ -160,11 +162,12 @@ This method might seem complicated but is important to understand that this is t
 - **Final Solution**: Correct xlsxwriter API + `_extract_row_color_from_format()` method for existing rows
 - **Result**: Perfect background color support across all field types with full formatting preservation
 
-### Rich Text Uniform Formatting Bug (Excel Export) - SEPARATE ISSUE
-- **Status**: Affects Excel output only, GUI works perfectly
-- **Issue**: Text with uniform formatting (all red, all bold) disappears in Excel
-- **Location**: `core/excel_manager.py` xlsxwriter rich text API handling  
-- **Workaround**: Use mixed formatting within text
+### Rich Text Uniform Formatting Bug (Excel Export) - COMPLETED ✅
+- **Status**: All text fields including uniform formatting now work correctly in Excel ✅ FIXED!
+- **Root Cause**: `xlsxwriter.write_rich_string()` designed for mixed formatting, failed with uniform patterns  
+- **Investigation**: Identified edge case where `[format_obj, "entire text"]` pattern caused text to disappear
+- **Final Solution**: Smart detection + fallback to `worksheet.write()` for uniform formatting cases
+- **Result**: Perfect Excel export for both uniform and mixed formatting with preserved functionality
 
 ### Window Height on External Monitors
 - ✅ **Laptop screens**: Full functionality, all elements visible
@@ -197,7 +200,7 @@ This method might seem complicated but is important to understand that this is t
 - Logging is configured for debugging
 - No automated tests are present in the codebase
 - No build process required - runs directly with Python interpreter
-- **Current version**: v1.17.15 (stable master with fixed T button clear formatting)
-- **Last tested**: 2025-07-30 - T button formatting fix verified working across multiple themes
+- **Current version**: v1.17.16 (stable master with uniform formatting bug fix)
+- **Last tested**: 2025-07-29 - Uniform formatting bug fix verified working across all formatting scenarios
 
 For detailed version history and development milestones, see DEVELOPMENT_HISTORY.md
