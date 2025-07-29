@@ -467,6 +467,12 @@ class PDFProcessorApp:
         ToolTip(self.output_folder_lock_switch, "När låst: mappvalet ändras inte när ny PDF väljs. "
                                                "När olåst: mappvalet uppdateras automatiskt till PDF-filens mapp.")
 
+        # Open folder button (between lock and reset)
+        self.open_folder_btn = tb.Button(pdf_path_frame, text="Öppna mapp",
+                                        command=self.open_output_folder, bootstyle=SUCCESS, width=12)
+        self.open_folder_btn.pack(side="left", padx=(10, 0))
+        ToolTip(self.open_folder_btn, "Öppna den valda mappen i filutforskaren.")
+
         # Reset button (same row)
         self.reset_folder_btn = tb.Button(pdf_path_frame, text="Nollställ mapp",
                                          command=self.reset_output_folder, bootstyle=INFO, width=15)
@@ -635,7 +641,7 @@ class PDFProcessorApp:
     def load_saved_output_folder(self):
         """Load previously saved output folder settings if they exist"""
         output_folder = self.config.get('output_folder', '')
-        output_folder_locked = self.config.get('output_folder_locked', False)
+        # ALWAYS start with lock switch OFF (session-only behavior)
         
         if output_folder and Path(output_folder).exists():
             # Store actual path and update display
@@ -646,9 +652,9 @@ class PDFProcessorApp:
         else:
             self._actual_output_folder = ""
         
-        self.output_folder_lock_var.set(output_folder_locked)
-        if output_folder_locked:
-            logger.info("Output folder lock is enabled")
+        # Always set lock to False on app start (session-only behavior)
+        self.output_folder_lock_var.set(False)
+        logger.info("Output folder lock always starts unlocked (session-only behavior)")
 
     def select_pdf_file(self):
         """Select PDF file for processing"""
@@ -730,9 +736,9 @@ class PDFProcessorApp:
         )
         
         if folder_path:
-            # Store actual path and update display
+            # Store actual path and update display (save folder but not lock state)
             self.config['output_folder'] = folder_path
-            self.config['output_folder_locked'] = self.output_folder_lock_var.get()
+            # Don't save lock state - it's session-only behavior
             self.config_manager.save_config(self.config)
             
             # Update display with friendly text
@@ -747,11 +753,34 @@ class PDFProcessorApp:
         self.output_folder_var.set("")
         self.output_folder_lock_var.set(False)
         self._actual_output_folder = ""
-        # Save to config
+        # Save folder reset to config (but not lock state - it's session-only)
         self.config['output_folder'] = ""
-        self.config['output_folder_locked'] = False
         self.config_manager.save_config(self.config)
         logger.info("Reset output folder selection")
+
+    def open_output_folder(self):
+        """Open the selected output folder in file explorer"""
+        actual_folder = getattr(self, '_actual_output_folder', '')
+        
+        if not actual_folder:
+            messagebox.showerror("Fel", "Ingen mapp är vald att öppna.")
+            return
+        
+        if not Path(actual_folder).exists():
+            messagebox.showerror("Fel", f"Mappen finns inte längre:\n{actual_folder}")
+            return
+        
+        try:
+            if platform.system() == 'Windows':
+                os.startfile(actual_folder)
+            elif platform.system() == 'Darwin':  # macOS
+                subprocess.run(['open', actual_folder])
+            else:  # Linux
+                subprocess.run(['xdg-open', actual_folder])
+            logger.info(f"Opened output folder: {actual_folder}")
+        except Exception as e:
+            messagebox.showerror("Fel", f"Kunde inte öppna mappen: {str(e)}")
+            logger.error(f"Error opening output folder: {e}")
 
     def get_display_folder_text(self, folder_path):
         """Get display text for output folder - show 'Samma mapp som pdf-filen' for PDF's parent directory"""
@@ -775,7 +804,7 @@ class PDFProcessorApp:
         self.output_folder_var.set(display_text)
 
     def on_output_folder_lock_change(self):
-        """Save config when output folder lock state changes"""
+        """Handle output folder lock state changes (session-only, no config save)"""
         # Check if trying to lock with empty folder
         if self.output_folder_lock_var.get():
             actual_folder = getattr(self, '_actual_output_folder', '')
@@ -785,10 +814,10 @@ class PDFProcessorApp:
                 messagebox.showerror("Fel", "Du måste välja en mapp innan du kan låsa mappvalet.")
                 return
         
-        self.config['output_folder_locked'] = self.output_folder_lock_var.get()
-        self.config_manager.save_config(self.config)
+        # NOTE: Lock state is NOT saved to config (session-only behavior)
+        # Only save the folder path, not the lock state
         if self.output_folder_lock_var.get():
-            logger.info("Output folder lock enabled")
+            logger.info("Output folder lock enabled (session-only)")
         else:
             logger.info("Output folder lock disabled")
 
