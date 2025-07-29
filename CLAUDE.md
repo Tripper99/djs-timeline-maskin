@@ -527,14 +527,20 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 - **Enhanced UX**: No more confusion about letter-coded color buttons
 
 **Testing Results**:
-- ✅ Application imports and runs without errors
+- ✅ Application imports and runs without errors (fixed font configuration issues)
 - ✅ All Ruff syntax checks pass
-- ✅ Bold button displays with bold text styling
-- ✅ Italic button displays with italic text styling
-- ✅ Color buttons show intuitive colored symbols
+- ✅ Bold button displays with mathematical bold Unicode character (𝐁)
+- ✅ Italic button displays with mathematical italic Unicode character (𝐼)
+- ✅ Color buttons show colored circles with appropriate ttkbootstrap styles
 - ✅ Default color button properly resets to actual default text color
 - ✅ All keyboard shortcuts work correctly (Ctrl+B, Ctrl+I, Ctrl+R, Ctrl+1, Ctrl+G, Ctrl+K)
 - ✅ Excel export handles all formatting including new default color
+
+**v1.17.8 Fix Applied**:
+- ✅ **Font Configuration Issue Resolved**: Removed unsupported `font` and `foreground` parameters from ttkbootstrap buttons
+- ✅ **Unicode Enhancement**: Used mathematical bold (𝐁) and italic (𝐼) Unicode characters for visual distinction
+- ✅ **Style Compatibility**: Updated to use proper ttkbootstrap styling system (danger, primary, success styles)
+- ✅ **Application Startup**: Fixed startup error "unknown option '-font'" and "unknown option '-foreground'"
 
 ### v1.17.7 Success (2025-07-29) - UI Cleanup: Remove Redundant Font Size Button ✅
 **Achievement**: Cleaned up the Excel integration section by removing redundant font size toggle button
