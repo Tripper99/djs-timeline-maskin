@@ -418,7 +418,7 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 - Logging is configured for debugging
 - No automated tests are present in the codebase
 - No build process required - runs directly with Python interpreter
-- **Current version**: v1.17.1 (stable master with enhanced output folder UX)
+- **Current version**: v1.17.2 (stable master with enhanced output folder UX)
 - **Last tested**: 2025-07-29 - All v1.17.1 improvements verified working, UI refinements successful
 
 ## Recent Development History
