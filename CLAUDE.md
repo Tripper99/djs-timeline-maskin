@@ -479,10 +479,40 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 - Logging is configured for debugging
 - No automated tests are present in the codebase
 - No build process required - runs directly with Python interpreter
-- **Current version**: v1.17.6 (stable master with fixed bold/italic font sizing)
-- **Last tested**: 2025-07-29 - All v1.17.6 improvements verified working, font sizing bug completely resolved
+- **Current version**: v1.17.7 (stable master with cleaned up font size UI)
+- **Last tested**: 2025-07-29 - All v1.17.7 improvements verified working, redundant button removed
 
 ## Recent Development History
+
+### v1.17.7 Success (2025-07-29) - UI Cleanup: Remove Redundant Font Size Button ✅
+**Achievement**: Cleaned up the Excel integration section by removing redundant font size toggle button
+
+**Problem Identified**:
+After implementing individual A+ buttons in each text field toolbar (v1.17.6), there was a redundant font size toggle button in the Excel integration section, positioned next to the help button (?). This created UI clutter and confusion since users now had multiple ways to change font size.
+
+**UI Improvement Implemented**:
+- ✅ **Removed Redundant Button**: Eliminated the global A+ button from Excel integration section (lines 572-578 in main_window.py)
+- ✅ **Preserved Individual Controls**: Kept the A+ buttons in each text field toolbar for direct, contextual font size control
+- ✅ **Maintained Functionality**: All font sizing functionality remains fully available through individual text field buttons
+- ✅ **Cleaner Interface**: Excel integration section now has a cleaner, less cluttered appearance
+
+**Technical Changes**:
+- Removed button creation and tooltip from `create_group3()` method
+- Kept `toggle_text_font_size()` method as it's still used by individual field buttons
+- No other code references needed cleanup
+
+**User Benefits**:
+- **Cleaner UI**: Excel integration section is less cluttered and more focused
+- **Intuitive Control**: Font size control is now only available where it's contextually relevant (in text fields)
+- **No Functionality Loss**: All font sizing capabilities remain fully accessible
+- **Consistent Experience**: Font size control is now consistently located in text field toolbars
+
+**Testing Results**:
+- ✅ Application starts without errors
+- ✅ Individual A+ buttons in text fields work perfectly
+- ✅ Font size changes still apply to all text fields (Händelse, Note1-3)
+- ✅ No broken references or functionality issues
+- ✅ Clean Ruff validation with no syntax errors
 
 ### v1.17.6 Success (2025-07-29) - Bold and Italic Font Sizing Fix ✅
 **Achievement**: Completely resolved the bug where bold and italic formatting didn't resize with the A+ font size toggle button

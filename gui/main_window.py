@@ -567,15 +567,7 @@ class PDFProcessorApp:
         help_btn = tb.Button(excel_btn_frame, text="?",
                            command=self.dialog_manager.show_excel_help,
                            bootstyle=SECONDARY, width=3)
-        help_btn.pack(side="left", padx=(0, 5))
-
-        # Font size toggle button
-        self.font_size_btn = tb.Button(excel_btn_frame, text="A+",
-                                      command=self.toggle_text_font_size,
-                                      bootstyle=INFO, width=3)
-        self.font_size_btn.pack(side="left")
-        ToolTip(self.font_size_btn, "Ändra textstorlek i textfält (Händelse, Note1-3). " +
-                                   "Cyklar mellan 9pt → 12pt → 15pt.")
+        help_btn.pack(side="left")
 
         # Excel column fields (scrollable, three-column layout)
         self.excel_fields_frame = tb.Frame(group3)
