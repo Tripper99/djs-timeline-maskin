@@ -1712,6 +1712,9 @@ class PDFProcessorApp:
                     # Clear internal clipboard after use (single use)
                     self.internal_clipboard = None
                     
+                    # Trigger character count check after formatted paste
+                    self.root.after_idle(lambda: self.check_character_count_for_widget(focused_widget))
+                    
                     return "break"  # Prevent default paste
                 else:
                     # No formatted content, use regular paste with undo tracking
@@ -1738,6 +1741,9 @@ class PDFProcessorApp:
                     
                     # Add edit separator after paste
                     self.root.after_idle(lambda: focused_widget.edit_separator())
+                    
+                    # Trigger character count check after regular paste
+                    self.root.after_idle(lambda: self.check_character_count_for_widget(focused_widget))
                 
                 # ALWAYS return "break" for Text widgets to prevent duplicate paste
                 # from widget-specific handlers in excel_fields.py
@@ -1755,6 +1761,27 @@ class PDFProcessorApp:
                 self.save_text_undo_state(text_widget, post_paste_content)
                 logger.info("Saved post-paste content to undo stack")
         except (tk.TclError, AttributeError):
+            pass
+
+    def check_character_count_for_widget(self, text_widget):
+        """Helper method to trigger character count check for a text widget after paste"""
+        try:
+            # Find which column this widget belongs to by checking widget references
+            # This is needed because the paste handler doesn't know the column name
+            for col_name, widgets in getattr(self, 'excel_widgets', {}).items():
+                if hasattr(widgets, 'text_widget') and widgets.text_widget == text_widget:
+                    # Create a dummy event for character count checking
+                    class DummyEvent:
+                        def __init__(self, widget):
+                            self.widget = widget
+                    
+                    self.check_character_count(DummyEvent(text_widget), col_name)
+                    break
+                elif widgets == text_widget:  # Direct widget reference
+                    self.check_character_count(DummyEvent(text_widget), col_name)
+                    break
+        except (AttributeError, TypeError):
+            # If we can't determine the column, skip character count check
             pass
 
     def handle_copy_with_format(self, event):

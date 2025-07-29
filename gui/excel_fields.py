@@ -376,10 +376,12 @@ class ExcelFieldManager:
                            lambda e, col=col_name: self.parent.check_character_count(e, col))
             text_widget.bind('<Button-1>',
                            lambda e, col=col_name: self.parent.root.after(1, lambda: self.parent.check_character_count(e, col)))
-            text_widget.bind('<Control-v>',
-                           lambda e, col=col_name: self.parent.dialog_manager.handle_paste_event(e, col))
-            text_widget.bind('<<Paste>>',
-                           lambda e, col=col_name: self.parent.dialog_manager.handle_paste_event(e, col))
+            # REMOVED: Widget-specific paste bindings to prevent duplicate paste
+            # These conflict with the global paste handler in main_window.py
+            # text_widget.bind('<Control-v>',
+            #                lambda e, col=col_name: self.parent.dialog_manager.handle_paste_event(e, col))
+            # text_widget.bind('<<Paste>>',
+            #                lambda e, col=col_name: self.parent.dialog_manager.handle_paste_event(e, col))
 
             # Add improved undo handling for key presses that replace selected text
             text_widget.bind('<KeyPress>',
