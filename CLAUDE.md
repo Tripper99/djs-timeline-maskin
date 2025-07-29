@@ -206,9 +206,30 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 3. Close the app (formatting automatically saved)
 4. Restart the app (formatting automatically restored)
 
-## Current Status (v1.16.18)
+## Current Status (v1.17.0)
 
-**BREAKTHROUGH SUCCESS**: All major text field bugs completely resolved with nuclear option approach
+**MAJOR FEATURE UPDATE**: Flexible output folder selection system replaces rigid subfolder approach
+
+### v1.17.0 Success (2025-07-29) - Output Folder Selection System ✅
+**Achievement**: Replaced the fixed "Omdöpta filer" subfolder switch with a comprehensive output folder selection system
+
+**New Features**:
+- ✅ **Output Folder Selection**: Choose any folder for renamed PDFs
+- ✅ **Auto-fill Logic**: Automatically fills with PDF's directory when unlocked
+- ✅ **Lock Switch**: Prevent folder from changing when selecting new PDFs
+- ✅ **Reset Button**: "Nollställ mapp" clears selection and unlocks auto-update
+- ✅ **Persistent Settings**: Output folder and lock state saved between sessions
+
+**Layout Changes**:
+- Removed: "Flytta omdöpt PDF till undermapp 'Omdöpta filer'" switch from Group 4
+- Added to Group 1: `Mapp för omdöpt pdf: [____] [Välj mapp] [ ]Lås`
+- Added reset button below for clearing selection
+
+**User Benefits**:
+- Full control over where renamed PDFs are saved
+- Can organize PDFs into any folder structure
+- Lock prevents accidental folder changes
+- Defaults to same directory if no folder selected
 
 ### v1.16.18 Success Story (2025-07-29) - Text Field Bug Resolution ✅
 **Achievement**: After 17+ versions and multiple failed approaches, the nuclear option definitively solved all text editing issues
@@ -236,6 +257,7 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 **Technical Breakthrough**: The key was abandoning the global binding approach and binding directly to each individual Text widget, passing the widget reference directly to the handler.
 
 ### Current Application Features:
+- ✅ **Output Folder Selection**: Flexible destination for renamed PDFs with folder dialog
 - ✅ **Scrollable Text Widgets**: All text fields (Händelse, Note1-3) now have vertical scrollbars
 - ✅ **Excel File Persistence**: App remembers selected Excel file between sessions
 - ✅ **Full-Window Scrollbar**: Canvas-based scrolling for low-resolution screen support
@@ -378,10 +400,34 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 - Logging is configured for debugging
 - No automated tests are present in the codebase
 - No build process required - runs directly with Python interpreter
-- **Current version**: v1.16.18 (stable master with all text field bugs resolved)
-- **Last tested**: 2025-07-29 - All text editing functionality working perfectly, paste/undo/formatting completely resolved
+- **Current version**: v1.17.0 (stable master with flexible output folder selection)
+- **Last tested**: 2025-07-29 - Output folder selection working perfectly, all previous features intact
 
 ## Recent Development History
+
+### v1.17.0 Success (2025-07-29) - Output Folder Selection System
+**Achievement**: Replaced fixed subfolder approach with flexible output folder selection
+
+**Key Changes**:
+- **Removed**: "Flytta omdöpt PDF till undermapp 'Omdöpta filer'" switch
+- **Added**: Complete output folder selection system with:
+  - Folder selection dialog ("Välj mapp" button)
+  - Auto-fill from PDF location when unlocked
+  - Lock switch to prevent unwanted changes
+  - Reset button to clear selection
+- **Updated**: PDF rename logic to use selected folder or default to same directory
+
+**User Benefits**:
+- Choose any destination folder for renamed PDFs
+- Organize files according to personal workflow
+- Lock prevents accidental folder changes
+- Settings persist between sessions
+
+**Technical Details**:
+- Added `output_folder` and `output_folder_locked` to configuration
+- Implemented auto-fill logic in `select_pdf_file()`
+- Updated `rename_current_pdf()` to use dynamic output folder
+- All functionality tested and verified working
 
 ### v1.16.18 Success (2025-07-29) - MAJOR BREAKTHROUGH: Text Field Bug Resolution
 **Achievement**: Completely resolved all persistent text field editing bugs with nuclear option approach
