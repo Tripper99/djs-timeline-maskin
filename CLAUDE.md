@@ -206,9 +206,36 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 3. Close the app (formatting automatically saved)
 4. Restart the app (formatting automatically restored)
 
-## Current Status (v1.16.6)
+## Current Status (v1.16.18)
 
-**NEW MASTER VERSION**: Complete application with scrollable text widgets and comprehensive validation
+**BREAKTHROUGH SUCCESS**: All major text field bugs completely resolved with nuclear option approach
+
+### v1.16.18 Success Story (2025-07-29) - Text Field Bug Resolution ✅
+**Achievement**: After 17+ versions and multiple failed approaches, the nuclear option definitively solved all text editing issues
+
+**Critical Bugs FIXED**:
+- ✅ **Regular undo while typing**: Now works character-by-character (was undoing large chunks)
+- ✅ **Undo after formatting**: No longer jumps way back inappropriately  
+- ✅ **Copy/paste with formatting**: Format preservation works perfectly (was duplicating or losing formatting)
+
+**Nuclear Option Solution**:
+- **Problem**: Global `bind_all('<Control-v>')` never worked due to ScrollableText focus hierarchy
+- **Root Cause**: Focus went to ScrollableText Frame, not inner Text widget
+- **Solution**: Direct widget binding in `excel_fields.py`:
+  ```python
+  text_widget.bind('<Control-v>', lambda e: self.parent.handle_paste_undo(text_widget))
+  ```
+- **Result**: Bypassed all tkinter hierarchy issues completely
+
+**User Testing Confirmation**:
+- Multiple successful paste operations in all Text fields (Händelse, Note1-3)
+- Proper undo state management working
+- No crashes, no duplicate paste, no formatting loss
+- Excel integration continues working flawlessly
+
+**Technical Breakthrough**: The key was abandoning the global binding approach and binding directly to each individual Text widget, passing the widget reference directly to the handler.
+
+### Current Application Features:
 - ✅ **Scrollable Text Widgets**: All text fields (Händelse, Note1-3) now have vertical scrollbars
 - ✅ **Excel File Persistence**: App remembers selected Excel file between sessions
 - ✅ **Full-Window Scrollbar**: Canvas-based scrolling for low-resolution screen support
@@ -248,6 +275,8 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 - **Future improvement**: Dynamic height adjustment based on screen size
 
 ## Things That Remain To Do
+
+**NOTE**: The major text field editing bugs (undo/paste/formatting) have been completely resolved in v1.16.18. Remaining issues are lower priority enhancements.
 
 ### High Priority Issues
 1. **Rich Text Uniform Formatting Bug** (Excel Export)
@@ -349,10 +378,41 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 - Logging is configured for debugging
 - No automated tests are present in the codebase
 - No build process required - runs directly with Python interpreter
-- **Current version**: v1.16.6 (stable master with scrollable text widgets and Excel file persistence)
-- **Last tested**: 2025-07-28 - Scrollable text widgets working perfectly, Excel file persistence restored
+- **Current version**: v1.16.18 (stable master with all text field bugs resolved)
+- **Last tested**: 2025-07-29 - All text editing functionality working perfectly, paste/undo/formatting completely resolved
 
 ## Recent Development History
+
+### v1.16.18 Success (2025-07-29) - MAJOR BREAKTHROUGH: Text Field Bug Resolution
+**Achievement**: Completely resolved all persistent text field editing bugs with nuclear option approach
+
+**Critical Problem Solved**:
+After 17+ versions of failed attempts, the paste functionality in Text fields (Händelse, Note1-3) was completely broken. Multiple approaches failed:
+- Global `bind_all('<Control-v>')` approach (v1.16.9-v1.16.17)
+- Class binding overrides with `bind_class` 
+- ScrollableText focus detection and redirection
+- Emergency reality checks with debug output and GUI popups
+
+**Nuclear Option Solution**:
+- **Root Cause**: ScrollableText wrapper caused focus to go to Frame instead of inner Text widget
+- **Breakthrough**: Direct widget binding in `excel_fields.py`:
+  ```python
+  text_widget.bind('<Control-v>', lambda e: self.parent.handle_paste_undo(text_widget))
+  ```
+- **Result**: Bypassed all tkinter hierarchy and focus issues completely
+
+**Bugs Definitively Fixed**:
+- ✅ **Regular undo while typing**: Character-by-character undo (was undoing large chunks)
+- ✅ **Undo after formatting**: No longer jumps way back inappropriately
+- ✅ **Copy/paste with formatting**: Perfect format preservation (was duplicating/losing formatting)
+
+**User Testing Results**:
+- Multiple successful paste operations confirmed in console logs
+- All Text fields now work flawlessly
+- Proper undo state management restored
+- Excel integration continues working perfectly
+
+**Technical Impact**: This nuclear option represents the definitive solution to a complex tkinter event binding hierarchy problem that had persisted across multiple versions.
 
 ### v1.16.6 Success (2025-07-28) - Scrollable Text Widgets Implementation
 **Achievement**: Added vertical scrollbars to all text fields for improved usability
