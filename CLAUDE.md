@@ -206,9 +206,45 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 3. Close the app (formatting automatically saved)
 4. Restart the app (formatting automatically restored)
 
-## Current Status (v1.17.3)
+## Current Status (v1.17.4)
 
-**SESSION-ONLY LOCK AND FOLDER OPENING**: Optimal balance between convenience and safety
+**IMPROVED ERROR HANDLING WITH RETRY/CANCEL DIALOGS**: Professional error handling with user-friendly retry options
+
+### v1.17.4 Success (2025-07-29) - Improved Error Handling with Retry/Cancel Dialogs ✅
+**Achievement**: Implemented professional error handling system with custom retry/cancel dialogs for all file lock scenarios
+
+**Key Features**:
+- ✅ **Custom Retry/Cancel Dialog**: Professional dialog with Swedish "Försök igen" and "Avbryt" buttons
+- ✅ **PDF File Lock Handling**: Retry loops for both source PDF and target file locks
+- ✅ **Excel File Lock Handling**: File lock detection and retry options for Excel operations
+- ✅ **Eliminated Secondary Dialogs**: Removed confusing "continue with Excel?" messages
+- ✅ **UI Polish**: Proper button order and spacing for optimal user experience
+
+**Technical Implementation**:
+- Added `show_retry_cancel_dialog()` method with custom tkinter dialog
+- Enhanced `rename_current_pdf()` with while loops for file lock retry
+- Modified `add_row_with_xlsxwriter()` to return "file_locked" status
+- Updated `save_excel_row()` with retry loop for Excel file lock handling
+- Streamlined `save_all_and_clear()` by removing secondary error dialogs
+
+**User Experience Improvements**:
+- **Clear Error Messages**: Professional dialogs with actionable Swedish text
+- **Retry Capability**: Users can keep trying until files are unlocked
+- **Clean Cancellation**: Cancel stops the entire operation without partial saves
+- **Consistent Interface**: Same retry/cancel pattern for PDF and Excel operations
+- **Visual Polish**: Proper button styling, order (retry first), and spacing
+
+**UI Refinements**:
+- **Button Order**: "Försök igen" (left, green) → "Avbryt" (right, red)
+- **Proper Spacing**: 10px padding between buttons for professional appearance
+- **Color Coding**: Green for positive action, red for negative action
+- **Responsive Design**: Centered dialogs with proper sizing and fonts
+
+**Error Handling Flow**:
+1. **File Lock Detected** → Show retry/cancel dialog
+2. **User Clicks "Försök igen"** → Check file lock status again
+3. **User Clicks "Avbryt"** → Cancel operation completely
+4. **No Secondary Dialogs** → Clean, predictable user experience
 
 ### v1.17.3 Success (2025-07-29) - Session-Only Lock and Folder Opening Functionality ✅
 **Achievement**: Implemented optimal user experience balance with session-only lock behavior and folder opening capability
@@ -441,8 +477,8 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 - Logging is configured for debugging
 - No automated tests are present in the codebase
 - No build process required - runs directly with Python interpreter
-- **Current version**: v1.17.3 (stable master with session-only lock and folder opening functionality)
-- **Last tested**: 2025-07-29 - All v1.17.3 improvements verified working, optimal UX balance achieved
+- **Current version**: v1.17.4 (stable master with improved error handling and retry/cancel dialogs)
+- **Last tested**: 2025-07-29 - All v1.17.4 improvements verified working, enhanced error handling confirmed
 
 ## Recent Development History
 
