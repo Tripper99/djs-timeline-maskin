@@ -301,6 +301,7 @@ class PDFProcessorApp:
         # Output folder for renamed PDFs
         self.output_folder_var = tk.StringVar(value="")
         self.output_folder_lock_var = tk.BooleanVar(value=False)
+        self._actual_output_folder = ""  # Store actual path while display shows friendly text
 
         # Row background color selection - DEFAULT: none (white)
         self.row_color_var = tk.StringVar(value="none")
@@ -466,13 +467,10 @@ class PDFProcessorApp:
         ToolTip(self.output_folder_lock_switch, "När låst: mappvalet ändras inte när ny PDF väljs. "
                                                "När olåst: mappvalet uppdateras automatiskt till PDF-filens mapp.")
 
-        # Second row: Reset button
-        reset_frame = tb.Frame(group1)
-        reset_frame.pack(fill="x", pady=(5, 0))
-        
-        self.reset_folder_btn = tb.Button(reset_frame, text="Nollställ mapp",
+        # Reset button (same row)
+        self.reset_folder_btn = tb.Button(pdf_path_frame, text="Nollställ mapp",
                                          command=self.reset_output_folder, bootstyle=INFO, width=15)
-        self.reset_folder_btn.pack(side="left", padx=(0, 10))
+        self.reset_folder_btn.pack(side="left", padx=(10, 0))
         ToolTip(self.reset_folder_btn, "Rensa mappvalet och låser upp automatisk uppdatering.")
 
     def create_group2(self, parent):
@@ -640,8 +638,13 @@ class PDFProcessorApp:
         output_folder_locked = self.config.get('output_folder_locked', False)
         
         if output_folder and Path(output_folder).exists():
-            self.output_folder_var.set(output_folder)
+            # Store actual path and update display
+            display_text = self.get_display_folder_text(output_folder)
+            self.output_folder_var.set(display_text)
+            self._actual_output_folder = output_folder
             logger.info(f"Loaded saved output folder: {output_folder}")
+        else:
+            self._actual_output_folder = ""
         
         self.output_folder_lock_var.set(output_folder_locked)
         if output_folder_locked:
@@ -702,10 +705,12 @@ class PDFProcessorApp:
             except Exception as e:
                 messagebox.showerror("Fel", f"Kunde inte öppna PDF-fil: {str(e)}")
 
-            # Auto-fill output folder if not locked and (empty or not set)
-            if not self.output_folder_lock_var.get() and not self.output_folder_var.get():
+            # Auto-fill output folder if not locked (always when unlocked)
+            if not self.output_folder_lock_var.get():
                 pdf_folder = str(Path(file_path).parent)
-                self.output_folder_var.set(pdf_folder)
+                self._actual_output_folder = pdf_folder
+                display_text = self.get_display_folder_text(pdf_folder)
+                self.output_folder_var.set(display_text)
                 logger.info(f"Auto-filled output folder: {pdf_folder}")
 
             # Update statistics
@@ -725,25 +730,61 @@ class PDFProcessorApp:
         )
         
         if folder_path:
-            self.output_folder_var.set(folder_path)
-            # Save to config for persistence
+            # Store actual path and update display
             self.config['output_folder'] = folder_path
             self.config['output_folder_locked'] = self.output_folder_lock_var.get()
             self.config_manager.save_config(self.config)
+            
+            # Update display with friendly text
+            display_text = self.get_display_folder_text(folder_path)
+            self.output_folder_var.set(display_text)
+            self._actual_output_folder = folder_path
+            
             logger.info(f"Selected output folder: {folder_path}")
 
     def reset_output_folder(self):
         """Reset output folder selection and unlock auto-fill"""
         self.output_folder_var.set("")
         self.output_folder_lock_var.set(False)
+        self._actual_output_folder = ""
         # Save to config
         self.config['output_folder'] = ""
         self.config['output_folder_locked'] = False
         self.config_manager.save_config(self.config)
         logger.info("Reset output folder selection")
 
+    def get_display_folder_text(self, folder_path):
+        """Get display text for output folder - show 'Samma mapp som pdf-filen' for PDF's parent directory"""
+        if not folder_path:
+            return ""
+        
+        # If we have a current PDF and the folder matches its parent directory
+        if self.current_pdf_path:
+            pdf_parent = str(Path(self.current_pdf_path).parent)
+            if str(folder_path) == pdf_parent:
+                return "Samma mapp som pdf-filen"
+        
+        return folder_path
+
+    def update_output_folder_display(self):
+        """Update the display text in the output folder entry"""
+        current_folder = self.output_folder_var.get()
+        display_text = self.get_display_folder_text(current_folder)
+        # Store the actual path but display the user-friendly text
+        self._actual_output_folder = current_folder
+        self.output_folder_var.set(display_text)
+
     def on_output_folder_lock_change(self):
         """Save config when output folder lock state changes"""
+        # Check if trying to lock with empty folder
+        if self.output_folder_lock_var.get():
+            actual_folder = getattr(self, '_actual_output_folder', '')
+            if not actual_folder:
+                # Revert the switch and show error
+                self.output_folder_lock_var.set(False)
+                messagebox.showerror("Fel", "Du måste välja en mapp innan du kan låsa mappvalet.")
+                return
+        
         self.config['output_folder_locked'] = self.output_folder_lock_var.get()
         self.config_manager.save_config(self.config)
         if self.output_folder_lock_var.get():
@@ -1003,7 +1044,7 @@ class PDFProcessorApp:
         old_file = Path(self.current_pdf_path)
 
         # Determine target directory based on output folder setting
-        output_folder = self.output_folder_var.get()
+        output_folder = getattr(self, '_actual_output_folder', '') or self.output_folder_var.get()
         if output_folder and Path(output_folder).exists():
             target_dir = Path(output_folder)
         else:
