@@ -364,7 +364,7 @@ class ExcelManager:
                         write_worksheet.write_formula(row_idx, col_idx, value, cell_format_obj)
                     elif data_type == 'richtext':
                         # Convert openpyxl RichText to xlsxwriter rich string
-                        self._write_rich_text_xlsxwriter(write_worksheet, row_idx, col_idx, value, write_workbook)
+                        self._write_rich_text_xlsxwriter(write_worksheet, row_idx, col_idx, value, write_workbook, cell_format_obj, None)
                     elif value is not None:
                         write_worksheet.write(row_idx, col_idx, value, cell_format_obj)
                     elif cell_format_obj:
@@ -403,8 +403,8 @@ class ExcelManager:
                     logger.info(f"Creating Dag formula for new row: {formula}")
                     write_worksheet.write_formula(next_row, col_idx-1, formula, default_format)
                 elif hasattr(value, '__class__') and value.__class__.__name__ == 'CellRichText':
-                    # Convert CellRichText to xlsxwriter rich string
-                    self._write_rich_text_xlsxwriter(write_worksheet, next_row, col_idx-1, value, write_workbook)
+                    # Convert CellRichText to xlsxwriter rich string with background color
+                    self._write_rich_text_xlsxwriter(write_worksheet, next_row, col_idx-1, value, write_workbook, default_format, row_color)
                 elif value is not None:
                     write_worksheet.write(next_row, col_idx-1, value, default_format)
                 else:
@@ -509,20 +509,41 @@ class ExcelManager:
             logger.warning(f"Could not convert color {color_value}: {e}")
             return None
 
-    def _write_rich_text_xlsxwriter(self, worksheet, row, col, rich_text_obj, workbook):
+    def _write_rich_text_xlsxwriter(self, worksheet, row, col, rich_text_obj, workbook, base_format=None, row_color=None):
         """BREAKTHROUGH METHOD: Convert openpyxl CellRichText to xlsxwriter rich string"""
         try:
+            # Extract base format properties (like background color and text wrap)
+            base_format_dict = {}
+            if base_format:
+                # For xlsxwriter Format objects, we need to reconstruct the format dict
+                # Since we know we're passing our own default_format, extract from the color mapping
+                # This is safer than trying to access internal xlsxwriter format properties
+                if row_color and row_color != "none":
+                    color_map = {
+                        "yellow": "FFFF99",
+                        "green": "CCFFCC",
+                        "blue": "CCE5FF",
+                        "pink": "FFCCEE",
+                        "gray": "E6E6E6"
+                    }
+                    if row_color in color_map:
+                        base_format_dict['bg_color'] = color_map[row_color]
+                base_format_dict['text_wrap'] = True  # Always include text wrap
+                    
             if not hasattr(rich_text_obj, '__iter__'):
-                # Plain text
-                worksheet.write(row, col, str(rich_text_obj))
+                # Plain text - apply base format
+                if base_format:
+                    worksheet.write(row, col, str(rich_text_obj), base_format)
+                else:
+                    worksheet.write(row, col, str(rich_text_obj))
                 return
 
             # Build rich string for xlsxwriter
             rich_parts = []
             for part in rich_text_obj:
                 if hasattr(part, 'text') and hasattr(part, 'font'):
-                    # TextBlock with formatting
-                    format_dict = {}
+                    # TextBlock with formatting - include base format properties
+                    format_dict = base_format_dict.copy()  # Start with base format
                     if hasattr(part.font, 'b') and part.font.b:
                         format_dict['bold'] = True
                     if hasattr(part.font, 'i') and part.font.i:
