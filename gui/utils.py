@@ -49,6 +49,9 @@ class ScrollableText(tb.Frame):
     def __init__(self, parent, **text_options):
         super().__init__(parent)
 
+        # Force autoseparators to False for better undo control
+        text_options['autoseparators'] = False
+        
         # Create text widget with all provided options
         self.text_widget = tk.Text(self, **text_options)
 

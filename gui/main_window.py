@@ -272,6 +272,9 @@ class PDFProcessorApp:
         self.text_redo_stacks = {}  # Dictionary to store redo history for each Text widget
 
         self.max_undo_levels = 20  # Maximum number of undo levels
+        
+        # Internal clipboard for format preservation
+        self.internal_clipboard = None  # Stores (text, tags) tuples
 
         # Lock switches for ALL fields except Dag and Inlagd (which is read-only)
         self.lock_vars = {
@@ -1634,36 +1637,26 @@ class PDFProcessorApp:
             logger.error(f"Error during verification of {field_name}: {e}")
 
     def handle_text_key_press_undo(self, event):
-        """Handle key press in Text widget - create undo separator when replacing selection"""
+        """Handle key press in Text widget - create undo separator for character-by-character undo"""
         try:
             text_widget = event.widget
             if not isinstance(text_widget, tk.Text):
                 return None
 
+            # Skip control/modifier key combinations except for Tab
+            if event.state & 0x4 and event.keysym != 'Tab':  # Control key pressed
+                return None
+
             # Check if there's selected text that will be replaced
             has_selection = bool(text_widget.tag_ranges(tk.SEL))
 
-            # Handle different key scenarios that replace text
-            if has_selection:
-                # Case 1: Regular printable character - replaces selection
-                if (len(event.char) == 1 and event.char.isprintable()):
-                    text_widget.edit_separator()
-                    logger.info(f"Added undo separator before typing '{event.char}' over selection")
-
-                # Case 2: Delete key - deletes selection
-                elif event.keysym in ['Delete', 'BackSpace']:
-                    text_widget.edit_separator()
-                    logger.info(f"Added undo separator before {event.keysym} on selection")
-
-                # Case 3: Enter/Return key - replaces selection with newline
-                elif event.keysym in ['Return', 'KP_Enter']:
-                    text_widget.edit_separator()
-                    logger.info("Added undo separator before Enter over selection")
-
-                # Case 4: Tab key - replaces selection with tab
-                elif event.keysym == 'Tab':
-                    text_widget.edit_separator()
-                    logger.info("Added undo separator before Tab over selection")
+            # Add separator for ANY character input or deletion
+            if (len(event.char) == 1 and event.char.isprintable()) or event.keysym in ['Delete', 'BackSpace', 'Return', 'KP_Enter', 'Tab']:
+                text_widget.edit_separator()
+                
+                # Log only for selections to reduce noise
+                if has_selection:
+                    logger.debug(f"Added undo separator before '{event.keysym}' over selection")
 
             # Allow the default key handling to proceed
             return None
@@ -1684,33 +1677,70 @@ class PDFProcessorApp:
         return None  # Allow default select-all to proceed
 
     def handle_paste_undo(self, event):
-        """Handle Ctrl+V - save current content before paste operation"""
+        """Handle Ctrl+V - paste with format preservation if available"""
         try:
             focused_widget = self.root.focus_get()
             if isinstance(focused_widget, tk.Text):
-                # Check if there's selected text that will be replaced
-                has_selection = bool(focused_widget.tag_ranges(tk.SEL))
+                # Add edit separator before paste
+                focused_widget.edit_separator()
+                
+                # Check if we have formatted content in internal clipboard
+                if self.internal_clipboard:
+                    text, tags_data = self.internal_clipboard
+                    
+                    # Get cursor position or selection
+                    try:
+                        # Delete selection if exists
+                        if focused_widget.tag_ranges(tk.SEL):
+                            focused_widget.delete(tk.SEL_FIRST, tk.SEL_LAST)
+                        insert_pos = focused_widget.index(tk.INSERT)
+                    except tk.TclError:
+                        insert_pos = focused_widget.index(tk.INSERT)
+                    
+                    # Insert text
+                    focused_widget.insert(insert_pos, text)
+                    
+                    # Apply formatting tags
+                    for tag, rel_start, rel_end in tags_data:
+                        tag_start = f"{insert_pos} + {rel_start}c"
+                        tag_end = f"{insert_pos} + {rel_end}c"
+                        focused_widget.tag_add(tag, tag_start, tag_end)
+                    
+                    # Add edit separator after paste
+                    focused_widget.edit_separator()
+                    
+                    # Clear internal clipboard after use (single use)
+                    self.internal_clipboard = None
+                    
+                    return "break"  # Prevent default paste
+                else:
+                    # No formatted content, use regular paste with undo tracking
+                    # Check if there's selected text that will be replaced
+                    has_selection = bool(focused_widget.tag_ranges(tk.SEL))
 
-                # Or if we just did a select-all
-                select_all_pending = getattr(focused_widget, '_select_all_pending', False)
+                    # Or if we just did a select-all
+                    select_all_pending = getattr(focused_widget, '_select_all_pending', False)
 
-                if has_selection or select_all_pending:
-                    # Save current content to our custom undo stack
-                    current_content = focused_widget.get("1.0", "end-1c")
-                    self.save_text_undo_state(focused_widget, current_content)
+                    if has_selection or select_all_pending:
+                        # Save current content to our custom undo stack
+                        current_content = focused_widget.get("1.0", "end-1c")
+                        self.save_text_undo_state(focused_widget, current_content)
 
-                    logger.info("Saved undo state before paste operation")
+                        logger.info("Saved undo state before paste operation")
 
-                # Clear the select-all pending flag
-                if hasattr(focused_widget, '_select_all_pending'):
-                    delattr(focused_widget, '_select_all_pending')
+                    # Clear the select-all pending flag
+                    if hasattr(focused_widget, '_select_all_pending'):
+                        delattr(focused_widget, '_select_all_pending')
 
-                # Schedule saving the post-paste content to our undo stack
-                # This ensures the pasted content is captured for future undo operations
-                self.root.after_idle(self.save_post_paste_state, focused_widget)
-        except (tk.TclError, AttributeError):
-            pass
-        return None  # Allow default paste to proceed
+                    # Schedule saving the post-paste content to our undo stack
+                    # This ensures the pasted content is captured for future undo operations
+                    self.root.after_idle(self.save_post_paste_state, focused_widget)
+                    
+                    # Add edit separator after paste
+                    self.root.after_idle(lambda: focused_widget.edit_separator())
+        except (tk.TclError, AttributeError) as e:
+            logger.error(f"Error in paste handler: {e}")
+        return None  # Allow default paste to proceed if no internal clipboard
 
     def save_post_paste_state(self, text_widget):
         """Save the state after a paste operation completes"""
@@ -1722,6 +1752,65 @@ class PDFProcessorApp:
                 logger.info("Saved post-paste content to undo stack")
         except (tk.TclError, AttributeError):
             pass
+
+    def handle_copy_with_format(self, event):
+        """Handle Ctrl+C - copy text with formatting to internal clipboard"""
+        try:
+            focused_widget = self.root.focus_get()
+            if isinstance(focused_widget, tk.Text):
+                try:
+                    # Get selection bounds
+                    start = focused_widget.index(tk.SEL_FIRST)
+                    end = focused_widget.index(tk.SEL_LAST)
+                    
+                    # Get selected text
+                    text = focused_widget.get(start, end)
+                    
+                    # Get all formatting tags in selection
+                    tags_data = []
+                    for tag in ["bold", "italic", "red", "blue", "green", "black"]:
+                        tag_ranges = focused_widget.tag_ranges(tag)
+                        for i in range(0, len(tag_ranges), 2):
+                            tag_start = tag_ranges[i]
+                            tag_end = tag_ranges[i + 1]
+                            # Check if tag overlaps with selection
+                            if focused_widget.compare(tag_start, "<", end) and focused_widget.compare(tag_end, ">", start):
+                                # Calculate relative positions within selection
+                                rel_start = max(0, len(focused_widget.get(start, tag_start)))
+                                rel_end = min(len(text), len(focused_widget.get(start, tag_end)))
+                                tags_data.append((tag, rel_start, rel_end))
+                    
+                    # Store in internal clipboard
+                    self.internal_clipboard = (text, tags_data)
+                    
+                    # Also copy to system clipboard (plain text)
+                    self.root.clipboard_clear()
+                    self.root.clipboard_append(text)
+                    
+                except tk.TclError:
+                    # No selection
+                    pass
+        except (tk.TclError, AttributeError):
+            pass
+        return None  # Allow default handling
+
+    def handle_cut_with_format(self, event):
+        """Handle Ctrl+X - cut text with formatting to internal clipboard"""
+        try:
+            focused_widget = self.root.focus_get()
+            if isinstance(focused_widget, tk.Text):
+                # First copy with format
+                self.handle_copy_with_format(event)
+                
+                # Then delete selection with undo support
+                if focused_widget.tag_ranges(tk.SEL):
+                    focused_widget.edit_separator()
+                    focused_widget.delete(tk.SEL_FIRST, tk.SEL_LAST)
+                    focused_widget.edit_separator()
+                    return "break"  # Prevent default cut
+        except (tk.TclError, AttributeError):
+            pass
+        return None
 
     def handle_delete_with_undo(self, event):
         """Handle Delete/BackSpace - prepare undo state before deletion"""
@@ -1909,6 +1998,8 @@ class PDFProcessorApp:
 
         # Add enhanced bindings for Text widgets to handle problematic operations
         self.root.bind_all('<Control-a>', self.handle_select_all_undo)
+        self.root.bind_all('<Control-c>', self.handle_copy_with_format)
+        self.root.bind_all('<Control-x>', self.handle_cut_with_format)
         self.root.bind_all('<Control-v>', self.handle_paste_undo)
         self.root.bind_all('<Delete>', self.handle_delete_with_undo)
         self.root.bind_all('<BackSpace>', self.handle_delete_with_undo)
@@ -2060,7 +2151,7 @@ class PDFProcessorApp:
         return True
 
     def save_text_undo_state(self, text_widget, content):
-        """Save text widget state to custom undo stack"""
+        """Save text widget state with formatting to custom undo stack"""
         widget_id = id(text_widget)
 
         # Initialize stacks if not exists
@@ -2068,12 +2159,24 @@ class PDFProcessorApp:
             self.text_undo_stacks[widget_id] = []
             self.text_redo_stacks[widget_id] = []
 
+        # Collect all formatting tags
+        tags_data = []
+        for tag in ["bold", "italic", "red", "blue", "green", "black"]:
+            tag_ranges = text_widget.tag_ranges(tag)
+            for i in range(0, len(tag_ranges), 2):
+                start_idx = str(tag_ranges[i])
+                end_idx = str(tag_ranges[i + 1])
+                tags_data.append((tag, start_idx, end_idx))
+        
+        # Create state tuple with content and tags
+        state = (content, tags_data)
+
         # Don't add duplicate content to avoid double-undo issues
-        if self.text_undo_stacks[widget_id] and self.text_undo_stacks[widget_id][-1] == content:
+        if self.text_undo_stacks[widget_id] and self.text_undo_stacks[widget_id][-1][0] == content:
             return
 
         # Add to undo stack
-        self.text_undo_stacks[widget_id].append(content)
+        self.text_undo_stacks[widget_id].append(state)
 
         # Limit stack size
         if len(self.text_undo_stacks[widget_id]) > self.max_undo_levels:
@@ -2083,7 +2186,7 @@ class PDFProcessorApp:
         self.text_redo_stacks[widget_id] = []
 
     def text_widget_undo(self, text_widget):
-        """Perform undo on Text widget using custom stack"""
+        """Perform undo on Text widget with formatting using custom stack"""
         widget_id = id(text_widget)
 
         if widget_id not in self.text_undo_stacks or len(self.text_undo_stacks[widget_id]) < 2:
@@ -2092,25 +2195,43 @@ class PDFProcessorApp:
         undo_stack = self.text_undo_stacks[widget_id]
         redo_stack = self.text_redo_stacks[widget_id]
 
-        # Save current content to redo stack (this is the state after the operation)
+        # Save current state to redo stack
         current_content = text_widget.get("1.0", "end-1c")
-        redo_stack.append(current_content)
+        current_tags = []
+        for tag in ["bold", "italic", "red", "blue", "green", "black"]:
+            tag_ranges = text_widget.tag_ranges(tag)
+            for i in range(0, len(tag_ranges), 2):
+                start_idx = str(tag_ranges[i])
+                end_idx = str(tag_ranges[i + 1])
+                current_tags.append((tag, start_idx, end_idx))
+        redo_stack.append((current_content, current_tags))
 
-        # Remove the current state from undo stack (this was just saved by the operation)
+        # Remove the current state from undo stack
         undo_stack.pop()
 
-        # Get the actual previous content from undo stack
-        previous_content = undo_stack[-1] if undo_stack else ""
+        # Get the previous state from undo stack
+        if undo_stack:
+            previous_content, previous_tags = undo_stack[-1]
+        else:
+            previous_content, previous_tags = "", []
 
         # Restore content
         text_widget.delete("1.0", tk.END)
         text_widget.insert("1.0", previous_content)
+        
+        # Restore formatting
+        for tag, start_idx, end_idx in previous_tags:
+            try:
+                text_widget.tag_add(tag, start_idx, end_idx)
+            except tk.TclError:
+                # Handle invalid indices
+                pass
 
-        logger.info("Performed custom undo on Text widget")
+        logger.info("Performed custom undo on Text widget with formatting")
         return True
 
     def text_widget_redo(self, text_widget):
-        """Perform redo on Text widget using custom stack"""
+        """Perform redo on Text widget with formatting using custom stack"""
         widget_id = id(text_widget)
 
         if widget_id not in self.text_redo_stacks or not self.text_redo_stacks[widget_id]:
@@ -2119,18 +2240,33 @@ class PDFProcessorApp:
         undo_stack = self.text_undo_stacks[widget_id]
         redo_stack = self.text_redo_stacks[widget_id]
 
-        # Get next content from redo stack
-        next_content = redo_stack.pop()
+        # Get next state from redo stack
+        next_content, next_tags = redo_stack.pop()
 
-        # Save current content to undo stack
+        # Save current state to undo stack
         current_content = text_widget.get("1.0", "end-1c")
-        undo_stack.append(current_content)
+        current_tags = []
+        for tag in ["bold", "italic", "red", "blue", "green", "black"]:
+            tag_ranges = text_widget.tag_ranges(tag)
+            for i in range(0, len(tag_ranges), 2):
+                start_idx = str(tag_ranges[i])
+                end_idx = str(tag_ranges[i + 1])
+                current_tags.append((tag, start_idx, end_idx))
+        undo_stack.append((current_content, current_tags))
 
         # Restore content
         text_widget.delete("1.0", tk.END)
         text_widget.insert("1.0", next_content)
+        
+        # Restore formatting
+        for tag, start_idx, end_idx in next_tags:
+            try:
+                text_widget.tag_add(tag, start_idx, end_idx)
+            except tk.TclError:
+                # Handle invalid indices
+                pass
 
-        logger.info("Performed custom redo on Text widget")
+        logger.info("Performed custom redo on Text widget with formatting")
         return True
 
     def setup_text_formatting_tags(self, text_widget):
@@ -2178,8 +2314,11 @@ class PDFProcessorApp:
         text_widget.bind('<Control-k>', lambda e: self.toggle_format(text_widget, "black"))
 
     def toggle_format(self, text_widget, format_type):
-        """Toggle formatting on selected text"""
+        """Toggle formatting on selected text with undo support"""
         try:
+            # Add edit separator BEFORE formatting change
+            text_widget.edit_separator()
+            
             # Get current selection
             try:
                 start = text_widget.index(tk.SEL_FIRST)
@@ -2207,6 +2346,9 @@ class PDFProcessorApp:
                 for color_tag in color_tags:
                     if color_tag != format_type:
                         text_widget.tag_remove(color_tag, start, end)
+            
+            # Add edit separator AFTER formatting change
+            text_widget.edit_separator()
 
         except tk.TclError:
             # Handle any errors silently
