@@ -4,6 +4,38 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v1.17.15 Success (2025-07-30) - T Button Clear Formatting Fix ✅
+**Achievement**: Fixed T button to properly clear ALL formatting and use correct text widget colors
+
+**Problems Solved**: 
+1. T button now removes ALL formatting (bold, italic, AND colors) instead of just colors
+2. T button uses text widget's actual default color instead of theme's system color
+
+**Technical Implementation**:
+- Added `clear_all_formatting()` method to replace `toggle_format("default")`
+- Changed color detection from theme system color to `text_widget.cget('foreground')`
+- Updated both T button command and Ctrl+K keyboard shortcut
+
+**Key Code Changes**:
+```python
+# OLD: Only toggled color, kept bold/italic
+command=lambda: self.toggle_format(text_widget, "default")
+
+# NEW: Clears ALL formatting
+command=lambda: self.clear_all_formatting(text_widget)
+
+# Color detection fix - use widget's actual color
+default_color = text_widget.cget('foreground')  # Instead of theme system color
+```
+
+**User Testing Results** ✅:
+- Confirmed working across multiple themes (Cerculean, Simplex, Sandstone, Yeti)
+- T button correctly removes bold, italic, and all color formatting
+- Text restored to proper default color for each theme's text widgets
+- No more light blue text in Cerculean theme!
+
+**Impact**: Essential usability fix for the formatting toolbar. Users can now properly clear all formatting with a single button press, making text editing more intuitive and reliable.
+
 ### v1.17.14 Success (2025-07-29) - Complete Rich Text Background Color Fix ✅
 **Achievement**: Completely resolved rich text background color bug with two-phase fix implementation
 

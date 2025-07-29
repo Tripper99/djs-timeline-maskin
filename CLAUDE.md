@@ -118,11 +118,11 @@ The breakthrough hybrid approach consista of:
 - Method 2 character-by-character algorithm for text extraction
 This method might seem complicated but is important to understand that this is the only way we've found to make the app to write perfect Excel rich text formatting with colors, bold, italic, line breaks.
 
-## Current Status (v1.17.14)
+## Current Status (v1.17.15)
 
-**COMPLETED ✅ - RICH TEXT BACKGROUND COLOR FIX**: Successfully resolved xlsxwriter write_rich_string() limitation
+**COMPLETED ✅ - T BUTTON CLEAR FORMATTING FIX**: T button now clears ALL formatting and uses text widget's actual default color
 
-### Working Features (v1.17.14):
+### Working Features (v1.17.15):
 - ✅ **Rich Text Background Colors**: All text fields (including rich text) support background colors correctly ✅ FIXED!
 - ✅ **Output Folder Selection**: Flexible destination for renamed PDFs with session-only lock and folder opening
 - ✅ **Font Size Toggle**: A+ button in text fields for cycling through 9pt → 12pt → 15pt with proper bold/italic formatting
@@ -136,10 +136,12 @@ This method might seem complicated but is important to understand that this is t
 - ✅ **19 Excel Columns**: All original fields plus new time fields
 - ✅ **Core Functionality**: PDF processing, Excel integration, locked fields all working
 - ✅ **Professional Toolbar**: Enhanced formatting toolbar with intuitive design and color-coded buttons
+- ✅ **T Button Clear Formatting**: T button removes ALL formatting (bold, italic, colors) and restores text widget's default color
 - ✅ **Error Handling**: Professional retry/cancel dialogs for file lock scenarios
 
-### Completed Major Fixes (v1.17.13-v1.17.14):
+### Completed Major Fixes (v1.17.13-v1.17.15):
 - ✅ **Rich Text Background Colors**: Successfully resolved with correct xlsxwriter API usage and color preservation system
+- ✅ **T Button Clear Formatting**: Fixed to remove ALL formatting and use text widget's actual default color instead of theme system color
 
 ### Rich Text Format Preservation (v1.14.0)
 **NEW SYSTEM**: Complete format preservation for locked text fields across app sessions
@@ -195,7 +197,7 @@ This method might seem complicated but is important to understand that this is t
 - Logging is configured for debugging
 - No automated tests are present in the codebase
 - No build process required - runs directly with Python interpreter
-- **Current version**: v1.17.8 (stable master with enhanced formatting toolbar design)
-- **Last tested**: 2025-07-29 - All v1.17.8 improvements verified working
+- **Current version**: v1.17.15 (stable master with fixed T button clear formatting)
+- **Last tested**: 2025-07-30 - T button formatting fix verified working across multiple themes
 
 For detailed version history and development milestones, see DEVELOPMENT_HISTORY.md
