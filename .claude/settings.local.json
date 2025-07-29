@@ -12,7 +12,9 @@
       "Bash(mv:*)",
       "Bash(grep:*)",
       "mcp__Ref__ref_search_documentation",
-      "WebFetch(domain:xlsxwriter.readthedocs.io)"
+      "WebFetch(domain:xlsxwriter.readthedocs.io)",
+      "Bash(wc:*)",
+      "WebFetch(domain:ttkbootstrap.readthedocs.io)"
     ],
     "deny": []
   }
