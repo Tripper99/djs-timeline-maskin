@@ -4,33 +4,48 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
-### v1.17.12 In Progress (2025-07-29) - Rich Text Background Color Fix Implementation 🔄
-**Problem**: Rich text fields (Händelse, Note1-3) don't display background colors despite user selection
+### v1.17.14 Success (2025-07-29) - Complete Rich Text Background Color Fix ✅
+**Achievement**: Completely resolved rich text background color bug with two-phase fix implementation
 
-**Root Cause Analysis** (v1.17.9-v1.17.11):
-- ✅ **Debug Analysis**: Comprehensive logging confirmed parameters pass correctly
-- ✅ **Color Format Fix**: Added required `#` prefix (`#CCE5FF` vs `CCE5FF`)
-- ❌ **Issue Persists**: `xlsxwriter.write_rich_string()` fundamentally ignores `bg_color` property
+**Problem Solved**: Rich text fields (Händelse, Note1-3) now display background colors correctly with full preservation across Excel operations
 
-**Current Solution** (v1.17.12):
-- **Approach**: Background color overlay implementation
-- **Method**: Two-step process - apply background first, then write rich text over it
-- **Status**: Code complete, comprehensive syntax testing passed, ready for user testing
+**Root Cause Analysis** (v1.17.9-v1.17.14):
+- ✅ **Phase 1 Discovery**: `xlsxwriter.write_rich_string()` requires format parameter (not separate write calls)
+- ✅ **Phase 2 Discovery**: Existing rows lost background colors due to `row_color=None` in processing
+- ✅ **Complete Solution**: Correct API usage + color detection for existing rows
 
-**Technical Implementation**:
+**Two-Phase Fix Implementation**:
+
+**Phase 1 (v1.17.13)**: Correct xlsxwriter API Usage
 ```python
-# Step 1: Apply background to entire cell
-cell_bg_format = workbook.add_format({
-    'bg_color': '#CCE5FF',
-    'text_wrap': True
-})
+# OLD (broken): Two separate calls
 worksheet.write(row, col, "", cell_bg_format)
+worksheet.write_rich_string(row, col, *rich_parts)  # Overwrites background!
 
-# Step 2: Write rich text over background
-worksheet.write_rich_string(row, col, *rich_parts)
+# NEW (fixed): Single call with format parameter  
+worksheet.write_rich_string(row, col, *rich_parts, cell_bg_format)  # Preserves background!
 ```
 
-**Testing Status**: ✅ Syntax verified, ⏳ User testing pending
+**Phase 2 (v1.17.14)**: Background Color Preservation for Existing Rows
+```python
+# Added _extract_row_color_from_format() method to detect existing background colors
+detected_row_color = self._extract_row_color_from_format(cell_format)
+self._write_rich_text_xlsxwriter(..., detected_row_color)  # Instead of None
+```
+
+**Technical Breakthrough**:
+- **Color Detection System**: Maps hex colors back to row color names (#CCE5FF → "blue")
+- **Existing Row Processing**: Preserves background colors when copying existing data
+- **API Compliance**: Uses xlsxwriter's intended format parameter approach
+
+**User Testing Results** ✅:
+- **New rows**: Perfect background colors in all field types
+- **Existing rows**: Background colors preserved when adding new rows  
+- **Multiple colors**: Blue, yellow, green, pink all working correctly
+- **Mixed formatting**: Bold, italic, font colors all maintained
+- **Production ready**: Complete success confirmed by user screenshot
+
+**Impact**: This was a major bug affecting core Excel functionality. The fix ensures reliable background color support across all operations, making the hybrid Excel method fully functional for professional use.
 
 ### v1.17.8 Success (2025-07-29) - Enhanced Formatting Toolbar Design ✅
 **Achievement**: Completely redesigned the text formatting toolbar with professional styling and improved functionality

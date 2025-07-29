@@ -118,12 +118,12 @@ The breakthrough hybrid approach consista of:
 - Method 2 character-by-character algorithm for text extraction
 This method might seem complicated but is important to understand that this is the only way we've found to make the app to write perfect Excel rich text formatting with colors, bold, italic, line breaks.
 
-## Current Status (v1.17.12)
+## Current Status (v1.17.14)
 
-**IN PROGRESS - RICH TEXT BACKGROUND COLOR FIX**: Addressing xlsxwriter write_rich_string() limitation
+**COMPLETED ✅ - RICH TEXT BACKGROUND COLOR FIX**: Successfully resolved xlsxwriter write_rich_string() limitation
 
-### Working Features (v1.17.12):
-- ✅ **Standard Text Background Colors**: All simple text fields support background colors correctly
+### Working Features (v1.17.14):
+- ✅ **Rich Text Background Colors**: All text fields (including rich text) support background colors correctly ✅ FIXED!
 - ✅ **Output Folder Selection**: Flexible destination for renamed PDFs with session-only lock and folder opening
 - ✅ **Font Size Toggle**: A+ button in text fields for cycling through 9pt → 12pt → 15pt with proper bold/italic formatting
 - ✅ **Scrollable Text Widgets**: All text fields (Händelse, Note1-3) now have vertical scrollbars
@@ -138,8 +138,8 @@ This method might seem complicated but is important to understand that this is t
 - ✅ **Professional Toolbar**: Enhanced formatting toolbar with intuitive design and color-coded buttons
 - ✅ **Error Handling**: Professional retry/cancel dialogs for file lock scenarios
 
-### In Development (v1.17.12):
-- 🔄 **Rich Text Background Colors**: Implementing overlay solution for xlsxwriter limitation
+### Completed Major Fixes (v1.17.13-v1.17.14):
+- ✅ **Rich Text Background Colors**: Successfully resolved with correct xlsxwriter API usage and color preservation system
 
 ### Rich Text Format Preservation (v1.14.0)
 **NEW SYSTEM**: Complete format preservation for locked text fields across app sessions
@@ -151,12 +151,12 @@ This method might seem complicated but is important to understand that this is t
 
 ## Known Issues
 
-### Rich Text Background Colors (v1.17.9-v1.17.12) - IN PROGRESS
-- **Status**: Standard text fields work ✅, Rich text fields don't work ❌
-- **Root Cause**: `xlsxwriter.write_rich_string()` ignores `bg_color` property in format objects
-- **Investigation**: Comprehensive debug analysis confirmed xlsxwriter limitation
-- **Current Solution**: Background color overlay implementation (v1.17.12) - testing in progress
-- **Location**: `_write_rich_text_xlsxwriter()` method in `core/excel_manager.py`
+### Rich Text Background Colors (v1.17.9-v1.17.14) - COMPLETED ✅
+- **Status**: All text fields including rich text now support background colors ✅ FIXED!
+- **Root Cause**: `xlsxwriter.write_rich_string()` required format parameter + existing rows lost color detection
+- **Investigation**: Two-phase fix - correct API usage (v1.17.13) + color preservation (v1.17.14)
+- **Final Solution**: Correct xlsxwriter API + `_extract_row_color_from_format()` method for existing rows
+- **Result**: Perfect background color support across all field types with full formatting preservation
 
 ### Rich Text Uniform Formatting Bug (Excel Export) - SEPARATE ISSUE
 - **Status**: Affects Excel output only, GUI works perfectly
