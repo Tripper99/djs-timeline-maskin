@@ -364,7 +364,10 @@ class ExcelManager:
                         write_worksheet.write_formula(row_idx, col_idx, value, cell_format_obj)
                     elif data_type == 'richtext':
                         # Convert openpyxl RichText to xlsxwriter rich string
-                        self._write_rich_text_xlsxwriter(write_worksheet, row_idx, col_idx, value, write_workbook, cell_format_obj, None)
+                        # Extract row color from existing cell format to preserve background colors
+                        detected_row_color = self._extract_row_color_from_format(cell_format)
+                        logger.info(f"DEBUG: Detected row color '{detected_row_color}' for existing rich text at ({row_idx}, {col_idx})")
+                        self._write_rich_text_xlsxwriter(write_worksheet, row_idx, col_idx, value, write_workbook, cell_format_obj, detected_row_color)
                     elif value is not None:
                         write_worksheet.write(row_idx, col_idx, value, cell_format_obj)
                     elif cell_format_obj:
@@ -508,6 +511,35 @@ class ExcelManager:
         except Exception as e:
             logger.warning(f"Could not convert color {color_value}: {e}")
             return None
+
+    def _extract_row_color_from_format(self, cell_format: Dict) -> str:
+        """Extract row color name from cell format background color
+        
+        Args:
+            cell_format: Dictionary with cell formatting properties
+            
+        Returns:
+            Row color name ('yellow', 'green', 'blue', 'pink', 'gray') or None
+        """
+        fill_color = cell_format.get('fill_color')
+        if not fill_color:
+            return None
+            
+        # Convert to hex format for comparison
+        color_hex = self._convert_color_to_hex(fill_color)
+        if not color_hex:
+            return None
+            
+        # Map hex colors back to our row color names
+        color_reverse_map = {
+            "#FFFF99": "yellow",
+            "#CCFFCC": "green", 
+            "#CCE5FF": "blue",
+            "#FFCCEE": "pink",
+            "#E6E6E6": "gray"
+        }
+        
+        return color_reverse_map.get(color_hex.upper())
 
     def _write_rich_text_xlsxwriter(self, worksheet, row, col, rich_text_obj, workbook, base_format=None, row_color=None):
         """BREAKTHROUGH METHOD: Convert openpyxl CellRichText to xlsxwriter rich string"""
