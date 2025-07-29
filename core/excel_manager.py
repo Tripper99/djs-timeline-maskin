@@ -379,11 +379,11 @@ class ExcelManager:
             # Include background color if specified
             if row_color and row_color != "none":
                 color_map = {
-                    "yellow": "FFFF99",
-                    "green": "CCFFCC",
-                    "blue": "CCE5FF",
-                    "pink": "FFCCEE",
-                    "gray": "E6E6E6"
+                    "yellow": "#FFFF99",
+                    "green": "#CCFFCC",
+                    "blue": "#CCE5FF",
+                    "pink": "#FFCCEE",
+                    "gray": "#E6E6E6"
                 }
                 format_dict = {'text_wrap': True}  # Always preserve text wrap
                 if row_color in color_map:
@@ -521,11 +521,11 @@ class ExcelManager:
                 # This is safer than trying to access internal xlsxwriter format properties
                 if row_color and row_color != "none":
                     color_map = {
-                        "yellow": "FFFF99",
-                        "green": "CCFFCC",
-                        "blue": "CCE5FF",
-                        "pink": "FFCCEE",
-                        "gray": "E6E6E6"
+                        "yellow": "#FFFF99",
+                        "green": "#CCFFCC",
+                        "blue": "#CCE5FF",
+                        "pink": "#FFCCEE",
+                        "gray": "#E6E6E6"
                     }
                     if row_color in color_map:
                         base_format_dict['bg_color'] = color_map[row_color]
