@@ -1683,6 +1683,12 @@ class PDFProcessorApp:
         try:
             focused_widget = self.root.focus_get()
             print(f"DEBUG: Focused widget: {focused_widget}, type: {type(focused_widget)}")
+            
+            # Check if this is a ScrollableText wrapper
+            if hasattr(focused_widget, 'text_widget') and isinstance(focused_widget.text_widget, tk.Text):
+                print(f"DEBUG: ScrollableText detected! Using inner text_widget: {focused_widget.text_widget}")
+                focused_widget = focused_widget.text_widget
+            
             if isinstance(focused_widget, tk.Text):
                 # Add edit separator before paste
                 focused_widget.edit_separator()
