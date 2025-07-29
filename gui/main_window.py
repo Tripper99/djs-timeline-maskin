@@ -1676,117 +1676,97 @@ class PDFProcessorApp:
             pass
         return None  # Allow default select-all to proceed
 
-    def handle_paste_undo(self, event):
-        """Handle Ctrl+V - paste with format preservation if available"""
-        print("=" * 80)
-        print("🚨 EMERGENCY REALITY CHECK: PASTE HANDLER CALLED! 🚨")
-        print("=" * 80)
-        print("DEBUG: handle_paste_undo called!")
-        logger.info("Paste handler executed")
-        
-        # Show GUI messagebox to prove this is being called
-        from tkinter import messagebox
-        messagebox.showinfo("PASTE HANDLER", "handle_paste_undo() WAS CALLED!\n\nThis proves the paste handler is working.")
+    def handle_paste_undo(self, text_widget):
+        """Handle Ctrl+V - paste with format preservation if available
+        Now called directly on specific text widgets rather than globally"""
+        logger.info("Direct paste handler executed")
         try:
-            focused_widget = self.root.focus_get()
-            print(f"DEBUG: Focused widget: {focused_widget}, type: {type(focused_widget)}")
-            
-            # Check if this is a ScrollableText wrapper
-            if hasattr(focused_widget, 'text_widget') and isinstance(focused_widget.text_widget, tk.Text):
-                print(f"DEBUG: ScrollableText detected! Using inner text_widget: {focused_widget.text_widget}")
-                focused_widget = focused_widget.text_widget
-            
-            if isinstance(focused_widget, tk.Text):
+            if isinstance(text_widget, tk.Text):
                 # Add edit separator before paste
-                focused_widget.edit_separator()
+                text_widget.edit_separator()
                 
                 # Check if we have formatted content in internal clipboard
-                print(f"DEBUG: Internal clipboard: {self.internal_clipboard}")
                 if self.internal_clipboard:
                     text, tags_data = self.internal_clipboard
                     
                     # Get cursor position or selection
                     try:
                         # Delete selection if exists
-                        if focused_widget.tag_ranges(tk.SEL):
-                            focused_widget.delete(tk.SEL_FIRST, tk.SEL_LAST)
-                        insert_pos = focused_widget.index(tk.INSERT)
+                        if text_widget.tag_ranges(tk.SEL):
+                            text_widget.delete(tk.SEL_FIRST, tk.SEL_LAST)
+                        insert_pos = text_widget.index(tk.INSERT)
                     except tk.TclError:
-                        insert_pos = focused_widget.index(tk.INSERT)
+                        insert_pos = text_widget.index(tk.INSERT)
                     
                     # Insert text
-                    focused_widget.insert(insert_pos, text)
+                    text_widget.insert(insert_pos, text)
                     
                     # Apply formatting tags
                     for tag, rel_start, rel_end in tags_data:
                         tag_start = f"{insert_pos} + {rel_start}c"
                         tag_end = f"{insert_pos} + {rel_end}c"
-                        focused_widget.tag_add(tag, tag_start, tag_end)
+                        text_widget.tag_add(tag, tag_start, tag_end)
                     
                     # Add edit separator after paste
-                    focused_widget.edit_separator()
+                    text_widget.edit_separator()
                     
                     # Clear internal clipboard after use (single use)
                     self.internal_clipboard = None
                     
                     # Trigger character count check after formatted paste
-                    self.root.after_idle(lambda: self.check_character_count_for_widget(focused_widget))
+                    self.root.after_idle(lambda: self.check_character_count_for_widget(text_widget))
                     
                     return "break"  # Prevent default paste
                 else:
                     # No formatted content - perform regular paste with undo tracking
                     try:
-                        # Get clipboard content - this was the MISSING CRITICAL CODE
+                        # Get clipboard content
                         clipboard_content = self.root.clipboard_get()
-                        print(f"DEBUG: Clipboard content: '{clipboard_content}'")
                         
                         # Check if there's selected text that will be replaced
-                        has_selection = bool(focused_widget.tag_ranges(tk.SEL))
+                        has_selection = bool(text_widget.tag_ranges(tk.SEL))
 
                         # Or if we just did a select-all
-                        select_all_pending = getattr(focused_widget, '_select_all_pending', False)
+                        select_all_pending = getattr(text_widget, '_select_all_pending', False)
 
                         if has_selection or select_all_pending:
                             # Save current content to our custom undo stack before replacing
-                            current_content = focused_widget.get("1.0", "end-1c")
-                            self.save_text_undo_state(focused_widget, current_content)
+                            current_content = text_widget.get("1.0", "end-1c")
+                            self.save_text_undo_state(text_widget, current_content)
 
                             logger.info("Saved undo state before paste operation")
 
                         # Clear the select-all pending flag
-                        if hasattr(focused_widget, '_select_all_pending'):
-                            delattr(focused_widget, '_select_all_pending')
+                        if hasattr(text_widget, '_select_all_pending'):
+                            delattr(text_widget, '_select_all_pending')
 
-                        # CRITICAL FIX: Actually perform the paste operation
+                        # Actually perform the paste operation
                         if has_selection:
                             # Delete selected text first
-                            focused_widget.delete(tk.SEL_FIRST, tk.SEL_LAST)
+                            text_widget.delete(tk.SEL_FIRST, tk.SEL_LAST)
                         
                         # Insert clipboard content at cursor position
-                        insert_pos = focused_widget.index(tk.INSERT)
-                        print(f"DEBUG: Inserting '{clipboard_content}' at position {insert_pos}")
-                        focused_widget.insert(insert_pos, clipboard_content)
-                        print("DEBUG: Text inserted successfully")
+                        insert_pos = text_widget.index(tk.INSERT)
+                        text_widget.insert(insert_pos, clipboard_content)
 
                         # Schedule saving the post-paste content to our undo stack
-                        self.root.after_idle(self.save_post_paste_state, focused_widget)
+                        self.root.after_idle(self.save_post_paste_state, text_widget)
                         
                         # Add edit separator after paste
-                        self.root.after_idle(lambda: focused_widget.edit_separator())
+                        self.root.after_idle(lambda: text_widget.edit_separator())
                         
                         # Trigger character count check after regular paste
-                        self.root.after_idle(lambda: self.check_character_count_for_widget(focused_widget))
+                        self.root.after_idle(lambda: self.check_character_count_for_widget(text_widget))
                         
                     except tk.TclError:
                         # No clipboard content or clipboard access failed
                         logger.debug("No clipboard content available for paste")
                 
-                # ALWAYS return "break" for Text widgets to prevent duplicate paste
-                # from widget-specific handlers in excel_fields.py
+                # ALWAYS return "break" for Text widgets to prevent default paste
                 return "break"
         except (tk.TclError, AttributeError) as e:
             logger.error(f"Error in paste handler: {e}")
-        return None  # Allow default paste for non-Text widgets
+        return "break"  # Always prevent default for direct widget calls
 
     def save_post_paste_state(self, text_widget):
         """Save the state after a paste operation completes"""
@@ -2067,22 +2047,9 @@ class PDFProcessorApp:
         self.root.bind_all('<Control-a>', self.handle_select_all_undo)
         self.root.bind_all('<Control-c>', self.handle_copy_with_format)
         self.root.bind_all('<Control-x>', self.handle_cut_with_format)
-        print("DEBUG: Setting up paste binding...")
-        self.root.bind_all('<Control-v>', self.handle_paste_undo)
-        print("DEBUG: Paste binding set up successfully")
+        # NOTE: Paste binding removed - now handled directly on each Text widget
         self.root.bind_all('<Delete>', self.handle_delete_with_undo)
         self.root.bind_all('<BackSpace>', self.handle_delete_with_undo)
-        
-        # CRITICAL: Disable built-in paste events to prevent duplication and allow our handler
-        # The Text widget has BOTH a <Control-v> class binding AND a <<Paste>> virtual event
-        # The <Control-v> class binding intercepts our global bind_all handler
-        print("DEBUG: Disabling built-in Text class <Control-v> binding...")
-        self.root.bind_class('Text', '<Control-v>', lambda e: 'break')
-        print("DEBUG: Control-v class binding disabled")
-        
-        print("DEBUG: Disabling built-in <<Paste>> virtual event...")
-        self.root.bind_class('Text', '<<Paste>>', lambda e: 'break')
-        print("DEBUG: Virtual event disabled")
 
     def global_undo(self, event=None):
         """Global undo function that works on focused widget"""

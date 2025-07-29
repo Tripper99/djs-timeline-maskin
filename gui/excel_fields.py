@@ -371,21 +371,16 @@ class ExcelFieldManager:
             # Enable undo functionality for text widget
             self.parent.enable_undo_for_widget(text_widget)
             
-            # CRITICAL: Additional prevention of built-in <<Paste>> virtual event
-            # This ensures our global handler is the ONLY paste mechanism
-            text_widget.bind('<<Paste>>', lambda e: 'break')
+            # NUCLEAR OPTION: Direct paste binding to bypass all tkinter hierarchy issues
+            # This binds directly to the actual Text widget, not the ScrollableText wrapper
+            text_widget.bind('<Control-v>', lambda e: self.parent.handle_paste_undo(text_widget))
+            text_widget.bind('<<Paste>>', lambda e: 'break')  # Disable built-in paste
 
-            # Bind character count checking and paste handling
+            # Bind character count checking 
             text_widget.bind('<KeyRelease>',
                            lambda e, col=col_name: self.parent.check_character_count(e, col))
             text_widget.bind('<Button-1>',
                            lambda e, col=col_name: self.parent.root.after(1, lambda: self.parent.check_character_count(e, col)))
-            # REMOVED: Widget-specific paste bindings to prevent duplicate paste
-            # These conflict with the global paste handler in main_window.py
-            # text_widget.bind('<Control-v>',
-            #                lambda e, col=col_name: self.parent.dialog_manager.handle_paste_event(e, col))
-            # text_widget.bind('<<Paste>>',
-            #                lambda e, col=col_name: self.parent.dialog_manager.handle_paste_event(e, col))
 
             # Add improved undo handling for key presses that replace selected text
             text_widget.bind('<KeyPress>',
