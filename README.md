@@ -68,4 +68,4 @@ Detta projekt är för personlig användning.
 
 ## Bidrag
 
-Detta är ett personligt projekt, men förslag och förbättringar är välkomna.
+Detta är ett personligt projekt.
