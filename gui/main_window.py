@@ -2539,6 +2539,35 @@ class PDFProcessorApp:
         logger.info("Performed custom redo on Text widget with formatting")
         return True
 
+    def get_theme_default_text_color(self):
+        """Get the current theme's appropriate default text color"""
+        try:
+            # Get current style instance
+            style = tb.Style()
+
+            # Try to get the foreground color from the current theme
+            # ttkbootstrap provides various ways to access theme colors
+            if hasattr(style, 'colors') and hasattr(style.colors, 'fg'):
+                return style.colors.fg
+            elif hasattr(style, 'colors'):
+                # Alternative method - get foreground color
+                return style.colors.get('fg', '#000000')  # Default to black if not found
+            else:
+                # Fallback: determine based on theme name
+                current_theme = self.config.get('theme', 'simplex')
+
+                # Light themes typically use dark text, dark themes use light text
+                dark_themes = ['darkly', 'cyborg', 'vapor', 'solar']
+                if current_theme.lower() in dark_themes:
+                    return '#FFFFFF'  # White text for dark themes
+                else:
+                    return '#000000'  # Black text for light themes
+
+        except Exception as e:
+            logger.warning(f"Could not determine theme default color: {e}")
+            # Safe fallback - dark gray that works on most backgrounds
+            return '#404040'
+
     def setup_text_formatting_tags(self, text_widget):
         """Configure formatting tags for rich text support"""
         # Get current font size from config
@@ -2645,9 +2674,9 @@ class PDFProcessorApp:
         green_btn.pack(side="left", padx=(0, 2))
         green_btn.configure(bootstyle="success")
 
-        # Default color button - styled for default text color
+        # Clear formatting button - removes ALL formatting and restores theme default color
         default_btn = tb.Button(parent_frame, text="T", width=3,
-                              command=lambda: self.toggle_format(text_widget, "default"))
+                              command=lambda: self.clear_all_formatting(text_widget))
         default_btn.pack(side="left", padx=(0, 2))
         default_btn.configure(bootstyle="secondary-outline")
 
@@ -2663,7 +2692,7 @@ class PDFProcessorApp:
         text_widget.bind('<Control-r>', lambda e: self.toggle_format(text_widget, "red"))
         text_widget.bind('<Control-1>', lambda e: self.toggle_format(text_widget, "blue"))
         text_widget.bind('<Control-g>', lambda e: self.toggle_format(text_widget, "green"))
-        text_widget.bind('<Control-k>', lambda e: self.toggle_format(text_widget, "default"))
+        text_widget.bind('<Control-k>', lambda e: self.clear_all_formatting(text_widget))
 
     def toggle_format(self, text_widget, format_type):
         """Toggle formatting on selected text with undo support"""
@@ -2704,6 +2733,48 @@ class PDFProcessorApp:
 
         except tk.TclError:
             # Handle any errors silently
+            pass
+
+    def clear_all_formatting(self, text_widget):
+        """Clear ALL formatting from selected text and restore theme-appropriate default color"""
+        try:
+            # Add edit separator BEFORE formatting change
+            text_widget.edit_separator()
+
+            # Get current selection
+            try:
+                start = text_widget.index(tk.SEL_FIRST)
+                end = text_widget.index(tk.SEL_LAST)
+            except tk.TclError:
+                # No selection, use entire text
+                start = "1.0"
+                end = "end-1c"
+
+            # Remove ALL formatting tags from the selection
+            all_format_tags = ["bold", "italic", "red", "blue", "green", "default"]
+            for tag in all_format_tags:
+                text_widget.tag_remove(tag, start, end)
+
+            # Get theme-appropriate default color and apply it
+            default_color = self.get_theme_default_text_color()
+
+            # Create a temporary tag for the theme default color
+            temp_tag = "theme_default"
+            text_widget.tag_configure(temp_tag, foreground=default_color)
+            text_widget.tag_add(temp_tag, start, end)
+
+            # Immediately replace the temporary tag with the permanent default tag
+            text_widget.tag_remove(temp_tag, start, end)
+            text_widget.tag_configure("default", foreground=default_color)
+            text_widget.tag_add("default", start, end)
+
+            # Add edit separator AFTER formatting change
+            text_widget.edit_separator()
+
+            logger.debug(f"Cleared all formatting and applied theme color {default_color}")
+
+        except tk.TclError as e:
+            logger.warning(f"Error clearing formatting: {e}")
             pass
 
     def get_formatted_text_for_excel(self, text_widget):
