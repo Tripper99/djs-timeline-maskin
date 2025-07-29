@@ -370,6 +370,10 @@ class ExcelFieldManager:
 
             # Enable undo functionality for text widget
             self.parent.enable_undo_for_widget(text_widget)
+            
+            # CRITICAL: Additional prevention of built-in <<Paste>> virtual event
+            # This ensures our global handler is the ONLY paste mechanism
+            text_widget.bind('<<Paste>>', lambda e: 'break')
 
             # Bind character count checking and paste handling
             text_widget.bind('<KeyRelease>',

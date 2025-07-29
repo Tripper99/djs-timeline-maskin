@@ -2034,6 +2034,11 @@ class PDFProcessorApp:
         self.root.bind_all('<Control-v>', self.handle_paste_undo)
         self.root.bind_all('<Delete>', self.handle_delete_with_undo)
         self.root.bind_all('<BackSpace>', self.handle_delete_with_undo)
+        
+        # CRITICAL: Disable built-in <<Paste>> virtual event to prevent duplication
+        # The Text widget has a built-in <<Paste>> binding that runs independently
+        # of our <Control-v> handler, causing text to be pasted twice
+        self.root.bind_class('Text', '<<Paste>>', lambda e: 'break')
 
     def global_undo(self, event=None):
         """Global undo function that works on focused widget"""
