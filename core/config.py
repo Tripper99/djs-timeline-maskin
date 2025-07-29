@@ -22,6 +22,8 @@ class ConfigManager:
             "last_pdf_dir": "",
             "window_geometry": "2000x1400",
             "theme": "simplex",
+            "output_folder": "",  # Store output folder path for renamed PDFs
+            "output_folder_locked": False,  # Store if output folder selection is locked
             "locked_fields": {},  # Store which fields are locked (field_name: True/False)
             "locked_field_contents": {},  # Store content of locked fields (field_name: content)
             "locked_field_formats": {}  # Store rich text formatting of locked fields (field_name: format_data)

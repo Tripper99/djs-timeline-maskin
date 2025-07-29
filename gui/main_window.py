@@ -62,6 +62,7 @@ class PDFProcessorApp:
         # Setup GUI
         self.setup_gui()
         self.load_saved_excel_file()  # Load previously selected Excel file
+        self.load_saved_output_folder()  # Load previously selected output folder
 
         # Load and restore locked fields after GUI is created
         self.excel_field_manager.restore_locked_fields()
@@ -297,8 +298,9 @@ class PDFProcessorApp:
             'Övrigt': tk.BooleanVar()  # Updated from "Korrelerande historisk händelse"
         }
 
-        # Move to subfolder switch - DEFAULT ON
-        self.move_to_subfolder_var = tk.BooleanVar(value=True)
+        # Output folder for renamed PDFs
+        self.output_folder_var = tk.StringVar(value="")
+        self.output_folder_lock_var = tk.BooleanVar(value=False)
 
         # Row background color selection - DEFAULT: none (white)
         self.row_color_var = tk.StringVar(value="none")
@@ -424,22 +426,54 @@ class PDFProcessorApp:
         group1 = tb.LabelFrame(parent, text="1. PDF-fil", padding=15)
         group1.pack(fill="x", pady=(0, 15))
 
-        # PDF path display
+        # First row: PDF path display
         pdf_path_frame = tb.Frame(group1)
         pdf_path_frame.pack(fill="x", pady=(0, 10))
 
         tb.Label(pdf_path_frame, text="Vald fil:", font=('Arial', 10)).pack(side="left")
         pdf_path_entry = tb.Entry(pdf_path_frame, textvariable=self.pdf_path_var,
-                                 state="readonly", font=('Arial', 9), width=60)
+                                 state="readonly", font=('Arial', 9), width=40)
         pdf_path_entry.pack(side="left", padx=(10, 10))
         ToolTip(pdf_path_entry, "Visar namn på den valda PDF-filen. Filen öppnas automatiskt när den väljs.")
 
         # Select PDF button
         select_pdf_btn = tb.Button(pdf_path_frame, text="Välj PDF",
                                   command=self.select_pdf_file, bootstyle=PRIMARY)
-        select_pdf_btn.pack(side="left")
+        select_pdf_btn.pack(side="left", padx=(0, 20))
         ToolTip(select_pdf_btn, "Välj en PDF-fil för bearbetning. Filen öppnas automatiskt för granskning, "
                                "filnamnet parsas till komponenter och sidantalet räknas automatiskt.")
+
+        # Output folder selection (same row)
+        tb.Label(pdf_path_frame, text="Mapp för omdöpt pdf:", font=('Arial', 10)).pack(side="left")
+        self.output_folder_entry = tb.Entry(pdf_path_frame, textvariable=self.output_folder_var,
+                                           state="readonly", font=('Arial', 9), width=30)
+        self.output_folder_entry.pack(side="left", padx=(10, 10))
+        ToolTip(self.output_folder_entry, "Visar mappen där omdöpta PDF-filer ska sparas. "
+                                         "Fylls automatiskt med PDF-filens mapp om inte låst.")
+
+        # Select output folder button
+        self.select_output_folder_btn = tb.Button(pdf_path_frame, text="Välj mapp",
+                                                 command=self.select_output_folder, bootstyle=SECONDARY)
+        self.select_output_folder_btn.pack(side="left", padx=(0, 10))
+        ToolTip(self.select_output_folder_btn, "Välj en mapp för omdöpta PDF-filer.")
+
+        # Lock switch for output folder
+        self.output_folder_lock_switch = tb.Checkbutton(pdf_path_frame, text="Lås",
+                                                       variable=self.output_folder_lock_var,
+                                                       command=self.on_output_folder_lock_change,
+                                                       bootstyle="info-round-toggle")
+        self.output_folder_lock_switch.pack(side="left", padx=(5, 0))
+        ToolTip(self.output_folder_lock_switch, "När låst: mappvalet ändras inte när ny PDF väljs. "
+                                               "När olåst: mappvalet uppdateras automatiskt till PDF-filens mapp.")
+
+        # Second row: Reset button
+        reset_frame = tb.Frame(group1)
+        reset_frame.pack(fill="x", pady=(5, 0))
+        
+        self.reset_folder_btn = tb.Button(reset_frame, text="Nollställ mapp",
+                                         command=self.reset_output_folder, bootstyle=INFO, width=15)
+        self.reset_folder_btn.pack(side="left", padx=(0, 10))
+        ToolTip(self.reset_folder_btn, "Rensa mappvalet och låser upp automatisk uppdatering.")
 
     def create_group2(self, parent):
         """Group 2: Filename Editing"""
@@ -552,14 +586,6 @@ class PDFProcessorApp:
                                           bootstyle=INFO, width=30)
         self.new_excel_row_btn.pack(side="left", padx=(0, 20))
 
-        # Move to subfolder switch
-        self.move_switch = tb.Checkbutton(excel_buttons_frame,
-                                        text='Flytta omdöpt PDF till undermapp "Omdöpta filer"',
-                                        variable=self.move_to_subfolder_var,
-                                        bootstyle="info-round-toggle")
-        self.move_switch.pack(side="left")
-        ToolTip(self.move_switch, "När aktiverad: omdöpta PDF-filer flyttas till undermappen 'Omdöpta filer'. "
-                                 "När inaktiverad: PDF-filer döps om på samma plats. Standard: PÅ.")
 
         # Second row: Row color selection
         color_frame = tb.Frame(group4)
@@ -608,7 +634,18 @@ class PDFProcessorApp:
                 self.open_excel_btn.config(state="normal")
                 logger.info(f"Loaded saved Excel file: {excel_path}")
 
-
+    def load_saved_output_folder(self):
+        """Load previously saved output folder settings if they exist"""
+        output_folder = self.config.get('output_folder', '')
+        output_folder_locked = self.config.get('output_folder_locked', False)
+        
+        if output_folder and Path(output_folder).exists():
+            self.output_folder_var.set(output_folder)
+            logger.info(f"Loaded saved output folder: {output_folder}")
+        
+        self.output_folder_lock_var.set(output_folder_locked)
+        if output_folder_locked:
+            logger.info("Output folder lock is enabled")
 
     def select_pdf_file(self):
         """Select PDF file for processing"""
@@ -665,11 +702,54 @@ class PDFProcessorApp:
             except Exception as e:
                 messagebox.showerror("Fel", f"Kunde inte öppna PDF-fil: {str(e)}")
 
+            # Auto-fill output folder if not locked and (empty or not set)
+            if not self.output_folder_lock_var.get() and not self.output_folder_var.get():
+                pdf_folder = str(Path(file_path).parent)
+                self.output_folder_var.set(pdf_folder)
+                logger.info(f"Auto-filled output folder: {pdf_folder}")
+
             # Update statistics
             self.stats['pdfs_opened'] += 1
             self.update_stats_display()
 
             logger.info(f"Loaded PDF: {filename}, Pages: {self.current_pdf_pages}")
+
+    def select_output_folder(self):
+        """Select output folder for renamed PDF files"""
+        current_folder = self.output_folder_var.get()
+        initial_dir = current_folder if current_folder and Path(current_folder).exists() else str(Path.home())
+        
+        folder_path = filedialog.askdirectory(
+            title="Välj mapp för omdöpta PDF-filer",
+            initialdir=initial_dir
+        )
+        
+        if folder_path:
+            self.output_folder_var.set(folder_path)
+            # Save to config for persistence
+            self.config['output_folder'] = folder_path
+            self.config['output_folder_locked'] = self.output_folder_lock_var.get()
+            self.config_manager.save_config(self.config)
+            logger.info(f"Selected output folder: {folder_path}")
+
+    def reset_output_folder(self):
+        """Reset output folder selection and unlock auto-fill"""
+        self.output_folder_var.set("")
+        self.output_folder_lock_var.set(False)
+        # Save to config
+        self.config['output_folder'] = ""
+        self.config['output_folder_locked'] = False
+        self.config_manager.save_config(self.config)
+        logger.info("Reset output folder selection")
+
+    def on_output_folder_lock_change(self):
+        """Save config when output folder lock state changes"""
+        self.config['output_folder_locked'] = self.output_folder_lock_var.get()
+        self.config_manager.save_config(self.config)
+        if self.output_folder_lock_var.get():
+            logger.info("Output folder lock enabled")
+        else:
+            logger.info("Output folder lock disabled")
 
     def select_excel_file(self):
         """Select Excel file for integration"""
@@ -922,38 +1002,21 @@ class PDFProcessorApp:
 
         old_file = Path(self.current_pdf_path)
 
-        # Determine target directory and check permissions
-        if self.move_to_subfolder_var.get():
-            subfolder_path = old_file.parent / "Omdöpta filer"
-
-            # Check parent directory permissions first
-            can_write, perm_error = PDFProcessor.check_directory_permissions(str(old_file.parent))
-            if not can_write:
-                messagebox.showerror("Fel", f"Kan inte skapa undermapp: {perm_error}")
-                return False
-
-            try:
-                subfolder_path.mkdir(exist_ok=True)
-                logger.info(f"Created/verified subfolder: {subfolder_path}")
-            except Exception as e:
-                messagebox.showerror("Fel", f"Kunde inte skapa underkatalog: {str(e)}")
-                return False
-
-            # Check subfolder permissions
-            can_write, perm_error = PDFProcessor.check_directory_permissions(str(subfolder_path))
-            if not can_write:
-                messagebox.showerror("Fel", f"Kan inte skriva till undermapp: {perm_error}")
-                return False
-
-            new_path = subfolder_path / new_filename
+        # Determine target directory based on output folder setting
+        output_folder = self.output_folder_var.get()
+        if output_folder and Path(output_folder).exists():
+            target_dir = Path(output_folder)
         else:
-            # Check current directory permissions
-            can_write, perm_error = PDFProcessor.check_directory_permissions(str(old_file.parent))
-            if not can_write:
-                messagebox.showerror("Fel", f"Kan inte skriva till mappen: {perm_error}")
-                return False
+            # Default to same directory as original file
+            target_dir = old_file.parent
 
-            new_path = old_file.parent / new_filename
+        # Check target directory permissions
+        can_write, perm_error = PDFProcessor.check_directory_permissions(str(target_dir))
+        if not can_write:
+            messagebox.showerror("Fel", f"Kan inte skriva till mappen '{target_dir}': {perm_error}")
+            return False
+
+        new_path = target_dir / new_filename
 
         # Check if target file already exists
         if new_path.exists() and str(new_path) != str(old_file):
@@ -970,10 +1033,10 @@ class PDFProcessorApp:
                 return False
         # Attempt to rename/move
         try:
-            if self.move_to_subfolder_var.get():
-                # Move to subfolder
+            if str(target_dir) != str(old_file.parent):
+                # Move to different directory
                 old_file.replace(new_path)  # replace() overwrites if target exists
-                logger.info(f"Moved and renamed: {old_file.name} -> Omdöpta filer/{new_filename}")
+                logger.info(f"Moved and renamed: {old_file.name} -> {target_dir.name}/{new_filename}")
             else:
                 # Just rename in same directory
                 old_file.rename(new_path)
