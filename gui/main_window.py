@@ -67,13 +67,17 @@ class PDFProcessorApp:
         # Load and restore locked fields after GUI is created
         self.excel_field_manager.restore_locked_fields()
 
+        # Apply saved font size to text fields
+        saved_font_size = self.config.get('text_font_size', 9)
+        self.apply_text_font_size(saved_font_size)
+
     def parse_geometry(self, geometry_string):
         """
         Parse tkinter geometry string safely handling negative coordinates.
-        
+
         Args:
             geometry_string (str): Format "widthxheight+x+y" or "widthxheight+x-y" etc.
-            
+
         Returns:
             tuple: (width, height, x, y) or None if parsing fails
         """
@@ -94,10 +98,10 @@ class PDFProcessorApp:
     def build_geometry(self, width, height, x, y):
         """
         Build tkinter geometry string from components.
-        
+
         Args:
             width, height, x, y (int): Window dimensions and position
-            
+
         Returns:
             str: Geometry string in format "widthxheight+x+y"
         """
@@ -273,7 +277,7 @@ class PDFProcessorApp:
         self.text_redo_stacks = {}  # Dictionary to store redo history for each Text widget
 
         self.max_undo_levels = 20  # Maximum number of undo levels
-        
+
         # Internal clipboard for format preservation
         self.internal_clipboard = None  # Stores (text, tags) tuples
 
@@ -581,13 +585,10 @@ class PDFProcessorApp:
         self.excel_fields_frame.grid_columnconfigure(0, weight=1)
 
         self.excel_field_manager.create_excel_fields()
-        
+
         # Apply saved font size to text fields after they're created
-        self.apply_text_font_size()
-        
-        # Set initial button text based on current font size
-        size_labels = {9: "A", 12: "A+", 15: "A++"}
-        self.font_size_btn.configure(text=size_labels.get(self.text_font_size, "A"))
+        saved_font_size = self.config.get('text_font_size', 9)
+        self.apply_text_font_size(saved_font_size)
 
     def create_group4(self, parent):
         """Group 4: Excel Operations Buttons"""
@@ -660,7 +661,7 @@ class PDFProcessorApp:
         """Load previously saved output folder settings if they exist"""
         output_folder = self.config.get('output_folder', '')
         # ALWAYS start with lock switch OFF (session-only behavior)
-        
+
         if output_folder and Path(output_folder).exists():
             # Store actual path and update display
             display_text = self.get_display_folder_text(output_folder)
@@ -669,7 +670,7 @@ class PDFProcessorApp:
             logger.info(f"Loaded saved output folder: {output_folder}")
         else:
             self._actual_output_folder = ""
-        
+
         # Always set lock to False on app start (session-only behavior)
         self.output_folder_lock_var.set(False)
         logger.info("Output folder lock always starts unlocked (session-only behavior)")
@@ -677,13 +678,13 @@ class PDFProcessorApp:
     def show_retry_cancel_dialog(self, title: str, message: str) -> str:
         """
         Show a custom dialog with 'Försök igen' and 'Avbryt' buttons
-        
+
         Returns:
             'retry' if user clicks retry button
             'cancel' if user clicks cancel button
         """
         import tkinter as tk
-        
+
         # Create custom dialog window
         dialog = tk.Toplevel(self.root)
         dialog.title(title)
@@ -691,87 +692,51 @@ class PDFProcessorApp:
         dialog.transient(self.root)
         dialog.grab_set()
         dialog.resizable(False, False)
-        
+
         # Center dialog
         dialog.update_idletasks()
         x = (dialog.winfo_screenwidth() // 2) - (500 // 2)
         y = (dialog.winfo_screenheight() // 2) - (200 // 2)
         dialog.geometry(f"500x200+{x}+{y}")
-        
+
         result = {'choice': 'cancel'}  # Default to cancel
-        
+
         # Message frame
         msg_frame = tk.Frame(dialog)
         msg_frame.pack(fill="both", expand=True, padx=20, pady=20)
-        
+
         # Message label
         msg_label = tk.Label(msg_frame, text=message, wraplength=450, justify="left", font=('Arial', 10))
         msg_label.pack(expand=True)
-        
+
         # Button frame
         btn_frame = tk.Frame(dialog)
         btn_frame.pack(fill="x", padx=20, pady=(0, 20))
-        
+
         def on_retry():
             result['choice'] = 'retry'
             dialog.destroy()
-            
+
         def on_cancel():
             result['choice'] = 'cancel'
             dialog.destroy()
-        
+
         # Buttons
         cancel_btn = tk.Button(btn_frame, text="Avbryt", command=on_cancel,
                               font=('Arial', 10), width=12, bg='#f44336', fg='white')
         cancel_btn.pack(side="right", padx=(10, 0))
-        
-        retry_btn = tk.Button(btn_frame, text="Försök igen", command=on_retry, 
+
+        retry_btn = tk.Button(btn_frame, text="Försök igen", command=on_retry,
                              font=('Arial', 10), width=12, bg='#4CAF50', fg='white')
         retry_btn.pack(side="right")
-        
+
         # Handle window close button (X) as cancel
         dialog.protocol("WM_DELETE_WINDOW", on_cancel)
-        
+
         # Wait for user response
         dialog.wait_window()
-        
+
         return result['choice']
-
-    def toggle_text_font_size(self):
-        """Toggle font size for text fields (Händelse, Note1-3) between 9pt, 12pt, 15pt"""
-        # Cycle through font sizes: 9 → 12 → 15 → 9
-        font_sizes = [9, 12, 15]
-        try:
-            current_index = font_sizes.index(self.text_font_size)
-            self.text_font_size = font_sizes[(current_index + 1) % len(font_sizes)]
-        except ValueError:
-            # If current size is not in list, reset to default
-            self.text_font_size = 9
-        
-        # Update button text to show current size
-        size_labels = {9: "A", 12: "A+", 15: "A++"}
-        self.font_size_btn.configure(text=size_labels.get(self.text_font_size, "A"))
-        
-        # Save font size to config
-        self.config['text_font_size'] = self.text_font_size
-        self.config_manager.save_config(self.config)
-        
-        # Apply new font size to all text fields (Händelse, Note1-3)
-        self.apply_text_font_size()
-        
-        logger.info(f"Changed text font size to {self.text_font_size}pt")
-
-    def apply_text_font_size(self):
-        """Apply current font size to all text fields"""
-        text_field_names = ['Händelse', 'Note1', 'Note2', 'Note3']
-        
-        if hasattr(self, 'excel_vars'):
-            for field_name in text_field_names:
-                if field_name in self.excel_vars:
-                    widget = self.excel_vars[field_name]
-                    # Check if it's a ScrollableText widget (has text_widget attribute)
-                    if hasattr(widget, 'text_widget'):
-                        widget.text_widget.configure(font=('Arial', self.text_font_size))
 
     def select_pdf_file(self):
         """Select PDF file for processing"""
@@ -846,23 +811,23 @@ class PDFProcessorApp:
         """Select output folder for renamed PDF files"""
         current_folder = self.output_folder_var.get()
         initial_dir = current_folder if current_folder and Path(current_folder).exists() else str(Path.home())
-        
+
         folder_path = filedialog.askdirectory(
             title="Välj mapp för omdöpta PDF-filer",
             initialdir=initial_dir
         )
-        
+
         if folder_path:
             # Store actual path and update display (save folder but not lock state)
             self.config['output_folder'] = folder_path
             # Don't save lock state - it's session-only behavior
             self.config_manager.save_config(self.config)
-            
+
             # Update display with friendly text
             display_text = self.get_display_folder_text(folder_path)
             self.output_folder_var.set(display_text)
             self._actual_output_folder = folder_path
-            
+
             logger.info(f"Selected output folder: {folder_path}")
 
     def reset_output_folder(self):
@@ -878,15 +843,15 @@ class PDFProcessorApp:
     def open_output_folder(self):
         """Open the selected output folder in file explorer"""
         actual_folder = getattr(self, '_actual_output_folder', '')
-        
+
         if not actual_folder:
             messagebox.showerror("Fel", "Ingen mapp är vald att öppna.")
             return
-        
+
         if not Path(actual_folder).exists():
             messagebox.showerror("Fel", f"Mappen finns inte längre:\n{actual_folder}")
             return
-        
+
         try:
             if platform.system() == 'Windows':
                 os.startfile(actual_folder)
@@ -903,13 +868,13 @@ class PDFProcessorApp:
         """Get display text for output folder - show 'Samma mapp som pdf-filen' for PDF's parent directory"""
         if not folder_path:
             return ""
-        
+
         # If we have a current PDF and the folder matches its parent directory
         if self.current_pdf_path:
             pdf_parent = str(Path(self.current_pdf_path).parent)
             if str(folder_path) == pdf_parent:
                 return "Samma mapp som pdf-filen"
-        
+
         return folder_path
 
     def update_output_folder_display(self):
@@ -930,7 +895,7 @@ class PDFProcessorApp:
                 self.output_folder_lock_var.set(False)
                 messagebox.showerror("Fel", "Du måste välja en mapp innan du kan låsa mappvalet.")
                 return
-        
+
         # NOTE: Lock state is NOT saved to config (session-only behavior)
         # Only save the folder path, not the lock state
         if self.output_folder_lock_var.get():
@@ -1349,7 +1314,7 @@ class PDFProcessorApp:
         # Try to save with retry loop for file lock handling
         while True:
             result = self.excel_manager.add_row_with_xlsxwriter(excel_data, filename, self.row_color_var.get())
-            
+
             if result is True:
                 # Success
                 self.stats['excel_rows_added'] += 1
@@ -1625,7 +1590,6 @@ class PDFProcessorApp:
 
             # Color coding based on remaining characters
             if remaining >= 200:
-                color = "green"
                 style = "success"
             elif remaining >= 50:
                 style = "warning"
@@ -1648,10 +1612,10 @@ class PDFProcessorApp:
     def validate_time_format(self, time_input):
         """
         Validate and format time input for HH:MM format (24-hour system).
-        
+
         Args:
             time_input (str): Time input from user
-            
+
         Returns:
             tuple: (is_valid, formatted_time, error_message)
         """
@@ -1713,7 +1677,7 @@ class PDFProcessorApp:
     def validate_time_field(self, event, field_name):
         """
         Validate time field on FocusOut event.
-        
+
         Args:
             event: FocusOut event
             field_name (str): Name of the time field ('Starttid' or 'Sluttid')
@@ -1755,18 +1719,18 @@ class PDFProcessorApp:
     def validate_date_format(self, date_input):
         """
         Validate and format date input for YYYY-MM-DD format.
-        
+
         Supported input formats:
         - YYYY-MM-DD (target format, validated and kept as-is)
         - YYYYMMDD (converted to YYYY-MM-DD format)
-        
+
         Rejected formats (require century specification):
         - YY-MM-DD (ambiguous century - could be 1900s or 2000s)
         - YYMMDD (ambiguous century - could be 1900s or 2000s)
-        
+
         Args:
             date_input (str): Date input from user
-            
+
         Returns:
             tuple: (is_valid, formatted_date, error_message)
         """
@@ -1844,7 +1808,7 @@ class PDFProcessorApp:
     def validate_date_field(self, event, field_name):
         """
         Validate date field on FocusOut event.
-        
+
         Args:
             event: FocusOut event
             field_name (str): Name of the date field ('Startdatum' or 'Slutdatum')
@@ -1920,7 +1884,7 @@ class PDFProcessorApp:
             # Add separator for ANY character input or deletion
             if (len(event.char) == 1 and event.char.isprintable()) or event.keysym in ['Delete', 'BackSpace', 'Return', 'KP_Enter', 'Tab']:
                 text_widget.edit_separator()
-                
+
                 # Log only for selections to reduce noise
                 if has_selection:
                     logger.debug(f"Added undo separator before '{event.keysym}' over selection")
@@ -1951,11 +1915,11 @@ class PDFProcessorApp:
             if isinstance(text_widget, tk.Text):
                 # Add edit separator before paste
                 text_widget.edit_separator()
-                
+
                 # Check if we have formatted content in internal clipboard
                 if self.internal_clipboard:
                     text, tags_data = self.internal_clipboard
-                    
+
                     # Get cursor position or selection
                     try:
                         # Delete selection if exists
@@ -1964,32 +1928,32 @@ class PDFProcessorApp:
                         insert_pos = text_widget.index(tk.INSERT)
                     except tk.TclError:
                         insert_pos = text_widget.index(tk.INSERT)
-                    
+
                     # Insert text
                     text_widget.insert(insert_pos, text)
-                    
+
                     # Apply formatting tags
                     for tag, rel_start, rel_end in tags_data:
                         tag_start = f"{insert_pos} + {rel_start}c"
                         tag_end = f"{insert_pos} + {rel_end}c"
                         text_widget.tag_add(tag, tag_start, tag_end)
-                    
+
                     # Add edit separator after paste
                     text_widget.edit_separator()
-                    
+
                     # Clear internal clipboard after use (single use)
                     self.internal_clipboard = None
-                    
+
                     # Trigger character count check after formatted paste
                     self.root.after_idle(lambda: self.check_character_count_for_widget(text_widget))
-                    
+
                     return "break"  # Prevent default paste
                 else:
                     # No formatted content - perform regular paste with undo tracking
                     try:
                         # Get clipboard content
                         clipboard_content = self.root.clipboard_get()
-                        
+
                         # Check if there's selected text that will be replaced
                         has_selection = bool(text_widget.tag_ranges(tk.SEL))
 
@@ -2011,24 +1975,24 @@ class PDFProcessorApp:
                         if has_selection:
                             # Delete selected text first
                             text_widget.delete(tk.SEL_FIRST, tk.SEL_LAST)
-                        
+
                         # Insert clipboard content at cursor position
                         insert_pos = text_widget.index(tk.INSERT)
                         text_widget.insert(insert_pos, clipboard_content)
 
                         # Schedule saving the post-paste content to our undo stack
                         self.root.after_idle(self.save_post_paste_state, text_widget)
-                        
+
                         # Add edit separator after paste
                         self.root.after_idle(lambda: text_widget.edit_separator())
-                        
+
                         # Trigger character count check after regular paste
                         self.root.after_idle(lambda: self.check_character_count_for_widget(text_widget))
-                        
+
                     except tk.TclError:
                         # No clipboard content or clipboard access failed
                         logger.debug("No clipboard content available for paste")
-                
+
                 # ALWAYS return "break" for Text widgets to prevent default paste
                 return "break"
         except (tk.TclError, AttributeError) as e:
@@ -2057,7 +2021,7 @@ class PDFProcessorApp:
                     class DummyEvent:
                         def __init__(self, widget):
                             self.widget = widget
-                    
+
                     self.check_character_count(DummyEvent(text_widget), col_name)
                     break
                 elif widgets == text_widget:  # Direct widget reference
@@ -2076,10 +2040,10 @@ class PDFProcessorApp:
                     # Get selection bounds
                     start = focused_widget.index(tk.SEL_FIRST)
                     end = focused_widget.index(tk.SEL_LAST)
-                    
+
                     # Get selected text
                     text = focused_widget.get(start, end)
-                    
+
                     # Get all formatting tags in selection
                     tags_data = []
                     for tag in ["bold", "italic", "red", "blue", "green", "black"]:
@@ -2093,14 +2057,14 @@ class PDFProcessorApp:
                                 rel_start = max(0, len(focused_widget.get(start, tag_start)))
                                 rel_end = min(len(text), len(focused_widget.get(start, tag_end)))
                                 tags_data.append((tag, rel_start, rel_end))
-                    
+
                     # Store in internal clipboard
                     self.internal_clipboard = (text, tags_data)
-                    
+
                     # Also copy to system clipboard (plain text)
                     self.root.clipboard_clear()
                     self.root.clipboard_append(text)
-                    
+
                 except tk.TclError:
                     # No selection
                     pass
@@ -2115,7 +2079,7 @@ class PDFProcessorApp:
             if isinstance(focused_widget, tk.Text):
                 # First copy with format
                 self.handle_copy_with_format(event)
-                
+
                 # Then delete selection with undo support
                 if focused_widget.tag_ranges(tk.SEL):
                     focused_widget.edit_separator()
@@ -2481,7 +2445,7 @@ class PDFProcessorApp:
                 start_idx = str(tag_ranges[i])
                 end_idx = str(tag_ranges[i + 1])
                 tags_data.append((tag, start_idx, end_idx))
-        
+
         # Create state tuple with content and tags
         state = (content, tags_data)
 
@@ -2532,7 +2496,7 @@ class PDFProcessorApp:
         # Restore content
         text_widget.delete("1.0", tk.END)
         text_widget.insert("1.0", previous_content)
-        
+
         # Restore formatting
         for tag, start_idx, end_idx in previous_tags:
             try:
@@ -2571,7 +2535,7 @@ class PDFProcessorApp:
         # Restore content
         text_widget.delete("1.0", tk.END)
         text_widget.insert("1.0", next_content)
-        
+
         # Restore formatting
         for tag, start_idx, end_idx in next_tags:
             try:
@@ -2585,17 +2549,73 @@ class PDFProcessorApp:
 
     def setup_text_formatting_tags(self, text_widget):
         """Configure formatting tags for rich text support"""
+        # Get current font size from config
+        font_size = self.config.get('text_font_size', 9)
+
         # Bold tag
-        text_widget.tag_configure("bold", font=('Arial', 9, 'bold'))
+        text_widget.tag_configure("bold", font=('Arial', font_size, 'bold'))
 
         # Italic tag
-        text_widget.tag_configure("italic", font=('Arial', 9, 'italic'))
+        text_widget.tag_configure("italic", font=('Arial', font_size, 'italic'))
 
         # Color tags
         text_widget.tag_configure("red", foreground="red")
         text_widget.tag_configure("blue", foreground="blue")
         text_widget.tag_configure("green", foreground="green")
         text_widget.tag_configure("black", foreground="black")
+
+    def update_formatting_tags(self, text_widget, font_size):
+        """Update formatting tags with new font size"""
+        # Update bold tag
+        text_widget.tag_configure("bold", font=('Arial', font_size, 'bold'))
+
+        # Update italic tag
+        text_widget.tag_configure("italic", font=('Arial', font_size, 'italic'))
+
+        # Color tags don't need font size updates
+
+    def toggle_text_font_size(self):
+        """Toggle text font size between 9pt → 12pt → 15pt → 9pt"""
+        current_size = self.config.get('text_font_size', 9)
+
+        # Cycle through font sizes
+        if current_size == 9:
+            new_size = 12
+        elif current_size == 12:
+            new_size = 15
+        else:  # 15 or any other value
+            new_size = 9
+
+        # Update config
+        self.config['text_font_size'] = new_size
+        self.config_manager.save_config(self.config)
+
+        # Apply new font size to all text fields
+        self.apply_text_font_size(new_size)
+
+        logger.info(f"Text font size changed from {current_size}pt to {new_size}pt")
+
+    def apply_text_font_size(self, font_size):
+        """Apply font size to all text fields (Händelse and Note1-3) and update formatting tags"""
+        text_fields = ['Händelse', 'Note1', 'Note2', 'Note3']
+
+        for field_name in text_fields:
+            if field_name in self.excel_vars:
+                text_widget = self.excel_vars[field_name]
+
+                # Update main widget font (for ScrollableText, we need the actual text widget)
+                if hasattr(text_widget, 'text_widget'):  # ScrollableText wrapper
+                    actual_widget = text_widget.text_widget
+                else:
+                    actual_widget = text_widget
+
+                # Update the main font
+                actual_widget.configure(font=('Arial', font_size))
+
+                # Update formatting tags to use new font size
+                self.update_formatting_tags(actual_widget, font_size)
+
+                logger.debug(f"Updated font size to {font_size}pt for {field_name}")
 
     def create_formatting_toolbar(self, parent_frame, text_widget, col_name):
         """Create formatting toolbar with buttons and bind keyboard shortcuts"""
@@ -2619,6 +2639,12 @@ class PDFProcessorApp:
             color_btn.pack(side="left", padx=(0, 2))
             color_btn.configure(bootstyle="outline")
 
+        # Font size toggle button
+        font_btn = tb.Button(parent_frame, text="A+", width=3,
+                           command=lambda: self.toggle_text_font_size())
+        font_btn.pack(side="left", padx=(2, 0))
+        font_btn.configure(bootstyle="outline")
+
         # Bind keyboard shortcuts for this text widget
         text_widget.bind('<Control-b>', lambda e: self.toggle_format(text_widget, "bold"))
         text_widget.bind('<Control-i>', lambda e: self.toggle_format(text_widget, "italic"))
@@ -2632,7 +2658,7 @@ class PDFProcessorApp:
         try:
             # Add edit separator BEFORE formatting change
             text_widget.edit_separator()
-            
+
             # Get current selection
             try:
                 start = text_widget.index(tk.SEL_FIRST)
@@ -2660,7 +2686,7 @@ class PDFProcessorApp:
                 for color_tag in color_tags:
                     if color_tag != format_type:
                         text_widget.tag_remove(color_tag, start, end)
-            
+
             # Add edit separator AFTER formatting change
             text_widget.edit_separator()
 
