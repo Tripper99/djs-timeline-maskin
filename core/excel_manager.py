@@ -376,7 +376,21 @@ class ExcelManager:
             special_data = self._prepare_special_data(data, filename)
 
             # Create a default format with word wrap for new cells
-            default_format = write_workbook.add_format({'text_wrap': True})
+            # Include background color if specified
+            if row_color and row_color != "none":
+                color_map = {
+                    "yellow": "FFFF99",
+                    "green": "CCFFCC",
+                    "blue": "CCE5FF",
+                    "pink": "FFCCEE",
+                    "gray": "E6E6E6"
+                }
+                format_dict = {'text_wrap': True}  # Always preserve text wrap
+                if row_color in color_map:
+                    format_dict['bg_color'] = color_map[row_color]
+                default_format = write_workbook.add_format(format_dict)
+            else:
+                default_format = write_workbook.add_format({'text_wrap': True})
 
             for col_name, col_idx in self.columns.items():
                 value = special_data.get(col_name, '')
