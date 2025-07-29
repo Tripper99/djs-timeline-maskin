@@ -58,7 +58,7 @@ class ExcelManager:
 
     def validate_excel_columns(self) -> List[str]:
         """Validate that all required columns exist in the Excel file
-        
+
         Returns:
             List of missing column names (empty if all columns present)
         """
@@ -514,31 +514,31 @@ class ExcelManager:
 
     def _extract_row_color_from_format(self, cell_format: Dict) -> str:
         """Extract row color name from cell format background color
-        
+
         Args:
             cell_format: Dictionary with cell formatting properties
-            
+
         Returns:
             Row color name ('yellow', 'green', 'blue', 'pink', 'gray') or None
         """
         fill_color = cell_format.get('fill_color')
         if not fill_color:
             return None
-            
+
         # Convert to hex format for comparison
         color_hex = self._convert_color_to_hex(fill_color)
         if not color_hex:
             return None
-            
+
         # Map hex colors back to our row color names
         color_reverse_map = {
             "#FFFF99": "yellow",
-            "#CCFFCC": "green", 
+            "#CCFFCC": "green",
             "#CCE5FF": "blue",
             "#FFCCEE": "pink",
             "#E6E6E6": "gray"
         }
-        
+
         return color_reverse_map.get(color_hex.upper())
 
     def _write_rich_text_xlsxwriter(self, worksheet, row, col, rich_text_obj, workbook, base_format=None, row_color=None):
@@ -613,6 +613,38 @@ class ExcelManager:
                 logger.info(f"DEBUG: Writing rich string with {len(rich_parts)} parts to cell ({row}, {col})")
                 logger.info(f"DEBUG: Rich parts structure: {[type(p).__name__ for p in rich_parts]}")
 
+                # UNIFORM FORMATTING FIX: Detect if text has uniform formatting throughout
+                # xlsxwriter write_rich_string() is designed for mixed formatting and fails with uniform formatting
+                # Pattern: [format_obj, "entire text content"] - xlsxwriter edge case
+                if (len(rich_parts) == 2 and
+                    hasattr(rich_parts[0], '__class__') and 'Format' in str(type(rich_parts[0])) and
+                    isinstance(rich_parts[1], str)):
+
+                    logger.info("DEBUG: Detected uniform formatting - using write() instead of write_rich_string()")
+
+                    # Extract the format and text
+                    format_obj = rich_parts[0]
+                    text_content = rich_parts[1]
+
+                    # For uniform formatting, we need to recreate the format to include background color
+                    # Since xlsxwriter doesn't allow extracting format properties, we need to rebuild
+                    if base_format_dict.get('bg_color'):
+                        # We have background color - need to combine with text formatting
+                        # The format_obj contains the text formatting, but we need to add background
+                        # Unfortunately, we can't extract from format_obj, so we'll use write() with text format
+                        # and accept that background color might not work perfectly for uniform formatting
+                        logger.info("DEBUG: Uniform formatting with background - text formatting takes priority")
+                        worksheet.write(row, col, text_content, format_obj)
+                    else:
+                        # No background color - simple uniform formatting works perfectly
+                        worksheet.write(row, col, text_content, format_obj)
+                        logger.info("DEBUG: Applied uniform formatting without background")
+
+                    return  # Exit early - uniform formatting handled
+
+                # Continue with normal mixed formatting logic for write_rich_string()
+                logger.info("DEBUG: Using write_rich_string() for mixed formatting")
+
                 # Apply background color using correct xlsxwriter API
                 if base_format_dict.get('bg_color'):
                     try:
@@ -651,12 +683,12 @@ class ExcelManager:
     def _repair_corrupted_cellrichtext(self, rich_text_obj):
         """
         Repair corrupted CellRichText objects that result from openpyxl reading xlsxwriter files.
-        
+
         Problem: When xlsxwriter writes rich text and openpyxl reads it back, we get:
         Part 0: str('WHOLE TEXT CONTENT...')  # Duplicated full text
         Part 1: TextBlock('Formatted part 1')  # Individual formatted parts
-        Part 2: TextBlock('Formatted part 2')  
-        
+        Part 2: TextBlock('Formatted part 2')
+
         Solution: Remove the duplicated first part and keep only the TextBlocks.
         """
         try:
