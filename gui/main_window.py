@@ -1738,9 +1738,13 @@ class PDFProcessorApp:
                     
                     # Add edit separator after paste
                     self.root.after_idle(lambda: focused_widget.edit_separator())
+                
+                # ALWAYS return "break" for Text widgets to prevent duplicate paste
+                # from widget-specific handlers in excel_fields.py
+                return "break"
         except (tk.TclError, AttributeError) as e:
             logger.error(f"Error in paste handler: {e}")
-        return None  # Allow default paste to proceed if no internal clipboard
+        return None  # Allow default paste for non-Text widgets
 
     def save_post_paste_state(self, text_widget):
         """Save the state after a paste operation completes"""
