@@ -1717,33 +1717,49 @@ class PDFProcessorApp:
                     
                     return "break"  # Prevent default paste
                 else:
-                    # No formatted content, use regular paste with undo tracking
-                    # Check if there's selected text that will be replaced
-                    has_selection = bool(focused_widget.tag_ranges(tk.SEL))
+                    # No formatted content - perform regular paste with undo tracking
+                    try:
+                        # Get clipboard content - this was the MISSING CRITICAL CODE
+                        clipboard_content = self.root.clipboard_get()
+                        
+                        # Check if there's selected text that will be replaced
+                        has_selection = bool(focused_widget.tag_ranges(tk.SEL))
 
-                    # Or if we just did a select-all
-                    select_all_pending = getattr(focused_widget, '_select_all_pending', False)
+                        # Or if we just did a select-all
+                        select_all_pending = getattr(focused_widget, '_select_all_pending', False)
 
-                    if has_selection or select_all_pending:
-                        # Save current content to our custom undo stack
-                        current_content = focused_widget.get("1.0", "end-1c")
-                        self.save_text_undo_state(focused_widget, current_content)
+                        if has_selection or select_all_pending:
+                            # Save current content to our custom undo stack before replacing
+                            current_content = focused_widget.get("1.0", "end-1c")
+                            self.save_text_undo_state(focused_widget, current_content)
 
-                        logger.info("Saved undo state before paste operation")
+                            logger.info("Saved undo state before paste operation")
 
-                    # Clear the select-all pending flag
-                    if hasattr(focused_widget, '_select_all_pending'):
-                        delattr(focused_widget, '_select_all_pending')
+                        # Clear the select-all pending flag
+                        if hasattr(focused_widget, '_select_all_pending'):
+                            delattr(focused_widget, '_select_all_pending')
 
-                    # Schedule saving the post-paste content to our undo stack
-                    # This ensures the pasted content is captured for future undo operations
-                    self.root.after_idle(self.save_post_paste_state, focused_widget)
-                    
-                    # Add edit separator after paste
-                    self.root.after_idle(lambda: focused_widget.edit_separator())
-                    
-                    # Trigger character count check after regular paste
-                    self.root.after_idle(lambda: self.check_character_count_for_widget(focused_widget))
+                        # CRITICAL FIX: Actually perform the paste operation
+                        if has_selection:
+                            # Delete selected text first
+                            focused_widget.delete(tk.SEL_FIRST, tk.SEL_LAST)
+                        
+                        # Insert clipboard content at cursor position
+                        insert_pos = focused_widget.index(tk.INSERT)
+                        focused_widget.insert(insert_pos, clipboard_content)
+
+                        # Schedule saving the post-paste content to our undo stack
+                        self.root.after_idle(self.save_post_paste_state, focused_widget)
+                        
+                        # Add edit separator after paste
+                        self.root.after_idle(lambda: focused_widget.edit_separator())
+                        
+                        # Trigger character count check after regular paste
+                        self.root.after_idle(lambda: self.check_character_count_for_widget(focused_widget))
+                        
+                    except tk.TclError:
+                        # No clipboard content or clipboard access failed
+                        logger.debug("No clipboard content available for paste")
                 
                 # ALWAYS return "break" for Text widgets to prevent duplicate paste
                 # from widget-specific handlers in excel_fields.py
