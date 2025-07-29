@@ -576,14 +576,43 @@ class ExcelManager:
                     part_str = str(part)
                     rich_parts.append(part_str)
 
-            # Use simple rich_string without complex filtering to avoid text ordering issues
+            # Handle rich text writing with background color support
             if rich_parts:
                 logger.info(f"DEBUG: Writing rich string with {len(rich_parts)} parts to cell ({row}, {col})")
                 logger.info(f"DEBUG: Rich parts structure: {[type(p).__name__ for p in rich_parts]}")
-                worksheet.write_rich_string(row, col, *rich_parts)
+                
+                # Check if we need background color (xlsxwriter write_rich_string doesn't support bg_color)
+                if base_format_dict.get('bg_color'):
+                    try:
+                        logger.info(f"DEBUG: Rich text with background color - using alternative approach")
+                        
+                        # Create a base format with background color for the entire cell
+                        cell_bg_format = workbook.add_format({
+                            'bg_color': base_format_dict['bg_color'],
+                            'text_wrap': True
+                        })
+                        
+                        # Apply background to entire cell first
+                        worksheet.write(row, col, "", cell_bg_format)
+                        
+                        # Then write rich text over it (this may or may not preserve background)
+                        logger.info("DEBUG: Writing rich text over background format")
+                        worksheet.write_rich_string(row, col, *rich_parts)
+                        
+                    except Exception as e:
+                        logger.warning(f"DEBUG: Background approach failed: {e}")
+                        # Fallback to normal rich text without background
+                        worksheet.write_rich_string(row, col, *rich_parts)
+                else:
+                    # No background color - use normal rich text
+                    worksheet.write_rich_string(row, col, *rich_parts)
             else:
+                # Plain text handling
                 logger.info(f"DEBUG: Writing plain text to cell ({row}, {col}): '{str(rich_text_obj)[:30]}...'")
-                worksheet.write(row, col, str(rich_text_obj))
+                if base_format:
+                    worksheet.write(row, col, str(rich_text_obj), base_format)
+                else:
+                    worksheet.write(row, col, str(rich_text_obj))
 
         except Exception as e:
             logger.warning(f"Error converting rich text to xlsxwriter format: {e}")
