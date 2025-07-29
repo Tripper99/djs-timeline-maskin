@@ -2755,8 +2755,8 @@ class PDFProcessorApp:
             for tag in all_format_tags:
                 text_widget.tag_remove(tag, start, end)
 
-            # Get theme-appropriate default color and apply it
-            default_color = self.get_theme_default_text_color()
+            # Get the text widget's actual default color (not the theme's system color)
+            default_color = text_widget.cget('foreground')
 
             # Create a temporary tag for the theme default color
             temp_tag = "theme_default"
