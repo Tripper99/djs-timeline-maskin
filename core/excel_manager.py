@@ -536,7 +536,7 @@ class ExcelManager:
                     logger.info(f"DEBUG: No background color applied - row_color='{row_color}'")
                 base_format_dict['text_wrap'] = True  # Always include text wrap
                 logger.info(f"DEBUG: Final base_format_dict: {base_format_dict}")
-                    
+
             if not hasattr(rich_text_obj, '__iter__'):
                 # Plain text - apply base format
                 if base_format:
@@ -580,25 +580,22 @@ class ExcelManager:
             if rich_parts:
                 logger.info(f"DEBUG: Writing rich string with {len(rich_parts)} parts to cell ({row}, {col})")
                 logger.info(f"DEBUG: Rich parts structure: {[type(p).__name__ for p in rich_parts]}")
-                
-                # Check if we need background color (xlsxwriter write_rich_string doesn't support bg_color)
+
+                # Apply background color using correct xlsxwriter API
                 if base_format_dict.get('bg_color'):
                     try:
-                        logger.info(f"DEBUG: Rich text with background color - using alternative approach")
-                        
+                        logger.info("DEBUG: Rich text with background color - using correct xlsxwriter API")
+
                         # Create a base format with background color for the entire cell
                         cell_bg_format = workbook.add_format({
                             'bg_color': base_format_dict['bg_color'],
                             'text_wrap': True
                         })
-                        
-                        # Apply background to entire cell first
-                        worksheet.write(row, col, "", cell_bg_format)
-                        
-                        # Then write rich text over it (this may or may not preserve background)
-                        logger.info("DEBUG: Writing rich text over background format")
-                        worksheet.write_rich_string(row, col, *rich_parts)
-                        
+
+                        # Use correct xlsxwriter API: pass cell format as last parameter
+                        logger.info("DEBUG: Writing rich text with background format as parameter")
+                        worksheet.write_rich_string(row, col, *rich_parts, cell_bg_format)
+
                     except Exception as e:
                         logger.warning(f"DEBUG: Background approach failed: {e}")
                         # Fallback to normal rich text without background

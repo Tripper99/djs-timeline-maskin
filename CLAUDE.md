@@ -118,11 +118,12 @@ The breakthrough hybrid approach consista of:
 - Method 2 character-by-character algorithm for text extraction
 This method might seem complicated but is important to understand that this is the only way we've found to make the app to write perfect Excel rich text formatting with colors, bold, italic, line breaks.
 
-## Current Status (v1.17.8)
+## Current Status (v1.17.12)
 
-**STABLE AND FULLY FUNCTIONAL**: Professional application with enhanced formatting toolbar design
+**IN PROGRESS - RICH TEXT BACKGROUND COLOR FIX**: Addressing xlsxwriter write_rich_string() limitation
 
-### Current Application Features:
+### Working Features (v1.17.12):
+- ✅ **Standard Text Background Colors**: All simple text fields support background colors correctly
 - ✅ **Output Folder Selection**: Flexible destination for renamed PDFs with session-only lock and folder opening
 - ✅ **Font Size Toggle**: A+ button in text fields for cycling through 9pt → 12pt → 15pt with proper bold/italic formatting
 - ✅ **Scrollable Text Widgets**: All text fields (Händelse, Note1-3) now have vertical scrollbars
@@ -130,18 +131,15 @@ This method might seem complicated but is important to understand that this is t
 - ✅ **Full-Window Scrollbar**: Canvas-based scrolling for low-resolution screen support
 - ✅ **Code Quality**: All major code issues resolved, clean Ruff validation
 - ✅ **Date/Time Validation**: Comprehensive validation system with multiple trigger events
-- ✅ **Tab Navigation**: Validation triggers correctly on Tab key press with format conversion
-- ✅ **Save Button Validation**: Pre-save validation runs before other checks, prevents bad data
-- ✅ **Format Conversion**: Automatic formatting (1530→15:30, 20250728→2025-07-28)
-- ✅ **Century Validation**: Rejects YY-MM-DD/YYMMDD with "Du måste ange århundrade" error
-- ✅ **User Experience**: Clear error messages with field names and current values
-- ✅ **Event Bindings**: FocusOut, Return, Tab triggers for natural user workflow
 - ✅ **Rich Text Persistence**: Bold, italic, and color formatting preserved across app sessions
 - ✅ **Time Fields**: Starttid and Sluttid with HH:MM validation and auto-formatting
 - ✅ **19 Excel Columns**: All original fields plus new time fields
 - ✅ **Core Functionality**: PDF processing, Excel integration, locked fields all working
 - ✅ **Professional Toolbar**: Enhanced formatting toolbar with intuitive design and color-coded buttons
 - ✅ **Error Handling**: Professional retry/cancel dialogs for file lock scenarios
+
+### In Development (v1.17.12):
+- 🔄 **Rich Text Background Colors**: Implementing overlay solution for xlsxwriter limitation
 
 ### Rich Text Format Preservation (v1.14.0)
 **NEW SYSTEM**: Complete format preservation for locked text fields across app sessions
@@ -153,10 +151,17 @@ This method might seem complicated but is important to understand that this is t
 
 ## Known Issues
 
-### Rich Text Uniform Formatting Bug (Excel Export)
+### Rich Text Background Colors (v1.17.9-v1.17.12) - IN PROGRESS
+- **Status**: Standard text fields work ✅, Rich text fields don't work ❌
+- **Root Cause**: `xlsxwriter.write_rich_string()` ignores `bg_color` property in format objects
+- **Investigation**: Comprehensive debug analysis confirmed xlsxwriter limitation
+- **Current Solution**: Background color overlay implementation (v1.17.12) - testing in progress
+- **Location**: `_write_rich_text_xlsxwriter()` method in `core/excel_manager.py`
+
+### Rich Text Uniform Formatting Bug (Excel Export) - SEPARATE ISSUE
 - **Status**: Affects Excel output only, GUI works perfectly
 - **Issue**: Text with uniform formatting (all red, all bold) disappears in Excel
-- **Location**: `core/excel_manager.py` xlsxwriter rich text API handling
+- **Location**: `core/excel_manager.py` xlsxwriter rich text API handling  
 - **Workaround**: Use mixed formatting within text
 
 ### Window Height on External Monitors

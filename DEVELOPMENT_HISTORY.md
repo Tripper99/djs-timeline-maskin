@@ -4,6 +4,34 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v1.17.12 In Progress (2025-07-29) - Rich Text Background Color Fix Implementation 🔄
+**Problem**: Rich text fields (Händelse, Note1-3) don't display background colors despite user selection
+
+**Root Cause Analysis** (v1.17.9-v1.17.11):
+- ✅ **Debug Analysis**: Comprehensive logging confirmed parameters pass correctly
+- ✅ **Color Format Fix**: Added required `#` prefix (`#CCE5FF` vs `CCE5FF`)
+- ❌ **Issue Persists**: `xlsxwriter.write_rich_string()` fundamentally ignores `bg_color` property
+
+**Current Solution** (v1.17.12):
+- **Approach**: Background color overlay implementation
+- **Method**: Two-step process - apply background first, then write rich text over it
+- **Status**: Code complete, comprehensive syntax testing passed, ready for user testing
+
+**Technical Implementation**:
+```python
+# Step 1: Apply background to entire cell
+cell_bg_format = workbook.add_format({
+    'bg_color': '#CCE5FF',
+    'text_wrap': True
+})
+worksheet.write(row, col, "", cell_bg_format)
+
+# Step 2: Write rich text over background
+worksheet.write_rich_string(row, col, *rich_parts)
+```
+
+**Testing Status**: ✅ Syntax verified, ⏳ User testing pending
+
 ### v1.17.8 Success (2025-07-29) - Enhanced Formatting Toolbar Design ✅
 **Achievement**: Completely redesigned the text formatting toolbar with professional styling and improved functionality
 
