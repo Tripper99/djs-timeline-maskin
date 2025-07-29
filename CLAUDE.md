@@ -206,9 +206,32 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 3. Close the app (formatting automatically saved)
 4. Restart the app (formatting automatically restored)
 
-## Current Status (v1.17.1)
+## Current Status (v1.17.3)
 
-**UI AND BEHAVIOR REFINEMENTS**: Enhanced output folder selection with improved user experience
+**SESSION-ONLY LOCK AND FOLDER OPENING**: Optimal balance between convenience and safety
+
+### v1.17.3 Success (2025-07-29) - Session-Only Lock and Folder Opening Functionality ✅
+**Achievement**: Implemented optimal user experience balance with session-only lock behavior and folder opening capability
+
+**Key Features**:
+- ✅ **Session-Only Lock Behavior**: Output folder lock switch always starts unlocked on app startup
+- ✅ **Persistent Folder Path**: Folder selection is remembered between sessions for user convenience  
+- ✅ **New "Öppna mapp" Button**: Opens selected output folder in file explorer
+- ✅ **Optimal UX Balance**: Safety (predictable lock behavior) + Convenience (remembered folder path)
+
+**Technical Implementation**:
+- Modified `load_saved_output_folder()` to always initialize lock switch as False
+- Updated config saving methods to not persist lock state (session-only behavior)
+- Added `open_output_folder()` method with cross-platform file explorer support
+- Enhanced GUI layout with new button positioned between lock switch and reset button
+
+**User Benefits**:
+- **Predictable Behavior**: Lock always starts unlocked, preventing unexpected auto-update blocking
+- **Time Saving**: Previously selected folder remembered across sessions
+- **Easy Access**: One-click folder opening in file explorer
+- **Consistent Experience**: Lock behavior is session-only while folder path persists
+
+**Design Decision**: This approach provides the best balance - folder path persistence saves user time while session-only lock ensures predictable behavior when selecting new PDFs.
 
 ### v1.17.1 Success (2025-07-29) - Output Folder UI and Behavior Improvements ✅
 **Achievement**: Refined the output folder selection system with better layout, user-friendly display, and improved behavior
@@ -275,7 +298,7 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 **Technical Breakthrough**: The key was abandoning the global binding approach and binding directly to each individual Text widget, passing the widget reference directly to the handler.
 
 ### Current Application Features:
-- ✅ **Output Folder Selection**: Flexible destination for renamed PDFs with folder dialog
+- ✅ **Output Folder Selection**: Flexible destination for renamed PDFs with session-only lock and folder opening
 - ✅ **Scrollable Text Widgets**: All text fields (Händelse, Note1-3) now have vertical scrollbars
 - ✅ **Excel File Persistence**: App remembers selected Excel file between sessions
 - ✅ **Full-Window Scrollbar**: Canvas-based scrolling for low-resolution screen support
@@ -418,8 +441,8 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 - Logging is configured for debugging
 - No automated tests are present in the codebase
 - No build process required - runs directly with Python interpreter
-- **Current version**: v1.17.2 (stable master with enhanced output folder UX)
-- **Last tested**: 2025-07-29 - All v1.17.1 improvements verified working, UI refinements successful
+- **Current version**: v1.17.3 (stable master with session-only lock and folder opening functionality)
+- **Last tested**: 2025-07-29 - All v1.17.3 improvements verified working, optimal UX balance achieved
 
 ## Recent Development History
 
