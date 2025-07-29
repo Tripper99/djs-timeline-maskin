@@ -2038,7 +2038,7 @@ class PDFProcessorApp:
 
                     # Get all formatting tags in selection
                     tags_data = []
-                    for tag in ["bold", "italic", "red", "blue", "green", "black"]:
+                    for tag in ["bold", "italic", "red", "blue", "green", "default"]:
                         tag_ranges = focused_widget.tag_ranges(tag)
                         for i in range(0, len(tag_ranges), 2):
                             tag_start = tag_ranges[i]
@@ -2431,7 +2431,7 @@ class PDFProcessorApp:
 
         # Collect all formatting tags
         tags_data = []
-        for tag in ["bold", "italic", "red", "blue", "green", "black"]:
+        for tag in ["bold", "italic", "red", "blue", "green", "default"]:
             tag_ranges = text_widget.tag_ranges(tag)
             for i in range(0, len(tag_ranges), 2):
                 start_idx = str(tag_ranges[i])
@@ -2468,7 +2468,7 @@ class PDFProcessorApp:
         # Save current state to redo stack
         current_content = text_widget.get("1.0", "end-1c")
         current_tags = []
-        for tag in ["bold", "italic", "red", "blue", "green", "black"]:
+        for tag in ["bold", "italic", "red", "blue", "green", "default"]:
             tag_ranges = text_widget.tag_ranges(tag)
             for i in range(0, len(tag_ranges), 2):
                 start_idx = str(tag_ranges[i])
@@ -2516,7 +2516,7 @@ class PDFProcessorApp:
         # Save current state to undo stack
         current_content = text_widget.get("1.0", "end-1c")
         current_tags = []
-        for tag in ["bold", "italic", "red", "blue", "green", "black"]:
+        for tag in ["bold", "italic", "red", "blue", "green", "default"]:
             tag_ranges = text_widget.tag_ranges(tag)
             for i in range(0, len(tag_ranges), 2):
                 start_idx = str(tag_ranges[i])
@@ -2544,6 +2544,9 @@ class PDFProcessorApp:
         # Get current font size from config
         font_size = self.config.get('text_font_size', 9)
 
+        # Get the actual default text color from the widget
+        default_color = text_widget.cget('foreground')
+
         # Bold tag
         text_widget.tag_configure("bold", font=('Arial', font_size, 'bold'))
 
@@ -2554,7 +2557,7 @@ class PDFProcessorApp:
         text_widget.tag_configure("red", foreground="red")
         text_widget.tag_configure("blue", foreground="blue")
         text_widget.tag_configure("green", foreground="green")
-        text_widget.tag_configure("black", foreground="black")
+        text_widget.tag_configure("default", foreground=default_color)  # Use actual default color
 
     def update_formatting_tags(self, text_widget, font_size):
         """Update formatting tags with new font size"""
@@ -2611,25 +2614,42 @@ class PDFProcessorApp:
 
     def create_formatting_toolbar(self, parent_frame, text_widget, col_name):
         """Create formatting toolbar with buttons and bind keyboard shortcuts"""
-        # Bold button
+        # Bold button - styled with bold text
         bold_btn = tb.Button(parent_frame, text="B", width=3,
                            command=lambda: self.toggle_format(text_widget, "bold"))
         bold_btn.pack(side="left", padx=(0, 2))
-        bold_btn.configure(bootstyle="outline")
+        bold_btn.configure(bootstyle="outline", font=('Arial', 9, 'bold'))
 
-        # Italic button
+        # Italic button - styled with italic text
         italic_btn = tb.Button(parent_frame, text="I", width=3,
                              command=lambda: self.toggle_format(text_widget, "italic"))
         italic_btn.pack(side="left", padx=(0, 2))
-        italic_btn.configure(bootstyle="outline")
+        italic_btn.configure(bootstyle="outline", font=('Arial', 9, 'italic'))
 
-        # Color buttons
-        colors = [("R", "red"), ("B", "blue"), ("G", "green"), ("K", "black")]
-        for btn_text, color in colors:
-            color_btn = tb.Button(parent_frame, text=btn_text, width=3,
-                                command=lambda c=color: self.toggle_format(text_widget, c))
-            color_btn.pack(side="left", padx=(0, 2))
-            color_btn.configure(bootstyle="outline")
+        # Color buttons with visual styling
+        # Red button - colored background
+        red_btn = tb.Button(parent_frame, text="●", width=3,
+                          command=lambda: self.toggle_format(text_widget, "red"))
+        red_btn.pack(side="left", padx=(0, 2))
+        red_btn.configure(bootstyle="danger-outline", foreground="red")
+
+        # Blue button - colored background
+        blue_btn = tb.Button(parent_frame, text="●", width=3,
+                           command=lambda: self.toggle_format(text_widget, "blue"))
+        blue_btn.pack(side="left", padx=(0, 2))
+        blue_btn.configure(bootstyle="primary-outline", foreground="blue")
+
+        # Green button - colored background
+        green_btn = tb.Button(parent_frame, text="●", width=3,
+                            command=lambda: self.toggle_format(text_widget, "green"))
+        green_btn.pack(side="left", padx=(0, 2))
+        green_btn.configure(bootstyle="success-outline", foreground="green")
+
+        # Default color button - styled with default color
+        default_btn = tb.Button(parent_frame, text="T", width=3,
+                              command=lambda: self.toggle_format(text_widget, "default"))
+        default_btn.pack(side="left", padx=(0, 2))
+        default_btn.configure(bootstyle="secondary-outline")
 
         # Font size toggle button
         font_btn = tb.Button(parent_frame, text="A+", width=3,
@@ -2643,7 +2663,7 @@ class PDFProcessorApp:
         text_widget.bind('<Control-r>', lambda e: self.toggle_format(text_widget, "red"))
         text_widget.bind('<Control-1>', lambda e: self.toggle_format(text_widget, "blue"))
         text_widget.bind('<Control-g>', lambda e: self.toggle_format(text_widget, "green"))
-        text_widget.bind('<Control-k>', lambda e: self.toggle_format(text_widget, "black"))
+        text_widget.bind('<Control-k>', lambda e: self.toggle_format(text_widget, "default"))
 
     def toggle_format(self, text_widget, format_type):
         """Toggle formatting on selected text with undo support"""
@@ -2673,8 +2693,8 @@ class PDFProcessorApp:
                 text_widget.tag_add(format_type, start, end)
 
             # For colors, remove other color tags when applying a new one
-            if format_type in ["red", "blue", "green", "black"]:
-                color_tags = ["red", "blue", "green", "black"]
+            if format_type in ["red", "blue", "green", "default"]:
+                color_tags = ["red", "blue", "green", "default"]
                 for color_tag in color_tags:
                     if color_tag != format_type:
                         text_widget.tag_remove(color_tag, start, end)
@@ -2698,7 +2718,7 @@ class PDFProcessorApp:
 
             # Check if there are any formatting tags
             all_tags = text_widget.tag_names()
-            format_tags = [tag for tag in all_tags if tag in ["bold", "italic", "red", "blue", "green", "black"]]
+            format_tags = [tag for tag in all_tags if tag in ["bold", "italic", "red", "blue", "green", "default"]]
 
             if not format_tags:
                 # No formatting, return plain text
@@ -2718,7 +2738,7 @@ class PDFProcessorApp:
 
                 # Get tags at current position
                 tags_at_pos = text_widget.tag_names(current_pos)
-                format_tags_at_pos = [tag for tag in tags_at_pos if tag in ["bold", "italic", "red", "blue", "green", "black"]]
+                format_tags_at_pos = [tag for tag in tags_at_pos if tag in ["bold", "italic", "red", "blue", "green", "default"]]
 
                 # Build text with same formatting
                 text_with_format = char
@@ -2727,7 +2747,7 @@ class PDFProcessorApp:
                 # Continue until formatting changes
                 while text_widget.compare(temp_pos, "<", text_end):
                     temp_tags = text_widget.tag_names(temp_pos)
-                    temp_format_tags = [tag for tag in temp_tags if tag in ["bold", "italic", "red", "blue", "green", "black"]]
+                    temp_format_tags = [tag for tag in temp_tags if tag in ["bold", "italic", "red", "blue", "green", "default"]]
 
                     if set(format_tags_at_pos) != set(temp_format_tags):
                         break
@@ -2750,8 +2770,10 @@ class PDFProcessorApp:
                             font_kwargs['color'] = Color(rgb="0000FF")
                         elif tag == "green":
                             font_kwargs['color'] = Color(rgb="008000")
-                        elif tag == "black":
-                            font_kwargs['color'] = Color(rgb="000000")
+                        elif tag == "default":
+                            # For default color, we'll need to use the actual default text color
+                            # For Excel export, we can use a dark gray that matches typical default text
+                            font_kwargs['color'] = Color(rgb="404040")
 
                     if font_kwargs:
                         font = InlineFont(**font_kwargs)

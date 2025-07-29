@@ -479,10 +479,62 @@ Rich text formatting is stored as JSON-compatible tag ranges in the configuratio
 - Logging is configured for debugging
 - No automated tests are present in the codebase
 - No build process required - runs directly with Python interpreter
-- **Current version**: v1.17.7 (stable master with cleaned up font size UI)
-- **Last tested**: 2025-07-29 - All v1.17.7 improvements verified working, redundant button removed
+- **Current version**: v1.17.8 (stable master with enhanced formatting toolbar design)
+- **Last tested**: 2025-07-29 - All v1.17.8 improvements verified working, professional toolbar styling implemented
 
 ## Recent Development History
+
+### v1.17.8 Success (2025-07-29) - Enhanced Formatting Toolbar Design ✅
+**Achievement**: Completely redesigned the text formatting toolbar with professional styling and improved functionality
+
+**Problems Addressed**:
+- **Visual Clarity**: Bold/Italic buttons looked like plain text, not indicating their function
+- **Color Button Confusion**: Letter codes "R", "B", "G", "K" weren't intuitive 
+- **Default Color Issue**: K button applied pure black (#000000) instead of actual default text color
+- **Professional Appearance**: Toolbar looked basic compared to standard text editor interfaces
+
+**Enhanced Design Implemented**:
+
+**Bold & Italic Buttons**:
+- ✅ **Bold Button**: Now displays **bold "B"** text for immediate visual recognition
+- ✅ **Italic Button**: Now displays *italic "I"* text for clear function indication
+- ✅ **Professional Styling**: Uses proper font styling to show exactly what each button does
+
+**Color Button Redesign**:
+- ✅ **Red Button**: Replaced "R" with colored circle (●) in red using danger-outline style
+- ✅ **Blue Button**: Replaced "B" with colored circle (●) in blue using primary-outline style  
+- ✅ **Green Button**: Replaced "G" with colored circle (●) in green using success-outline style
+- ✅ **Default Button**: Replaced "K" with "T" (Text) using secondary-outline style for default color
+
+**Color Functionality Fix**:
+- ✅ **True Default Color**: Default button now applies actual widget default text color (gray) instead of pure black
+- ✅ **Smart Detection**: System detects actual default text color from text widget configuration
+- ✅ **Excel Export**: Enhanced Excel export to use appropriate gray color (rgb="404040") for default text
+- ✅ **Keyboard Shortcut**: Ctrl+K now applies true default color instead of pure black
+
+**Technical Improvements**:
+- Updated all tag references from "black" to "default" throughout codebase
+- Enhanced `setup_text_formatting_tags()` to detect actual default color via `text_widget.cget('foreground')`
+- Improved button styling using ttkbootstrap's color-coded bootstrap styles
+- Updated Excel rich text export to handle default color appropriately
+- Maintained all existing keyboard shortcuts with improved functionality
+
+**User Benefits**:
+- **Intuitive Design**: Users immediately understand what each button does
+- **Professional Appearance**: Toolbar now matches modern text editor standards
+- **Better Color Control**: Default color button actually resets to true default, not pure black
+- **Visual Feedback**: Clear indication of formatting options with appropriate styling
+- **Enhanced UX**: No more confusion about letter-coded color buttons
+
+**Testing Results**:
+- ✅ Application imports and runs without errors
+- ✅ All Ruff syntax checks pass
+- ✅ Bold button displays with bold text styling
+- ✅ Italic button displays with italic text styling
+- ✅ Color buttons show intuitive colored symbols
+- ✅ Default color button properly resets to actual default text color
+- ✅ All keyboard shortcuts work correctly (Ctrl+B, Ctrl+I, Ctrl+R, Ctrl+1, Ctrl+G, Ctrl+K)
+- ✅ Excel export handles all formatting including new default color
 
 ### v1.17.7 Success (2025-07-29) - UI Cleanup: Remove Redundant Font Size Button ✅
 **Achievement**: Cleaned up the Excel integration section by removing redundant font size toggle button

@@ -10,7 +10,8 @@
       "Bash(find:*)",
       "Bash(true)",
       "Bash(mv:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "mcp__Ref__ref_search_documentation"
     ],
     "deny": []
   }
