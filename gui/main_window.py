@@ -1678,8 +1678,15 @@ class PDFProcessorApp:
 
     def handle_paste_undo(self, event):
         """Handle Ctrl+V - paste with format preservation if available"""
+        print("=" * 80)
+        print("🚨 EMERGENCY REALITY CHECK: PASTE HANDLER CALLED! 🚨")
+        print("=" * 80)
         print("DEBUG: handle_paste_undo called!")
         logger.info("Paste handler executed")
+        
+        # Show GUI messagebox to prove this is being called
+        from tkinter import messagebox
+        messagebox.showinfo("PASTE HANDLER", "handle_paste_undo() WAS CALLED!\n\nThis proves the paste handler is working.")
         try:
             focused_widget = self.root.focus_get()
             print(f"DEBUG: Focused widget: {focused_widget}, type: {type(focused_widget)}")
