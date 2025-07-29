@@ -656,6 +656,69 @@ class PDFProcessorApp:
         self.output_folder_lock_var.set(False)
         logger.info("Output folder lock always starts unlocked (session-only behavior)")
 
+    def show_retry_cancel_dialog(self, title: str, message: str) -> str:
+        """
+        Show a custom dialog with 'Försök igen' and 'Avbryt' buttons
+        
+        Returns:
+            'retry' if user clicks retry button
+            'cancel' if user clicks cancel button
+        """
+        import tkinter as tk
+        
+        # Create custom dialog window
+        dialog = tk.Toplevel(self.root)
+        dialog.title(title)
+        dialog.geometry("500x200")
+        dialog.transient(self.root)
+        dialog.grab_set()
+        dialog.resizable(False, False)
+        
+        # Center dialog
+        dialog.update_idletasks()
+        x = (dialog.winfo_screenwidth() // 2) - (500 // 2)
+        y = (dialog.winfo_screenheight() // 2) - (200 // 2)
+        dialog.geometry(f"500x200+{x}+{y}")
+        
+        result = {'choice': 'cancel'}  # Default to cancel
+        
+        # Message frame
+        msg_frame = tk.Frame(dialog)
+        msg_frame.pack(fill="both", expand=True, padx=20, pady=20)
+        
+        # Message label
+        msg_label = tk.Label(msg_frame, text=message, wraplength=450, justify="left", font=('Arial', 10))
+        msg_label.pack(expand=True)
+        
+        # Button frame
+        btn_frame = tk.Frame(dialog)
+        btn_frame.pack(fill="x", padx=20, pady=(0, 20))
+        
+        def on_retry():
+            result['choice'] = 'retry'
+            dialog.destroy()
+            
+        def on_cancel():
+            result['choice'] = 'cancel'
+            dialog.destroy()
+        
+        # Buttons
+        retry_btn = tk.Button(btn_frame, text="Försök igen", command=on_retry, 
+                             font=('Arial', 10), width=12, bg='#4CAF50', fg='white')
+        retry_btn.pack(side="right", padx=(10, 0))
+        
+        cancel_btn = tk.Button(btn_frame, text="Avbryt", command=on_cancel,
+                              font=('Arial', 10), width=12, bg='#f44336', fg='white')
+        cancel_btn.pack(side="right")
+        
+        # Handle window close button (X) as cancel
+        dialog.protocol("WM_DELETE_WINDOW", on_cancel)
+        
+        # Wait for user response
+        dialog.wait_window()
+        
+        return result['choice']
+
     def select_pdf_file(self):
         """Select PDF file for processing"""
         initial_dir = self.config.get('last_pdf_dir', str(Path.home()))
@@ -1049,12 +1112,16 @@ class PDFProcessorApp:
                                "Filen kan ha flyttats, tagits bort eller skadats.")
             return False
 
-        # Check if file is locked by another application
-        if PDFProcessor.is_file_locked(self.current_pdf_path):
-            messagebox.showerror("Fil låst",
-                               "PDF-filen används av ett annat program. " +
-                               "Stäng programmet och försök igen.")
-            return False
+        # Check if file is locked by another application - with retry loop
+        while PDFProcessor.is_file_locked(self.current_pdf_path):
+            choice = self.show_retry_cancel_dialog(
+                "Fil låst",
+                "PDF-filen används av ett annat program. " +
+                "Stäng programmet och försök igen."
+            )
+            if choice == 'cancel':
+                return False
+            # If choice == 'retry', loop continues to check again
 
         # Construct new filename
         new_filename = FilenameParser.construct_filename(
@@ -1090,12 +1157,16 @@ class PDFProcessorApp:
 
         # Check if target file already exists
         if new_path.exists() and str(new_path) != str(old_file):
-            # Check if target file is locked
-            if PDFProcessor.is_file_locked(str(new_path)):
-                messagebox.showerror("Fel",
-                                   f"Målfilen '{new_filename}' är låst av ett annat program. " +
-                                   "Stäng programmet och försök igen.")
-                return False
+            # Check if target file is locked - with retry loop
+            while PDFProcessor.is_file_locked(str(new_path)):
+                choice = self.show_retry_cancel_dialog(
+                    "Målfil låst",
+                    f"Målfilen '{new_filename}' är låst av ett annat program. " +
+                    "Stäng programmet och försök igen."
+                )
+                if choice == 'cancel':
+                    return False
+                # If choice == 'retry', loop continues to check again
 
             result = messagebox.askyesno("Filen finns redan",
                                        f"Filen '{new_filename}' finns redan. Vill du skriva över den?")
@@ -1221,14 +1292,30 @@ class PDFProcessorApp:
         # Add filename components for special handling
         excel_data['date'] = self.date_var.get()
 
-        if self.excel_manager.add_row_with_xlsxwriter(excel_data, filename, self.row_color_var.get()):
-            self.stats['excel_rows_added'] += 1
-            self.excel_row_saved.set(True)
-            self.update_stats_display()
-            logger.info(f"Added Excel row with data for: {filename}")
-            return True
-        else:
-            return False
+        # Try to save with retry loop for file lock handling
+        while True:
+            result = self.excel_manager.add_row_with_xlsxwriter(excel_data, filename, self.row_color_var.get())
+            
+            if result is True:
+                # Success
+                self.stats['excel_rows_added'] += 1
+                self.excel_row_saved.set(True)
+                self.update_stats_display()
+                logger.info(f"Added Excel row with data for: {filename}")
+                return True
+            elif result == "file_locked":
+                # Excel file is locked - show retry/cancel dialog
+                choice = self.show_retry_cancel_dialog(
+                    "Excel-fil låst",
+                    "Excel-filen används av ett annat program. " +
+                    "Stäng programmet och försök igen."
+                )
+                if choice == 'cancel':
+                    return False
+                # If choice == 'retry', loop continues to try again
+            else:
+                # Other error
+                return False
 
 
     def clear_pdf_and_filename_fields(self):
@@ -1292,11 +1379,8 @@ class PDFProcessorApp:
                         return  # User didn't select a file
                     # Try rename again with new file
                     if not self.rename_current_pdf():
-                        result = messagebox.askyesno("Filnamnändring misslyckades",
-                                                   "PDF-filen kunde inte döpas om. " +
-                                                   "Vill du ändå fortsätta med att spara Excel-raden?")
-                        if not result:
-                            return
+                        # Rename failed (user cancelled), stop the operation
+                        return
                 else:  # Yes - continue without rename
                     pass  # Skip rename, continue with Excel
             else:
@@ -1304,12 +1388,8 @@ class PDFProcessorApp:
                 if self.rename_current_pdf():
                     operations_performed.append("PDF-filen har döpts om")
                 else:
-                    # If rename failed, ask user if they want to continue with Excel save
-                    result = messagebox.askyesno("Filnamnändring misslyckades",
-                                               "PDF-filen kunde inte döpas om. " +
-                                               "Vill du ändå fortsätta med att spara Excel-raden?")
-                    if not result:
-                        return
+                    # Rename failed (user cancelled), stop the operation
+                    return
 
         # 2. Save Excel row if required data exists AND Excel file is available
         if self.should_save_excel_row():

@@ -238,6 +238,15 @@ class ExcelManager:
                 logger.error(f"Excel file not found: {self.excel_path}")
                 return False
 
+            # Check if Excel file is locked by another application
+            try:
+                with open(self.excel_path, 'r+b'):
+                    pass
+            except (OSError, PermissionError):
+                # File is locked - return special error code for caller to handle
+                logger.warning(f"Excel file is locked: {self.excel_path}")
+                return "file_locked"
+
             # Step 1: Read existing data with openpyxl (preserves formulas)
             read_workbook = openpyxl.load_workbook(self.excel_path, rich_text=True)
             read_worksheet = read_workbook.active
