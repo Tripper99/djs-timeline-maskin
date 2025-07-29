@@ -511,6 +511,7 @@ class ExcelManager:
 
     def _write_rich_text_xlsxwriter(self, worksheet, row, col, rich_text_obj, workbook, base_format=None, row_color=None):
         """BREAKTHROUGH METHOD: Convert openpyxl CellRichText to xlsxwriter rich string"""
+        logger.info(f"DEBUG: _write_rich_text_xlsxwriter called with row_color='{row_color}', base_format={base_format is not None}")
         try:
             # Extract base format properties (like background color and text wrap)
             base_format_dict = {}
@@ -528,7 +529,13 @@ class ExcelManager:
                     }
                     if row_color in color_map:
                         base_format_dict['bg_color'] = color_map[row_color]
+                        logger.info(f"DEBUG: Added bg_color '{color_map[row_color]}' to base_format_dict for row_color '{row_color}'")
+                    else:
+                        logger.warning(f"DEBUG: row_color '{row_color}' not found in color_map")
+                else:
+                    logger.info(f"DEBUG: No background color applied - row_color='{row_color}'")
                 base_format_dict['text_wrap'] = True  # Always include text wrap
+                logger.info(f"DEBUG: Final base_format_dict: {base_format_dict}")
                     
             if not hasattr(rich_text_obj, '__iter__'):
                 # Plain text - apply base format
@@ -556,8 +563,10 @@ class ExcelManager:
 
                     if format_dict:
                         format_obj = workbook.add_format(format_dict)
+                        logger.info(f"DEBUG: Created format object with dict: {format_dict}")
                         rich_parts.extend([format_obj, part.text])
                     else:
+                        logger.info(f"DEBUG: No format applied to text part: '{part.text[:20]}...'")
                         rich_parts.append(part.text)
                 elif isinstance(part, str):
                     # Plain text string part
@@ -569,8 +578,11 @@ class ExcelManager:
 
             # Use simple rich_string without complex filtering to avoid text ordering issues
             if rich_parts:
+                logger.info(f"DEBUG: Writing rich string with {len(rich_parts)} parts to cell ({row}, {col})")
+                logger.info(f"DEBUG: Rich parts structure: {[type(p).__name__ for p in rich_parts]}")
                 worksheet.write_rich_string(row, col, *rich_parts)
             else:
+                logger.info(f"DEBUG: Writing plain text to cell ({row}, {col}): '{str(rich_text_obj)[:30]}...'")
                 worksheet.write(row, col, str(rich_text_obj))
 
         except Exception as e:
