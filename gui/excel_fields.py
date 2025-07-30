@@ -9,8 +9,7 @@ import tkinter as tk
 from typing import Any, Dict, List, Tuple
 
 # Third-party GUI imports
-import ttkbootstrap as tb
-from ttkbootstrap.constants import *
+import customtkinter as ctk
 
 from gui.utils import ScrollableText
 
@@ -205,7 +204,7 @@ class ExcelFieldManager:
                 # Reset character counter for text fields
                 if col_name in self.parent.char_counters:
                     limit = self.parent.handelse_char_limit if col_name == 'Händelse' else self.parent.char_limit
-                    self.parent.char_counters[col_name].config(text=f"Tecken kvar: {limit}", bootstyle="success")
+                    self.parent.char_counters[col_name].config(text=f"Tecken kvar: {limit}")
             else:  # StringVar
                 var.set("")
 
@@ -232,7 +231,7 @@ class ExcelFieldManager:
             self.parent.excel_vars['Inlagd'].set(today_date)
 
         # Create frame for Excel fields (responsive grid layout)
-        fields_container = tb.Frame(self.parent.excel_fields_frame)
+        fields_container = ctk.CTkFrame(self.parent.excel_fields_frame, fg_color="transparent")
         fields_container.pack(fill="both", expand=True, pady=(5, 0))
 
         # Configure responsive row expansion
@@ -251,7 +250,7 @@ class ExcelFieldManager:
         fields_container.grid_columnconfigure(2, weight=1, uniform="col")  # Right column - 1/3 of width
 
         # Create Column 1
-        col1_frame = tb.LabelFrame(fields_container, text="", padding=2)
+        col1_frame = ctk.CTkFrame(fields_container)
         col1_frame.grid(row=0, column=0, sticky="nsew", padx=2, pady=2)
         col1_frame.grid_columnconfigure(0, weight=0)  # Field labels - fixed width
         col1_frame.grid_columnconfigure(1, weight=1)  # Entry fields - expand to fill space
@@ -266,7 +265,7 @@ class ExcelFieldManager:
             row += rows_used
 
         # Create Column 2
-        col2_frame = tb.LabelFrame(fields_container, text="", padding=2)
+        col2_frame = ctk.CTkFrame(fields_container)
         col2_frame.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
         col2_frame.grid_columnconfigure(0, weight=1)  # Content takes full width
 
@@ -277,7 +276,7 @@ class ExcelFieldManager:
         col2_frame.grid_rowconfigure(1, weight=1)
 
         # Create subframe for date/time fields
-        datetime_frame = tb.Frame(col2_frame)
+        datetime_frame = ctk.CTkFrame(col2_frame, fg_color="transparent")
         datetime_frame.grid(row=0, column=0, sticky="ew", pady=(0, 5))
 
         # Configure two columns in the datetime subframe
@@ -291,7 +290,7 @@ class ExcelFieldManager:
         self.create_field_in_frame(col2_frame, 'Händelse', 1, column_type="column2")
 
         # Create Column 3
-        col3_frame = tb.LabelFrame(fields_container, text="", padding=(2, 2, 10, 2))  # Extra bottom padding for character counters
+        col3_frame = ctk.CTkFrame(fields_container)
         col3_frame.grid(row=0, column=2, sticky="nsew", padx=2, pady=2)
         col3_frame.grid_columnconfigure(0, weight=1)  # Make all content expand full width
 
@@ -308,11 +307,11 @@ class ExcelFieldManager:
         # Special handling for Dag column - make it read-only with explanation
         if col_name == 'Dag':
             # Standard horizontal layout for Dag field
-            tb.Label(parent_frame, text=f"{col_name}:",
+            ctk.CTkLabel(parent_frame, text=f"{col_name}:",
                     font=('Arial', 10)).grid(row=row, column=0, sticky="w", pady=(0, 5))
 
             dag_var = tk.StringVar(value="Formel läggs till automatiskt")
-            entry = tb.Entry(parent_frame,
+            entry = ctk.CTkEntry(parent_frame,
                            textvariable=dag_var,
                            state="readonly",
                            font=('Arial', 9, 'italic'))
@@ -324,10 +323,10 @@ class ExcelFieldManager:
         # Special handling for Inlagd - read-only, always today's date
         elif col_name == 'Inlagd':
             # Standard horizontal layout for Inlagd field
-            tb.Label(parent_frame, text=f"{col_name}:",
+            ctk.CTkLabel(parent_frame, text=f"{col_name}:",
                     font=('Arial', 10)).grid(row=row, column=0, sticky="w", pady=(0, 5))
 
-            entry = tb.Entry(parent_frame, textvariable=self.parent.excel_vars[col_name],
+            entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],
                            state="readonly",
                            font=('Arial', 9))
             entry.grid(row=row, column=1, sticky="ew", pady=(0, 5))
@@ -338,18 +337,17 @@ class ExcelFieldManager:
         # Special vertical layout for text fields with character counters (Händelse, Note1-3)
         elif col_name.startswith('Note') or col_name == 'Händelse':
             # Row 1: Field name and lock switch (if applicable)
-            header_frame = tb.Frame(parent_frame)
+            header_frame = ctk.CTkFrame(parent_frame, fg_color="transparent")
             header_frame.grid(row=row, column=0, columnspan=2, sticky="sew", pady=(0, 2))
 
-            tb.Label(header_frame, text=f"{col_name}:",
+            ctk.CTkLabel(header_frame, text=f"{col_name}:",
                     font=('Arial', 10)).pack(side="left")
 
             # Add lock switch for text fields that should have one
             if has_lock:
-                lock_switch = tb.Checkbutton(header_frame,
+                lock_switch = ctk.CTkCheckBox(header_frame,
                                            text="Lås",
-                                           variable=self.parent.lock_vars[col_name],
-                                           bootstyle="success-round-toggle")
+                                           variable=self.parent.lock_vars[col_name])
                 lock_switch.pack(side="right")
 
             # Row 2: Text widget (full width)
@@ -396,7 +394,7 @@ class ExcelFieldManager:
             self.parent.setup_text_formatting_tags(text_widget)
 
             # Row 2.5: Formatting toolbar (compact)
-            toolbar_frame = tb.Frame(parent_frame)
+            toolbar_frame = ctk.CTkFrame(parent_frame, fg_color="transparent")
             toolbar_frame.grid(row=row+1, column=0, columnspan=2, sticky="w", pady=(2, 2))
             self.parent.create_formatting_toolbar(toolbar_frame, text_widget, col_name)
 
@@ -411,8 +409,8 @@ class ExcelFieldManager:
 
             # Row 4: Character counter (left aligned, compact)
             limit = self.parent.handelse_char_limit if col_name == 'Händelse' else self.parent.char_limit
-            counter_label = tb.Label(parent_frame, text=f"{limit}",
-                                   font=('Arial', 8), bootstyle="success")
+            counter_label = ctk.CTkLabel(parent_frame, text=f"{limit}",
+                                   font=('Arial', 8))
             counter_label.grid(row=row+3, column=0, sticky="w", pady=(5, 8))
             self.parent.char_counters[col_name] = counter_label
 
@@ -425,23 +423,23 @@ class ExcelFieldManager:
         # Layout depends on column type and field type
         elif column_type == "column1":
             # Horizontal layout for column 1 and date fields in column 2 - saves vertical space
-            tb.Label(parent_frame, text=f"{col_name}:",
+            ctk.CTkLabel(parent_frame, text=f"{col_name}:",
                     font=('Arial', 10)).grid(row=row, column=0, sticky="w", pady=(0, 5))
 
             # Set appropriate width based on field type
             if col_name in ['Startdatum', 'Slutdatum']:
                 # Date fields: 2025-07-25 (10 chars + padding)
-                entry = tb.Entry(parent_frame, textvariable=self.parent.excel_vars[col_name],
+                entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],
                                font=('Arial', 9), width=12)
                 entry.grid(row=row, column=1, sticky="w", pady=(0, 5))
             elif col_name in ['Starttid', 'Sluttid']:
                 # Time fields: 18:45 (5 chars + padding)
-                entry = tb.Entry(parent_frame, textvariable=self.parent.excel_vars[col_name],
+                entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],
                                font=('Arial', 9), width=7)
                 entry.grid(row=row, column=1, sticky="w", pady=(0, 5))
             else:
                 # Other fields: expand to fill available space
-                entry = tb.Entry(parent_frame, textvariable=self.parent.excel_vars[col_name],
+                entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],
                                font=('Arial', 9))
                 entry.grid(row=row, column=1, sticky="ew", pady=(0, 5))
 
@@ -454,10 +452,9 @@ class ExcelFieldManager:
 
             # Add lock switch for fields that should have one (in column 2)
             if has_lock:
-                lock_switch = tb.Checkbutton(parent_frame,
+                lock_switch = ctk.CTkCheckBox(parent_frame,
                                            text="Lås",
-                                           variable=self.parent.lock_vars[col_name],
-                                           bootstyle="success-round-toggle")
+                                           variable=self.parent.lock_vars[col_name])
                 lock_switch.grid(row=row, column=2, sticky="w", padx=(5, 0), pady=(0, 5))
 
             # Return 1 row used for horizontal layout
@@ -466,22 +463,21 @@ class ExcelFieldManager:
         else:
             # Vertical layout for columns 2&3 - maximizes input field width
             # Row 1: Field name and lock switch
-            header_frame = tb.Frame(parent_frame)
+            header_frame = ctk.CTkFrame(parent_frame, fg_color="transparent")
             header_frame.grid(row=row, column=0, columnspan=2, sticky="ew", pady=(0, 2))
 
-            tb.Label(header_frame, text=f"{col_name}:",
+            ctk.CTkLabel(header_frame, text=f"{col_name}:",
                     font=('Arial', 10)).pack(side="left")
 
             # Add lock switch for fields that should have one
             if has_lock:
-                lock_switch = tb.Checkbutton(header_frame,
+                lock_switch = ctk.CTkCheckBox(header_frame,
                                            text="Lås",
-                                           variable=self.parent.lock_vars[col_name],
-                                           bootstyle="success-round-toggle")
+                                           variable=self.parent.lock_vars[col_name])
                 lock_switch.pack(side="right")
 
             # Row 2: Entry field (full width)
-            entry = tb.Entry(parent_frame, textvariable=self.parent.excel_vars[col_name],
+            entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],
                            font=('Arial', 9))
             entry.grid(row=row+1, column=0, columnspan=2, sticky="ew", pady=(0, 5))
 
@@ -499,11 +495,11 @@ class ExcelFieldManager:
     def _create_datetime_fields_in_subframe(self, datetime_frame):
         """Create date/time fields in a 2-column subframe layout with proper alignment"""
         # Left column: Startdatum and Starttid
-        left_frame = tb.Frame(datetime_frame)
+        left_frame = ctk.CTkFrame(datetime_frame, fg_color="transparent")
         left_frame.grid(row=0, column=0, sticky="ew", padx=(0, 10))
 
         # Right column: Slutdatum and Sluttid
-        right_frame = tb.Frame(datetime_frame)
+        right_frame = ctk.CTkFrame(datetime_frame, fg_color="transparent")
         right_frame.grid(row=0, column=1, sticky="ew", padx=(10, 0))
 
         # Configure column weights for proper alignment within each side
@@ -516,10 +512,10 @@ class ExcelFieldManager:
         right_frame.grid_columnconfigure(2, weight=1)             # Lock column - remaining space
 
         # Create Startdatum field (left side, row 0)
-        tb.Label(left_frame, text="Startdatum:",
+        ctk.CTkLabel(left_frame, text="Startdatum:",
                 font=('Arial', 10)).grid(row=0, column=0, sticky="w", pady=(0, 5))
 
-        entry = tb.Entry(left_frame, textvariable=self.parent.excel_vars['Startdatum'],
+        entry = ctk.CTkEntry(left_frame, textvariable=self.parent.excel_vars['Startdatum'],
                         font=('Arial', 9), width=12)
         entry.grid(row=0, column=1, sticky="w", padx=(5, 5), pady=(0, 5))
         entry.bind('<FocusOut>', lambda e: self.parent.validate_date_field(e, 'Startdatum'))
@@ -529,17 +525,16 @@ class ExcelFieldManager:
         print("DEBUG: Date validation bindings added for Startdatum (FocusOut, Return, Tab, Button-1)")
         self.parent.enable_undo_for_widget(entry)
 
-        lock_switch = tb.Checkbutton(left_frame,
+        lock_switch = ctk.CTkCheckBox(left_frame,
                                     text="Lås",
-                                    variable=self.parent.lock_vars['Startdatum'],
-                                    bootstyle="success-round-toggle")
+                                    variable=self.parent.lock_vars['Startdatum'])
         lock_switch.grid(row=0, column=2, sticky="w", pady=(0, 5))
 
         # Create Starttid field (left side, row 1)
-        tb.Label(left_frame, text="Starttid:",
+        ctk.CTkLabel(left_frame, text="Starttid:",
                 font=('Arial', 10)).grid(row=1, column=0, sticky="w")
 
-        entry = tb.Entry(left_frame, textvariable=self.parent.excel_vars['Starttid'],
+        entry = ctk.CTkEntry(left_frame, textvariable=self.parent.excel_vars['Starttid'],
                         font=('Arial', 9), width=7)
         entry.grid(row=1, column=1, sticky="w", padx=(5, 5))
         entry.bind('<FocusOut>', lambda e: self.parent.validate_time_field(e, 'Starttid'))
@@ -549,17 +544,16 @@ class ExcelFieldManager:
         print("DEBUG: Time validation bindings added for Starttid (FocusOut, Return, Tab, Button-1)")
         self.parent.enable_undo_for_widget(entry)
 
-        lock_switch = tb.Checkbutton(left_frame,
+        lock_switch = ctk.CTkCheckBox(left_frame,
                                     text="Lås",
-                                    variable=self.parent.lock_vars['Starttid'],
-                                    bootstyle="success-round-toggle")
+                                    variable=self.parent.lock_vars['Starttid'])
         lock_switch.grid(row=1, column=2, sticky="w")
 
         # Create Slutdatum field (right side, row 0)
-        tb.Label(right_frame, text="Slutdatum:",
+        ctk.CTkLabel(right_frame, text="Slutdatum:",
                 font=('Arial', 10)).grid(row=0, column=0, sticky="w", pady=(0, 5))
 
-        entry = tb.Entry(right_frame, textvariable=self.parent.excel_vars['Slutdatum'],
+        entry = ctk.CTkEntry(right_frame, textvariable=self.parent.excel_vars['Slutdatum'],
                         font=('Arial', 9), width=12)
         entry.grid(row=0, column=1, sticky="w", padx=(5, 5), pady=(0, 5))
         entry.bind('<FocusOut>', lambda e: self.parent.validate_date_field(e, 'Slutdatum'))
@@ -569,17 +563,16 @@ class ExcelFieldManager:
         print("DEBUG: Date validation bindings added for Slutdatum (FocusOut, Return, Tab, Button-1)")
         self.parent.enable_undo_for_widget(entry)
 
-        lock_switch = tb.Checkbutton(right_frame,
+        lock_switch = ctk.CTkCheckBox(right_frame,
                                     text="Lås",
-                                    variable=self.parent.lock_vars['Slutdatum'],
-                                    bootstyle="success-round-toggle")
+                                    variable=self.parent.lock_vars['Slutdatum'])
         lock_switch.grid(row=0, column=2, sticky="w", pady=(0, 5))
 
         # Create Sluttid field (right side, row 1)
-        tb.Label(right_frame, text="Sluttid:",
+        ctk.CTkLabel(right_frame, text="Sluttid:",
                 font=('Arial', 10)).grid(row=1, column=0, sticky="w")
 
-        entry = tb.Entry(right_frame, textvariable=self.parent.excel_vars['Sluttid'],
+        entry = ctk.CTkEntry(right_frame, textvariable=self.parent.excel_vars['Sluttid'],
                         font=('Arial', 9), width=7)
         entry.grid(row=1, column=1, sticky="w", padx=(5, 5))
         entry.bind('<FocusOut>', lambda e: self.parent.validate_time_field(e, 'Sluttid'))
@@ -589,8 +582,7 @@ class ExcelFieldManager:
         print("DEBUG: Time validation bindings added for Sluttid (FocusOut, Return, Tab, Button-1)")
         self.parent.enable_undo_for_widget(entry)
 
-        lock_switch = tb.Checkbutton(right_frame,
+        lock_switch = ctk.CTkCheckBox(right_frame,
                                     text="Lås",
-                                    variable=self.parent.lock_vars['Sluttid'],
-                                    bootstyle="success-round-toggle")
+                                    variable=self.parent.lock_vars['Sluttid'])
         lock_switch.grid(row=1, column=2, sticky="w")

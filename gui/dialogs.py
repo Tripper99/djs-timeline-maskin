@@ -10,8 +10,7 @@ from pathlib import Path
 from tkinter import filedialog, messagebox, scrolledtext
 
 # Third-party GUI imports
-import ttkbootstrap as tb
-from ttkbootstrap.constants import *
+import customtkinter as ctk
 
 # Local imports
 from gui.utils import ToolTip
@@ -28,7 +27,7 @@ class DialogManager:
 
     def show_excel_help(self):
         """Show help dialog for Excel file requirements"""
-        help_win = tb.Toplevel()
+        help_win = ctk.CTkToplevel()
         help_win.title("Excel-fil hjälp")
         help_win.geometry("600x600")  # Increased from 500 to 600 (20% increase)
         help_win.transient(self.parent.root)
@@ -41,11 +40,11 @@ class DialogManager:
         help_win.geometry(f"600x600+{x}+{y}")
 
         # Main frame
-        main_frame = tb.Frame(help_win)
+        main_frame = ctk.CTkFrame(help_win)
         main_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
         # Header
-        tb.Label(main_frame, text="Excel-fil krav",
+        ctk.CTkLabel(main_frame, text="Excel-fil krav",
                 font=('Arial', 14, 'bold')).pack(pady=(0, 15))
 
         # Requirements text (updated with new field name)
@@ -81,31 +80,30 @@ VIKTIGT:
 Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamnet."""
 
         # Scrollable text area
-        text_frame = tb.Frame(main_frame)
+        text_frame = ctk.CTkFrame(main_frame)
         text_frame.pack(fill="both", expand=True, pady=(0, 15))
 
-        text_area = scrolledtext.ScrolledText(text_frame, wrap=tk.WORD,
+        text_area = scrolledtext.ctk.CTkTextbox(text_frame, wrap=tk.WORD,
                                             font=('Arial', 10), height=15)
         text_area.pack(fill="both", expand=True)
         text_area.insert("1.0", req_text)
         text_area.config(state=tk.DISABLED)
 
         # Buttons frame
-        buttons_frame = tb.Frame(main_frame)
+        buttons_frame = ctk.CTkFrame(main_frame)
         buttons_frame.pack(fill="x", pady=(10, 0))
 
         # Create template button
-        template_btn = tb.Button(buttons_frame, text="Skapa mall-Excel med rätt kolumner",
-                               command=lambda: self.create_excel_template(help_win),
-                               bootstyle=SUCCESS, width=35)
+        template_btn = ctk.CTkButton(buttons_frame, text="Skapa mall-Excel med rätt kolumner",
+                               command=lambda: self.create_excel_template(help_win), width=35)
         template_btn.pack(side="left", padx=(0, 10))
         ToolTip(template_btn, "Skapar en ny Excel-fil med alla nödvändiga kolumner fördefinierade. " +
                              "Filerna får rätt formatering och några exempel-formler för Dag-kolumnen.")
 
         # Close button
-        close_btn = tb.Button(buttons_frame, text="Stäng",
+        close_btn = ctk.CTkButton(buttons_frame, text="Stäng",
                             command=help_win.destroy,
-                            bootstyle=SECONDARY, width=15)
+                            width=100)
         close_btn.pack(side="right")
 
     def create_excel_template(self, parent_window=None):
@@ -235,7 +233,7 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
                 return False  # Don't block the event
 
             # Content is too long - offer options
-            dialog_win = tb.Toplevel()
+            dialog_win = ctk.CTkToplevel()
             dialog_win.title("Text för lång")
             dialog_win.geometry("650x325")
             dialog_win.transient(self.parent.root)
@@ -251,18 +249,18 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
             dialog_result = [None]  # Use list to allow modification in nested functions
 
             # Main frame
-            main_frame = tb.Frame(dialog_win)
+            main_frame = ctk.CTkFrame(dialog_win)
             main_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
             # Message
             message_text = (f"Den inklistrade texten är {len(clipboard_content)} tecken lång, "
                           f"vilket överstiger gränsen på {limit} tecken.\n\n"
                           f"Vad vill du göra?")
-            tb.Label(main_frame, text=message_text, font=('Arial', 10),
+            ctk.CTkLabel(main_frame, text=message_text, font=ctk.CTkFont(size=10),
                     wraplength=580, justify="left").pack(pady=(0, 20))
 
             # Button frame
-            button_frame = tb.Frame(main_frame)
+            button_frame = ctk.CTkFrame(main_frame)
             button_frame.pack(fill="x", pady=(10, 0))
 
             def on_truncate():
@@ -278,14 +276,14 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
                 dialog_win.destroy()
 
             # Buttons with clear labels
-            tb.Button(button_frame, text=f"Klipp av texten (första {limit} tecken)",
-                     command=on_truncate, bootstyle=WARNING, width=35).pack(pady=(0, 5))
+            ctk.CTkButton(button_frame, text=f"Klipp av texten (första {limit} tecken)",
+                     command=on_truncate, width=35).pack(pady=(0, 5))
 
-            tb.Button(button_frame, text="Dela upp på flera fält",
-                     command=on_split, bootstyle=INFO, width=35).pack(pady=(0, 5))
+            ctk.CTkButton(button_frame, text="Dela upp på flera fält",
+                     command=on_split, fg_color="#17a2b8", width=35).pack(pady=(0, 5))
 
-            tb.Button(button_frame, text="Avbryt inklistring",
-                     command=on_cancel, bootstyle=SECONDARY, width=35).pack(pady=(0, 5))
+            ctk.CTkButton(button_frame, text="Avbryt inklistring",
+                     command=on_cancel, width=150).pack(pady=(0, 5))
 
             # Wait for dialog to close
             dialog_win.wait_window()
@@ -421,7 +419,7 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
         # Only show warning if text actually won't fit
         if remaining_text:
             # Create custom warning dialog
-            warning_win = tb.Toplevel()
+            warning_win = ctk.CTkToplevel()
             warning_win.title("Text för lång")
             warning_win.geometry("650x200")
             warning_win.transient(self.parent.root)
@@ -434,19 +432,19 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
             warning_win.geometry(f"650x200+{x}+{y}")
 
             # Main frame
-            main_frame = tb.Frame(warning_win)
+            main_frame = ctk.CTkFrame(warning_win)
             main_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
             # Warning message
             warning_text = ("Texten är för lång för att passa i tillgängliga fält. " +
                           f"Cirka {len(remaining_text)} tecken kommer att klippas bort från slutet.")
-            tb.Label(main_frame, text=warning_text, font=('Arial', 10),
+            ctk.CTkLabel(main_frame, text=warning_text, font=ctk.CTkFont(size=10),
                     wraplength=580, justify="left").pack(pady=(0, 20))
 
             # OK button
-            tb.Button(main_frame, text="OK",
+            ctk.CTkButton(main_frame, text="OK",
                      command=warning_win.destroy,
-                     bootstyle=PRIMARY, width=15).pack()
+                     width=100).pack()
 
             # Wait for dialog to close
             warning_win.wait_window()
@@ -465,7 +463,7 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
             preview_text += f"• {field_name}: \"{preview}\" ({len(chunk)} tecken)\n"
 
         # Create custom dialog for split confirmation
-        dialog_win = tb.Toplevel()
+        dialog_win = ctk.CTkToplevel()
         dialog_win.title("Bekräfta textuppdelning")
         dialog_win.geometry("650x400")
         dialog_win.transient(self.parent.root)
@@ -481,22 +479,22 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
         confirm_result = [False]
 
         # Main frame
-        main_frame = tb.Frame(dialog_win)
+        main_frame = ctk.CTkFrame(dialog_win)
         main_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
         # Message with scrollable text area
-        text_frame = tb.Frame(main_frame)
+        text_frame = ctk.CTkFrame(main_frame)
         text_frame.pack(fill="x", pady=(0, 15))
 
         import tkinter.scrolledtext as scrolledtext
-        text_area = scrolledtext.ScrolledText(text_frame, wrap=tk.WORD,
+        text_area = scrolledtext.ctk.CTkTextbox(text_frame, wrap=tk.WORD,
                                             font=('Arial', 10), height=10, width=70)
         text_area.pack(fill="both")
         text_area.insert("1.0", preview_text + "\nFortsätt med denna uppdelning?")
         text_area.config(state=tk.DISABLED)
 
         # Button frame
-        button_frame = tb.Frame(main_frame)
+        button_frame = ctk.CTkFrame(main_frame)
         button_frame.pack(fill="x", pady=(10, 0))
 
         def on_yes():
@@ -507,11 +505,11 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
             confirm_result[0] = False
             dialog_win.destroy()
 
-        tb.Button(button_frame, text="Ja, fortsätt med uppdelning",
-                 command=on_yes, bootstyle=SUCCESS, width=25).pack(side="left", padx=(0, 10))
+        ctk.CTkButton(button_frame, text="Ja, fortsätt med uppdelning",
+                 command=on_yes, fg_color="#28a745", width=25).pack(side="left", padx=(0, 10))
 
-        tb.Button(button_frame, text="Nej, avbryt",
-                 command=on_no, bootstyle=SECONDARY, width=15).pack(side="left")
+        ctk.CTkButton(button_frame, text="Nej, avbryt",
+                 command=on_no, width=120).pack(side="left")
 
         # Wait for dialog to close
         dialog_win.wait_window()

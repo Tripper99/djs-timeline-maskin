@@ -17,10 +17,14 @@ try:
     import tkinter as tk
     from tkinter import filedialog, messagebox
 
-    import ttkbootstrap as tb
-    from ttkbootstrap.constants import INFO, PRIMARY, SECONDARY, SUCCESS
-except ImportError:
-    print("Error: ttkbootstrap not installed. Install with: pip install ttkbootstrap")
+    import customtkinter as ctk
+
+    # Configure CustomTkinter
+    ctk.set_appearance_mode("light")  # "light" or "dark"
+    ctk.set_default_color_theme("blue")  # "blue", "green", "dark-blue"
+except ImportError as e:
+    print(f"Error: Required GUI library not installed. {e}")
+    print("Install with: pip install customtkinter")
     exit(1)
 
 
@@ -119,9 +123,8 @@ class PDFProcessorApp:
         except Exception as e:
             logger.warning(f"Could not set DPI awareness: {e}")
 
-        # Get saved theme or use default
-        current_theme = self.config.get('theme', 'simplex')
-        self.root = tb.Window(themename=current_theme)
+        # Create main window with CustomTkinter
+        self.root = ctk.CTk()
         self.root.title(f"DJs Timeline-maskin {VERSION}")
         self.root.geometry("1800x1000")  # Initial size before responsive calculation
 
@@ -199,7 +202,7 @@ class PDFProcessorApp:
         self.setup_undo_functionality()
 
         # Create main container that fills window
-        container = tb.Frame(self.root)
+        container = ctk.CTkFrame(self.root, corner_radius=0)
         container.pack(fill="both", expand=True)
 
         # Create scrollable frame
@@ -210,7 +213,7 @@ class PDFProcessorApp:
         content_frame = self.scrollable_frame.interior
 
         # Main container - removed expand=True to ensure bottom frame remains visible
-        main_frame = tb.Frame(content_frame)
+        main_frame = ctk.CTkFrame(content_frame)
         main_frame.pack(fill="x", expand=False, padx=20, pady=20)
 
         # Variables
@@ -223,18 +226,18 @@ class PDFProcessorApp:
         self.create_group4(main_frame)  # Excel Operations Buttons
 
         # Bottom frame for statistics and version
-        bottom_frame = tb.Frame(content_frame)
+        bottom_frame = ctk.CTkFrame(content_frame)
         bottom_frame.pack(fill="x", padx=20, pady=(0, 10))
 
         # Statistics label (left side)
-        self.filename_stats_label = tb.Label(bottom_frame, text=self.get_stats_text(),
-                                           font=('Arial', 9))
+        self.filename_stats_label = ctk.CTkLabel(bottom_frame, text=self.get_stats_text(),
+                                               font=ctk.CTkFont(size=9))
         self.filename_stats_label.pack(side="left")
         ToolTip(self.filename_stats_label, "Statistik över användning: Antal PDF:er öppnade, "
                                          "filer omdöpta och Excel-rader tillagda under denna session.")
 
         # Version label (right side)
-        version_label = tb.Label(bottom_frame, text=VERSION, font=('Arial', 8))
+        version_label = ctk.CTkLabel(bottom_frame, text=VERSION, font=ctk.CTkFont(size=8))
         version_label.pack(side="right")
         ToolTip(version_label, f"Programversion {VERSION}. DJs Timeline-maskin för PDF-filhantering och Excel-integration.")
 
@@ -434,146 +437,148 @@ class PDFProcessorApp:
 
     def create_group1(self, parent):
         """Group 1: PDF Selection"""
-        group1 = tb.LabelFrame(parent, text="1. PDF-fil", padding=15)
+        group1 = ctk.CTkFrame(parent)
+        ctk.CTkLabel(group1, text="1. PDF-fil", font=ctk.CTkFont(weight="bold")).pack(anchor="w", padx=10, pady=(10, 5))
         group1.pack(fill="x", pady=(0, 15))
 
         # First row: PDF path display
-        pdf_path_frame = tb.Frame(group1)
+        pdf_path_frame = ctk.CTkFrame(group1, fg_color="transparent")
         pdf_path_frame.pack(fill="x", pady=(0, 10))
 
-        tb.Label(pdf_path_frame, text="Vald fil:", font=('Arial', 10)).pack(side="left")
-        pdf_path_entry = tb.Entry(pdf_path_frame, textvariable=self.pdf_path_var,
+        ctk.CTkLabel(pdf_path_frame, text="Vald fil:", font=ctk.CTkFont(size=10)).pack(side="left", padx=(10, 5))
+        pdf_path_entry = ctk.CTkEntry(pdf_path_frame, textvariable=self.pdf_path_var,
                                  state="readonly", font=('Arial', 9), width=40)
         pdf_path_entry.pack(side="left", padx=(10, 10))
         ToolTip(pdf_path_entry, "Visar namn på den valda PDF-filen. Filen öppnas automatiskt när den väljs.")
 
         # Select PDF button
-        select_pdf_btn = tb.Button(pdf_path_frame, text="Välj PDF",
-                                  command=self.select_pdf_file, bootstyle=PRIMARY)
+        select_pdf_btn = ctk.CTkButton(pdf_path_frame, text="Välj PDF",
+                                  command=self.select_pdf_file, )
         select_pdf_btn.pack(side="left", padx=(0, 20))
         ToolTip(select_pdf_btn, "Välj en PDF-fil för bearbetning. Filen öppnas automatiskt för granskning, "
                                "filnamnet parsas till komponenter och sidantalet räknas automatiskt.")
 
         # Output folder selection (same row)
-        tb.Label(pdf_path_frame, text="Mapp för omdöpt pdf:", font=('Arial', 10)).pack(side="left")
-        self.output_folder_entry = tb.Entry(pdf_path_frame, textvariable=self.output_folder_var,
+        ctk.CTkLabel(pdf_path_frame, text="Mapp för omdöpt pdf:", font=ctk.CTkFont(size=10)).pack(side="left", padx=(10, 5))
+        self.output_folder_entry = ctk.CTkEntry(pdf_path_frame, textvariable=self.output_folder_var,
                                            state="readonly", font=('Arial', 9), width=30)
         self.output_folder_entry.pack(side="left", padx=(10, 10))
         ToolTip(self.output_folder_entry, "Visar mappen där omdöpta PDF-filer ska sparas. "
                                          "Fylls automatiskt med PDF-filens mapp om inte låst.")
 
         # Select output folder button
-        self.select_output_folder_btn = tb.Button(pdf_path_frame, text="Välj mapp",
-                                                 command=self.select_output_folder, bootstyle=SECONDARY)
+        self.select_output_folder_btn = ctk.CTkButton(pdf_path_frame, text="Välj mapp",
+                                                 command=self.select_output_folder, )
         self.select_output_folder_btn.pack(side="left", padx=(0, 10))
         ToolTip(self.select_output_folder_btn, "Välj en mapp för omdöpta PDF-filer.")
 
         # Lock switch for output folder
-        self.output_folder_lock_switch = tb.Checkbutton(pdf_path_frame, text="Lås",
+        self.output_folder_lock_switch = ctk.CTkCheckBox(pdf_path_frame, text="Lås",
                                                        variable=self.output_folder_lock_var,
-                                                       command=self.on_output_folder_lock_change,
-                                                       bootstyle="info-round-toggle")
+                                                       command=self.on_output_folder_lock_change)
         self.output_folder_lock_switch.pack(side="left", padx=(5, 0))
         ToolTip(self.output_folder_lock_switch, "När låst: mappvalet ändras inte när ny PDF väljs. "
                                                "När olåst: mappvalet uppdateras automatiskt till PDF-filens mapp.")
 
         # Open folder button (between lock and reset)
-        self.open_folder_btn = tb.Button(pdf_path_frame, text="Öppna mapp",
-                                        command=self.open_output_folder, bootstyle=SUCCESS, width=12)
+        self.open_folder_btn = ctk.CTkButton(pdf_path_frame, text="Öppna mapp",
+                                        command=self.open_output_folder, fg_color="#28a745", width=12)
         self.open_folder_btn.pack(side="left", padx=(10, 0))
         ToolTip(self.open_folder_btn, "Öppna den valda mappen i filutforskaren.")
 
         # Reset button (same row)
-        self.reset_folder_btn = tb.Button(pdf_path_frame, text="Nollställ mapp",
-                                         command=self.reset_output_folder, bootstyle=INFO, width=15)
+        self.reset_folder_btn = ctk.CTkButton(pdf_path_frame, text="Nollställ mapp",
+                                         command=self.reset_output_folder, fg_color="#17a2b8", width=15)
         self.reset_folder_btn.pack(side="left", padx=(10, 0))
         ToolTip(self.reset_folder_btn, "Rensa mappvalet och låser upp automatisk uppdatering.")
 
     def create_group2(self, parent):
         """Group 2: Filename Editing"""
-        group2 = tb.LabelFrame(parent, text="2. Filnamn komponenter", padding=15)
+        group2 = ctk.CTkFrame(parent)
+        ctk.CTkLabel(group2, text="2. Filnamn komponenter", font=ctk.CTkFont(weight="bold")).pack(anchor="w", padx=10, pady=(10, 5))
         group2.pack(fill="x", pady=(0, 15))
 
         # Create grid for filename components
-        components_frame = tb.Frame(group2)
+        components_frame = ctk.CTkFrame(group2, fg_color="transparent")
         components_frame.pack(fill="x")
 
         # Date
-        tb.Label(components_frame, text="Datum:", font=('Arial', 10)).grid(
+        ctk.CTkLabel(components_frame, text="Datum:", font=ctk.CTkFont(size=10)).grid(
             row=0, column=0, sticky="w", padx=(0, 10), pady=(0, 5))
-        date_entry = tb.Entry(components_frame, textvariable=self.date_var, width=15)
+        date_entry = ctk.CTkEntry(components_frame, textvariable=self.date_var, width=15)
         date_entry.grid(row=0, column=1, sticky="w", padx=(0, 20), pady=(0, 5))
         self.enable_undo_for_widget(date_entry)
 
         # Newspaper
-        tb.Label(components_frame, text="Tidning:", font=('Arial', 10)).grid(
+        ctk.CTkLabel(components_frame, text="Tidning:", font=ctk.CTkFont(size=10)).grid(
             row=0, column=2, sticky="w", padx=(0, 10), pady=(0, 5))
-        newspaper_entry = tb.Entry(components_frame, textvariable=self.newspaper_var, width=20)
+        newspaper_entry = ctk.CTkEntry(components_frame, textvariable=self.newspaper_var, width=20)
         newspaper_entry.grid(row=0, column=3, sticky="w", padx=(0, 20), pady=(0, 5))
         self.enable_undo_for_widget(newspaper_entry)
 
         # Pages
-        tb.Label(components_frame, text="Sidor:", font=('Arial', 10)).grid(
+        ctk.CTkLabel(components_frame, text="Sidor:", font=ctk.CTkFont(size=10)).grid(
             row=0, column=4, sticky="w", padx=(0, 10), pady=(0, 5))
-        pages_entry = tb.Entry(components_frame, textvariable=self.pages_var, width=5)
+        pages_entry = ctk.CTkEntry(components_frame, textvariable=self.pages_var, width=5)
         pages_entry.grid(row=0, column=5, sticky="w", padx=(0, 20), pady=(0, 5))
         self.enable_undo_for_widget(pages_entry)
 
         # Comment
-        tb.Label(components_frame, text="Kommentar:", font=('Arial', 10)).grid(
+        ctk.CTkLabel(components_frame, text="Kommentar:", font=ctk.CTkFont(size=10)).grid(
             row=0, column=6, sticky="w", padx=(0, 10), pady=(0, 5))
-        comment_entry = tb.Entry(components_frame, textvariable=self.comment_var, width=40)
+        comment_entry = ctk.CTkEntry(components_frame, textvariable=self.comment_var, width=40)
         comment_entry.grid(row=0, column=7, sticky="w", padx=(0, 20), pady=(0, 5))
         self.enable_undo_for_widget(comment_entry)
 
         # Copy to Excel button (moved to same row, made 25% smaller)
-        self.copy_to_excel_btn = tb.Button(components_frame, text="Kopiera filnamn till Excel-fältet",
+        self.copy_to_excel_btn = ctk.CTkButton(components_frame, text="Kopiera filnamn till Excel-fältet",
                                          command=self.copy_filename_to_excel,
-                                         bootstyle=INFO, width=26)
+                                         fg_color="#17a2b8", width=26)
         self.copy_to_excel_btn.grid(row=0, column=8, sticky="w", padx=(10, 0), pady=(0, 5))
 
     def create_group3(self, parent):
         """Group 3: Excel Integration"""
-        group3 = tb.LabelFrame(parent, text="3. Excel-integration", padding=8)
+        group3 = ctk.CTkFrame(parent)
+        ctk.CTkLabel(group3, text="3. Excel-integration", font=ctk.CTkFont(weight="bold")).pack(anchor="w", padx=10, pady=(10, 5))
         group3.pack(fill="x", pady=(0, 8))
 
         # Excel file selection
-        excel_file_frame = tb.Frame(group3)
+        excel_file_frame = ctk.CTkFrame(group3, fg_color="transparent")
         excel_file_frame.pack(fill="x", pady=(0, 10))
 
-        tb.Label(excel_file_frame, text="Excel-fil:", font=('Arial', 10)).pack(side="left")
-        excel_path_entry = tb.Entry(excel_file_frame, textvariable=self.excel_path_var,
+        ctk.CTkLabel(excel_file_frame, text="Excel-fil:", font=ctk.CTkFont(size=10)).pack(side="left", padx=(10, 5))
+        excel_path_entry = ctk.CTkEntry(excel_file_frame, textvariable=self.excel_path_var,
                                    state="readonly", font=('Arial', 9), width=60)
         excel_path_entry.pack(side="left", padx=(10, 10))
         ToolTip(excel_path_entry, "Visar namn på den valda Excel-filen. Programmet kommer ihåg senast använda fil.")
 
         # Button frame for Excel file selection and help
-        excel_btn_frame = tb.Frame(excel_file_frame)
+        excel_btn_frame = ctk.CTkFrame(excel_file_frame, fg_color="transparent")
         excel_btn_frame.pack(side="left")
 
-        self.select_excel_btn = tb.Button(excel_btn_frame, text="Välj Excel",
+        self.select_excel_btn = ctk.CTkButton(excel_btn_frame, text="Välj Excel",
                                          command=self.select_excel_file,
-                                         bootstyle=INFO)
+                                         fg_color="#17a2b8")
         self.select_excel_btn.pack(side="left", padx=(0, 5))
         ToolTip(self.select_excel_btn, "Välj Excel-fil (.xlsx) för dataintegrering. "
                                       "Du får möjlighet att skapa en säkerhetskopia att arbeta med.")
 
         # Open Excel button
-        self.open_excel_btn = tb.Button(excel_btn_frame, text="Öppna Excel",
+        self.open_excel_btn = ctk.CTkButton(excel_btn_frame, text="Öppna Excel",
                                        command=self.open_excel_file,
-                                       bootstyle=SUCCESS, state="disabled")
+                                       fg_color="#28a745", state="disabled")
         self.open_excel_btn.pack(side="left", padx=(0, 5))
         ToolTip(self.open_excel_btn, "Öppna den valda Excel-filen i externt program. "
                                     "Blir tillgänglig när en Excel-fil har valts.")
 
         # Help button (question mark)
-        help_btn = tb.Button(excel_btn_frame, text="?",
+        help_btn = ctk.CTkButton(excel_btn_frame, text="?",
                            command=self.dialog_manager.show_excel_help,
-                           bootstyle=SECONDARY, width=3)
+                           width=30)
         help_btn.pack(side="left")
 
         # Excel column fields (scrollable, three-column layout)
-        self.excel_fields_frame = tb.Frame(group3)
+        self.excel_fields_frame = ctk.CTkFrame(group3, fg_color="transparent")
         self.excel_fields_frame.pack(fill="both", expand=False, pady=(5, 0))  # Reduced padding to save vertical space
 
         # Configure the excel_fields_frame for responsive layout
@@ -587,30 +592,31 @@ class PDFProcessorApp:
 
     def create_group4(self, parent):
         """Group 4: Excel Operations Buttons"""
-        group4 = tb.LabelFrame(parent, text="Spara nya pdf-namnet och/eller nya excelraden", padding=8)
+        group4 = ctk.CTkFrame(parent)
+        ctk.CTkLabel(group4, text="Spara nya pdf-namnet och/eller nya excelraden", font=ctk.CTkFont(weight="bold")).pack(anchor="w", padx=10, pady=(10, 5))
         group4.pack(fill="x", pady=(0, 8))
 
         # First row: Buttons for Excel operations
-        excel_buttons_frame = tb.Frame(group4)
+        excel_buttons_frame = ctk.CTkFrame(group4, fg_color="transparent")
         excel_buttons_frame.pack(fill="x", pady=(0, 10))
 
-        self.save_all_btn = tb.Button(excel_buttons_frame, text="Spara allt och rensa fälten",
+        self.save_all_btn = ctk.CTkButton(excel_buttons_frame, text="Spara allt och rensa fälten",
                                      command=self.save_all_and_clear,
-                                     bootstyle=SUCCESS, width=30)
+                                     fg_color="#28a745", width=30)
         self.save_all_btn.pack(side="left", padx=(0, 10))
 
-        self.new_excel_row_btn = tb.Button(excel_buttons_frame, text="Rensa allt utan att spara",
+        self.new_excel_row_btn = ctk.CTkButton(excel_buttons_frame, text="Rensa allt utan att spara",
                                           command=self.clear_all_without_saving,
-                                          bootstyle=INFO, width=30)
+                                          fg_color="#17a2b8", width=30)
         self.new_excel_row_btn.pack(side="left", padx=(0, 20))
 
 
         # Second row: Row color selection
-        color_frame = tb.Frame(group4)
+        color_frame = ctk.CTkFrame(group4, fg_color="transparent")
         color_frame.pack(fill="x", pady=(5, 0))
 
         # Label for color selection
-        color_label = tb.Label(color_frame, text="Nya radens färg:", font=('Arial', 10, 'bold'))
+        color_label = ctk.CTkLabel(color_frame, text="Nya radens färg:", font=ctk.CTkFont(size=10, weight="bold"))
         color_label.pack(side="left", padx=(0, 15))
 
         # Color options with visual indicators
@@ -625,13 +631,13 @@ class PDFProcessorApp:
 
         for value, text, color in color_options:
             # Create frame for each radio button with color sample
-            radio_frame = tb.Frame(color_frame)
+            radio_frame = ctk.CTkFrame(color_frame, fg_color="transparent")
             # Add consistent spacing between all options for better visual separation
             radio_frame.pack(side="left", padx=(0, 20))
 
             # Radio button
-            radio = tb.Radiobutton(radio_frame, text=text, value=value,
-                                 variable=self.row_color_var, bootstyle="info")
+            radio = ctk.CTkRadioButton(radio_frame, text=text, value=value,
+                                 variable=self.row_color_var)
             radio.pack(side="left")
 
             # Color sample using Canvas widget - skip for "none" option
@@ -1622,7 +1628,7 @@ class PDFProcessorApp:
             else:
                 style = "danger"
 
-            counter_label.config(text=f"Tecken kvar: {remaining}", bootstyle=style)
+            counter_label.config(text=f"Tecken kvar: {remaining}")
 
         # Hard limit enforcement
         if char_count > limit:
@@ -1633,7 +1639,7 @@ class PDFProcessorApp:
 
             # Update counter to show 0
             if column_name in self.char_counters:
-                self.char_counters[column_name].config(text="Tecken kvar: 0", bootstyle="danger")
+                self.char_counters[column_name].config(text="Tecken kvar: 0")
 
     def validate_time_format(self, time_input):
         """
@@ -2580,25 +2586,14 @@ class PDFProcessorApp:
         """Get the current theme's appropriate default text color"""
         try:
             # Get current style instance
-            style = tb.Style()
-
-            # Try to get the foreground color from the current theme
-            # ttkbootstrap provides various ways to access theme colors
-            if hasattr(style, 'colors') and hasattr(style.colors, 'fg'):
-                return style.colors.fg
-            elif hasattr(style, 'colors'):
-                # Alternative method - get foreground color
-                return style.colors.get('fg', '#000000')  # Default to black if not found
+            # Style removed - not needed in CustomTkinter
+            # Get default text color from CustomTkinter theme
+            # CustomTkinter uses appearance mode for theming
+            appearance_mode = ctk.get_appearance_mode()
+            if appearance_mode == "Dark":
+                return '#ffffff'  # White text for dark mode
             else:
-                # Fallback: determine based on theme name
-                current_theme = self.config.get('theme', 'simplex')
-
-                # Light themes typically use dark text, dark themes use light text
-                dark_themes = ['darkly', 'cyborg', 'vapor', 'solar']
-                if current_theme.lower() in dark_themes:
-                    return '#FFFFFF'  # White text for dark themes
-                else:
-                    return '#000000'  # Black text for light themes
+                return '#000000'  # Black text for light mode
 
         except Exception as e:
             logger.warning(f"Could not determine theme default color: {e}")
@@ -2674,61 +2669,48 @@ class PDFProcessorApp:
 
     def configure_button_styles(self):
         """Configure custom button styles with fixed colors that persist across theme changes"""
-        style = tb.Style()
-
-        # Configure custom button styles with fixed colors
-        style.configure('Red.TButton', background='#DC3545', foreground='white')
-        style.map('Red.TButton',
-                  background=[('active', '#C82333'), ('pressed', '#BD2130')])
-
-        style.configure('Green.TButton', background='#28A745', foreground='white')
-        style.map('Green.TButton',
-                  background=[('active', '#218838'), ('pressed', '#1E7E34')])
-
-        style.configure('Blue.TButton', background='#007BFF', foreground='white')
-        style.map('Blue.TButton',
-                  background=[('active', '#0069D9'), ('pressed', '#0056B3')])
+        # Style configuration not needed in CustomTkinter
+        # Colors are set directly on buttons
+        pass
 
     def create_formatting_toolbar(self, parent_frame, text_widget, col_name):
         """Create formatting toolbar with buttons and bind keyboard shortcuts"""
         # Ensure custom button styles are configured
         self.configure_button_styles()
         # Bold button - styled with bold text using Unicode
-        bold_btn = tb.Button(parent_frame, text="𝐁", width=3,
+        bold_btn = ctk.CTkButton(parent_frame, text="𝐁", width=30,
                            command=lambda: self.toggle_format(text_widget, "bold"))
         bold_btn.pack(side="left", padx=(0, 2))
-        bold_btn.configure(bootstyle="outline")
 
         # Color buttons with fixed colors (order: Red, Green, Blue)
         # Red button - fixed red color
-        red_btn = tb.Button(parent_frame, text="●", width=3,
+        red_btn = ctk.CTkButton(parent_frame, text="●", width=30,
                           command=lambda: self.toggle_format(text_widget, "red"),
-                          style='Red.TButton')
+                          fg_color="#DC3545", hover_color="#C82333")
         red_btn.pack(side="left", padx=(0, 2))
 
         # Green button - fixed green color
-        green_btn = tb.Button(parent_frame, text="●", width=3,
+        green_btn = ctk.CTkButton(parent_frame, text="●", width=30,
                             command=lambda: self.toggle_format(text_widget, "green"),
-                            style='Green.TButton')
+                            fg_color="#28A745", hover_color="#218838")
         green_btn.pack(side="left", padx=(0, 2))
 
         # Blue button - fixed blue color
-        blue_btn = tb.Button(parent_frame, text="●", width=3,
+        blue_btn = ctk.CTkButton(parent_frame, text="●", width=30,
                            command=lambda: self.toggle_format(text_widget, "blue"),
-                           style='Blue.TButton')
+                           fg_color="#007BFF", hover_color="#0069D9")
         blue_btn.pack(side="left", padx=(0, 2))
 
         # Clear formatting button - removes ALL formatting and restores theme default color
-        default_btn = tb.Button(parent_frame, text="T", width=3,
-                              command=lambda: self.clear_all_formatting(text_widget))
+        default_btn = ctk.CTkButton(parent_frame, text="T", width=30,
+                              command=lambda: self.clear_all_formatting(text_widget),
+                              fg_color="gray60", hover_color="gray50")
         default_btn.pack(side="left", padx=(0, 2))
-        default_btn.configure(bootstyle="secondary-outline")
 
         # Font size toggle button
-        font_btn = tb.Button(parent_frame, text="A+", width=3,
+        font_btn = ctk.CTkButton(parent_frame, text="A+", width=30,
                            command=lambda: self.toggle_text_font_size())
         font_btn.pack(side="left", padx=(2, 0))
-        font_btn.configure(bootstyle="outline")
 
         # Bind keyboard shortcuts for this text widget
         text_widget.bind('<Control-b>', lambda e: self.toggle_format(text_widget, "bold"))

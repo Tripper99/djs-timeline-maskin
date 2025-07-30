@@ -5,7 +5,7 @@ GUI utility classes for the DJ Timeline application
 import platform
 import tkinter as tk
 
-import ttkbootstrap as tb
+import customtkinter as ctk
 
 
 class ToolTip:
@@ -43,7 +43,7 @@ class ToolTip:
             self.tooltip_window = None
 
 
-class ScrollableText(tb.Frame):
+class ScrollableText(ctk.CTkFrame):
     """A Text widget with vertical scrollbar"""
 
     def __init__(self, parent, **text_options):
@@ -56,7 +56,9 @@ class ScrollableText(tb.Frame):
         self.text_widget = tk.Text(self, **text_options)
 
         # Create scrollbar (always visible for consistent behavior)
-        self.scrollbar = tb.Scrollbar(self, orient="vertical",
+        # Note: CustomTkinter doesn't have a separate scrollbar widget
+        # We'll use tkinter's scrollbar for now
+        self.scrollbar = tk.Scrollbar(self, orient="vertical",
                                      command=self.text_widget.yview)
 
         # Configure text widget scrolling
@@ -74,7 +76,7 @@ class ScrollableText(tb.Frame):
         return getattr(self.text_widget, name)
 
 
-class ScrollableFrame(tb.Frame):
+class ScrollableFrame(ctk.CTkFrame):
     """
     A scrollable frame widget that provides vertical scrolling capability
     while preserving ttkbootstrap theming.
@@ -91,8 +93,9 @@ class ScrollableFrame(tb.Frame):
 
         # Create canvas and scrollbar
         self.canvas = tk.Canvas(self, highlightthickness=0)
-        self.scrollbar = tb.Scrollbar(self, orient="vertical", command=self.canvas.yview)
-        self.scrollable_frame = tb.Frame(self.canvas)
+        # Use tkinter scrollbar as CustomTkinter doesn't have one yet
+        self.scrollbar = tk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.scrollable_frame = ctk.CTkFrame(self.canvas)
 
         # Configure canvas
         self.scrollable_frame.bind(
