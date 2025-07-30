@@ -243,15 +243,14 @@ class ExcelFieldManager:
         column2_fields = ['Händelse']  # Date/time fields are now handled separately in subframe
         column3_fields = ['Note1', 'Note2', 'Note3']
 
-        # Configure column weights for equal spacing - each column gets exactly 1/3 of available width
-        # Use uniform to force exactly equal column distribution
-        fields_container.grid_columnconfigure(0, weight=1, uniform="col")  # Left column - 1/3 of width
-        fields_container.grid_columnconfigure(1, weight=1, uniform="col")  # Middle column - 1/3 of width
-        fields_container.grid_columnconfigure(2, weight=1, uniform="col")  # Right column - 1/3 of width
+        # Configure column weights for better spacing - left column wider, text columns narrower with gaps
+        fields_container.grid_columnconfigure(0, weight=2)  # Left column - 40% width (more fields)
+        fields_container.grid_columnconfigure(1, weight=1)  # Middle column - 30% width (Händelse)
+        fields_container.grid_columnconfigure(2, weight=1)  # Right column - 30% width (Note1-3)
 
         # Create Column 1
         col1_frame = ctk.CTkFrame(fields_container)
-        col1_frame.grid(row=0, column=0, sticky="nsew", padx=2, pady=2)
+        col1_frame.grid(row=0, column=0, sticky="nsew", padx=(5, 10), pady=2)
         col1_frame.grid_columnconfigure(0, weight=0)  # Field labels - fixed width
         col1_frame.grid_columnconfigure(1, weight=1)  # Entry fields - expand to fill space
         col1_frame.grid_columnconfigure(2, weight=0)  # Lock switches - fixed width
@@ -266,7 +265,7 @@ class ExcelFieldManager:
 
         # Create Column 2
         col2_frame = ctk.CTkFrame(fields_container)
-        col2_frame.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
+        col2_frame.grid(row=0, column=1, sticky="nsew", padx=(10, 10), pady=2)
         col2_frame.grid_columnconfigure(0, weight=1)  # Content takes full width
 
         # Row 0: Date/Time subframe (fixed height, no expansion)
@@ -291,7 +290,7 @@ class ExcelFieldManager:
 
         # Create Column 3
         col3_frame = ctk.CTkFrame(fields_container)
-        col3_frame.grid(row=0, column=2, sticky="nsew", padx=2, pady=2)
+        col3_frame.grid(row=0, column=2, sticky="nsew", padx=(10, 5), pady=2)
         col3_frame.grid_columnconfigure(0, weight=1)  # Make all content expand full width
 
         row = 0
