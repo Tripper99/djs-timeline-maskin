@@ -260,10 +260,10 @@ class PDFProcessorApp:
         # Excel column variables
         self.excel_vars = {}
 
-        # Character counters for text fields (1000 char limit for most, 1500 for Händelse)
+        # Character counters for text fields (1000 char limit for all text fields)
         self.char_counters = {}
         self.char_limit = 1000
-        self.handelse_char_limit = 1500
+        self.handelse_char_limit = 1000
 
         # Undo/Redo functionality - track widgets that support undo
         self.undo_widgets = []  # List of widgets with undo enabled

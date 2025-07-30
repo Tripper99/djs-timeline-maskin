@@ -197,7 +197,7 @@ The main interface uses a responsive three-column layout optimized for efficient
 \bullet {\b Date/Time Subframe}:\par
   \bullet Startdatum, Starttid (HH:MM format)\par
   \bullet Slutdatum, Sluttid (HH:MM format)\par
-\bullet {\b Händelse Field} - Main event description (1500 character limit)\par
+\bullet {\b Händelse Field} - Main event description (1000 character limit)\par
   \bullet Expandable text area with rich formatting toolbar\par
   \bullet Real-time character counter\par
   \bullet Full rich text support with format preservation\par
@@ -323,7 +323,7 @@ After automatic parsing, you can manually refine the extracted components:\par
 {\b Smart Mapping Features:}\par
 \bullet Preserves existing Excel field content if fields are locked\par
 \bullet Applies rich text formatting to transferred content\par
-\bullet Maintains character limits (1000 for notes, 1500 for Händelse)\par
+\bullet Maintains character limits (1000 for all text fields)\par
 \bullet Updates character counters in real-time\par
 \par
 {\b Common PDF Processing Scenarios}\par
@@ -426,7 +426,7 @@ Your Excel file must contain exactly these 19 column headers (case-sensitive, ex
 \bullet {\b Special} - Special circumstances, urgency flags, or unique identifiers\par
 \par
 {\b Event Description:}\par
-\bullet {\b Händelse} - Main event description (1500 character limit)\par
+\bullet {\b Händelse} - Main event description (1000 character limit)\par
   \bullet Supports full rich text formatting\par
   \bullet Bold, italic, colors, and mixed formatting\par
   \bullet Preserves formatting in Excel output\par
@@ -632,7 +632,7 @@ Formatting data is stored in {\f2 pdf_processor_config.json}:\par
 {\b Character Limits and Counters}\par
 \par
 {\b Field-Specific Limits:}\par
-\bullet {\b Händelse Field} - 1500 characters maximum\par
+\bullet {\b Händelse Field} - 1000 characters maximum\par
 \bullet {\b Note Fields} - 1000 characters each maximum\par
 \bullet Real-time character counters show remaining space\par
 \bullet Counters update as you type and format text\par
@@ -935,7 +935,7 @@ The application includes comprehensive validation for all date and time fields:\
 \par
 {\b Character Counters:}\par
 All text fields include real-time character counting:\par
-\bullet {\b Händelse} - Shows "X/1500 characters"\par
+\bullet {\b Händelse} - Shows "X/1000 characters"\par
 \bullet {\b Note Fields} - Shows "X/1000 characters" each\par
 \bullet Counters update as you type, format, or edit text\par
 \bullet Warning indicators when approaching limits\par

@@ -51,7 +51,7 @@ class ScrollableText(tb.Frame):
 
         # Force autoseparators to False for better undo control
         text_options['autoseparators'] = False
-        
+
         # Create text widget with all provided options
         self.text_widget = tk.Text(self, **text_options)
 

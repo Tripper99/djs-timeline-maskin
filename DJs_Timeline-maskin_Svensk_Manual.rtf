@@ -197,7 +197,7 @@ Huvudgränssnittet använder en responsiv trekolumnslayout optimerad för effekt
 \bullet {\b Datum/Tid-underram}:\par
   \bullet Startdatum, Starttid (HH:MM format)\par
   \bullet Slutdatum, Sluttid (HH:MM format)\par
-\bullet {\b Händelse-fält} - Huvudhändelsebeskrivning (1500 tecken gräns)\par
+\bullet {\b Händelse-fält} - Huvudhändelsebeskrivning (1000 tecken gräns)\par
   \bullet Expanderbart textområde med rich formateringsverktygsfält\par
   \bullet Realtids teckenräknare\par
   \bullet Fullt rich text-stöd med formatbevarande\par
@@ -323,7 +323,7 @@ Efter automatisk analysering kan du manuellt förfina de extraherade komponenter
 {\b Smarta mappningsfunktioner:}\par
 \bullet Bevarar befintligt Excel-fältinnehåll om fält är låsta\par
 \bullet Tillämpar rich text-formatering på överförd innehåll\par
-\bullet Upprätthåller teckengränser (1000 för anteckningar, 1500 för Händelse)\par
+\bullet Upprätthåller teckengränser (1000 för alla textfält)\par
 \bullet Uppdaterar teckenräknare i realtid\par
 \par
 {\b Vanliga PDF-bearbetningsscenarier}\par
@@ -426,7 +426,7 @@ Din Excel-fil måste innehålla exakt dessa 19 kolumnrubriker (skiftlägeskänsl
 \bullet {\b Special} - Särskilda omständigheter, brådskeflaggor eller unika identifierare\par
 \par
 {\b Händelsebeskrivning:}\par
-\bullet {\b Händelse} - Huvudhändelsebeskrivning (1500 tecken gräns)\par
+\bullet {\b Händelse} - Huvudhändelsebeskrivning (1000 tecken gräns)\par
   \bullet Stöder full rich text-formatering\par
   \bullet Fet, kursiv, färger och blandad formatering\par
   \bullet Bevarar formatering i Excel-utdata\par
@@ -632,7 +632,7 @@ Formateringsdata lagras i {\f2 pdf_processor_config.json}:\par
 {\b Teckengränser och räknare}\par
 \par
 {\b Fältspecifika gränser:}\par
-\bullet {\b Händelse-fält} - 1500 tecken maximum\par
+\bullet {\b Händelse-fält} - 1000 tecken maximum\par
 \bullet {\b Anteckningsfält} - 1000 tecken vardera maximum\par
 \bullet Realtids teckenräknare visar återstående utrymme\par
 \bullet Räknare uppdateras när du skriver och formaterar text\par
@@ -935,7 +935,7 @@ Applikationen inkluderar omfattande validering för alla datum- och tidsfält:\p
 \par
 {\b Teckenräknare:}\par
 Alla textfält inkluderar realtids teckenräkning:\par
-\bullet {\b Händelse} - Visar "X/1500 tecken"\par
+\bullet {\b Händelse} - Visar "X/1000 tecken"\par
 \bullet {\b Anteckningsfält} - Visar "X/1000 tecken" vardera\par
 \bullet Räknare uppdateras när du skriver, formaterar eller redigerar text\par
 \bullet Varningsindikatorer när gränser närmar sig\par
