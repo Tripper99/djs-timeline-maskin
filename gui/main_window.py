@@ -1220,49 +1220,27 @@ class PDFProcessorApp:
             return False
 
     def should_save_excel_row(self) -> bool:
-        """Check if Excel row should be saved based on any significant content"""
+        """Check if Excel row should be saved - now simplified"""
+        # NOTE: This method is now mainly used by other parts of the code
+        # The main save logic is handled directly in save_all_and_clear()
+
         if not self.excel_vars:
             return False
 
-        # First check Startdatum and Händelse specifically
-        # These two fields must BOTH have content for any Excel row to be saved
+        # Check if both Startdatum and Händelse have content
         startdatum_content = ""
-        if 'Startdatum' in self.excel_vars:
-            if hasattr(self.excel_vars['Startdatum'], 'get'):
-                startdatum_content = self.excel_vars['Startdatum'].get().strip()
+        if 'Startdatum' in self.excel_vars and hasattr(self.excel_vars['Startdatum'], 'get'):
+            startdatum_content = self.excel_vars['Startdatum'].get().strip()
 
         handelse_content = ""
-        if 'Händelse' in self.excel_vars:
-            if hasattr(self.excel_vars['Händelse'], 'get'):
-                if hasattr(self.excel_vars['Händelse'], 'delete'):  # Text widget
-                    handelse_content = self.excel_vars['Händelse'].get("1.0", tk.END).strip()
-                else:  # StringVar
-                    handelse_content = self.excel_vars['Händelse'].get().strip()
+        if 'Händelse' in self.excel_vars and hasattr(self.excel_vars['Händelse'], 'get'):
+            if hasattr(self.excel_vars['Händelse'], 'delete'):  # Text widget
+                handelse_content = self.excel_vars['Händelse'].get("1.0", tk.END).strip()
+            else:  # StringVar
+                handelse_content = self.excel_vars['Händelse'].get().strip()
 
-        # NEW LOGIC: Excel row can ONLY be saved if BOTH Startdatum AND Händelse have content
-        if not (startdatum_content and handelse_content):
-            return False
-
-        # If we get here, both required fields have content
-        # Now check if there's any data worth saving
-        important_fields = ['Startdatum', 'Händelse', 'OBS', 'Kategori', 'Underkategori',
-                           'Person/sak', 'Special', 'Slutdatum', 'Note1', 'Note2', 'Note3',
-                           'Källa1', 'Källa2', 'Källa3', 'Övrigt']
-
-        for field_name in important_fields:
-            if field_name in self.excel_vars:
-                var = self.excel_vars[field_name]
-                if hasattr(var, 'get'):
-                    content = ""
-                    if hasattr(var, 'delete'):  # Text widget
-                        content = var.get("1.0", tk.END).strip()
-                    else:  # StringVar or Entry
-                        content = var.get().strip()
-
-                    if content:  # If any field has content, save the row
-                        return True
-
-        return False
+        # Simple rule: Excel row can only be saved if BOTH required fields have content
+        return startdatum_content and handelse_content
 
     def save_excel_row(self) -> bool:
         """Save current Excel data as new row"""
@@ -1362,28 +1340,30 @@ class PDFProcessorApp:
 
     def save_all_and_clear(self):
         """Main save function - rename file if changed and save Excel row if data exists"""
-        # First check if there's a PDF to rename
-        has_pdf_to_rename = self.current_pdf_path and self.has_filename_changed()
 
-        # Check if any Excel fields have content (not just Startdatum/Händelse)
-        has_any_excel_content = False
+        # STEP 1: Determine what operations are needed
+        needs_pdf_rename = self.current_pdf_path and self.has_filename_changed()
+
+        # Check if Startdatum and Händelse both have content for Excel row
+        startdatum_content = ""
+        handelse_content = ""
+
         if self.excel_vars:
-            for field_name, var in self.excel_vars.items():
-                # Skip automatic fields
-                if field_name in ['Dag', 'Inlagd']:
-                    continue
-                if hasattr(var, 'get'):
-                    content = ""
-                    if hasattr(var, 'delete'):  # Text widget
-                        content = var.get("1.0", tk.END).strip()
-                    else:  # StringVar
-                        content = var.get().strip()
-                    if content:
-                        has_any_excel_content = True
-                        break
+            if 'Startdatum' in self.excel_vars and hasattr(self.excel_vars['Startdatum'], 'get'):
+                startdatum_content = self.excel_vars['Startdatum'].get().strip()
 
-        # If nothing to do at all
-        if not has_pdf_to_rename and not has_any_excel_content:
+            if 'Händelse' in self.excel_vars and hasattr(self.excel_vars['Händelse'], 'get'):
+                if hasattr(self.excel_vars['Händelse'], 'delete'):  # Text widget
+                    handelse_content = self.excel_vars['Händelse'].get("1.0", tk.END).strip()
+                else:  # StringVar
+                    handelse_content = self.excel_vars['Händelse'].get().strip()
+
+        needs_excel_row = startdatum_content and handelse_content
+
+        # STEP 2: Handle different scenarios
+
+        # Nothing to do at all
+        if not needs_pdf_rename and not needs_excel_row:
             messagebox.showinfo(
                 "Inget att göra",
                 "Jag har inget att göra.\n\n" +
@@ -1392,14 +1372,31 @@ class PDFProcessorApp:
             )
             return
 
-        # If there's Excel content, check if it can be saved
-        if has_any_excel_content:
-            # Check if Startdatum and Händelse are properly filled
-            if not self.validate_excel_data_before_save():
-                return  # User cancelled after seeing validation error
+        # Excel row needed but validation fails
+        if needs_excel_row:
+            # First validate all date and time fields
+            if not self.validate_all_date_time_fields():
+                return  # Date/time validation failed
 
-        # Check if Excel file exists before proceeding
-        if self.excel_manager.excel_path and not Path(self.excel_manager.excel_path).exists():
+        # If Excel row needed but one of the required fields is missing
+        # (This shouldn't happen due to needs_excel_row check, but as safety)
+        if (startdatum_content or handelse_content) and not (startdatum_content and handelse_content):
+            messagebox.showwarning(
+                "Obligatoriska fält saknas",
+                "Både Startdatum och Händelse måste vara ifyllda för att en ny excelrad ska kunna skrivas.\n\n" +
+                "Om du bara vill byta namn på en pdf så se till så att fälten Startdatum och Händelse är tomma."
+            )
+            # Focus on the empty field
+            if not startdatum_content and 'Startdatum' in self.excel_vars:
+                if hasattr(self.excel_vars['Startdatum'], 'focus'):
+                    self.excel_vars['Startdatum'].focus()
+            elif not handelse_content and 'Händelse' in self.excel_vars:
+                if hasattr(self.excel_vars['Händelse'], 'focus'):
+                    self.excel_vars['Händelse'].focus()
+            return
+
+        # STEP 3: Check if Excel file exists before proceeding (if Excel row needed)
+        if needs_excel_row and self.excel_manager.excel_path and not Path(self.excel_manager.excel_path).exists():
             result = messagebox.askyesnocancel(
                 "Excel-fil saknas",
                 f"Excel-filen kunde inte hittas:\n{Path(self.excel_manager.excel_path).name}\n\n" +
@@ -1416,12 +1413,14 @@ class PDFProcessorApp:
                 self.select_excel_file()
                 if not self.excel_manager.excel_path or not Path(self.excel_manager.excel_path).exists():
                     return  # User didn't select a valid file
-            # If result is False (No), continue without Excel saving
+            else:  # No - continue without Excel saving
+                needs_excel_row = False
 
+        # STEP 4: Perform operations
         operations_performed = []
 
-        # 1. Rename PDF file if filename has changed
-        if self.current_pdf_path and self.has_filename_changed():
+        # 4A. Rename PDF file if needed
+        if needs_pdf_rename:
             # Check that PDF file still exists before attempting rename
             is_valid, error_msg = PDFProcessor.validate_pdf_file(self.current_pdf_path)
             if not is_valid:
@@ -1442,20 +1441,18 @@ class PDFProcessorApp:
                         return  # User didn't select a file
                     # Try rename again with new file
                     if not self.rename_current_pdf():
-                        # Rename failed (user cancelled), stop the operation
-                        return
+                        return  # Rename failed, stop operation
                 else:  # Yes - continue without rename
-                    pass  # Skip rename, continue with Excel
+                    needs_pdf_rename = False  # Skip PDF rename
             else:
                 # File exists, proceed with rename
                 if self.rename_current_pdf():
                     operations_performed.append("PDF-filen har döpts om")
                 else:
-                    # Rename failed (user cancelled), stop the operation
-                    return
+                    return  # Rename failed, stop operation
 
-        # 2. Save Excel row if required data exists AND Excel file is available
-        if self.should_save_excel_row():
+        # 4B. Save Excel row if needed
+        if needs_excel_row:
             if not self.excel_manager.worksheet:
                 messagebox.showwarning("Varning", "Ingen Excel-fil vald")
                 return
@@ -1470,21 +1467,17 @@ class PDFProcessorApp:
                     messagebox.showerror("Fel", "Kunde inte spara Excel-raden")
                     return
 
-        # 3. Clear Excel fields
+        # STEP 5: Clear fields
         self.excel_field_manager.clear_excel_fields()
-
-        # 4. Clear PDF and filename fields
         self.clear_pdf_and_filename_fields()
-
-        # 5. Reset row color to default
         self.row_color_var.set("none")
 
-        # Show result message based on what was done
+        # STEP 6: Show appropriate status message
         pdf_renamed = "PDF-filen har döpts om" in operations_performed
         excel_saved = "Excel-rad har sparats" in operations_performed
 
         if pdf_renamed and excel_saved:
-            # Both operations performed - show detailed list
+            # Both operations performed
             message = "Följande operationer genomfördes:\n• " + "\n• ".join(operations_performed)
             message += "\n• Alla fält har rensats (utom låsta och automatiska fält)"
             messagebox.showinfo("Sparat", message)
@@ -1504,7 +1497,7 @@ class PDFProcessorApp:
                 "Grattis! Din timeline växer."
             )
         else:
-            # This shouldn't happen due to earlier check, but keep as fallback
+            # This should never happen, but as fallback
             messagebox.showinfo("Klart", "Alla fält har rensats.")
 
     def validate_all_date_time_fields(self) -> bool:
@@ -1561,54 +1554,15 @@ class PDFProcessorApp:
             return False
 
     def validate_excel_data_before_save(self) -> bool:
-        """Validate Excel data before saving and warn user of potential issues"""
+        """Validate Excel data before saving - now simplified"""
+        # NOTE: This method is now mainly used for date/time validation
+        # The main Startdatum/Händelse validation is handled in save_all_and_clear()
+
         if not self.excel_vars:
             return True  # No Excel file loaded, nothing to validate
 
-        # First validate all date and time fields before other checks
-        if not self.validate_all_date_time_fields():
-            return False  # Date/time validation failed, cancel save
-
-        # Check if Händelse has content
-        handelse_content = ""
-        if 'Händelse' in self.excel_vars:
-            if hasattr(self.excel_vars['Händelse'], 'get'):
-                if hasattr(self.excel_vars['Händelse'], 'delete'):  # Text widget
-                    handelse_content = self.excel_vars['Händelse'].get("1.0", tk.END).strip()
-                else:  # StringVar
-                    handelse_content = self.excel_vars['Händelse'].get().strip()
-
-        # Check if Startdatum has content
-        tid_start_content = ""
-        if 'Startdatum' in self.excel_vars:
-            if hasattr(self.excel_vars['Startdatum'], 'get'):
-                tid_start_content = self.excel_vars['Startdatum'].get().strip()
-
-        # NEW VALIDATION: Simple rule for Excel operations
-        # If BOTH Startdatum and Händelse are empty, skip all Excel validation (PDF-only operation)
-        if not handelse_content and not tid_start_content:
-            return True  # No Excel validation needed - other fields will be ignored
-
-        # If either Startdatum OR Händelse has content, both must be filled
-        if not (handelse_content and tid_start_content):
-            messagebox.showwarning(
-                "Obligatoriska fält saknas",
-                "Både Startdatum och Händelse måste vara ifyllda för att en ny excelrad ska kunna skrivas.\n\n" +
-                "Om du bara vill byta namn på en pdf så se till så att fälten Startdatum och Händelse är tomma."
-            )
-            # Focus on the empty field
-            if not tid_start_content and 'Startdatum' in self.excel_vars:
-                if hasattr(self.excel_vars['Startdatum'], 'focus'):
-                    self.excel_vars['Startdatum'].focus()
-            elif not handelse_content and 'Händelse' in self.excel_vars:
-                if hasattr(self.excel_vars['Händelse'], 'focus'):
-                    self.excel_vars['Händelse'].focus()
-            return False
-
-        # If both fields are empty, that's OK - no Excel row will be created
-        # If both fields have content, that's also OK - Excel row will be created
-
-        return True  # Validation passed or user chose to continue
+        # Only validate date and time fields
+        return self.validate_all_date_time_fields()
 
     def clear_all_without_saving(self):
         """Clear all fields without saving anything"""
