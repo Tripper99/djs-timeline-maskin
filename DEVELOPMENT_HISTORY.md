@@ -4,6 +4,51 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v1.18.1 Success (2025-07-30) - Theme-Independent Color Buttons ✅
+**Achievement**: Fixed formatting toolbar color buttons to display consistent colors regardless of selected theme
+
+**Problem Solved**: 
+Color buttons (Red, Blue, Green) were using ttkbootstrap's theme-dependent styles (danger, primary, success) which changed colors based on the selected theme. This made it impossible for users to identify button functions when switching themes.
+
+**Key Features Implemented**:
+- **Fixed Color Buttons**: Red (#DC3545), Green (#28A745), Blue (#007BFF) remain constant
+- **Theme Persistence**: Custom button styles reapplied after theme changes
+- **Button Reordering**: Changed order from Red-Blue-Green to Red-Green-Blue as requested
+- **Clean Implementation**: Centralized style configuration in configure_button_styles() method
+
+**Technical Implementation**:
+```python
+def configure_button_styles(self):
+    """Configure custom button styles with fixed colors that persist across theme changes"""
+    style = tb.Style()
+    
+    # Configure custom button styles with fixed colors
+    style.configure('Red.TButton', background='#DC3545', foreground='white')
+    style.map('Red.TButton',
+              background=[('active', '#C82333'), ('pressed', '#BD2130')])
+    
+    style.configure('Green.TButton', background='#28A745', foreground='white')
+    style.map('Green.TButton',
+              background=[('active', '#218838'), ('pressed', '#1E7E34')])
+    
+    style.configure('Blue.TButton', background='#007BFF', foreground='white')
+    style.map('Blue.TButton',
+              background=[('active', '#0069D9'), ('pressed', '#0056B3')])
+
+# Called in change_theme() to reapply styles after theme changes
+```
+
+**User Testing Results** ✅:
+- ✅ Color buttons maintain fixed colors across all themes
+- ✅ Theme switching no longer affects button appearance
+- ✅ Buttons display correctly on app startup regardless of saved theme
+- ✅ New Red-Green-Blue order implemented as requested
+
+**Impact**: 
+- User experience: Improved consistency and clarity
+- Theme flexibility: Users can choose any theme without losing button functionality
+- Visual feedback: Clear identification of formatting options regardless of theme choice
+
 ### v1.18.0 Success (2025-07-30) - Clean Formatting System ✅
 **Achievement**: Major simplification - removed italic functionality for guaranteed Excel compatibility and improved user experience
 

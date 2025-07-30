@@ -118,15 +118,16 @@ The breakthrough hybrid approach consista of:
 - Method 2 character-by-character algorithm for text extraction
 This method might seem complicated but is important to understand that this is the only way we've found to make the app to write perfect Excel rich text formatting with colors, bold, italic, line breaks.
 
-## Current Status (v1.18.0)
+## Current Status (v1.18.1)
 
 **COMPLETED ✅ - CLEAN FORMATTING SYSTEM**: Major simplification with italic removed for guaranteed Excel compatibility and improved user experience
 
-### Working Features (v1.18.0):
-- ✅ **Clean Formatting System**: Bold + 3 colors only - guaranteed Excel compatibility ✅ NEW!
-- ✅ **Excel Hybrid Method Protected**: No risk to reliable Excel export functionality ✅ NEW!
-- ✅ **Simplified User Interface**: Bold, Red, Blue, Green, T-clear, A+ font buttons only ✅ NEW!
-- ✅ **Perfect Excel Export**: All formatting combinations export flawlessly to Excel ✅ NEW!
+### Working Features (v1.18.1):
+- ✅ **Theme-Independent Color Buttons**: Formatting toolbar colors remain fixed across all themes ✅ NEW!
+- ✅ **Clean Formatting System**: Bold + 3 colors only - guaranteed Excel compatibility
+- ✅ **Excel Hybrid Method Protected**: No risk to reliable Excel export functionality
+- ✅ **Simplified User Interface**: Bold, Red, Green, Blue, T-clear, A+ font buttons only
+- ✅ **Perfect Excel Export**: All formatting combinations export flawlessly to Excel
 - ✅ **Strict Validation System**: Both Startdatum and Händelse must be filled for Excel row creation
 - ✅ **PDF-Only Operations**: PDF renaming works without Excel validation when both required fields are empty
 - ✅ **Enhanced Error Messages**: Clear guidance for users on field requirements with PDF-only hint
@@ -210,7 +211,7 @@ This method might seem complicated but is important to understand that this is t
 - Logging is configured for debugging
 - No automated tests are present in the codebase
 - No build process required - runs directly with Python interpreter
-- **Current version**: v1.18.0 (stable master with clean formatting system)
-- **Last tested**: 2025-07-30 - Clean formatting system with Excel compatibility verified working perfectly
+- **Current version**: v1.18.1 (stable master with theme-independent color buttons)
+- **Last tested**: 2025-07-30 - Theme-independent color buttons verified working perfectly across all themes
 
 For detailed version history and development milestones, see DEVELOPMENT_HISTORY.md
