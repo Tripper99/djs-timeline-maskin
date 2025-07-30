@@ -1224,6 +1224,28 @@ class PDFProcessorApp:
         if not self.excel_vars:
             return False
 
+        # First check Startdatum and Händelse specifically
+        # These two fields must BOTH have content if either has content
+        startdatum_content = ""
+        if 'Startdatum' in self.excel_vars:
+            if hasattr(self.excel_vars['Startdatum'], 'get'):
+                startdatum_content = self.excel_vars['Startdatum'].get().strip()
+
+        handelse_content = ""
+        if 'Händelse' in self.excel_vars:
+            if hasattr(self.excel_vars['Händelse'], 'get'):
+                if hasattr(self.excel_vars['Händelse'], 'delete'):  # Text widget
+                    handelse_content = self.excel_vars['Händelse'].get("1.0", tk.END).strip()
+                else:  # StringVar
+                    handelse_content = self.excel_vars['Händelse'].get().strip()
+
+        # If either Startdatum or Händelse has content, both must have content
+        if (startdatum_content or handelse_content):
+            if not (startdatum_content and handelse_content):
+                # One has content but not the other - don't save
+                return False
+            # Both have content - continue checking other fields
+
         # Check if any important field has content
         important_fields = ['Startdatum', 'Händelse', 'OBS', 'Kategori', 'Underkategori',
                            'Person/sak', 'Special', 'Slutdatum', 'Note1', 'Note2', 'Note3',
@@ -1342,6 +1364,19 @@ class PDFProcessorApp:
 
     def save_all_and_clear(self):
         """Main save function - rename file if changed and save Excel row if data exists"""
+        # First check if there's anything to do
+        has_pdf_to_rename = self.current_pdf_path and self.has_filename_changed()
+        has_excel_data_to_save = self.should_save_excel_row()
+
+        if not has_pdf_to_rename and not has_excel_data_to_save:
+            messagebox.showinfo(
+                "Inget att göra",
+                "Jag har inget att göra.\n\n" +
+                "Välj en pdf att namnändra och/eller fyll i datum i Startdatum " +
+                "och en beskrivning i Händelse-fältet."
+            )
+            return
+
         # Check for potential missing date when user has entered event info
         if not self.validate_excel_data_before_save():
             return  # User chose to cancel and fix the issue
@@ -1427,16 +1462,33 @@ class PDFProcessorApp:
         # 5. Reset row color to default
         self.row_color_var.set("none")
 
-        operations_performed.append("alla fält har rensats (utom låsta)")
+        # Show result message based on what was done
+        pdf_renamed = "PDF-filen har döpts om" in operations_performed
+        excel_saved = "Excel-rad har sparats" in operations_performed
 
-        # Show result message
-        if operations_performed:
+        if pdf_renamed and excel_saved:
+            # Both operations performed - show detailed list
             message = "Följande operationer genomfördes:\n• " + "\n• ".join(operations_performed)
+            message += "\n• Alla fält har rensats (utom låsta och automatiska fält)"
             messagebox.showinfo("Sparat", message)
+        elif pdf_renamed and not excel_saved:
+            # Only PDF renamed
+            messagebox.showinfo(
+                "PDF namnändrad",
+                "Pdf-filen har fått sitt nya namn.\n\n" +
+                "Alla fält har rensats (utom låsta och automatiska fält)."
+            )
+        elif excel_saved and not pdf_renamed:
+            # Only Excel row saved
+            messagebox.showinfo(
+                "Excel-rad skapad",
+                "Den nya excelraden har skapats.\n" +
+                "Alla fält har rensats (utom låsta och automatiska fält).\n\n" +
+                "Grattis! Din timeline växer."
+            )
         else:
-            messagebox.showinfo("Inget att spara",
-                              "Inga ändringar att spara (alla fält var tomma eller oförändrade). " +
-                              "Alla fält har rensats.")
+            # This shouldn't happen due to earlier check, but keep as fallback
+            messagebox.showinfo("Klart", "Alla fält har rensats.")
 
     def validate_all_date_time_fields(self) -> bool:
         """Validate all date and time fields before saving. Returns False if validation fails."""
@@ -1515,23 +1567,33 @@ class PDFProcessorApp:
             if hasattr(self.excel_vars['Startdatum'], 'get'):
                 tid_start_content = self.excel_vars['Startdatum'].get().strip()
 
-        # Warning if Händelse has content but Startdatum is missing
-        if handelse_content and not tid_start_content:
-            result = messagebox.askyesno(
-                "Saknas datum?",
-                "Du har fyllt i 'Händelse' men inte 'Startdatum' (datum).\n\n" +
-                "Excel-raden kommer att sparas, men utan datum blir det svårt att sortera och hitta händelsen senare.\n\n" +
-                "Vill du:\n" +
-                "• JA - Fortsätta och spara utan datum\n" +
-                "• NEJ - Avbryta så du kan fylla i datum"
-            )
+        # NEW VALIDATION: Strict requirement for both Startdatum and Händelse
+        # If either field has content, both must have content
+        if (handelse_content or tid_start_content):
+            # Check if Händelse is missing but Startdatum exists
+            if tid_start_content and not handelse_content:
+                messagebox.showwarning(
+                    "Saknas händelse",
+                    "Du måste skriva något i Händelse-fältet för att en ny excelrad ska kunna sparas."
+                )
+                # Focus on Händelse field if possible
+                if 'Händelse' in self.excel_vars and hasattr(self.excel_vars['Händelse'], 'focus'):
+                    self.excel_vars['Händelse'].focus()
+                return False
 
-            if result is False:  # No - let user add date
+            # Check if Startdatum is missing but Händelse exists
+            elif handelse_content and not tid_start_content:
+                messagebox.showwarning(
+                    "Saknas startdatum",
+                    "Du måste ange ett Startdatum för att en ny excelrad ska kunna sparas."
+                )
                 # Focus on Startdatum field if possible
                 if 'Startdatum' in self.excel_vars and hasattr(self.excel_vars['Startdatum'], 'focus'):
                     self.excel_vars['Startdatum'].focus()
                 return False
-            # If result is True (Yes), continue and save row even without date
+
+        # If both fields are empty, that's OK - no Excel row will be created
+        # If both fields have content, that's also OK - Excel row will be created
 
         return True  # Validation passed or user chose to continue
 
