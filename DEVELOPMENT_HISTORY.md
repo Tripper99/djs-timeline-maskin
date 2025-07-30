@@ -4,6 +4,35 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v1.19.1 EXE Distribution Ready (2025-07-30) - Professional Config File Naming ✅
+**Achievement**: Successfully renamed config file for professional EXE distribution
+
+**Changes Made**:
+- **Config filename**: Changed from `pdf_processor_config.json` to `djs_timeline_machine_config.json`
+- **Version update**: v1.19.0 → v1.19.1
+- **Window width**: Optimized from 2000px to 1800px for better compatibility (from v1.19.0)
+- **Documentation**: Updated all references to new config filename
+
+**Implementation Process**:
+1. **Clean Approach**: Simple filename change without complex migration logic
+2. **Auto-Creation**: Leveraged existing config auto-creation functionality
+3. **Testing**: Verified config creation, settings persistence, app functionality
+4. **Professional Naming**: Config filename now matches application name
+
+**Benefits for EXE Distribution**:
+- Professional config filename: `djs_timeline_machine_config.json`
+- Config file automatically created alongside EXE
+- All user settings preserved and working correctly
+- Ready for deployment packaging
+
+### v1.19.0 Window Width Optimization (2025-07-30) - Better Screen Compatibility ✅
+**Achievement**: Reduced startup window width from 2000px to 1800px for improved compatibility
+
+**Changes Made**:
+- Updated all window width references from 2000px to 1800px
+- Modified default config geometry and centering calculations
+- Preserved all functionality while improving screen compatibility
+
 ### v1.18.2 Stable Reset (2025-07-30) - Recovery from Critical Config Issues ✅
 **Achievement**: Successfully identified and resolved critical config saving issues by resetting to stable v1.18.2
 
