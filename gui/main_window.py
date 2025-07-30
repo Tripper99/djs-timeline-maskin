@@ -1367,7 +1367,7 @@ class PDFProcessorApp:
 
         # Nothing to do at all
         if not needs_pdf_rename and not needs_excel_row:
-            messagebox.showinfo(
+            messagebox.showwarning(
                 "Inget att göra",
                 "Jag har inget att göra.\n\n" +
                 "Välj en pdf att namnändra och/eller fyll i datum i Startdatum " +
