@@ -118,11 +118,16 @@ The breakthrough hybrid approach consista of:
 - Method 2 character-by-character algorithm for text extraction
 This method might seem complicated but is important to understand that this is the only way we've found to make the app to write perfect Excel rich text formatting with colors, bold, italic, line breaks.
 
-## Current Status (v1.17.16)
+## Current Status (v1.17.17)
 
-**COMPLETED ✅ - UNIFORM FORMATTING BUG FIX**: Text with uniform formatting (all red, all bold, etc.) now displays correctly in Excel
+**COMPLETED ✅ - STRICT VALIDATION FOR STARTDATUM AND HÄNDELSE**: Both fields must be filled for Excel row creation, with proper PDF-only operation support
 
-### Working Features (v1.17.16):
+### Working Features (v1.17.17):
+- ✅ **Strict Validation System**: Both Startdatum and Händelse must be filled for Excel row creation ✅ NEW!
+- ✅ **PDF-Only Operations**: PDF renaming works without Excel validation when both required fields are empty ✅ NEW!
+- ✅ **Enhanced Error Messages**: Clear guidance for users on field requirements with PDF-only hint ✅ NEW!
+- ✅ **Correct 'Nothing to Do' Logic**: Proper message when no operations are needed ✅ NEW!
+- ✅ **Simplified Validation Logic**: Clean, linear logic without conflicts between validation systems ✅ NEW!
 - ✅ **Rich Text Background Colors**: All text fields (including rich text) support background colors correctly ✅ FIXED!
 - ✅ **Uniform Formatting Excel Export**: Text with uniform formatting (all red, all bold, etc.) now displays correctly in Excel ✅ FIXED!
 - ✅ **Output Folder Selection**: Flexible destination for renamed PDFs with session-only lock and folder opening
@@ -140,7 +145,9 @@ This method might seem complicated but is important to understand that this is t
 - ✅ **T Button Clear Formatting**: T button removes ALL formatting (bold, italic, colors) and restores text widget's default color
 - ✅ **Error Handling**: Professional retry/cancel dialogs for file lock scenarios
 
-### Completed Major Fixes (v1.17.13-v1.17.16):
+### Completed Major Fixes (v1.17.13-v1.17.17):
+- ✅ **Strict Validation Implementation (v1.17.17)**: Complete overhaul of save operation logic with proper Startdatum/Händelse validation
+- ✅ **PDF-Only Operation Support (v1.17.17)**: Fixed logic to allow PDF renaming without Excel field validation
 - ✅ **Rich Text Background Colors**: Successfully resolved with correct xlsxwriter API usage and color preservation system
 - ✅ **T Button Clear Formatting**: Fixed to remove ALL formatting and use text widget's actual default color instead of theme system color
 - ✅ **Uniform Formatting Excel Export**: Fixed xlsxwriter edge case where uniformly formatted text disappeared in Excel
@@ -200,7 +207,7 @@ This method might seem complicated but is important to understand that this is t
 - Logging is configured for debugging
 - No automated tests are present in the codebase
 - No build process required - runs directly with Python interpreter
-- **Current version**: v1.17.16 (stable master with uniform formatting bug fix)
-- **Last tested**: 2025-07-29 - Uniform formatting bug fix verified working across all formatting scenarios
+- **Current version**: v1.17.17 (stable master with strict validation system)
+- **Last tested**: 2025-07-30 - Strict validation for Startdatum/Händelse verified working across all scenarios
 
 For detailed version history and development milestones, see DEVELOPMENT_HISTORY.md

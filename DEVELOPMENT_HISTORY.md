@@ -4,6 +4,53 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v1.17.17 Success (2025-07-30) - Strict Validation System Implementation ✅
+**Achievement**: Implemented comprehensive validation system requiring both Startdatum and Händelse fields for Excel row creation, while maintaining PDF-only operation capability
+
+**Problem Solved**: 
+Users needed strict control over Excel row creation to maintain timeline data quality. Previously, Excel rows could be created with incomplete critical information, making timeline analysis unreliable. Also needed to preserve the ability to rename PDF files without Excel validation requirements.
+
+**Key Features Implemented**:
+- **Strict Validation**: Both Startdatum AND Händelse must be filled for any Excel row creation
+- **PDF-Only Operations**: PDF renaming works independently when both required fields are empty
+- **Enhanced User Guidance**: Clear error messages with hints about PDF-only functionality
+- **Correct Logic Flow**: Fixed "nothing to do" scenarios and combined operation handling
+
+**Technical Implementation**:
+```python
+# Simple, clear logic in save_all_and_clear():
+needs_pdf_rename = self.current_pdf_path and self.has_filename_changed()
+needs_excel_row = startdatum_content and handelse_content
+
+# Handle scenarios based on clear requirements
+if not needs_pdf_rename and not needs_excel_row:
+    show_nothing_to_do_message()
+elif (startdatum_content or handelse_content) and not (startdatum_content and handelse_content):
+    show_validation_error_with_guidance()
+else:
+    perform_operations_and_show_results()
+```
+
+**Architecture Improvements**:
+- Replaced complex overlapping validation systems with single, linear logic
+- Simplified helper methods to avoid conflicts
+- Clear separation between PDF operations and Excel operations
+- Eliminated redundant field checking and validation loops
+
+**Testing Results** ✅:
+- PDF-only rename (empty required fields): Works without Excel validation ✅
+- Excel-only creation (both fields filled): Creates row correctly ✅
+- Combined operations (PDF + Excel): Both operations complete successfully ✅
+- Partial field filling: Shows clear validation message with guidance ✅
+- Nothing to do scenario: Shows correct "nothing to do" message ✅
+- All existing functionality: Preserved without regressions ✅
+
+**User Experience Improvements**:
+- Clear error messages: "Både Startdatum och Händelse måste vara ifyllda för att en ny excelrad ska kunna skrivas"
+- Helpful guidance: "Om du bara vill byta namn på en pdf så se till så att fälten Startdatum och Händelse är tomma"
+- Appropriate focus management on validation errors
+- Distinct status messages for different operation types
+
 ### v1.17.16 Success (2025-07-29) - Uniform Formatting Excel Export Fix ✅
 **Achievement**: Fixed critical bug where uniformly formatted text (all red, all bold, etc.) disappeared in Excel export
 
