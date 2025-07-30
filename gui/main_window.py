@@ -2067,7 +2067,7 @@ class PDFProcessorApp:
 
                     # Get all formatting tags in selection
                     tags_data = []
-                    for tag in ["bold", "italic", "red", "blue", "green", "default"]:
+                    for tag in ["bold", "red", "blue", "green", "default"]:
                         tag_ranges = focused_widget.tag_ranges(tag)
                         for i in range(0, len(tag_ranges), 2):
                             tag_start = tag_ranges[i]
@@ -2460,7 +2460,7 @@ class PDFProcessorApp:
 
         # Collect all formatting tags
         tags_data = []
-        for tag in ["bold", "italic", "red", "blue", "green", "default"]:
+        for tag in ["bold", "red", "blue", "green", "default"]:
             tag_ranges = text_widget.tag_ranges(tag)
             for i in range(0, len(tag_ranges), 2):
                 start_idx = str(tag_ranges[i])
@@ -2497,7 +2497,7 @@ class PDFProcessorApp:
         # Save current state to redo stack
         current_content = text_widget.get("1.0", "end-1c")
         current_tags = []
-        for tag in ["bold", "italic", "red", "blue", "green", "default"]:
+        for tag in ["bold", "red", "blue", "green", "default"]:
             tag_ranges = text_widget.tag_ranges(tag)
             for i in range(0, len(tag_ranges), 2):
                 start_idx = str(tag_ranges[i])
@@ -2545,7 +2545,7 @@ class PDFProcessorApp:
         # Save current state to undo stack
         current_content = text_widget.get("1.0", "end-1c")
         current_tags = []
-        for tag in ["bold", "italic", "red", "blue", "green", "default"]:
+        for tag in ["bold", "red", "blue", "green", "default"]:
             tag_ranges = text_widget.tag_ranges(tag)
             for i in range(0, len(tag_ranges), 2):
                 start_idx = str(tag_ranges[i])
@@ -2608,9 +2608,6 @@ class PDFProcessorApp:
         # Bold tag
         text_widget.tag_configure("bold", font=('Arial', font_size, 'bold'))
 
-        # Italic tag
-        text_widget.tag_configure("italic", font=('Arial', font_size, 'italic'))
-
         # Color tags
         text_widget.tag_configure("red", foreground="red")
         text_widget.tag_configure("blue", foreground="blue")
@@ -2621,9 +2618,6 @@ class PDFProcessorApp:
         """Update formatting tags with new font size"""
         # Update bold tag
         text_widget.tag_configure("bold", font=('Arial', font_size, 'bold'))
-
-        # Update italic tag
-        text_widget.tag_configure("italic", font=('Arial', font_size, 'italic'))
 
         # Color tags don't need font size updates
 
@@ -2678,12 +2672,6 @@ class PDFProcessorApp:
         bold_btn.pack(side="left", padx=(0, 2))
         bold_btn.configure(bootstyle="outline")
 
-        # Italic button - styled with italic text using Unicode
-        italic_btn = tb.Button(parent_frame, text="𝐼", width=3,
-                             command=lambda: self.toggle_format(text_widget, "italic"))
-        italic_btn.pack(side="left", padx=(0, 2))
-        italic_btn.configure(bootstyle="outline")
-
         # Color buttons with visual styling using ttkbootstrap styles
         # Red button - uses danger style for red appearance
         red_btn = tb.Button(parent_frame, text="●", width=3,
@@ -2717,7 +2705,6 @@ class PDFProcessorApp:
 
         # Bind keyboard shortcuts for this text widget
         text_widget.bind('<Control-b>', lambda e: self.toggle_format(text_widget, "bold"))
-        text_widget.bind('<Control-i>', lambda e: self.toggle_format(text_widget, "italic"))
         text_widget.bind('<Control-r>', lambda e: self.toggle_format(text_widget, "red"))
         text_widget.bind('<Control-1>', lambda e: self.toggle_format(text_widget, "blue"))
         text_widget.bind('<Control-g>', lambda e: self.toggle_format(text_widget, "green"))
@@ -2780,7 +2767,7 @@ class PDFProcessorApp:
                 end = "end-1c"
 
             # Remove ALL formatting tags from the selection
-            all_format_tags = ["bold", "italic", "red", "blue", "green", "default"]
+            all_format_tags = ["bold", "red", "blue", "green", "default"]
             for tag in all_format_tags:
                 text_widget.tag_remove(tag, start, end)
 
@@ -2818,7 +2805,7 @@ class PDFProcessorApp:
 
             # Check if there are any formatting tags
             all_tags = text_widget.tag_names()
-            format_tags = [tag for tag in all_tags if tag in ["bold", "italic", "red", "blue", "green", "default"]]
+            format_tags = [tag for tag in all_tags if tag in ["bold", "red", "blue", "green", "default"]]
 
             if not format_tags:
                 # No formatting, return plain text
@@ -2838,7 +2825,7 @@ class PDFProcessorApp:
 
                 # Get tags at current position
                 tags_at_pos = text_widget.tag_names(current_pos)
-                format_tags_at_pos = [tag for tag in tags_at_pos if tag in ["bold", "italic", "red", "blue", "green", "default"]]
+                format_tags_at_pos = [tag for tag in tags_at_pos if tag in ["bold", "red", "blue", "green", "default"]]
 
                 # Build text with same formatting
                 text_with_format = char
@@ -2847,7 +2834,7 @@ class PDFProcessorApp:
                 # Continue until formatting changes
                 while text_widget.compare(temp_pos, "<", text_end):
                     temp_tags = text_widget.tag_names(temp_pos)
-                    temp_format_tags = [tag for tag in temp_tags if tag in ["bold", "italic", "red", "blue", "green", "default"]]
+                    temp_format_tags = [tag for tag in temp_tags if tag in ["bold", "red", "blue", "green", "default"]]
 
                     if set(format_tags_at_pos) != set(temp_format_tags):
                         break

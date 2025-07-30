@@ -40,7 +40,7 @@ class ExcelFieldManager:
 
             # Get all tag ranges in the widget
             tag_ranges = []
-            available_tags = ['bold', 'italic', 'red', 'blue', 'green', 'black']
+            available_tags = ['bold', 'red', 'blue', 'green', 'black']
 
             for tag in available_tags:
                 ranges = text_widget.tag_ranges(tag)
