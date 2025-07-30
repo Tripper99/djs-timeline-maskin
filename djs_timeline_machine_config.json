@@ -1,10 +1,10 @@
 {
   "excel_file": "C:/Dropbox/Dokument/Python/APP DJs Timeline-maskin/Timeline_mall NYA KOLUMNERNA.xlsx",
   "last_pdf_dir": "",
-  "window_geometry": "1920x741+52+41",
+  "window_geometry": "1800x735+52+0",
   "theme": "simplex",
-  "output_folder": "",
-  "output_folder_locked": false,
+  "output_folder": "C:/Dropbox/DaCosta/Dokument/Tidningar, Radio, TV, debatter/Artiklar från KB/KB SAMLAT 250513 250514 250523 250527 250611/Omdöpta filer inlagda i timeline",
+  "output_folder_locked": true,
   "text_font_size": 9,
   "locked_fields": {
     "OBS": true,
@@ -20,7 +20,7 @@
     "Note1": true,
     "Note2": true,
     "Note3": true,
-    "Källa1": false,
+    "Källa1": true,
     "Källa2": false,
     "Källa3": false,
     "Övrigt": false
@@ -33,7 +33,8 @@
     "Startdatum": "2025-12-15",
     "Note1": "Plain text. \nRöd text. Röd text. Röd text. Röd text. ",
     "Note2": "Plain text. \nRöd text. Röd text. Röd text. Röd text. ",
-    "Note3": "Plain text. \nRöd text. Röd text. Röd text. Röd text. "
+    "Note3": "Plain text. \nRöd text. Röd text. Röd text. Röd text. ",
+    "Källa1": "Test"
   },
   "locked_field_formats": {
     "Händelse": [
