@@ -2666,30 +2666,45 @@ class PDFProcessorApp:
 
     def create_formatting_toolbar(self, parent_frame, text_widget, col_name):
         """Create formatting toolbar with buttons and bind keyboard shortcuts"""
+        # Create style for fixed-color buttons
+        style = tb.Style()
+
+        # Configure custom button styles with fixed colors
+        style.configure('Red.TButton', background='#DC3545', foreground='white')
+        style.map('Red.TButton',
+                  background=[('active', '#C82333'), ('pressed', '#BD2130')])
+
+        style.configure('Green.TButton', background='#28A745', foreground='white')
+        style.map('Green.TButton',
+                  background=[('active', '#218838'), ('pressed', '#1E7E34')])
+
+        style.configure('Blue.TButton', background='#007BFF', foreground='white')
+        style.map('Blue.TButton',
+                  background=[('active', '#0069D9'), ('pressed', '#0056B3')])
         # Bold button - styled with bold text using Unicode
         bold_btn = tb.Button(parent_frame, text="𝐁", width=3,
                            command=lambda: self.toggle_format(text_widget, "bold"))
         bold_btn.pack(side="left", padx=(0, 2))
         bold_btn.configure(bootstyle="outline")
 
-        # Color buttons with visual styling using ttkbootstrap styles
-        # Red button - uses danger style for red appearance
+        # Color buttons with fixed colors (order: Red, Green, Blue)
+        # Red button - fixed red color
         red_btn = tb.Button(parent_frame, text="●", width=3,
-                          command=lambda: self.toggle_format(text_widget, "red"))
+                          command=lambda: self.toggle_format(text_widget, "red"),
+                          style='Red.TButton')
         red_btn.pack(side="left", padx=(0, 2))
-        red_btn.configure(bootstyle="danger")
 
-        # Blue button - uses primary style for blue appearance
-        blue_btn = tb.Button(parent_frame, text="●", width=3,
-                           command=lambda: self.toggle_format(text_widget, "blue"))
-        blue_btn.pack(side="left", padx=(0, 2))
-        blue_btn.configure(bootstyle="primary")
-
-        # Green button - uses success style for green appearance
+        # Green button - fixed green color
         green_btn = tb.Button(parent_frame, text="●", width=3,
-                            command=lambda: self.toggle_format(text_widget, "green"))
+                            command=lambda: self.toggle_format(text_widget, "green"),
+                            style='Green.TButton')
         green_btn.pack(side="left", padx=(0, 2))
-        green_btn.configure(bootstyle="success")
+
+        # Blue button - fixed blue color
+        blue_btn = tb.Button(parent_frame, text="●", width=3,
+                           command=lambda: self.toggle_format(text_widget, "blue"),
+                           style='Blue.TButton')
+        blue_btn.pack(side="left", padx=(0, 2))
 
         # Clear formatting button - removes ALL formatting and restores theme default color
         default_btn = tb.Button(parent_frame, text="T", width=3,
