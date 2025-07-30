@@ -393,6 +393,9 @@ class PDFProcessorApp:
             # Apply the new theme to the root window
             self.root.style.theme_use(theme_name)
 
+            # Reapply custom button styles after theme change
+            self.configure_button_styles()
+
             # Save the theme preference to config
             self.config['theme'] = theme_name
             self.config_manager.save_config(self.config)
@@ -2664,9 +2667,8 @@ class PDFProcessorApp:
 
                 logger.debug(f"Updated font size to {font_size}pt for {field_name}")
 
-    def create_formatting_toolbar(self, parent_frame, text_widget, col_name):
-        """Create formatting toolbar with buttons and bind keyboard shortcuts"""
-        # Create style for fixed-color buttons
+    def configure_button_styles(self):
+        """Configure custom button styles with fixed colors that persist across theme changes"""
         style = tb.Style()
 
         # Configure custom button styles with fixed colors
@@ -2681,6 +2683,11 @@ class PDFProcessorApp:
         style.configure('Blue.TButton', background='#007BFF', foreground='white')
         style.map('Blue.TButton',
                   background=[('active', '#0069D9'), ('pressed', '#0056B3')])
+
+    def create_formatting_toolbar(self, parent_frame, text_widget, col_name):
+        """Create formatting toolbar with buttons and bind keyboard shortcuts"""
+        # Ensure custom button styles are configured
+        self.configure_button_styles()
         # Bold button - styled with bold text using Unicode
         bold_btn = tb.Button(parent_frame, text="𝐁", width=3,
                            command=lambda: self.toggle_format(text_widget, "bold"))
