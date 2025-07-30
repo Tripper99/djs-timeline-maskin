@@ -655,7 +655,7 @@ class PDFProcessorApp:
     def load_saved_output_folder(self):
         """Load previously saved output folder settings if they exist"""
         output_folder = self.config.get('output_folder', '')
-        # ALWAYS start with lock switch OFF (session-only behavior)
+        output_folder_locked = self.config.get('output_folder_locked', False)
 
         if output_folder and Path(output_folder).exists():
             # Store actual path and update display
@@ -666,9 +666,9 @@ class PDFProcessorApp:
         else:
             self._actual_output_folder = ""
 
-        # Always set lock to False on app start (session-only behavior)
-        self.output_folder_lock_var.set(False)
-        logger.info("Output folder lock always starts unlocked (session-only behavior)")
+        # Load saved lock state
+        self.output_folder_lock_var.set(output_folder_locked)
+        logger.info(f"Loaded output folder lock state: {output_folder_locked}")
 
     def show_retry_cancel_dialog(self, title: str, message: str) -> str:
         """
@@ -881,7 +881,7 @@ class PDFProcessorApp:
         self.output_folder_var.set(display_text)
 
     def on_output_folder_lock_change(self):
-        """Handle output folder lock state changes (session-only, no config save)"""
+        """Handle output folder lock state changes and save to config"""
         # Check if trying to lock with empty folder
         if self.output_folder_lock_var.get():
             actual_folder = getattr(self, '_actual_output_folder', '')
@@ -891,12 +891,14 @@ class PDFProcessorApp:
                 messagebox.showerror("Fel", "Du måste välja en mapp innan du kan låsa mappvalet.")
                 return
 
-        # NOTE: Lock state is NOT saved to config (session-only behavior)
-        # Only save the folder path, not the lock state
+        # Save lock state to config
+        self.config['output_folder_locked'] = self.output_folder_lock_var.get()
+        self.config_manager.save_config(self.config)
+
         if self.output_folder_lock_var.get():
-            logger.info("Output folder lock enabled (session-only)")
+            logger.info("Output folder lock enabled and saved to config")
         else:
-            logger.info("Output folder lock disabled")
+            logger.info("Output folder lock disabled and saved to config")
 
     def select_excel_file(self):
         """Select Excel file for integration"""
@@ -2240,6 +2242,9 @@ class PDFProcessorApp:
         except Exception as e:
             logger.warning(f"Error limiting geometry on save: {e}")
             self.config['window_geometry'] = current_geometry
+
+        # Save current output folder lock state
+        self.config['output_folder_locked'] = self.output_folder_lock_var.get()
 
         self.config_manager.save_config(self.config)
 
