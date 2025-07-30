@@ -1,0 +1,1485 @@
+{\rtf1\ansi\deff0 {\fonttbl {\f0 Times New Roman;} {\f1 Arial;} {\f2 Courier New;}}
+{\colortbl;\red0\green0\blue0;\red255\green0\blue0;\red0\green0\blue255;\red0\green128\blue0;}
+
+\paperw12240\paperh15840\margl1440\margr1440\margt1440\margb1440
+
+{\header \pard\qc\f1\fs24\b DJs Timeline-maskin - User Manual\par}
+{\footer \pard\qc\f0\fs18 Page \chpgn\par}
+
+\pard\qc\f1\fs36\b DJs Timeline-maskin\par
+\f1\fs24\b User Manual\par
+\f0\fs18 Version 1.17.15\par
+\par
+
+\pard\ql\f0\fs20\par
+\page
+
+{\f1\fs28\b Table of Contents}\par
+\par
+{\f0\fs18
+1. Introduction and Purpose.............................3\par
+2. System Requirements................................4\par
+3. Installation Instructions...........................4\par
+4. Getting Started....................................5\par
+5. Main Interface Overview............................6\par
+6. PDF Processing Workflow............................8\par
+7. Excel Integration.................................11\par
+8. Rich Text Formatting.............................14\par
+9. Configuration and Settings........................16\par
+10. Advanced Features................................18\par
+11. Troubleshooting..................................20\par
+12. Technical Support................................22\par
+}
+\par
+\page
+
+{\f1\fs28\b 1. Introduction and Purpose}\par
+\par
+{\f0\fs20
+DJs Timeline-maskin (DJs Timeline Machine) is a specialized desktop application designed specifically for investigative journalists and researchers. The application streamlines the complex process of organizing research materials, processing documents, and creating detailed timelines of events.
+\par\par
+{\b Key Benefits:}\par
+\bullet Automates PDF file organization and renaming\par
+\bullet Creates structured Excel timelines with rich text formatting\par
+\bullet Preserves research data with session persistence\par
+\bullet Supports collaborative research workflows\par
+\bullet Maintains professional documentation standards\par
+\par
+{\b Primary Use Cases:}\par
+\bullet Processing large volumes of PDF documents from news archives\par
+\bullet Creating chronological timelines of events for investigations\par
+\bullet Organizing source materials with consistent naming conventions\par
+\bullet Maintaining detailed research notes with rich text formatting\par
+\bullet Collaborative timeline creation for research teams\par
+\par
+{\b Application Workflow:}\par
+The application follows a systematic 4-step process:\par
+1. {\b PDF Selection} - Choose and validate PDF documents\par
+2. {\b Component Editing} - Parse and edit filename components\par
+3. {\b Excel Integration} - Map data to timeline fields with rich formatting\par
+4. {\b Save Operations} - Rename files and update Excel timelines\par
+}
+\par
+\page
+
+{\f1\fs28\b 2. System Requirements}\par
+\par
+{\f0\fs20
+{\b Minimum System Requirements:}\par
+\bullet Operating System: Windows 7/8/10/11\par
+\bullet Python: Version 3.7 or higher\par
+\bullet RAM: 4 GB minimum, 8 GB recommended\par
+\bullet Storage: 50 MB free disk space\par
+\bullet Display: 1024x768 minimum resolution\par
+\par
+{\b Recommended Configuration:}\par
+\bullet Operating System: Windows 10/11\par
+\bullet Python: Version 3.9 or higher\par
+\bullet RAM: 8 GB or more\par
+\bullet Storage: 100 MB free disk space\par
+\bullet Display: 1920x1080 or higher resolution\par
+\bullet Microsoft Excel 2016 or newer (for optimal Excel integration)\par
+\par
+{\b Software Dependencies:}\par
+The application requires these Python packages (installed automatically):\par
+\bullet {\f2 ttkbootstrap} - Modern GUI theming\par
+\bullet {\f2 PyPDF2} - PDF processing capabilities\par
+\bullet {\f2 openpyxl} - Excel file reading\par
+\bullet {\f2 xlsxwriter} - Excel file writing with rich text support\par
+}
+\par
+
+{\f1\fs28\b 3. Installation Instructions}\par
+\par
+{\f0\fs20
+{\b Step 1: Python Installation}\par
+1. Download Python from {\f2 https://www.python.org/downloads/}\par
+2. Run the installer and check "Add Python to PATH"\par
+3. Complete the installation process\par
+\par
+{\b Step 2: Download Application}\par
+1. Download the DJs Timeline-maskin application files\par
+2. Extract to a folder of your choice (e.g., {\f2 C:\\Programs\\DJs-Timeline-maskin})\par
+3. Note the location of the {\f2 app.py} file\par
+\par
+{\b Step 3: Install Dependencies}\par
+1. Open Command Prompt (cmd) as Administrator\par
+2. Navigate to the application folder:\par
+   {\f2 cd "C:\\Programs\\DJs-Timeline-maskin"}\par
+3. Install required packages:\par
+   {\f2 pip install ttkbootstrap PyPDF2 openpyxl xlsxwriter}\par
+\par
+{\b Step 4: First Launch}\par
+1. In Command Prompt, run:\par
+   {\f2 python app.py}\par
+2. The application should launch with the main interface\par
+3. If successful, create a desktop shortcut for easy access\par
+\par
+{\b Creating a Desktop Shortcut:}\par
+1. Right-click on desktop → New → Shortcut\par
+2. Enter: {\f2 python "C:\\Programs\\DJs-Timeline-maskin\\app.py"}\par
+3. Name: "DJs Timeline-maskin"\par
+4. Click Finish\par
+}
+\par
+\page
+
+{\f1\fs28\b 4. Getting Started}\par
+\par
+{\f0\fs20
+{\b Quick Start Guide}\par
+\par
+{\b Before You Begin:}\par
+\bullet Prepare an Excel file with the required 19 column headers (see Section 7)\par
+\bullet Gather PDF files you want to process\par
+\bullet Choose a folder for renamed PDF output\par
+\par
+{\b Your First Session:}\par
+\par
+{\b Step 1: Launch and Configure}\par
+1. Start the application using your desktop shortcut or command line\par
+2. Go to {\b File → Select Excel File} and choose your timeline Excel file\par
+3. The application will validate the Excel file structure\par
+\par
+{\b Step 2: Process Your First PDF}\par
+1. Click {\b "Select PDF"} button in the top section\par
+2. Choose a PDF file from your research materials\par
+3. Review the automatically parsed filename components:\par
+   \bullet Date (YYYY-MM-DD format)\par
+   \bullet Source/Newspaper name\par
+   \bullet Page count\par
+   \bullet Comments/description\par
+4. Edit any components as needed\par
+\par
+{\b Step 3: Complete Excel Fields}\par
+1. Use {\b "Copy to Excel"} to transfer PDF data to Excel fields\par
+2. Fill in additional fields like Kategori, Person/sak, Händelse\par
+3. Use the rich text formatting toolbar for important notes\par
+4. Set date and time fields (Startdatum, Starttid, etc.)\par
+\par
+{\b Step 4: Save Your Work}\par
+1. Click {\b "Save Excel Row + Rename PDF"} to complete the process\par
+2. Choose output folder for the renamed PDF\par
+3. Verify the new Excel row was added to your timeline\par
+\par
+{\b Tips for New Users:}\par
+\bullet Start with a few test PDFs to familiarize yourself with the workflow\par
+\bullet Use the Help menu tooltips to understand each field's purpose\par
+\bullet Lock frequently used fields to save time on repetitive entries\par
+\bullet Experiment with themes (File → Theme) to find your preference\par
+}
+\par
+\page
+
+{\f1\fs28\b 5. Main Interface Overview}\par
+\par
+{\f0\fs20
+{\b Window Layout}\par
+\par
+The main interface uses a responsive three-column layout optimized for efficient data entry and organization:\par
+\par
+{\b Top Section - PDF Processing}\par
+\bullet {\b Select PDF Button} - Choose PDF files for processing\par
+\bullet {\b PDF Information Display} - Shows file details and page count\par
+\bullet {\b Filename Component Fields} - Editable parsed filename parts\par
+\bullet {\b Copy to Excel Button} - Transfers PDF data to Excel fields\par
+\par
+{\b Column 1 - Administrative Fields}\par
+\bullet {\b OBS} - Observations and notes\par
+\bullet {\b Inlagd} - Auto-filled with today's date\par
+\bullet {\b Dag} - Auto-calculated day of week\par
+\bullet {\b Kategori} - Event category classification\par
+\bullet {\b Underkategori} - Event subcategory\par
+\bullet {\b Person/sak} - Person or case involved\par
+\bullet {\b Special} - Special circumstances or flags\par
+\par
+{\b Column 2 - Date/Time and Main Content}\par
+\bullet {\b Date/Time Subframe}:\par
+  \bullet Startdatum, Starttid (HH:MM format)\par
+  \bullet Slutdatum, Sluttid (HH:MM format)\par
+\bullet {\b Händelse Field} - Main event description (1500 character limit)\par
+  \bullet Expandable text area with rich formatting toolbar\par
+  \bullet Real-time character counter\par
+  \bullet Full rich text support with format preservation\par
+\par
+{\b Column 3 - Notes and Sources}\par
+\bullet {\b Note1, Note2, Note3} - Research notes (1000 characters each)\par
+  \bullet Rich text formatting capabilities\par
+  \bullet Individual formatting toolbars\par
+  \bullet Scrollable text areas\par
+\bullet {\b Källa1, Källa2, Källa3} - Source references\par
+\bullet {\b Övrigt} - Additional information\par
+\par
+{\b Bottom Section - Controls and Status}\par
+\bullet {\b Action Buttons}:\par
+  \bullet "Add to Excel Only" - Creates Excel row without renaming PDF\par
+  \bullet "Save Excel Row + Rename PDF" - Complete workflow\par
+  \bullet "Clear All Fields" - Resets all input fields\par
+\bullet {\b Statistics Display} - Session tracking information\par
+\bullet {\b Background Color Selection} - Timeline visualization colors\par
+\par
+{\b Menu System}\par
+\bullet {\b File Menu}\par
+  \bullet Select Excel File - Choose timeline spreadsheet\par
+  \bullet Select Output Folder - Set PDF rename destination\par
+  \bullet Exit - Close application\par
+\bullet {\b Theme Menu} - Choose from 15+ visual themes\par
+\bullet {\b Help Menu}\par
+  \bullet Excel Requirements - Detailed column specifications\par
+  \bullet About - Version and usage information\par
+\par
+{\b Special Interface Features}\par
+\bullet {\b Full-Window Scrolling} - Canvas-based scrolling for low-resolution displays\par
+\bullet {\b Responsive Layout} - Adapts to different screen sizes and resolutions\par
+\bullet {\b Field Locking System} - Lock frequently used fields with toggle switches\par
+\bullet {\b Tooltips} - Context-sensitive help for all interface elements\par
+\bullet {\b Keyboard Shortcuts} - Standard formatting shortcuts (Ctrl+B, Ctrl+I, etc.)\par
+}
+\par
+\page
+
+{\f1\fs28\b 6. PDF Processing Workflow}\par
+\par
+{\f0\fs20
+{\b Understanding PDF Processing}\par
+\par
+The PDF processing system is designed to handle the complex task of extracting meaningful information from research document filenames and preparing them for timeline integration.\par
+\par
+{\b Step 1: PDF Selection and Validation}\par
+\par
+{\b Choosing PDF Files:}\par
+1. Click the {\b "Select PDF"} button in the top section\par
+2. Navigate to your PDF document location\par
+3. Select a single PDF file (multiple selection not supported)\par
+4. The application immediately validates the file\par
+\par
+{\b Automatic Validation Checks:}\par
+\bullet {\b File Integrity} - Verifies PDF structure is not corrupted\par
+\bullet {\b Readability} - Ensures PDF can be opened and processed\par
+\bullet {\b Encryption Detection} - Identifies password-protected files\par
+\bullet {\b Size Validation} - Detects empty or invalid files\par
+\bullet {\b Extension Verification} - Confirms proper .pdf extension\par
+\par
+{\b Validation Results:}\par
+\bullet {\cf2 Red text} - File cannot be processed (corrupted, encrypted, etc.)\par
+\bullet {\cf3 Blue text} - File validated successfully\par
+\bullet Page count displayed (e.g., "5 pages")\par
+\bullet File size information\par
+\par
+{\b Step 2: Filename Component Analysis}\par
+\par
+The application uses intelligent parsing algorithms to extract structured information from PDF filenames:\par
+\par
+{\b Date Extraction:}\par
+\bullet Recognizes YYYY-MM-DD date patterns\par
+\bullet Handles various date formats and separators\par
+\bullet Validates date logic (month ≤ 12, day ≤ 31)\par
+\bullet Automatically formats to standard YYYY-MM-DD\par
+\par
+{\b Source/Newspaper Identification:}\par
+\bullet Extracts newspaper or source names\par
+\bullet Handles ALL-CAPS formatting correctly\par
+\bullet Recognizes common Swedish publication names\par
+\bullet Preserves original capitalization preferences\par
+\par
+{\b Page Count Processing:}\par
+\bullet Identifies "(X sid)" format page information\par
+\bullet Extracts numeric page counts\par
+\bullet Handles various page notation formats\par
+\bullet Cross-references with actual PDF page count\par
+\par
+{\b Comment and Description Parsing:}\par
+\bullet Extracts descriptive text from filenames\par
+\bullet Removes common file naming artifacts\par
+\bullet Preserves meaningful description content\par
+\bullet Cleans up formatting inconsistencies\par
+\par
+{\b Step 3: Component Editing and Refinement}\par
+\par
+After automatic parsing, you can manually refine the extracted components:\par
+\par
+{\b Editable Fields:}\par
+\bullet {\b Date Field} - Modify or correct the extracted date\par
+\bullet {\b Source Field} - Edit newspaper/source name\par
+\bullet {\b Page Field} - Adjust page count information\par
+\bullet {\b Comments Field} - Refine description text\par
+\par
+{\b Editing Best Practices:}\par
+\bullet Keep date format as YYYY-MM-DD for consistency\par
+\bullet Use standard source name abbreviations\par
+\bullet Include relevant page ranges in comments\par
+\bullet Add context that will be useful in timeline view\par
+\par
+{\b Step 4: Integration with Excel Fields}\par
+\par
+{\b "Copy to Excel" Functionality:}\par
+1. Click {\b "Copy to Excel"} button after editing components\par
+2. PDF information is automatically mapped to appropriate Excel fields:\par
+   \bullet Date → Startdatum field\par
+   \bullet Source → Källa1 field\par
+   \bullet Comments → Händelse field (with formatting preservation)\par
+   \bullet Page info → Integrated into note fields\par
+\par
+{\b Smart Mapping Features:}\par
+\bullet Preserves existing Excel field content if fields are locked\par
+\bullet Applies rich text formatting to transferred content\par
+\bullet Maintains character limits (1000 for notes, 1500 for Händelse)\par
+\bullet Updates character counters in real-time\par
+\par
+{\b Common PDF Processing Scenarios}\par
+\par
+{\b Scenario 1: Standard News Article}\par
+Filename: {\f2 2023-03-15_DN_kommentar_politik_3sid.pdf}\par
+\bullet Date: 2023-03-15\par
+\bullet Source: DN (Dagens Nyheter)\par
+\bullet Pages: 3\par
+\bullet Comments: kommentar politik\par
+\par
+{\b Scenario 2: Archive Document}\par
+Filename: {\f2 1995-12-08_AFTONBLADET_MORDET_OLOFPALME_DOKUMENT_8sid.pdf}\par
+\bullet Date: 1995-12-08\par
+\bullet Source: AFTONBLADET\par
+\bullet Pages: 8\par
+\bullet Comments: MORDET OLOFPALME DOKUMENT\par
+\par
+{\b Scenario 3: Complex Research File}\par
+Filename: {\f2 2021-06-23_SvD_Ekonomi_Pandemi_Analys_Finansiell_Impact_12sid.pdf}\par
+\bullet Date: 2021-06-23\par
+\bullet Source: SvD (Svenska Dagbladet)\par
+\bullet Pages: 12\par
+\bullet Comments: Ekonomi Pandemi Analys Finansiell Impact\par
+\par
+{\b Troubleshooting PDF Processing}\par
+\par
+{\b Common Issues and Solutions:}\par
+\bullet {\b "Cannot read PDF"} - File may be corrupted or encrypted\par
+  \bullet Solution: Try opening in PDF reader, decrypt if necessary\par
+\bullet {\b "Invalid date format"} - Date not recognized in filename\par
+  \bullet Solution: Manually enter date in YYYY-MM-DD format\par
+\bullet {\b "No components found"} - Filename too complex or non-standard\par
+  \bullet Solution: Use manual entry for all components\par
+\bullet {\b "Page count mismatch"} - Filename pages ≠ actual PDF pages\par
+  \bullet Solution: Update page field to match actual page count\par
+}
+\par
+\page
+
+{\f1\fs28\b 7. Excel Integration}\par
+\par
+{\f0\fs20
+{\b Understanding Excel Integration}\par
+\par
+The Excel integration system is the core feature that transforms your research data into structured, searchable timelines. The application uses a sophisticated hybrid approach combining two Excel libraries for optimal performance and formatting capabilities.\par
+\par
+{\b Required Excel File Structure}\par
+\par
+Your Excel file must contain exactly these 19 column headers (case-sensitive, exact spelling required):\par
+\par
+{\f2\fs16
+1. OBS                    11. Slutdatum\par
+2. Inlagd                 12. Sluttid\par
+3. Dag                    13. Note1\par
+4. Kategori               14. Note2\par
+5. Underkategori          15. Note3\par
+6. Person/sak             16. Källa1\par
+7. Special                17. Källa2\par
+8. Händelse               18. Källa3\par
+9. Startdatum             19. Övrigt\par
+10. Starttid\par
+}\par
+\par
+{\b Important Excel File Requirements:}\par
+\bullet Column order does not matter - headers can be in any sequence\par
+\bullet Additional columns are permitted and will be ignored\par
+\bullet Headers must be in the first row of the worksheet\par
+\bullet File must be in .xlsx format (Excel 2007 or newer)\par
+\bullet Formulas in existing rows are preserved during updates\par
+\bullet Empty rows can exist and will be preserved\par
+\par
+{\b Setting Up Your Excel File}\par
+\par
+{\b Method 1: Create New File}\par
+1. Open Microsoft Excel\par
+2. Create a new workbook\par
+3. In row 1, enter all 19 required headers exactly as listed above\par
+4. Save as .xlsx format in your preferred location\par
+5. The file is now ready for use with DJs Timeline-maskin\par
+\par
+{\b Method 2: Modify Existing File}\par
+1. Open your existing timeline Excel file\par
+2. Verify all 19 required headers are present\par
+3. Add any missing headers to row 1\par
+4. Rename headers to match exact spelling requirements\par
+5. Save the file\par
+\par
+{\b Excel Field Descriptions and Usage}\par
+\par
+{\b Administrative Fields:}\par
+\bullet {\b OBS} - General observations, warnings, or special notes about the entry\par
+\bullet {\b Inlagd} - Automatically filled with today's date when row is created\par
+\bullet {\b Dag} - Automatically calculated day of the week from Startdatum\par
+\par
+{\b Categorization Fields:}\par
+\bullet {\b Kategori} - Primary event category (e.g., Politik, Ekonomi, Brott)\par
+\bullet {\b Underkategori} - Specific subcategory or event type\par
+\bullet {\b Person/sak} - Key person involved or case reference\par
+\bullet {\b Special} - Special circumstances, urgency flags, or unique identifiers\par
+\par
+{\b Event Description:}\par
+\bullet {\b Händelse} - Main event description (1500 character limit)\par
+  \bullet Supports full rich text formatting\par
+  \bullet Bold, italic, colors, and mixed formatting\par
+  \bullet Preserves formatting in Excel output\par
+  \bullet Automatically wraps text in Excel cells\par
+\par
+{\b Date and Time Fields:}\par
+\bullet {\b Startdatum} - Event start date (YYYY-MM-DD format)\par
+\bullet {\b Starttid} - Event start time (HH:MM format, 24-hour)\par
+\bullet {\b Slutdatum} - Event end date (YYYY-MM-DD format)\par
+\bullet {\b Sluttid} - Event end time (HH:MM format, 24-hour)\par
+\par
+{\b Research Notes:}\par
+\bullet {\b Note1, Note2, Note3} - Detailed research notes (1000 characters each)\par
+  \bullet Full rich text formatting support\par
+  \bullet Individual formatting preservation\par
+  \bullet Ideal for analysis, context, and cross-references\par
+\par
+{\b Source Documentation:}\par
+\bullet {\b Källa1, Källa2, Källa3} - Source references and citations\par
+  \bullet Primary source, secondary sources, verification sources\par
+  \bullet Include page numbers, URLs, or specific references\par
+\bullet {\b Övrigt} - Additional information that doesn't fit other categories\par
+\par
+{\b Advanced Excel Features}\par
+\par
+{\b Rich Text Formatting in Excel}\par
+The application uses a hybrid system for perfect Excel rich text output:\par
+\bullet {\b openpyxl} library reads existing Excel data and preserves formulas\par
+\bullet {\b xlsxwriter} library writes new data with perfect rich text formatting\par
+\bullet Character-by-character formatting analysis ensures accuracy\par
+\bullet All formatting (bold, italic, colors) is preserved in Excel output\par
+\par
+{\b Background Color System}\par
+Enhance your timeline visualization with background colors:\par
+\par
+{\b Available Colors:}\par
+\bullet {\b White} - Default, standard entries\par
+\bullet {\b Light Yellow} - Important events, warnings\par
+\bullet {\b Light Green} - Positive developments, confirmations\par
+\bullet {\b Light Blue} - Informational entries, references\par
+\bullet {\b Light Red} - Critical events, urgent items\par
+\par
+{\b Using Background Colors:}\par
+1. Select desired color from dropdown before saving Excel row\par
+2. Color applies to entire row in Excel output\par
+3. Colors are preserved when editing existing rows\par
+4. Use consistent color coding for timeline readability\par
+\par
+{\b Excel File Management}\par
+\par
+{\b File Selection and Persistence:}\par
+1. Use {\b File → Select Excel File} to choose your timeline\par
+2. Application remembers selected file between sessions\par
+3. File path is saved in configuration for convenience\par
+4. Change files anytime using the File menu\par
+\par
+{\b Data Validation and Safety:}\par
+\bullet Application validates Excel file structure before writing\par
+\bullet Existing data and formulas are never modified\par
+\bullet New rows are always appended to the end of existing data\par
+\bullet Backup your Excel files regularly as a precaution\par
+\par
+{\b Working with Large Excel Files:}\par
+\bullet No practical limit on file size or number of rows\par
+\bullet Performance optimized for files with thousands of entries\par
+\bullet Reading existing data is fast and efficient\par
+\bullet Writing new rows maintains consistent performance\par
+\par
+{\b Excel Integration Best Practices}\par
+\par
+{\b File Organization:}\par
+\bullet Use descriptive Excel file names with version numbers or dates\par
+\bullet Store Excel files in a consistent location\par
+\bullet Consider separate files for different research projects\par
+\bullet Regular backups prevent data loss\par
+\par
+{\b Data Entry Consistency:}\par
+\bullet Develop standard abbreviations for categories and sources\par
+\bullet Use consistent date formats throughout your timeline\par
+\bullet Establish color coding conventions for different event types\par
+\bullet Create templates for common entry types\par
+\par
+{\b Timeline Maintenance:}\par
+\bullet Sort Excel data by date columns for chronological order\par
+\bullet Use Excel's filter features to analyze specific categories\par
+\bullet Create summary sheets with charts and statistics\par
+\bullet Regular review and cleanup of duplicate or outdated entries\par
+}
+\par
+\page
+
+{\f1\fs28\b 8. Rich Text Formatting}\par
+\par
+{\f0\fs20
+{\b Understanding Rich Text Capabilities}\par
+\par
+DJs Timeline-maskin provides comprehensive rich text formatting capabilities that allow you to create professional, visually organized timeline entries. The formatting system is designed specifically for investigative journalism needs, where emphasis, color coding, and text structure are crucial for information organization.\par
+\par
+{\b Supported Text Fields}\par
+\par
+Rich text formatting is available in these fields:\par
+\bullet {\b Händelse} - Main event description field\par
+\bullet {\b Note1, Note2, Note3} - Research notes fields\par
+\par
+These fields support:\par
+\bullet Mixed formatting within single text entries\par
+\bullet Format preservation across application sessions\par
+\bullet Perfect Excel export with all formatting intact\par
+\bullet Unlimited undo/redo for text operations\par
+\par
+{\b Formatting Toolbar}\par
+\par
+Each rich text field includes a professional formatting toolbar with these controls:\par
+\par
+{\b {\f1 𝐁} Bold Button}\par
+\bullet Keyboard shortcut: Ctrl+B\par
+\bullet Toggles bold formatting for selected text\par
+\bullet Works with selected text or at cursor position\par
+\bullet Combines with other formatting options\par
+\par
+{\b {\f1 𝐼} Italic Button}\par
+\bullet Keyboard shortcut: Ctrl+I\par
+\bullet Toggles italic formatting for selected text\par
+\bullet Works with selected text or at cursor position\par
+\bullet Combines with bold and color formatting\par
+\par
+{\b Color Formatting Buttons:}\par
+\bullet {\cf2 ● Red} - Red text color (Ctrl+R)\par
+\bullet {\cf3 ● Blue} - Blue text color (Ctrl+1)\par
+\bullet {\cf4 ● Green} - Green text color (Ctrl+G)\par
+\bullet Colors can be combined with bold and italic\par
+\bullet Use for emphasis, categorization, and visual organization\par
+\par
+{\b {\f1 T} Clear Formatting Button}\par
+\bullet Keyboard shortcut: Ctrl+K\par
+\bullet Removes ALL formatting from selected text\par
+\bullet Returns text to default appearance\par
+\bullet Useful for cleaning up formatted text\par
+\par
+{\b {\f1 A+} Font Size Toggle}\par
+\bullet Cycles through font sizes: 9pt → 12pt → 15pt → 9pt\par
+\bullet Applies to entire text field\par
+\bullet Preserves bold and italic formatting during size changes\par
+\bullet Useful for improving readability\par
+\par
+{\b Advanced Formatting Techniques}\par
+\par
+{\b Mixed Formatting Examples:}\par
+\par
+{\b Example 1: Event Description}\par
+{\f2 "{\b Meeting with} {\cf2\b source} {\b at} {\cf3 City Hall} {\b regarding} {\i financial irregularities} {\b in} {\cf4 municipal contracts}."}
+\par\par
+{\b Example 2: Research Notes}\par
+{\f2 "{\b VERIFIED:} {\cf4 Contract amount confirmed} {\b via} {\i public records}. {\cf2 UNVERIFIED:} {\i Source claims of} {\cf2\b corruption} {\i require additional documentation}."}
+\par\par
+{\b Example 3: Source Citation}\par
+{\f2 "{\b Primary:} {\i Interview transcript} {\b -} {\cf3 John Smith, 2023-03-15}. {\b Secondary:} {\cf4 City Council minutes} {\b showing} {\cf2\b budget discrepancy}."}
+\par\par
+{\b Formatting Best Practices}\par
+\par
+{\b Color Coding Conventions:}\par
+\bullet {\cf2 Red} - Urgent items, unverified claims, warnings\par
+\bullet {\cf3 Blue} - Dates, locations, official sources\par
+\bullet {\cf4 Green} - Verified information, confirmations\par
+\bullet {\b Bold} - Key facts, important names, critical events\par
+\bullet {\i Italic} - Quotes, speculation, context notes\par
+\par
+{\b Structural Organization:}\par
+\bullet Use bold for main event headings\par
+\bullet Apply colors to categorize information types\par
+\bullet Use italics for quotes and uncertain information\par
+\bullet Combine formatting for maximum clarity\par
+\par
+{\b Text Selection and Editing:}\par
+\bullet Double-click to select entire words\par
+\bullet Triple-click to select entire paragraphs\par
+\bullet Drag to select custom text ranges\par
+\bullet Use Shift+Arrow keys for precise selection\par
+\par
+{\b Format Persistence System}\par
+\par
+{\b Session Persistence:}\par
+The application automatically saves all formatting information:\par
+\bullet Formatting preserved when switching between PDFs\par
+\bullet Rich text maintained across application restarts\par
+\bullet Locked fields retain formatting indefinitely\par
+\bullet Configuration file stores complete formatting data\par
+\par
+{\b Excel Export Formatting:}\par
+All rich text formatting is perfectly preserved in Excel output:\par
+\bullet Bold and italic formatting maintained\par
+\bullet Text colors appear correctly in Excel cells\par
+\bullet Mixed formatting within cells supported\par
+\bullet Excel formulas and cell formatting preserved\par
+\par
+{\b Configuration Storage:}\par
+Formatting data is stored in {\f2 pdf_processor_config.json}:\par
+\bullet Individual tag ranges for each formatting type\par
+\bullet Start and end positions for all formatted text\par
+\bullet Backward compatibility with older configuration files\par
+\bullet Automatic cleanup of invalid or orphaned formatting data\par
+\par
+{\b Character Limits and Counters}\par
+\par
+{\b Field-Specific Limits:}\par
+\bullet {\b Händelse Field} - 1500 characters maximum\par
+\bullet {\b Note Fields} - 1000 characters each maximum\par
+\bullet Real-time character counters show remaining space\par
+\bullet Counters update as you type and format text\par
+\par
+{\b Managing Character Limits:}\par
+\bullet Use concise, focused descriptions\par
+\bullet Abbreviate common terms and phrases\par
+\bullet Distribute information across multiple note fields\par
+\bullet Use formatting to emphasize key information efficiently\par
+\par
+{\b Troubleshooting Rich Text Issues}\par
+\par
+{\b Common Formatting Problems:}\par
+\bullet {\b "Formatting disappears in Excel"} - Affects only uniform formatting\par
+  \bullet Solution: Mix formatting types (add some bold to all-red text)\par
+\bullet {\b "Text appears garbled"} - Character encoding issue\par
+  \bullet Solution: Avoid special characters, use standard text\par
+\bullet {\b "Formatting toolbar not responding"} - Text selection issue\par
+  \bullet Solution: Click in text field before using toolbar\par
+\bullet {\b "Undo not working correctly"} - Complex formatting state\par
+  \bullet Solution: Use Clear Formatting (T button) to reset\par
+\par
+{\b Performance with Large Text Blocks:}\par
+\bullet Rich text performance optimized for typical usage\par
+\bullet Very large text blocks may experience slower formatting\par
+\bullet Consider breaking large texts into multiple fields\par
+\bullet Use formatting selectively for best performance\par
+\par
+{\b Keyboard Shortcuts Summary}\par
+\par
+{\b Text Formatting:}\par
+\bullet Ctrl+B - Toggle bold\par
+\bullet Ctrl+I - Toggle italic\par
+\bullet Ctrl+R - Red text color\par
+\bullet Ctrl+1 - Blue text color\par
+\bullet Ctrl+G - Green text color\par
+\bullet Ctrl+K - Clear all formatting\par
+\par
+{\b Text Editing:}\par
+\bullet Ctrl+A - Select all text\par
+\bullet Ctrl+C - Copy selected text\par
+\bullet Ctrl+V - Paste text\par
+\bullet Ctrl+X - Cut selected text\par
+\bullet Ctrl+Z - Undo last action\par
+\bullet Ctrl+Y - Redo last undone action\par
+}
+\par
+\page
+
+{\f1\fs28\b 9. Configuration and Settings}\par
+\par
+{\f0\fs20
+{\b Understanding Configuration Management}\par
+\par
+DJs Timeline-maskin uses a comprehensive configuration system that preserves your preferences, settings, and work state between application sessions. This ensures consistent workflow and eliminates the need to reconfigure the application each time you use it.\par
+\par
+{\b Configuration File Location}\par
+\par
+All settings are stored in: {\f2 pdf_processor_config.json}\par
+\bullet Located in the same folder as the application\par
+\bullet Automatically created on first application run\par
+\bullet Updated whenever settings change\par
+\bullet Can be manually edited with text editor if needed\par
+\bullet Backup recommended before manual modifications\par
+\par
+{\b Persistent Settings Categories}\par
+\par
+{\b File and Folder Preferences:}\par
+\bullet {\b Excel File Path} - Your selected timeline Excel file\par
+  \bullet Remembered across all sessions\par
+  \bullet Automatically loaded on application startup\par
+  \bullet Can be changed anytime via File menu\par
+\bullet {\b Last PDF Directory} - Recently used PDF folder location\par
+  \bullet File dialog opens to this location\par
+  \bullet Updates automatically when you browse to new folders\par
+\bullet {\b Output Folder} - Destination for renamed PDF files\par
+  \bullet Session-only setting (not permanently saved)\par
+  \bullet Remembered during current session\par
+  \bullet Reset each time application starts\par
+\par
+{\b Window and Display Settings:}\par
+\bullet {\b Window Geometry} - Size and position of main window\par
+  \bullet Automatically saved when window is resized or moved\par
+  \bullet Restored on next application startup\par
+  \bullet Format: width x height + x_position + y_position\par
+\bullet {\b Theme Selection} - Current visual theme\par
+  \bullet Choice from 15+ available themes\par
+  \bullet Applied immediately when changed\par
+  \bullet Consistent across all interface elements\par
+\bullet {\b Font Size Preference} - Text field font size\par
+  \bullet Remembered per text field type\par
+  \bullet Applied to new text entries\par
+  \bullet Preserves existing text formatting\par
+\par
+{\b Field Locking System}\par
+\par
+The field locking system allows you to preserve frequently used content:\par
+\par
+{\b Lockable Fields:}\par
+All fields except Dag and Inlagd can be locked:\par
+\bullet OBS, Kategori, Underkategori, Person/sak, Special\par
+\bullet Händelse, Note1, Note2, Note3\par
+\bullet Startdatum, Starttid, Slutdatum, Sluttid\par
+\bullet Källa1, Källa2, Källa3, Övrigt\par
+\par
+{\b Lock Configuration Storage:}\par
+\bullet {\b locked_fields} - Boolean true/false for each field\par
+\bullet {\b locked_field_contents} - Plain text content of locked fields\par
+\bullet {\b locked_field_formats} - Rich text formatting data (v1.14.0+)\par
+\par
+{\b Using Field Locks:}\par
+1. Enter content in any field (including rich text formatting)\par
+2. Toggle the lock switch next to the field ON\par
+3. Content and formatting are immediately saved to configuration\par
+4. Locked content persists across application sessions\par
+5. Toggle lock OFF to enable editing again\par
+\par
+{\b Rich Text Format Preservation (v1.14.0+)}\par
+\par
+Advanced formatting preservation system for locked fields:\par
+\par
+{\b Supported Formatting:}\par
+\bullet Bold text formatting\par
+\bullet Italic text formatting\par
+\bullet Text colors: Red, Blue, Green, Default\par
+\bullet Mixed formatting within single text field\par
+\bullet Character-precise formatting positions\par
+\par
+{\b Format Storage Structure:}\par
+{\f2\fs16
+"locked_field_formats": {\par
+  "Note1": [\par
+    {\par
+      "tag": "bold",\par
+      "start": "1.0",\par
+      "end": "1.15"\par
+    },\par
+    {\par
+      "tag": "red",\par
+      "start": "1.5",\par
+      "end": "1.10"\par
+    }\par
+  ]\par
+}\par
+}\par
+\par
+{\b Backward Compatibility:}\par
+\bullet Configuration files from previous versions work seamlessly\par
+\bullet Missing {\f2 locked_field_formats} section treated as empty\par
+\bullet Automatic upgrade of configuration structure\par
+\bullet No data loss during version updates\par
+\par
+{\b Theme System Configuration}\par
+\par
+{\b Available Themes:}\par
+\par
+{\b Light Themes:}\par
+\bullet cosmo, flatly, journal, litera, lumen\par
+\bullet minty, pulse, sandstone, united, yeti\par
+\bullet morph, simplex, cerculean\par
+\par
+{\b Dark Themes:}\par
+\bullet cyborg, darkly, solar, superhero, vapor\par
+\par
+{\b Theme Selection:}\par
+1. Access via {\b File → Theme} menu\par
+2. Click desired theme name\par
+3. Theme applies immediately to entire interface\par
+4. Selection saved automatically to configuration\par
+5. Restored on next application startup\par
+\par
+{\b Theme Customization Effects:}\par
+\bullet Window backgrounds and borders\par
+\bullet Button styles and hover effects\par
+\bullet Text field appearances and colors\par
+\bullet Menu and dialog styling\par
+\bullet Scrollbar and tooltip appearances\par
+\par
+{\b Manual Configuration Editing}\par
+\par
+{\b When to Edit Manually:}\par
+\bullet Corrupted configuration file\par
+\bullet Need to reset specific settings\par
+\bullet Bulk modification of locked field contents\par
+\bullet Troubleshooting configuration issues\par
+\par
+{\b Safe Editing Practices:}\par
+1. {\b Always backup} {\f2 pdf_processor_config.json} before editing\par
+2. Use a proper JSON editor or text editor with JSON validation\par
+3. Verify JSON syntax before saving changes\par
+4. Test application startup after modifications\par
+5. Restore backup if application fails to start\par
+\par
+{\b Common Manual Edits:}\par
+\bullet Clearing locked field contents: Set values to empty strings ""\par
+\bullet Resetting window geometry: Delete "window_geometry" line\par
+\bullet Changing theme: Modify "theme" value to valid theme name\par
+\bullet Clearing Excel file path: Set "excel_file" to ""\par
+\par
+{\b Configuration Troubleshooting}\par
+\par
+{\b Common Configuration Issues:}\par
+\par
+{\b "Application won't remember Excel file"}\par
+\bullet Check {\f2 pdf_processor_config.json} exists and is writable\par
+\bullet Verify "excel_file" path is correct and file exists\par
+\bullet Run application as administrator if permission issues\par
+\par
+{\b "Locked fields not preserving content"}\par
+\bullet Ensure lock switches are toggled ON before closing application\par
+\bullet Check "locked_fields" and "locked_field_contents" in config file\par
+\bullet Verify JSON syntax is valid\par
+\par
+{\b "Window opens in wrong position/size"}\par
+\bullet Delete "window_geometry" line from configuration file\par
+\bullet Application will open with default size and position\par
+\bullet Resize and move window to preferred location\par
+\par
+{\b "Theme not applying correctly"}\par
+\bullet Verify theme name matches exactly (case-sensitive)\par
+\bullet Try selecting different theme from menu\par
+\bullet Delete "theme" line to reset to default\par
+\par
+{\b "Rich text formatting lost"}\par
+\bullet Check "locked_field_formats" section exists\par
+\bullet Verify field was locked when formatting was applied\par
+\bullet Re-apply formatting and ensure field is locked\par
+\par
+{\b Configuration Backup and Recovery}\par
+\par
+{\b Regular Backup Strategy:}\par
+1. Copy {\f2 pdf_processor_config.json} to backup location weekly\par
+2. Include configuration in your general backup routine\par
+3. Keep multiple generations of configuration backups\par
+4. Document significant configuration changes\par
+\par
+{\b Recovery Procedures:}\par
+1. {\b Complete Reset} - Delete configuration file, restart application\par
+2. {\b Selective Reset} - Delete specific sections from configuration\par
+3. {\b Backup Restore} - Replace current config with known good backup\par
+4. {\b Manual Reconstruction} - Rebuild configuration from scratch\par
+}
+\par
+\page
+
+{\f1\fs28\b 10. Advanced Features}\par
+\par
+{\f0\fs20
+{\b Session Statistics and Productivity Tracking}\par
+\par
+DJs Timeline-maskin includes comprehensive session tracking to help you monitor productivity and workflow efficiency:\par
+\par
+{\b Statistics Display:}\par
+Located in the bottom section of the main window, real-time statistics show:\par
+\bullet {\b PDFs Opened} - Total number of PDF files processed in current session\par
+\bullet {\b Files Renamed} - Number of PDF files successfully renamed\par
+\bullet {\b Excel Rows Added} - Number of new timeline entries created\par
+\bullet Statistics update immediately as you work\par
+\bullet Reset to zero when application restarts\par
+\par
+{\b Using Statistics for Workflow Analysis:}\par
+\bullet Track daily productivity and processing volume\par
+\bullet Identify bottlenecks in your research workflow\par
+\bullet Measure efficiency improvements over time\par
+\bullet Plan work sessions based on historical performance\par
+\par
+{\b Date and Time Validation System}\par
+\par
+The application includes comprehensive validation for all date and time fields:\par
+\par
+{\b Validation Triggers:}\par
+\bullet Focus loss (clicking out of field)\par
+\bullet Enter key press\par
+\bullet Save operations (Excel row creation)\par
+\bullet Field clearing operations\par
+\bullet Copy-to-Excel operations\par
+\par
+{\b Date Validation Rules:}\par
+\bullet {\b Format} - Must be YYYY-MM-DD\par
+\bullet {\b Year Range} - 1900-2100 accepted\par
+\bullet {\b Month Range} - 01-12 only\par
+\bullet {\b Day Range} - 01-31, validated against month\par
+\bullet {\b Leap Year} - February 29 validated for leap years only\par
+\bullet {\b Logic Check} - Start date must be ≤ end date\par
+\par
+{\b Time Validation Rules:}\par
+\bullet {\b Format} - Must be HH:MM (24-hour format)\par
+\bullet {\b Hour Range} - 00-23 only\par
+\bullet {\b Minute Range} - 00-59 only\par
+\bullet {\b Auto-formatting} - Automatically adds leading zeros\par
+\bullet {\b Time Logic} - Start time must be ≤ end time on same date\par
+\par
+{\b Validation Error Handling:}\par
+\bullet Clear, specific error messages for each validation failure\par
+\bullet Field highlighting for invalid entries\par
+\bullet Prevention of save operations with invalid data\par
+\bullet Automatic correction suggestions where possible\par
+\par
+{\b Advanced Text Features}\par
+\par
+{\b Character Counters:}\par
+All text fields include real-time character counting:\par
+\bullet {\b Händelse} - Shows "X/1500 characters"\par
+\bullet {\b Note Fields} - Shows "X/1000 characters" each\par
+\bullet Counters update as you type, format, or edit text\par
+\bullet Warning indicators when approaching limits\par
+\bullet Prevention of input beyond character limits\par
+\par
+{\b Scrollable Text Widgets:}\par
+Enhanced text editing experience:\par
+\bullet All major text fields include vertical scrollbars\par
+\bullet Smooth scrolling for long text entries\par
+\bullet Keyboard navigation support (Page Up/Down, Ctrl+Home/End)\par
+\bullet Mouse wheel scrolling within text fields\par
+\bullet Automatic scrollbar appearance based on content length\par
+\par
+{\b Internal Clipboard System:}\par
+Advanced copy/paste functionality:\par
+\bullet Format-preserving text copying between fields\par
+\bullet Rich text formatting maintained during paste operations\par
+\bullet Integration with system clipboard\par
+\bullet Undo/redo support for all clipboard operations\par
+\par
+{\b Full-Window Scrolling System}\par
+\par
+Optimized for low-resolution displays and accessibility:\par
+\par
+{\b Canvas-Based Scrolling:}\par
+\bullet Entire window content scrollable when needed\par
+\bullet Automatic scrollbar appearance for small screens\par
+\bullet Smooth scrolling performance\par
+\bullet Mouse wheel support throughout interface\par
+\bullet Keyboard navigation (Page Up/Down, Arrow keys)\par
+\par
+{\b Responsive Layout Adaptation:}\par
+\bullet Automatic detection of screen resolution limitations\par
+\bullet Dynamic interface scaling for different display sizes\par
+\bullet Minimum window size enforcement for usability\par
+\bullet Optimized element spacing for touch interfaces\par
+\par
+{\b Professional Toolbar System}\par
+\par
+Each rich text field includes an intuitive formatting toolbar:\par
+\par
+{\b Visual Design:}\par
+\bullet Color-coded buttons for easy identification\par
+\bullet Hover effects and visual feedback\par
+\bullet Consistent spacing and professional appearance\par
+\bullet Integration with field-specific character counters\par
+\bullet Responsive sizing for different window sizes\par
+\par
+{\b Enhanced User Experience:}\par
+\bullet Tooltips for all toolbar buttons\par
+\bullet Keyboard shortcut indicators\par
+\bullet Visual state indicators for active formatting\par
+\bullet Disabled state handling for invalid operations\par
+\par
+{\b Error Handling and Recovery}\par
+\par
+{\b Professional Error Dialogs:}\par
+The application includes comprehensive error handling:\par
+\bullet {\b File Lock Scenarios} - Professional retry/cancel dialogs\par
+\bullet {\b Excel Access Issues} - Clear explanations and solutions\par
+\bullet {\b PDF Processing Errors} - Specific error identification\par
+\bullet {\b Configuration Problems} - Automatic recovery suggestions\par
+\par
+{\b Automatic Recovery Features:}\par
+\bullet Configuration file reconstruction when corrupted\par
+\bullet Graceful handling of missing Excel files\par
+\bullet Automatic backup creation before critical operations\par
+\bullet Session state preservation during unexpected shutdowns\par
+\par
+{\b Advanced Workflow Optimizations}\par
+\par
+{\b Batch Processing Considerations:}\par
+While the application processes one PDF at a time, workflow optimizations include:\par
+\bullet Rapid file selection through recent folders\par
+\bullet Quick field copying and reuse through locking system\par
+\bullet Efficient Excel row creation with preserved formatting\par
+\bullet Minimal clicks required for common operations\par
+\par
+{\b Multi-Session Workflow Support:}\par
+\bullet Session state preservation across application restarts\par
+\bullet Work-in-progress protection through configuration persistence\par
+\bullet Seamless continuation of research projects\par
+\bullet Cross-session statistics tracking preparation\par
+\par
+{\b Integration with External Tools}\par
+\par
+{\b Excel Integration Enhancements:}\par
+\bullet Preservation of existing Excel formulas and formatting\par
+\bullet Support for protected Excel worksheets (with proper permissions)\par
+\bullet Integration with Excel's built-in filtering and sorting features\par
+\bullet Compatibility with Excel templates and custom formatting\par
+\par
+{\b File System Integration:}\par
+\bullet Integration with Windows file explorer\par
+\bullet Support for network drives and cloud storage locations\par
+\bullet Proper handling of long file paths and special characters\par
+\bullet Compatibility with various PDF creation sources\par
+\par
+{\b Accessibility Features}\par
+\par
+{\b Keyboard Navigation:}\par
+\bullet Full application navigation using keyboard only\par
+\bullet Tab order optimization for efficient field traversal\par
+\bullet Standard Windows keyboard shortcuts support\par
+\bullet Custom shortcuts for application-specific functions\par
+\par
+{\b Visual Accessibility:}\par
+\bullet High contrast theme options\par
+\bullet Scalable text and interface elements\par
+\bullet Clear visual indicators for field states and validation\par
+\bullet Consistent color usage for information hierarchy\par
+\par
+{\b Screen Reader Compatibility:}\par
+\bullet Proper labeling of all interface elements\par
+\bullet Logical tab order and focus management\par
+\bullet Status announcements for important operations\par
+\bullet Alternative text for visual indicators\par
+}
+\par
+\page
+
+{\f1\fs28\b 11. Troubleshooting}\par
+\par
+{\f0\fs20
+{\b Common Issues and Solutions}\par
+\par
+{\b Application Startup Problems}\par
+\par
+{\b "Application won't start"}\par
+{\b Symptoms:} Double-clicking shortcut or running {\f2 python app.py} shows error or nothing happens\par
+{\b Possible Causes and Solutions:}\par
+\bullet {\b Python not installed or not in PATH}\par
+  \bullet Solution: Reinstall Python with "Add to PATH" option checked\par
+  \bullet Test: Open Command Prompt, type {\f2 python --version}\par
+\bullet {\b Missing dependencies}\par
+  \bullet Solution: Run {\f2 pip install ttkbootstrap PyPDF2 openpyxl xlsxwriter}\par
+  \bullet Test: Import each library individually in Python interpreter\par
+\bullet {\b Corrupted configuration file}\par
+  \bullet Solution: Delete {\f2 pdf_processor_config.json} and restart application\par
+  \bullet Test: Check if JSON file contains valid syntax\par
+\bullet {\b File permissions issue}\par
+  \bullet Solution: Run Command Prompt as Administrator\par
+  \bullet Test: Try running from different folder location\par
+\par
+{\b "Application starts but shows error messages"}\par
+{\b Common Error Messages:}\par
+\bullet {\f2 "ModuleNotFoundError: No module named 'ttkbootstrap'"}\par
+  \bullet Solution: Install missing module with {\f2 pip install ttkbootstrap}\par
+\bullet {\f2 "FileNotFoundError: [Errno 2] No such file or directory"}\par
+  \bullet Solution: Check file paths in configuration, ensure Excel file exists\par
+\bullet {\f2 "PermissionError: [Errno 13] Permission denied"}\par
+  \bullet Solution: Run as Administrator or change file permissions\par
+\par
+{\b PDF Processing Issues}\par
+\par
+{\b "Cannot read PDF file"}\par
+{\b Symptoms:} Red error text appears when selecting PDF, file shows as unreadable\par
+{\b Possible Causes and Solutions:}\par
+\bullet {\b Password-protected PDF}\par
+  \bullet Solution: Remove password protection using PDF editor\par
+  \bullet Alternative: Use unprotected copy of document\par
+\bullet {\b Corrupted PDF file}\par
+  \bullet Solution: Try opening PDF in Adobe Reader or browser\par
+  \bullet If unreadable, obtain new copy of document\par
+\bullet {\b Unsupported PDF version}\par
+  \bullet Solution: Re-save PDF using newer PDF software\par
+  \bullet Try "Print to PDF" to create compatible version\par
+\bullet {\b Empty or invalid PDF}\par
+  \bullet Solution: Verify file size > 0 bytes and proper .pdf extension\par
+  \bullet Check file wasn't corrupted during download/transfer\par
+\par
+{\b "PDF page count incorrect"}\par
+{\b Symptoms:} Displayed page count doesn't match actual PDF pages\par
+{\b Solutions:}\par
+\bullet Some PDFs have complex structure - manual correction acceptable\par
+\bullet Update page count field manually to reflect actual pages\par
+\bullet Use PDF viewer to verify correct page count\par
+\par
+{\b "Filename parsing produces unexpected results"}\par
+{\b Symptoms:} Date, source, or comments extracted incorrectly from filename\par
+{\b Solutions:}\par
+\bullet Filename parsing is best-effort - manual editing expected\par
+\bullet Edit each component field to correct values\par
+\bullet Use consistent filename formats for better automatic parsing\par
+\bullet Consider renaming source PDFs to more standard formats\par
+\par
+{\b Excel Integration Problems}\par
+\par
+{\b "Cannot open Excel file" or "Excel file validation failed"}\par
+{\b Symptoms:} Error when selecting Excel file or attempting to save rows\par
+{\b Possible Causes and Solutions:}\par
+\bullet {\b Missing required column headers}\par
+  \bullet Solution: Add all 19 required headers exactly as specified\par
+  \bullet Check spelling and capitalization of headers\par
+  \bullet Headers can be in any order but must be present\par
+\bullet {\b Excel file is open in another application}\par
+  \bullet Solution: Close Excel file in other applications\par
+  \bullet Wait a few seconds and try operation again\par
+\bullet {\b File format not supported}\par
+  \bullet Solution: Save Excel file as .xlsx format (Excel 2007+)\par
+  \bullet Avoid .xls (older format) or .csv files\par
+\bullet {\b File permissions issue}\par
+  \bullet Solution: Check file is not read-only or protected\par
+  \bullet Try copying file to different location\par
+\par
+{\b "Excel rows not saving correctly"}\par
+{\b Symptoms:} Save operation completes but no new row appears in Excel\par
+{\b Troubleshooting Steps:}\par
+1. Close and reopen Excel file to refresh view\par
+2. Check if row was added to end of existing data\par
+3. Verify Excel file path is correct in application\par
+4. Test with new, simple Excel file to isolate issue\par
+5. Check Windows Event Viewer for system-level errors\par
+\par
+{\b "Rich text formatting lost in Excel"}\par
+{\b Symptoms:} Text appears in Excel but formatting (bold, colors) missing\par
+{\b Known Issues and Workarounds:}\par
+\bullet {\b Uniform formatting bug} - Text with single formatting type may disappear\par
+  \bullet Solution: Mix formatting types (add bold to all-red text)\par
+  \bullet Use different formatting combinations within same text\par
+\bullet {\b Excel compatibility} - Some Excel versions handle rich text differently\par
+  \bullet Solution: Test with newer Excel version if available\par
+  \bullet Save Excel file in different format and reopen\par
+\par
+{\b Rich Text and Formatting Issues}\par
+\par
+{\b "Formatting toolbar not responding"}\par
+{\b Symptoms:} Clicking formatting buttons has no effect\par
+{\b Solutions:}\par
+\bullet Click inside text field before using toolbar\par
+\bullet Select text first, then apply formatting\par
+\bullet Try using keyboard shortcuts instead (Ctrl+B, Ctrl+I)\par
+\bullet Clear all formatting (T button) and start fresh\par
+\par
+{\b "Text appears garbled or with strange characters"}\par
+{\b Symptoms:} Unusual characters appear in text fields or Excel output\par
+{\b Solutions:}\par
+\bullet Avoid copying text from PDFs directly - type manually\par
+\bullet Use standard keyboard characters only\par
+\bullet Clear formatting and retype affected text\par
+\bullet Check source document for character encoding issues\par
+\par
+{\b "Undo/Redo not working correctly"}\par
+{\b Symptoms:} Ctrl+Z and Ctrl+Y don't work as expected\par
+{\b Solutions:}\par
+\bullet Some complex formatting operations can't be undone\par
+\bullet Use Clear Formatting (T button) to reset field\par
+\bullet Save field content frequently to avoid losing work\par
+\bullet Close and reopen application if undo system becomes unstable\par
+\par
+{\b Configuration and Settings Problems}\par
+\par
+{\b "Settings not saving between sessions"}\par
+{\b Symptoms:} Excel file path, theme, or locked fields reset on application restart\par
+{\b Solutions:}\par
+\bullet Check if {\f2 pdf_processor_config.json} file exists and is writable\par
+\bullet Run application as Administrator to ensure file write permissions\par
+\bullet Verify hard drive has sufficient free space\par
+\bullet Check antivirus software isn't blocking configuration file access\par
+\par
+{\b "Locked fields not preserving content"}\par
+{\b Symptoms:} Fields marked as locked don't retain content after restart\par
+{\b Troubleshooting:}\par
+1. Ensure lock switch is ON before closing application\par
+2. Check configuration file contains locked field data\par
+3. Verify field names match exactly between application and config\par
+4. Test with simple text content first, then try rich text\par
+\par
+{\b "Application window opens in wrong position or size"}\par
+{\b Symptoms:} Window appears off-screen or with incorrect dimensions\par
+{\b Solutions:}\par
+\bullet Delete "window_geometry" line from configuration file\par
+\bullet Use Alt+Space, M to move window if off-screen\par
+\bullet Reset to default by deleting entire configuration file\par
+\bullet Check if multiple monitor setup changed since last use\par
+\par
+{\b Performance and Memory Issues}\par
+\par
+{\b "Application runs slowly or freezes"}\par
+{\b Symptoms:} Long delays when processing files or updating interface\par
+{\b Possible Causes and Solutions:}\par
+\bullet {\b Large PDF files}\par
+  \bullet Solution: Process smaller PDFs or extract relevant pages first\par
+  \bullet Close other applications to free memory\par
+\bullet {\b Large Excel files}\par
+  \bullet Solution: Archive old timeline data to separate files\par
+  \bullet Use Excel's built-in compression features\par
+\bullet {\b System resource constraints}\par
+  \bullet Solution: Close unnecessary applications\par
+  \bullet Restart computer to clear memory\par
+  \bullet Check available disk space\par
+\par
+{\b "Memory error or application crashes"}\par
+{\b Symptoms:} Application suddenly closes or shows memory-related errors\par
+{\b Solutions:}\par
+\bullet Restart computer to clear memory issues\par
+\bullet Process files in smaller batches\par
+\bullet Check system for malware or hardware issues\par
+\bullet Update Python and required libraries to latest versions\par
+\par
+{\b Network and File Access Issues}\par
+\par
+{\b "Cannot access files on network drives"}\par
+{\b Symptoms:} PDF or Excel files on network locations cause errors\par
+{\b Solutions:}\par
+\bullet Copy files to local drive temporarily\par
+\bullet Ensure network drive is properly mapped and accessible\par
+\bullet Check network permissions for file access\par
+\bullet Use UNC paths (\\\\server\\share) instead of mapped drive letters\par
+\par
+{\b "Files locked by other applications"}\par
+{\b Symptoms:} Error messages about file being in use or locked\par
+{\b Solutions:}\par
+\bullet Close Excel or PDF viewer applications\par
+\bullet Wait 30 seconds and retry operation\par
+\bullet Restart Windows Explorer (Ctrl+Shift+Esc → Explorer.exe)\par
+\bullet Use Windows Resource Monitor to identify locking process\par
+\par
+{\b Advanced Troubleshooting}\par
+\par
+{\b Creating Debug Information}\par
+When contacting support, gather this information:\par
+1. Exact error message text (copy/paste or screenshot)\par
+2. Steps to reproduce the problem\par
+3. System information (Windows version, Python version)\par
+4. Configuration file contents (if relevant)\par
+5. Sample PDF and Excel files that cause issues (if safe to share)\par
+\par
+{\b System Information Collection}\par
+Run these commands in Command Prompt:\par
+\bullet {\f2 python --version} - Python version\par
+\bullet {\f2 pip list} - Installed packages\par
+\bullet {\f2 systeminfo} - Windows system details\par
+\par
+{\b Log File Analysis}\par
+The application may create log files for debugging:\par
+\bullet Check application folder for .log files\par
+\bullet Look for error patterns or repeated issues\par
+\bullet Include relevant log excerpts when reporting problems\par
+}
+\par
+\page
+
+{\f1\fs28\b 12. Technical Support}\par
+\par
+{\f0\fs20
+{\b Getting Help}\par
+\par
+{\b Built-in Help Resources}\par
+\par
+The application includes several built-in help features:\par
+\par
+{\b Tooltips and Context Help:}\par
+\bullet Hover over any interface element for helpful tooltips\par
+\bullet Tooltips explain field purposes and usage guidelines\par
+\bullet Context-sensitive help appears automatically\par
+\bullet No internet connection required\par
+\par
+{\b Help Menu:}\par
+\bullet {\b Excel Requirements} - Detailed dialog explaining required column headers\par
+\bullet {\b About} - Version information and basic usage statistics\par
+\bullet {\b Application Information} - Current session statistics and performance data\par
+\par
+{\b Self-Help Troubleshooting}\par
+\par
+{\b Before Seeking External Help:}\par
+1. Check Section 11 (Troubleshooting) of this manual\par
+2. Try restarting the application\par
+3. Verify all dependencies are installed correctly\par
+4. Test with simple, known-good files\par
+5. Check Windows Event Viewer for system errors\par
+\par
+{\b Diagnostic Steps:}\par
+1. {\b Isolate the Problem}\par
+   \bullet Does issue occur with all PDFs or specific files?\par
+   \bullet Can you reproduce the problem consistently?\par
+   \bullet Does problem occur with new vs. existing Excel files?\par
+\par
+2. {\b Test Basic Functionality}\par
+   \bullet Can application start successfully?\par
+   \bullet Can you select and validate a simple PDF?\par
+   \bullet Can you create a new Excel row with minimal data?\par
+\par
+3. {\b Check System Requirements}\par
+   \bullet Verify Python version compatibility\par
+   \bullet Confirm all required packages installed\par
+   \bullet Check available disk space and memory\par
+\par
+{\b Creating Effective Bug Reports}\par
+\par
+{\b Information to Include:}\par
+\bullet {\b Application Version} - Found in Help → About\par
+\bullet {\b Operating System} - Windows version and build\par
+\bullet {\b Python Version} - Output of {\f2 python --version}\par
+\bullet {\b Exact Error Message} - Copy/paste or clear screenshot\par
+\bullet {\b Steps to Reproduce} - Detailed sequence of actions\par
+\bullet {\b Expected vs. Actual Behavior} - What should happen vs. what does happen\par
+\bullet {\b Sample Files} - If safe to share, provide problematic PDF/Excel files\par
+\par
+{\b Bug Report Template:}\par
+{\f2\fs16
+Subject: [Brief description of issue]\par
+\par
+Application Version: [From Help → About]\par
+Windows Version: [e.g., Windows 10 Build 19042]\par
+Python Version: [Output of python --version]\par
+\par
+Problem Description:\par
+[Detailed description of what's wrong]\par
+\par
+Steps to Reproduce:\par
+1. [First step]\par
+2. [Second step]\par
+3. [Continue...]\par
+\par
+Expected Result:\par
+[What should happen]\par
+\par
+Actual Result:\par
+[What actually happens]\par
+\par
+Error Messages:\par
+[Exact text of any error messages]\par
+\par
+Additional Information:\par
+[Any other relevant details]\par
+}\par
+\par
+{\b Understanding Application Limitations}\par
+\par
+{\b Known Limitations:}\par
+\bullet {\b Single PDF Processing} - Cannot process multiple PDFs simultaneously\par
+\bullet {\b Excel Rich Text Bug} - Uniform formatting may disappear in Excel export\par
+\bullet {\b Network File Performance} - Slower operation with files on network drives\par
+\bullet {\b Large File Memory Usage} - Very large PDFs may cause memory issues\par
+\bullet {\b Windows-Only} - Currently designed for Windows operating systems\par
+\par
+{\b Design Decisions and Constraints:}\par
+\bullet {\b Hybrid Excel System} - Complex but necessary for perfect formatting\par
+\bullet {\b Session-Only Output Folder} - Security feature to prevent accidental overwriting\par
+\bullet {\b 19-Column Requirement} - Specific structure needed for timeline functionality\par
+\bullet {\b Configuration Persistence} - Some settings saved, others reset for security\par
+\par
+{\b Performance Optimization}\par
+\par
+{\b Improving Application Performance:}\par
+\par
+{\b System Optimization:}\par
+\bullet Close unnecessary applications during intensive use\par
+\bullet Ensure adequate free disk space (minimum 1 GB recommended)\par
+\bullet Use local drives instead of network locations when possible\par
+\bullet Keep Windows and Python updated to latest versions\par
+\par
+{\b File Management:}\par
+\bullet Process PDFs in smaller batches for better performance\par
+\bullet Archive older Excel timeline data to separate files\par
+\bullet Use compressed PDF files when possible\par
+\bullet Organize files in shallow folder structures\par
+\par
+{\b Application Settings:}\par
+\bullet Use simpler themes for older hardware\par
+\bullet Minimize use of rich text formatting for very long texts\par
+\bullet Lock frequently used fields to reduce data entry time\par
+\bullet Close and restart application periodically during long sessions\par
+\par
+{\b Backup and Recovery Strategies}\par
+\par
+{\b Critical Data to Backup:}\par
+\bullet {\b Excel Timeline Files} - Your primary research data\par
+\bullet {\b Configuration File} - {\f2 pdf_processor_config.json}\par
+\bullet {\b Source PDF Files} - Original documents\par
+\bullet {\b Application Files} - Complete application folder\par
+\par
+{\b Backup Schedule Recommendations:}\par
+\bullet {\b Daily} - Excel files you're actively working on\par
+\bullet {\b Weekly} - Configuration file and application folder\par
+\bullet {\b Monthly} - Complete archive of all research materials\par
+\bullet {\b Before Major Changes} - Configuration and Excel files\par
+\par
+{\b Recovery Procedures:}\par
+1. {\b Configuration Recovery}\par
+   \bullet Restore {\f2 pdf_processor_config.json} from backup\par
+   \bullet Or delete file and reconfigure application from scratch\par
+\par
+2. {\b Excel File Recovery}\par
+   \bullet Use Excel's built-in AutoRecover features\par
+   \bullet Restore from your backup copies\par
+   \bullet Check for temporary Excel files in system temp folders\par
+\par
+3. {\b Application Recovery}\par
+   \bullet Reinstall application from original source\par
+   \bullet Restore configuration and data files\par
+   \bullet Verify all dependencies still installed\par
+\par
+{\b Version Updates and Maintenance}\par
+\par
+{\b Staying Current:}\par
+\bullet Check for application updates periodically\par
+\bullet Update Python and required libraries as needed\par
+\bullet Test new versions with backup copies of your data\par
+\bullet Read release notes for new features and bug fixes\par
+\par
+{\b Safe Update Procedures:}\par
+1. Create complete backup of current working setup\par
+2. Test new version with non-critical data first\par
+3. Verify all features work correctly\par
+4. Migrate real data only after successful testing\par
+5. Keep previous version available as fallback\par
+\par
+{\b Maintenance Tasks:}\par
+\bullet {\b Monthly} - Clear temporary files and restart system\par
+\bullet {\b Quarterly} - Review and archive old timeline data\par
+\bullet {\b Annually} - Complete backup verification and system cleanup\par
+\bullet {\b As Needed} - Update documentation and workflow procedures\par
+\par
+{\b Community and Resources}\par
+\par
+{\b Best Practices from Users:}\par
+\bullet Develop consistent naming conventions for categories\par
+\bullet Use color coding systematically across projects\par
+\bullet Create template configurations for different research types\par
+\bullet Maintain separate Excel files for different investigations\par
+\bullet Document your workflow procedures for team collaboration\par
+\par
+{\b Professional Usage Tips:}\par
+\bullet Regular quality checks of timeline data accuracy\par
+\bullet Peer review of critical timeline entries\par
+\bullet Integration with other research and analysis tools\par
+\bullet Backup strategies that meet professional retention requirements\par
+\bullet Security considerations for sensitive investigation materials\par
+\par
+{\b Conclusion}\par
+\par
+DJs Timeline-maskin is designed to be a reliable, professional tool for investigative journalism and research. While complex in its capabilities, following the guidelines in this manual will help you maximize its effectiveness and minimize problems.\par
+\par
+Remember that the application is continuously being improved based on user feedback and real-world usage scenarios. Your experience and suggestions contribute to making it better for the entire user community.\par
+\par
+For questions not covered in this manual, systematic troubleshooting using the provided guidelines will resolve most issues. When in doubt, start with the simplest possible test case and gradually work up to more complex scenarios.\par
+}
+\par
+\page
+
+{\pard\qc\f1\fs24\b End of Manual\par
+\f0\fs18 DJs Timeline-maskin v1.17.15\par
+Documentation Date: July 29, 2025\par}
+
+}

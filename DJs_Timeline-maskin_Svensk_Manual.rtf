@@ -1,0 +1,1485 @@
+{\rtf1\ansi\ansicpg1252\deff0 {\fonttbl {\f0 Times New Roman;} {\f1 Arial;} {\f2 Courier New;}}
+{\colortbl;\red0\green0\blue0;\red255\green0\blue0;\red0\green0\blue255;\red0\green128\blue0;}
+
+\paperw12240\paperh15840\margl1440\margr1440\margt1440\margb1440
+
+{\header \pard\qc\f1\fs24\b DJs Timeline-maskin - Användarmanual\par}
+{\footer \pard\qc\f0\fs18 Sida \chpgn\par}
+
+\pard\qc\f1\fs36\b DJs Timeline-maskin\par
+\f1\fs24\b Användarmanual\par
+\f0\fs18 Version 1.17.16\par
+\par
+
+\pard\ql\f0\fs20\par
+\page
+
+{\f1\fs28\b Innehållsförteckning}\par
+\par
+{\f0\fs18
+1. Introduktion och syfte...............................3\par
+2. Systemkrav..............................................4\par
+3. Installationsanvisningar.............................4\par
+4. Komma igång.............................................5\par
+5. Huvudgränssnittets översikt..........................6\par
+6. PDF-bearbetningsarbetsflöde..........................8\par
+7. Excel-integration......................................11\par
+8. Rich text-formatering.................................14\par
+9. Konfiguration och inställningar......................16\par
+10. Avancerade funktioner................................18\par
+11. Felsökning............................................20\par
+12. Teknisk support.......................................22\par
+}
+\par
+\page
+
+{\f1\fs28\b 1. Introduktion och syfte}\par
+\par
+{\f0\fs20
+DJs Timeline-maskin är en specialiserad skrivbordsapplikation som är särskilt utformad för undersökande journalister och forskare. Applikationen effektiviserar den komplexa processen att organisera forskningsmaterial, bearbeta dokument och skapa detaljerade tidslinjer över händelser.
+\par\par
+{\b Huvudfördelar:}\par
+\bullet Automatiserar PDF-filorganisation och namnändring\par
+\bullet Skapar strukturerade Excel-tidslinjer med rich text-formatering\par
+\bullet Bevarar forskningsdata med sessionspersistens\par
+\bullet Stöder kollaborativa forskningsarbetsflöden\par
+\bullet Upprätthåller professionella dokumentationsstandarder\par
+\par
+{\b Primära användningsfall:}\par
+\bullet Bearbetning av stora volymer PDF-dokument från nyhetsarkiv\par
+\bullet Skapande av kronologiska tidslinjer över händelser för undersökningar\par
+\bullet Organisering av källmaterial med konsekventa namnkonventioner\par
+\bullet Underhåll av detaljerade forskningsanteckningar med rich text-formatering\par
+\bullet Kollaborativt tidslinjesskapande för forskningsteam\par
+\par
+{\b Applikationsarbetsflöde:}\par
+Applikationen följer en systematisk 4-stegsprocess:\par
+1. {\b PDF-val} - Välj och validera PDF-dokument\par
+2. {\b Komponentredigering} - Analysera och redigera filnamnskomponenter\par
+3. {\b Excel-integration} - Mappa data till tidslinjefält med rich formatering\par
+4. {\b Sparoperationer} - Byt namn på filer och uppdatera Excel-tidslinjer\par
+}
+\par
+\page
+
+{\f1\fs28\b 2. Systemkrav}\par
+\par
+{\f0\fs20
+{\b Minimala systemkrav:}\par
+\bullet Operativsystem: Windows 7/8/10/11\par
+\bullet Python: Version 3.7 eller högre\par
+\bullet RAM: 4 GB minimum, 8 GB rekommenderat\par
+\bullet Lagring: 50 MB ledigt diskutrymme\par
+\bullet Skärm: 1024x768 minimum upplösning\par
+\par
+{\b Rekommenderad konfiguration:}\par
+\bullet Operativsystem: Windows 10/11\par
+\bullet Python: Version 3.9 eller högre\par
+\bullet RAM: 8 GB eller mer\par
+\bullet Lagring: 100 MB ledigt diskutrymme\par
+\bullet Skärm: 1920x1080 eller högre upplösning\par
+\bullet Microsoft Excel 2016 eller nyare (för optimal Excel-integration)\par
+\par
+{\b Mjukvaruberoenden:}\par
+Applikationen kräver dessa Python-paket (installeras automatiskt):\par
+\bullet {\f2 ttkbootstrap} - Modern GUI-tematisering\par
+\bullet {\f2 PyPDF2} - PDF-bearbetningsmöjligheter\par
+\bullet {\f2 openpyxl} - Excel-filläsning\par
+\bullet {\f2 xlsxwriter} - Excel-filskrivning med rich text-stöd\par
+}
+\par
+
+{\f1\fs28\b 3. Installationsanvisningar}\par
+\par
+{\f0\fs20
+{\b Steg 1: Python-installation}\par
+1. Ladda ner Python från {\f2 https://www.python.org/downloads/}\par
+2. Kör installationsprogrammet och markera "Add Python to PATH"\par
+3. Slutför installationsprocessen\par
+\par
+{\b Steg 2: Ladda ner applikation}\par
+1. Ladda ner DJs Timeline-maskin applikationsfiler\par
+2. Extrahera till en mapp av ditt val (t.ex., {\f2 C:\\Program\\DJs-Timeline-maskin})\par
+3. Notera platsen för {\f2 app.py} filen\par
+\par
+{\b Steg 3: Installera beroenden}\par
+1. Öppna Kommandotolken (cmd) som Administratör\par
+2. Navigera till applikationsmappen:\par
+   {\f2 cd "C:\\Program\\DJs-Timeline-maskin"}\par
+3. Installera nödvändiga paket:\par
+   {\f2 pip install ttkbootstrap PyPDF2 openpyxl xlsxwriter}\par
+\par
+{\b Steg 4: Första start}\par
+1. I Kommandotolken, kör:\par
+   {\f2 python app.py}\par
+2. Applikationen bör starta med huvudgränssnittet\par
+3. Om framgångsrikt, skapa en skrivbordsgenväg för enkel åtkomst\par
+\par
+{\b Skapa en skrivbordsgenväg:}\par
+1. Högerklicka på skrivbordet → Ny → Genväg\par
+2. Ange: {\f2 python "C:\\Program\\DJs-Timeline-maskin\\app.py"}\par
+3. Namn: "DJs Timeline-maskin"\par
+4. Klicka Slutför\par
+}
+\par
+\page
+
+{\f1\fs28\b 4. Komma igång}\par
+\par
+{\f0\fs20
+{\b Snabbstartsguide}\par
+\par
+{\b Innan du börjar:}\par
+\bullet Förbered en Excel-fil med de nödvändiga 19 kolumnrubrikerna (se avsnitt 7)\par
+\bullet Samla PDF-filer du vill bearbeta\par
+\bullet Välj en mapp för omdöpta PDF-utdata\par
+\par
+{\b Din första session:}\par
+\par
+{\b Steg 1: Starta och konfigurera}\par
+1. Starta applikationen med din skrivbordsgenväg eller kommandorad\par
+2. Gå till {\b Fil → Välj Excel-fil} och välj din tidslinje Excel-fil\par
+3. Applikationen kommer att validera Excel-filstrukturen\par
+\par
+{\b Steg 2: Bearbeta din första PDF}\par
+1. Klicka på {\b "Välj PDF"} knappen i övre sektionen\par
+2. Välj en PDF-fil från ditt forskningsmaterial\par
+3. Granska de automatiskt analyserade filnamnskomponenterna:\par
+   \bullet Datum (YYYY-MM-DD format)\par
+   \bullet Källa/Tidningsnamn\par
+   \bullet Sidantal\par
+   \bullet Kommentarer/beskrivning\par
+4. Redigera eventuella komponenter vid behov\par
+\par
+{\b Steg 3: Fyll i Excel-fält}\par
+1. Använd {\b "Kopiera till Excel"} för att överföra PDF-data till Excel-fält\par
+2. Fyll i ytterligare fält som Kategori, Person/sak, Händelse\par
+3. Använd rich text-formateringsverktygsfältet för viktiga anteckningar\par
+4. Ställ in datum- och tidsfält (Startdatum, Starttid, etc.)\par
+\par
+{\b Steg 4: Spara ditt arbete}\par
+1. Klicka {\b "Spara Excel-rad + Byt namn på PDF"} för att slutföra processen\par
+2. Välj utdatamapp för den omdöpta PDF:en\par
+3. Verifiera att den nya Excel-raden lades till i din tidslinje\par
+\par
+{\b Tips för nya användare:}\par
+\bullet Börja med några test-PDF:er för att bekanta dig med arbetsflödet\par
+\bullet Använd hjälpmenyns verktygstips för att förstå varje fälts syfte\par
+\bullet Lås ofta använda fält för att spara tid på repetitiva poster\par
+\bullet Experimentera med teman (Fil → Tema) för att hitta din preferens\par
+}
+\par
+\page
+
+{\f1\fs28\b 5. Huvudgränssnittets översikt}\par
+\par
+{\f0\fs20
+{\b Fönsterlayout}\par
+\par
+Huvudgränssnittet använder en responsiv trekolumnslayout optimerad för effektiv datainmatning och organisation:\par
+\par
+{\b Övre sektion - PDF-bearbetning}\par
+\bullet {\b Välj PDF-knapp} - Välj PDF-filer för bearbetning\par
+\bullet {\b PDF-informationsvisning} - Visar fildetaljer och sidantal\par
+\bullet {\b Filnamnskomponentfält} - Redigerbara analyserade filnamnsdelar\par
+\bullet {\b Kopiera till Excel-knapp} - Överför PDF-data till Excel-fält\par
+\par
+{\b Kolumn 1 - Administrativa fält}\par
+\bullet {\b OBS} - Observationer och anteckningar\par
+\bullet {\b Inlagd} - Auto-ifylld med dagens datum\par
+\bullet {\b Dag} - Auto-beräknad veckodag\par
+\bullet {\b Kategori} - Händelsekategoriklassificering\par
+\bullet {\b Underkategori} - Händelseunderkategori\par
+\bullet {\b Person/sak} - Person eller ärende inblandad\par
+\bullet {\b Special} - Särskilda omständigheter eller flaggor\par
+\par
+{\b Kolumn 2 - Datum/Tid och huvudinnehåll}\par
+\bullet {\b Datum/Tid-underram}:\par
+  \bullet Startdatum, Starttid (HH:MM format)\par
+  \bullet Slutdatum, Sluttid (HH:MM format)\par
+\bullet {\b Händelse-fält} - Huvudhändelsebeskrivning (1500 tecken gräns)\par
+  \bullet Expanderbart textområde med rich formateringsverktygsfält\par
+  \bullet Realtids teckenräknare\par
+  \bullet Fullt rich text-stöd med formatbevarande\par
+\par
+{\b Kolumn 3 - Anteckningar och källor}\par
+\bullet {\b Note1, Note2, Note3} - Forskningsanteckningar (1000 tecken vardera)\par
+  \bullet Rich text-formateringsmöjligheter\par
+  \bullet Individuella formateringsverktygsfält\par
+  \bullet Rullbara textområden\par
+\bullet {\b Källa1, Källa2, Källa3} - Källreferenser\par
+\bullet {\b Övrigt} - Ytterligare information\par
+\par
+{\b Nedre sektion - Kontroller och status}\par
+\bullet {\b Åtgärdsknappar}:\par
+  \bullet "Lägg till endast i Excel" - Skapar Excel-rad utan att döpa om PDF\par
+  \bullet "Spara Excel-rad + Byt namn på PDF" - Komplett arbetsflöde\par
+  \bullet "Rensa alla fält" - Återställer alla inmatningsfält\par
+\bullet {\b Statistikvisning} - Sessionsspårningsinformation\par
+\bullet {\b Bakgrundsfärgval} - Tidslinjevisualiseringsfärger\par
+\par
+{\b Menysystem}\par
+\bullet {\b Filmeny}\par
+  \bullet Välj Excel-fil - Välj tidslinjekalkylblad\par
+  \bullet Välj utdatamapp - Ställ in PDF-omdöpningsdestination\par
+  \bullet Avsluta - Stäng applikation\par
+\bullet {\b Temameny} - Välj från 15+ visuella teman\par
+\bullet {\b Hjälpmeny}\par
+  \bullet Excel-krav - Detaljerade kolumnspecifikationer\par
+  \bullet Om - Version och användningsinformation\par
+\par
+{\b Särskilda gränssnittsfunktioner}\par
+\bullet {\b Helskärmrullning} - Kanvasbaserad rullning för låga upplösningsskärmar\par
+\bullet {\b Responsiv layout} - Anpassar sig till olika skärmstorlekar och upplösningar\par
+\bullet {\b Fältlåssystem} - Lås ofta använda fält med växelbrytare\par
+\bullet {\b Verktygstips} - Kontextkänslig hjälp för alla gränssnittselement\par
+\bullet {\b Kortkommandon} - Standard formateringsgenvägar (Ctrl+B, Ctrl+I, etc.)\par
+}
+\par
+\page
+
+{\f1\fs28\b 6. PDF-bearbetningsarbetsflöde}\par
+\par
+{\f0\fs20
+{\b Förstå PDF-bearbetning}\par
+\par
+PDF-bearbetningssystemet är utformat för att hantera den komplexa uppgiften att extrahera meningsfull information från forskningsdokumentfilnamn och förbereda dem för tidslinjeintegration.\par
+\par
+{\b Steg 1: PDF-val och validering}\par
+\par
+{\b Välja PDF-filer:}\par
+1. Klicka på {\b "Välj PDF"} knappen i övre sektionen\par
+2. Navigera till din PDF-dokumentplats\par
+3. Välj en enda PDF-fil (flera val stöds inte)\par
+4. Applikationen validerar omedelbart filen\par
+\par
+{\b Automatiska valideringskontroller:}\par
+\bullet {\b Filintegritet} - Verifierar att PDF-strukturen inte är skadad\par
+\bullet {\b Läsbarhet} - Säkerställer att PDF kan öppnas och bearbetas\par
+\bullet {\b Krypteringsdetektering} - Identifierar lösenordsskyddade filer\par
+\bullet {\b Storleksvalidering} - Upptäcker tomma eller ogiltiga filer\par
+\bullet {\b Ändelseverifiering} - Bekräftar korrekt .pdf ändelse\par
+\par
+{\b Valideringsresultat:}\par
+\bullet {\cf2 Röd text} - Filen kan inte bearbetas (skadad, krypterad, etc.)\par
+\bullet {\cf3 Blå text} - Filen validerad framgångsrikt\par
+\bullet Sidantal visas (t.ex., "5 sidor")\par
+\bullet Filstorleksinformation\par
+\par
+{\b Steg 2: Filnamnskomponentanalys}\par
+\par
+Applikationen använder intelligenta analyseringsalgoritmer för att extrahera strukturerad information från PDF-filnamn:\par
+\par
+{\b Datumextraktion:}\par
+\bullet Känner igen YYYY-MM-DD datummönster\par
+\bullet Hanterar olika datumformat och avgränsare\par
+\bullet Validerar datumlogik (månad ≤ 12, dag ≤ 31)\par
+\bullet Formaterar automatiskt till standard YYYY-MM-DD\par
+\par
+{\b Källa/Tidningsidentifiering:}\par
+\bullet Extraherar tidnings- eller källnamn\par
+\bullet Hanterar VERSALER-formatering korrekt\par
+\bullet Känner igen vanliga svenska publikationsnamn\par
+\bullet Bevarar ursprungliga versalisieringspreferenser\par
+\par
+{\b Sidantalbearbetning:}\par
+\bullet Identifierar "(X sid)" format sidinformation\par
+\bullet Extraherar numeriska sidantal\par
+\bullet Hanterar olika sidnotationsformat\par
+\bullet Korsrefererar med faktiskt PDF-sidantal\par
+\par
+{\b Kommentar och beskrivningsanalysering:}\par
+\bullet Extraherar beskrivande text från filnamn\par
+\bullet Tar bort vanliga filnamndsartefakter\par
+\bullet Bevarar meningsfullt beskrivningsinnehåll\par
+\bullet Rensar formateringsinkonsistenser\par
+\par
+{\b Steg 3: Komponentredigering och förfining}\par
+\par
+Efter automatisk analysering kan du manuellt förfina de extraherade komponenterna:\par
+\par
+{\b Redigerbara fält:}\par
+\bullet {\b Datumfält} - Modifiera eller korrigera det extraherade datumet\par
+\bullet {\b Källfält} - Redigera tidnings/källnamn\par
+\bullet {\b Sidfält} - Justera sidantalinformation\par
+\bullet {\b Kommentarfält} - Förfina beskrivningstext\par
+\par
+{\b Bästa praxis för redigering:}\par
+\bullet Behåll datumformat som YYYY-MM-DD för konsistens\par
+\bullet Använd standardkällnamnsförkortningar\par
+\bullet Inkludera relevanta sidintervall i kommentarer\par
+\bullet Lägg till kontext som kommer att vara användbar i tidslinjevyn\par
+\par
+{\b Steg 4: Integration med Excel-fält}\par
+\par
+{\b "Kopiera till Excel" funktionalitet:}\par
+1. Klicka {\b "Kopiera till Excel"} knappen efter att ha redigerat komponenter\par
+2. PDF-information mappas automatiskt till lämpliga Excel-fält:\par
+   \bullet Datum → Startdatum fält\par
+   \bullet Källa → Källa1 fält\par
+   \bullet Kommentarer → Händelse fält (med formatbevarande)\par
+   \bullet Sidinformation → Integrerad i anteckningsfält\par
+\par
+{\b Smarta mappningsfunktioner:}\par
+\bullet Bevarar befintligt Excel-fältinnehåll om fält är låsta\par
+\bullet Tillämpar rich text-formatering på överförd innehåll\par
+\bullet Upprätthåller teckengränser (1000 för anteckningar, 1500 för Händelse)\par
+\bullet Uppdaterar teckenräknare i realtid\par
+\par
+{\b Vanliga PDF-bearbetningsscenarier}\par
+\par
+{\b Scenario 1: Standard nyhetsartikel}\par
+Filnamn: {\f2 2023-03-15_DN_kommentar_politik_3sid.pdf}\par
+\bullet Datum: 2023-03-15\par
+\bullet Källa: DN (Dagens Nyheter)\par
+\bullet Sidor: 3\par
+\bullet Kommentarer: kommentar politik\par
+\par
+{\b Scenario 2: Arkivdokument}\par
+Filnamn: {\f2 1995-12-08_AFTONBLADET_MORDET_OLOFPALME_DOKUMENT_8sid.pdf}\par
+\bullet Datum: 1995-12-08\par
+\bullet Källa: AFTONBLADET\par
+\bullet Sidor: 8\par
+\bullet Kommentarer: MORDET OLOFPALME DOKUMENT\par
+\par
+{\b Scenario 3: Komplex forskningsfil}\par
+Filnamn: {\f2 2021-06-23_SvD_Ekonomi_Pandemi_Analys_Finansiell_Impact_12sid.pdf}\par
+\bullet Datum: 2021-06-23\par
+\bullet Källa: SvD (Svenska Dagbladet)\par
+\bullet Sidor: 12\par
+\bullet Kommentarer: Ekonomi Pandemi Analys Finansiell Impact\par
+\par
+{\b Felsökning PDF-bearbetning}\par
+\par
+{\b Vanliga problem och lösningar:}\par
+\bullet {\b "Kan inte läsa PDF"} - Filen kan vara skadad eller krypterad\par
+  \bullet Lösning: Försök öppna i PDF-läsare, dekryptera om nödvändigt\par
+\bullet {\b "Ogiltigt datumformat"} - Datum inte känt i filnamn\par
+  \bullet Lösning: Ange datum manuellt i YYYY-MM-DD format\par
+\bullet {\b "Inga komponenter hittades"} - Filnamn för komplext eller icke-standard\par
+  \bullet Lösning: Använd manuell inmatning för alla komponenter\par
+\bullet {\b "Sidantal matchar inte"} - Filnamnsidor ≠ faktiska PDF-sidor\par
+  \bullet Lösning: Uppdatera sidfält för att matcha faktiskt sidantal\par
+}
+\par
+\page
+
+{\f1\fs28\b 7. Excel-integration}\par
+\par
+{\f0\fs20
+{\b Förstå Excel-integration}\par
+\par
+Excel-integrationssystemet är kärnfunktionen som transformerar din forskningsdata till strukturerade, sökbara tidslinjer. Applikationen använder en sofistikerad hybridmetod som kombinerar två Excel-bibliotek för optimal prestanda och formateringsmöjligheter.\par
+\par
+{\b Nödvändig Excel-filstruktur}\par
+\par
+Din Excel-fil måste innehålla exakt dessa 19 kolumnrubriker (skiftlägeskänsliga, exakt stavning krävs):\par
+\par
+{\f2\fs16
+1. OBS                    11. Slutdatum\par
+2. Inlagd                 12. Sluttid\par
+3. Dag                    13. Note1\par
+4. Kategori               14. Note2\par
+5. Underkategori          15. Note3\par
+6. Person/sak             16. Källa1\par
+7. Special                17. Källa2\par
+8. Händelse               18. Källa3\par
+9. Startdatum             19. Övrigt\par
+10. Starttid\par
+}\par
+\par
+{\b Viktiga Excel-filkrav:}\par
+\bullet Kolumnordning spelar ingen roll - rubriker kan vara i vilken sekvens som helst\par
+\bullet Ytterligare kolumner är tillåtna och kommer att ignoreras\par
+\bullet Rubriker måste vara i första raden av kalkylbladet\par
+\bullet Filen måste vara i .xlsx format (Excel 2007 eller nyare)\par
+\bullet Formler i befintliga rader bevaras under uppdateringar\par
+\bullet Tomma rader kan existera och kommer att bevaras\par
+\par
+{\b Ställa in din Excel-fil}\par
+\par
+{\b Metod 1: Skapa ny fil}\par
+1. Öppna Microsoft Excel\par
+2. Skapa en ny arbetsbok\par
+3. I rad 1, ange alla 19 nödvändiga rubriker exakt som listat ovan\par
+4. Spara som .xlsx format på din föredragna plats\par
+5. Filen är nu redo för användning med DJs Timeline-maskin\par
+\par
+{\b Metod 2: Modifiera befintlig fil}\par
+1. Öppna din befintliga tidslinje Excel-fil\par
+2. Verifiera att alla 19 nödvändiga rubriker finns\par
+3. Lägg till eventuella saknade rubriker till rad 1\par
+4. Döp om rubriker för att matcha exakta stavningskrav\par
+5. Spara filen\par
+\par
+{\b Excel-fältbeskrivningar och användning}\par
+\par
+{\b Administrativa fält:}\par
+\bullet {\b OBS} - Allmänna observationer, varningar eller speciella anteckningar om posten\par
+\bullet {\b Inlagd} - Automatiskt ifylld med dagens datum när rad skapas\par
+\bullet {\b Dag} - Automatiskt beräknad veckodag från Startdatum\par
+\par
+{\b Kategoriseringsfält:}\par
+\bullet {\b Kategori} - Primär händelsekategori (t.ex., Politik, Ekonomi, Brott)\par
+\bullet {\b Underkategori} - Specifik underkategori eller händelsetyp\par
+\bullet {\b Person/sak} - Nyckelperson inblandad eller ärendebreferens\par
+\bullet {\b Special} - Särskilda omständigheter, brådskeflaggor eller unika identifierare\par
+\par
+{\b Händelsebeskrivning:}\par
+\bullet {\b Händelse} - Huvudhändelsebeskrivning (1500 tecken gräns)\par
+  \bullet Stöder full rich text-formatering\par
+  \bullet Fet, kursiv, färger och blandad formatering\par
+  \bullet Bevarar formatering i Excel-utdata\par
+  \bullet Radbryter text automatiskt i Excel-celler\par
+\par
+{\b Datum- och tidsfält:}\par
+\bullet {\b Startdatum} - Händelse startdatum (YYYY-MM-DD format)\par
+\bullet {\b Starttid} - Händelse starttid (HH:MM format, 24-timmar)\par
+\bullet {\b Slutdatum} - Händelse slutdatum (YYYY-MM-DD format)\par
+\bullet {\b Sluttid} - Händelse sluttid (HH:MM format, 24-timmar)\par
+\par
+{\b Forskningsanteckningar:}\par
+\bullet {\b Note1, Note2, Note3} - Detaljerade forskningsanteckningar (1000 tecken vardera)\par
+  \bullet Fullt rich text-formateringsstöd\par
+  \bullet Individuellt formatbevarande\par
+  \bullet Idealiskt för analys, kontext och korsreferenser\par
+\par
+{\b Källdokumentation:}\par
+\bullet {\b Källa1, Källa2, Källa3} - Källreferenser och citat\par
+  \bullet Primärkälla, sekundära källor, verifieringskällor\par
+  \bullet Inkludera sidnummer, URL:er eller specifika referenser\par
+\bullet {\b Övrigt} - Ytterligare information som inte passar andra kategorier\par
+\par
+{\b Avancerade Excel-funktioner}\par
+\par
+{\b Rich Text-formatering i Excel}\par
+Applikationen använder ett hybridsystem för perfekt Excel rich text-utdata:\par
+\bullet {\b openpyxl} bibliotek läser befintlig Excel-data och bevarar formler\par
+\bullet {\b xlsxwriter} bibliotek skriver ny data med perfekt rich text-formatering\par
+\bullet Tecken-för-tecken formateringsanalys säkerställer noggrannhet\par
+\bullet All formatering (fet, kursiv, färger) bevaras i Excel-utdata\par
+\par
+{\b Bakgrundsfärgsystem}\par
+Förbättra din tidslinjevisualisering med bakgrundsfärger:\par
+\par
+{\b Tillgängliga färger:}\par
+\bullet {\b Vit} - Standard, vanliga poster\par
+\bullet {\b Ljusgul} - Viktiga händelser, varningar\par
+\bullet {\b Ljusgrön} - Positiva utvecklingar, bekräftelser\par
+\bullet {\b Ljusblå} - Informationsposter, referenser\par
+\bullet {\b Ljusröd} - Kritiska händelser, brådskande objekt\par
+\par
+{\b Använda bakgrundsfärger:}\par
+1. Välj önskad färg från rullgardinsmeny innan du sparar Excel-rad\par
+2. Färg gäller för hela raden i Excel-utdata\par
+3. Färger bevaras när befintliga rader redigeras\par
+4. Använd konsekvent färgkodning för tidslinjeläsbarhet\par
+\par
+{\b Excel-filhantering}\par
+\par
+{\b Filval och persistens:}\par
+1. Använd {\b Fil → Välj Excel-fil} för att välja din tidslinje\par
+2. Applikationen kommer ihåg vald fil mellan sessioner\par
+3. Filväg sparas i konfiguration för bekvämlighet\par
+4. Ändra filer när som helst med Filmenyn\par
+\par
+{\b Datavalidering och säkerhet:}\par
+\bullet Applikationen validerar Excel-filstruktur innan skrivning\par
+\bullet Befintlig data och formler modifieras aldrig\par
+\bullet Nya rader läggs alltid till i slutet av befintlig data\par
+\bullet Säkerhetskopiera dina Excel-filer regelbundet som försiktighetsåtgärd\par
+\par
+{\b Arbeta med stora Excel-filer:}\par
+\bullet Ingen praktisk gräns för filstorlek eller antal rader\par
+\bullet Prestanda optimerad för filer med tusentals poster\par
+\bullet Läsning av befintlig data är snabb och effektiv\par
+\bullet Skrivning av nya rader bibehåller konsekvent prestanda\par
+\par
+{\b Bästa praxis för Excel-integration}\par
+\par
+{\b Filorganisation:}\par
+\bullet Använd beskrivande Excel-filnamn med versionsnummer eller datum\par
+\bullet Lagra Excel-filer på en konsekvent plats\par
+\bullet Överväg separata filer för olika forskningsprojekt\par
+\bullet Regelbundna säkerhetskopior förhindrar dataförlust\par
+\par
+{\b Datainmatningskonsistens:}\par
+\bullet Utveckla standardförkortningar för kategorier och källor\par
+\bullet Använd konsekventa datumformat genom hela din tidslinje\par
+\bullet Etablera färgkodningskonventioner för olika händelsetyper\par
+\bullet Skapa mallar för vanliga posttyper\par
+\par
+{\b Tidslinjeunderhåll:}\par
+\bullet Sortera Excel-data efter datumkolumner för kronologisk ordning\par
+\bullet Använd Excels filterfunktioner för att analysera specifika kategorier\par
+\bullet Skapa sammanfattningsblad med diagram och statistik\par
+\bullet Regelbunden granskning och städning av dubbletter eller föråldrade poster\par
+}
+\par
+\page
+
+{\f1\fs28\b 8. Rich text-formatering}\par
+\par
+{\f0\fs20
+{\b Förstå Rich Text-möjligheter}\par
+\par
+DJs Timeline-maskin tillhandahåller omfattande rich text-formateringsmöjligheter som låter dig skapa professionella, visuellt organiserade tidslinjeposter. Formateringssystemet är särskilt utformat för undersökande journalistiska behov, där betoning, färgkodning och textstruktur är avgörande för informationsorganisation.\par
+\par
+{\b Stödda textfält}\par
+\par
+Rich text-formatering finns tillgänglig i dessa fält:\par
+\bullet {\b Händelse} - Huvudhändelsebeskrivningsfält\par
+\bullet {\b Note1, Note2, Note3} - Forskningsanteckningsfält\par
+\par
+Dessa fält stöder:\par
+\bullet Blandad formatering inom enskilda textposter\par
+\bullet Formatbevarande över applikationssessioner\par
+\bullet Perfekt Excel-export med all formatering intakt\par
+\bullet Obegränsad ångra/gör om för textoperationer\par
+\par
+{\b Formateringsverktygsfält}\par
+\par
+Varje rich text-fält inkluderar ett professionellt formateringsverktygsfält med dessa kontroller:\par
+\par
+{\b {\f1 𝐅} Fet-knapp}\par
+\bullet Kortkommando: Ctrl+B\par
+\bullet Växlar fet formatering för vald text\par
+\bullet Fungerar med vald text eller vid markörposition\par
+\bullet Kombineras med andra formateringsalternativ\par
+\par
+{\b {\f1 𝐊} Kursiv-knapp}\par
+\bullet Kortkommando: Ctrl+I\par
+\bullet Växlar kursiv formatering för vald text\par
+\bullet Fungerar med vald text eller vid markörposition\par
+\bullet Kombineras med fet och färgformatering\par
+\par
+{\b Färgformateringsknappar:}\par
+\bullet {\cf2 ● Röd} - Röd textfärg (Ctrl+R)\par
+\bullet {\cf3 ● Blå} - Blå textfärg (Ctrl+1)\par
+\bullet {\cf4 ● Grön} - Grön textfärg (Ctrl+G)\par
+\bullet Färger kan kombineras med fet och kursiv\par
+\bullet Använd för betoning, kategorisering och visuell organisation\par
+\par
+{\b {\f1 T} Rensa formatering-knapp}\par
+\bullet Kortkommando: Ctrl+K\par
+\bullet Tar bort ALL formatering från vald text\par
+\bullet Återställer text till standardutseende\par
+\bullet Användbart för att rensa formaterad text\par
+\par
+{\b {\f1 A+} Teckenstorlek växel}\par
+\bullet Cyklar genom teckenstorlekar: 9pt → 12pt → 15pt → 9pt\par
+\bullet Gäller för hela textfältet\par
+\bullet Bevarar fet och kursiv formatering under storleksändringar\par
+\bullet Användbart för att förbättra läsbarhet\par
+\par
+{\b Avancerade formateringstekniker}\par
+\par
+{\b Exempel på blandad formatering:}\par
+\par
+{\b Exempel 1: Händelsebeskrivning}\par
+{\f2 "{\b Möte med} {\cf2\b källa} {\b på} {\cf3 Stadshuset} {\b angående} {\i finansiella oegentligheter} {\b i} {\cf4 kommunala kontrakt}."}
+\par\par
+{\b Exempel 2: Forskningsanteckningar}\par
+{\f2 "{\b VERIFIERAT:} {\cf4 Kontraktsbelopp bekräftat} {\b via} {\i offentliga register}. {\cf2 OVERIFIERAT:} {\i Källans påståenden om} {\cf2\b korruption} {\i kräver ytterligare dokumentation}."}
+\par\par
+{\b Exempel 3: Källcitat}\par
+{\f2 "{\b Primär:} {\i Intervjutranskript} {\b -} {\cf3 John Smith, 2023-03-15}. {\b Sekundär:} {\cf4 Kommunfullmäktigeprotokoll} {\b som visar} {\cf2\b budgetavvikelse}."}
+\par\par
+{\b Bästa praxis för formatering}\par
+\par
+{\b Färgkodningskonventioner:}\par
+\bullet {\cf2 Röd} - Brådskande objekt, overifierade påståenden, varningar\par
+\bullet {\cf3 Blå} - Datum, platser, officiella källor\par
+\bullet {\cf4 Grön} - Verifierad information, bekräftelser\par
+\bullet {\b Fet} - Nyckelfakta, viktiga namn, kritiska händelser\par
+\bullet {\i Kursiv} - Citat, spekulation, kontextanteckningar\par
+\par
+{\b Strukturell organisation:}\par
+\bullet Använd fet för huvudhändelserubriker\par
+\bullet Tillämpa färger för att kategorisera informationstyper\par
+\bullet Använd kursiv för citat och osäker information\par
+\bullet Kombinera formatering för maximal klarhet\par
+\par
+{\b Textval och redigering:}\par
+\bullet Dubbelklicka för att välja hela ord\par
+\bullet Trippelklicka för att välja hela stycken\par
+\bullet Dra för att välja anpassade textintervall\par
+\bullet Använd Shift+Piltangenter för precist val\par
+\par
+{\b Formatpersistenssystem}\par
+\par
+{\b Sessionspersistens:}\par
+Applikationen sparar automatiskt all formateringsinformation:\par
+\bullet Formatering bevarad vid växling mellan PDF:er\par
+\bullet Rich text bibehållen över applikationsomstarter\par
+\bullet Låsta fält behåller formatering på obestämd tid\par
+\bullet Konfigurationsfil lagrar komplett formateringsdata\par
+\par
+{\b Excel-exportformatering:}\par
+All rich text-formatering bevaras perfekt i Excel-utdata:\par
+\bullet Fet och kursiv formatering bibehållen\par
+\bullet Textfärger visas korrekt i Excel-celler\par
+\bullet Blandad formatering inom celler stöds\par
+\bullet Excel-formler och cellformatering bevarad\par
+\par
+{\b Konfigurationslagring:}\par
+Formateringsdata lagras i {\f2 pdf_processor_config.json}:\par
+\bullet Individuella taggintervall för varje formateringstyp\par
+\bullet Start- och slutpositioner för all formaterad text\par
+\bullet Bakåtkompatibilitet med äldre konfigurationsfiler\par
+\bullet Automatisk städning av ogiltig eller föräldralös formateringsdata\par
+\par
+{\b Teckengränser och räknare}\par
+\par
+{\b Fältspecifika gränser:}\par
+\bullet {\b Händelse-fält} - 1500 tecken maximum\par
+\bullet {\b Anteckningsfält} - 1000 tecken vardera maximum\par
+\bullet Realtids teckenräknare visar återstående utrymme\par
+\bullet Räknare uppdateras när du skriver och formaterar text\par
+\par
+{\b Hantera teckengränser:}\par
+\bullet Använd koncisa, fokuserade beskrivningar\par
+\bullet Förkorta vanliga termer och fraser\par
+\bullet Distribuera information över flera anteckningsfält\par
+\bullet Använd formatering för att effektivt betona nyckelinformation\par
+\par
+{\b Felsökning rich text-problem}\par
+\par
+{\b Vanliga formateringsproblem:}\par
+\bullet {\b "Formatering försvinner i Excel"} - Påverkar endast enhetlig formatering\par
+  \bullet Lösning: Blanda formateringstyper (lägg till lite fet till all-röd text)\par
+\bullet {\b "Text visas förvrängd"} - Teckenkodningsproblem\par
+  \bullet Lösning: Undvik specialtecken, använd standardtext\par
+\bullet {\b "Formateringsverktygsfält svarar inte"} - Textvalproblem\par
+  \bullet Lösning: Klicka i textfält innan du använder verktygsfältet\par
+\bullet {\b "Ångra fungerar inte korrekt"} - Komplext formateringstillstånd\par
+  \bullet Lösning: Använd Rensa formatering (T-knapp) för att återställa\par
+\par
+{\b Prestanda med stora textblock:}\par
+\bullet Rich text-prestanda optimerad för typisk användning\par
+\bullet Mycket stora textblock kan uppleva långsammare formatering\par
+\bullet Överväg att dela stora texter i flera fält\par
+\bullet Använd formatering selektivt för bästa prestanda\par
+\par
+{\b Sammandrag av kortkommandon}\par
+\par
+{\b Textformatering:}\par
+\bullet Ctrl+B - Växla fet\par
+\bullet Ctrl+I - Växla kursiv\par
+\bullet Ctrl+R - Röd textfärg\par
+\bullet Ctrl+1 - Blå textfärg\par
+\bullet Ctrl+G - Grön textfärg\par
+\bullet Ctrl+K - Rensa all formatering\par
+\par
+{\b Textredigering:}\par
+\bullet Ctrl+A - Välj all text\par
+\bullet Ctrl+C - Kopiera vald text\par
+\bullet Ctrl+V - Klistra in text\par
+\bullet Ctrl+X - Klipp ut vald text\par
+\bullet Ctrl+Z - Ångra senaste åtgärd\par
+\bullet Ctrl+Y - Gör om senast ångrad åtgärd\par
+}
+\par
+\page
+
+{\f1\fs28\b 9. Konfiguration och inställningar}\par
+\par
+{\f0\fs20
+{\b Förstå konfigurationshantering}\par
+\par
+DJs Timeline-maskin använder ett omfattande konfigurationssystem som bevarar dina preferenser, inställningar och arbetstillstånd mellan applikationssessioner. Detta säkerställer konsekvent arbetsflöde och eliminerar behovet av att omkonfigurera applikationen varje gång du använder den.\par
+\par
+{\b Konfigurationsfilplats}\par
+\par
+Alla inställningar lagras i: {\f2 pdf_processor_config.json}\par
+\bullet Placerad i samma mapp som applikationen\par
+\bullet Skapas automatiskt vid första applikationskörning\par
+\bullet Uppdateras när inställningar ändras\par
+\bullet Kan redigeras manuellt med textredigerare vid behov\par
+\bullet Säkerhetskopia rekommenderas före manuella modifieringar\par
+\par
+{\b Kategorier för persistenta inställningar}\par
+\par
+{\b Fil- och mapppreferenser:}\par
+\bullet {\b Excel-filväg} - Din valda tidslinje Excel-fil\par
+  \bullet Kommer ihåg över alla sessioner\par
+  \bullet Laddas automatiskt vid applikationsstart\par
+  \bullet Kan ändras när som helst via Filmeny\par
+\bullet {\b Senaste PDF-mapp} - Nyligen använd PDF-mappplats\par
+  \bullet Fildialog öppnas till denna plats\par
+  \bullet Uppdateras automatiskt när du bläddrar till nya mappar\par
+\bullet {\b Utdatamapp} - Destination för omdöpta PDF-filer\par
+  \bullet Endast sessionsinställning (sparas inte permanent)\par
+  \bullet Kommer ihåg under aktuell session\par
+  \bullet Återställs varje gång applikationen startar\par
+\par
+{\b Fönster- och visningsinställningar:}\par
+\bullet {\b Fönstergeometri} - Storlek och position för huvudfönster\par
+  \bullet Sparas automatiskt när fönstret ändras storlek eller flyttas\par
+  \bullet Återställs vid nästa applikationsstart\par
+  \bullet Format: bredd x höjd + x_position + y_position\par
+\bullet {\b Temeval} - Aktuellt visuellt tema\par
+  \bullet Val från 15+ tillgängliga teman\par
+  \bullet Tillämpas omedelbart när det ändras\par
+  \bullet Konsekvent över alla gränssnittselement\par
+\bullet {\b Teckenstorlekspreferens} - Textfältets teckenstorlek\par
+  \bullet Kommer ihåg per textfältstyp\par
+  \bullet Tillämpas på nya textposter\par
+  \bullet Bevarar befintlig textformatering\par
+\par
+{\b Fältlåssystem}\par
+\par
+Fältlåssystemet låter dig bevara ofta använt innehåll:\par
+\par
+{\b Låsbara fält:}\par
+Alla fält utom Dag och Inlagd kan låsas:\par
+\bullet OBS, Kategori, Underkategori, Person/sak, Special\par
+\bullet Händelse, Note1, Note2, Note3\par
+\bullet Startdatum, Starttid, Slutdatum, Sluttid\par
+\bullet Källa1, Källa2, Källa3, Övrigt\par
+\par
+{\b Låskonfigurationslagring:}\par
+\bullet {\b locked_fields} - Boolean sant/falskt för varje fält\par
+\bullet {\b locked_field_contents} - Vanlig textinnehåll för låsta fält\par
+\bullet {\b locked_field_formats} - Rich text-formateringsdata (v1.14.0+)\par
+\par
+{\b Använda fältlås:}\par
+1. Ange innehåll i vilket fält som helst (inklusive rich text-formatering)\par
+2. Växla låsomkopplaren bredvid fältet PÅ\par
+3. Innehåll och formatering sparas omedelbart till konfiguration\par
+4. Låst innehåll kvarstår över applikationssessioner\par
+5. Växla lås AV för att aktivera redigering igen\par
+\par
+{\b Rich Text-formatbevarande (v1.14.0+)}\par
+\par
+Avancerat formatbevarandesystem för låsta textfält över applikationssessioner:\par
+\par
+{\b Stödd formatering:}\par
+\bullet Fet textformatering\par
+\bullet Kursiv textformatering\par
+\bullet Textfärger: Röd, Blå, Grön, Standard\par
+\bullet Blandad formatering inom enskilt textfält\par
+\bullet Teckenprecisa formateringspositioner\par
+\par
+{\b Formatlagringsstruktur:}\par
+{\f2\fs16
+"locked_field_formats": {\par
+  "Note1": [\par
+    {\par
+      "tag": "bold",\par
+      "start": "1.0",\par
+      "end": "1.15"\par
+    },\par
+    {\par
+      "tag": "red",\par
+      "start": "1.5",\par
+      "end": "1.10"\par
+    }\par
+  ]\par
+}\par
+}\par
+\par
+{\b Bakåtkompatibilitet:}\par
+\bullet Konfigurationsfiler från tidigare versioner fungerar sömlöst\par
+\bullet Saknad {\f2 locked_field_formats} sektion behandlad som tom\par
+\bullet Automatisk uppgradering av konfigurationsstruktur\par
+\bullet Ingen dataförlust under versionsuppdateringar\par
+\par
+{\b Temasystemkonfiguration}\par
+\par
+{\b Tillgängliga teman:}\par
+\par
+{\b Ljusa teman:}\par
+\bullet cosmo, flatly, journal, litera, lumen\par
+\bullet minty, pulse, sandstone, united, yeti\par
+\bullet morph, simplex, cerculean\par
+\par
+{\b Mörka teman:}\par
+\bullet cyborg, darkly, solar, superhero, vapor\par
+\par
+{\b Temeval:}\par
+1. Åtkomst via {\b Fil → Tema} meny\par
+2. Klicka på önskat temanamn\par
+3. Tema tillämpas omedelbart på hela gränssnittet\par
+4. Val sparas automatiskt till konfiguration\par
+5. Återställs vid nästa applikationsstart\par
+\par
+{\b Temaanpassningseffekter:}\par
+\bullet Fönsterbakgrunder och ramar\par
+\bullet Knappstilar och hover-effekter\par
+\bullet Textfältsutseenden och färger\par
+\bullet Meny- och dialogstilar\par
+\bullet Rullgardin- och verktygstipsutseenden\par
+\par
+{\b Manuell konfigurationsredigering}\par
+\par
+{\b När att redigera manuellt:}\par
+\bullet Skadad konfigurationsfil\par
+\bullet Behov av att återställa specifika inställningar\par
+\bullet Massmodifiering av låsta fältinnehåll\par
+\bullet Felsökning av konfigurationsproblem\par
+\par
+{\b Säkra redigeringsrutiner:}\par
+1. {\b Säkerhetskopiera alltid} {\f2 pdf_processor_config.json} före redigering\par
+2. Använd en riktig JSON-redigerare eller textredigerare med JSON-validering\par
+3. Verifiera JSON-syntax innan du sparar ändringar\par
+4. Testa applikationsstart efter modifieringar\par
+5. Återställ säkerhetskopia om applikationen misslyckas att starta\par
+\par
+{\b Vanliga manuella redigeringar:}\par
+\bullet Rensa låsta fältinnehåll: Sätt värden till tomma strängar ""\par
+\bullet Återställa fönstergeometri: Ta bort "window_geometry" rad\par
+\bullet Ändra tema: Modifiera "theme" värde till giltigt temanamn\par
+\bullet Rensa Excel-filväg: Sätt "excel_file" till ""\par
+\par
+{\b Konfigurationsfelsökning}\par
+\par
+{\b Vanliga konfigurationsproblem:}\par
+\par
+{\b "Applikationen kommer inte ihåg Excel-fil"}\par
+\bullet Kontrollera att {\f2 pdf_processor_config.json} existerar och är skrivbar\par
+\bullet Verifiera att "excel_file" sökväg är korrekt och fil existerar\par
+\bullet Kör applikation som administratör om behörighetsproblem\par
+\par
+{\b "Låsta fält bevarar inte innehåll"}\par
+\bullet Säkerställ att låsomkopplare är växlade PÅ innan applikationen stängs\par
+\bullet Kontrollera "locked_fields" och "locked_field_contents" i config-fil\par
+\bullet Verifiera att JSON-syntax är giltig\par
+\par
+{\b "Fönster öppnas på fel position/storlek"}\par
+\bullet Ta bort "window_geometry" rad från konfigurationsfil\par
+\bullet Applikationen kommer att öppna med standardstorlek och position\par
+\bullet Ändra storlek och flytta fönster till föredragen plats\par
+\par
+{\b "Tema tillämpas inte korrekt"}\par
+\bullet Verifiera att temanamn matchar exakt (skiftlägeskänsligt)\par
+\bullet Försök välja annat tema från meny\par
+\bullet Ta bort "theme" rad för att återställa till standard\par
+\par
+{\b "Rich text-formatering förlorad"}\par
+\bullet Kontrollera att "locked_field_formats" sektion existerar\par
+\bullet Verifiera att fält var låst när formatering tillämpades\par
+\bullet Tillämpa formatering igen och säkerställ att fält är låst\par
+\par
+{\b Säkerhetskopiering av konfiguration och återställning}\par
+\par
+{\b Regelbunden säkerhetskopieringsstrategi:}\par
+1. Kopiera {\f2 pdf_processor_config.json} till säkerhetskopieringsplats veckovis\par
+2. Inkludera konfiguration i din allmänna säkerhetskopieringsrutin\par
+3. Behåll flera generationer av konfigurationssäkerhetskopior\par
+4. Dokumentera betydande konfigurationsändringar\par
+\par
+{\b Återställningsprocedurer:}\par
+1. {\b Fullständig återställning} - Ta bort konfigurationsfil, starta om applikation\par
+2. {\b Selektiv återställning} - Ta bort specifika sektioner från konfiguration\par
+3. {\b Säkerhetskopieringsåterställning} - Ersätt aktuell config med känd bra säkerhetskopia\par
+4. {\b Manuell rekonstruktion} - Återuppbygga konfiguration från början\par
+}
+\par
+\page
+
+{\f1\fs28\b 10. Avancerade funktioner}\par
+\par
+{\f0\fs20
+{\b Sessionsstatistik och produktivitetsspårning}\par
+\par
+DJs Timeline-maskin inkluderar omfattande sessionsspårning för att hjälpa dig övervaka produktivitet och arbetsflödeseffektivitet:\par
+\par
+{\b Statistikvisning:}\par
+Placerad i den nedre sektionen av huvudfönstret, realtidsstatistik visar:\par
+\bullet {\b PDF:er öppnade} - Totalt antal PDF-filer bearbetade i aktuell session\par
+\bullet {\b Filer omdöpta} - Antal PDF-filer framgångsrikt omdöpta\par
+\bullet {\b Excel-rader tillagda} - Antal nya tidslinjeposter skapade\par
+\bullet Statistik uppdateras omedelbart när du arbetar\par
+\bullet Återställs till noll när applikationen startas om\par
+\par
+{\b Använda statistik för arbetsflödesanalys:}\par
+\bullet Spåra daglig produktivitet och bearbetningsvolym\par
+\bullet Identifiera flaskhalsar i ditt forskningsarbetsflöde\par
+\bullet Mät effektivitetsförbättringar över tid\par
+\bullet Planera arbetssessioner baserat på historisk prestanda\par
+\par
+{\b Datum- och tidsvalideringssystem}\par
+\par
+Applikationen inkluderar omfattande validering för alla datum- och tidsfält:\par
+\par
+{\b Valideringsutlösare:}\par
+\bullet Fokusförlust (klicka ut ur fält)\par
+\bullet Enter-tangent tryckning\par
+\bullet Sparoperationer (Excel-radskapande)\par
+\bullet Fältrensningsoperationer\par
+\bullet Kopiera-till-Excel operationer\par
+\par
+{\b Datumvalideringsregler:}\par
+\bullet {\b Format} - Måste vara YYYY-MM-DD\par
+\bullet {\b Årsintervall} - 1900-2100 accepterat\par
+\bullet {\b Månadsintervall} - 01-12 endast\par
+\bullet {\b Dagsintervall} - 01-31, validerat mot månad\par
+\bullet {\b Skottår} - 29 februari validerat endast för skottår\par
+\bullet {\b Logikkontroll} - Startdatum måste vara ≤ slutdatum\par
+\par
+{\b Tidsvalideringsregler:}\par
+\bullet {\b Format} - Måste vara HH:MM (24-timmarsformat)\par
+\bullet {\b Timintervall} - 00-23 endast\par
+\bullet {\b Minutintervall} - 00-59 endast\par
+\bullet {\b Auto-formatering} - Lägger automatiskt till inledande nollor\par
+\bullet {\b Tidslogik} - Starttid måste vara ≤ sluttid samma datum\par
+\par
+{\b Valideringsfelhantering:}\par
+\bullet Tydliga, specifika felmeddelanden för varje valideringsfel\par
+\bullet Fältmarkering för ogiltiga poster\par
+\bullet Förebyggande av sparoperationer med ogiltig data\par
+\bullet Automatiska korrigeringsförslag där möjligt\par
+\par
+{\b Avancerade textfunktioner}\par
+\par
+{\b Teckenräknare:}\par
+Alla textfält inkluderar realtids teckenräkning:\par
+\bullet {\b Händelse} - Visar "X/1500 tecken"\par
+\bullet {\b Anteckningsfält} - Visar "X/1000 tecken" vardera\par
+\bullet Räknare uppdateras när du skriver, formaterar eller redigerar text\par
+\bullet Varningsindikatorer när gränser närmar sig\par
+\bullet Förebyggande av inmatning bortom teckengränser\par
+\par
+{\b Rullbara textwidgets:}\par
+Förbättrad textredigeringsupplevelse:\par
+\bullet Alla större textfält inkluderar vertikala rullgardiner\par
+\bullet Smidig rullning för långa textposter\par
+\bullet Tangentbordsnavigering stöd (Page Up/Down, Ctrl+Home/End)\par
+\bullet Mushjulsrullning inom textfält\par
+\bullet Automatisk rullgardinsframträdande baserat på innehållslängd\par
+\par
+{\b Internt urklippssystem:}\par
+Avancerad kopiera/klistra in-funktionalitet:\par
+\bullet Formatbevarande textkopiering mellan fält\par
+\bullet Rich text-formatering bibehållen under inklistringsoperationer\par
+\bullet Integration med systemurklipp\par
+\bullet Ångra/gör om-stöd för alla urklippsoperationer\par
+\par
+{\b Helskärmrullningssystem}\par
+\par
+Optimerat för låga upplösningsskärmar och tillgänglighet:\par
+\par
+{\b Kanvasbaserad rullning:}\par
+\bullet Hela fönsterinnehåll rullbart vid behov\par
+\bullet Automatisk rullgardinsframträdande för små skärmar\par
+\bullet Smidig rullningsprestanda\par
+\bullet Mushjulstöd genom hela gränssnittet\par
+\bullet Tangentbordsnavigering (Page Up/Down, Piltangenter)\par
+\par
+{\b Responsiv layoutanpassning:}\par
+\bullet Automatisk detektering av skärmupplösningsbegränsningar\par
+\bullet Dynamisk gränssnittsskalning för olika skärmstorlekar\par
+\bullet Minimifönsterstorlek upprätthållande för användbarhet\par
+\bullet Optimerat elementavstånd för touchgränssnitt\par
+\par
+{\b Professionellt verktygsfältssystem}\par
+\par
+Varje rich text-fält inkluderar ett intuitivt formateringsverktygsfält:\par
+\par
+{\b Visuell design:}\par
+\bullet Färgkodade knappar för enkel identifiering\par
+\bullet Hover-effekter och visuell återkoppling\par
+\bullet Konsekvent avstånd och professionellt utseende\par
+\bullet Integration med fältspecifika teckenräknare\par
+\bullet Responsiv storlek för olika fönsterstorlekar\par
+\par
+{\b Förbättrad användarupplevelse:}\par
+\bullet Verktygstips för alla verktygsfältsknappar\par
+\bullet Kortkommandoindikatorer\par
+\bullet Visuella tillståndsindikatorer för aktiv formatering\par
+\bullet Inaktiverat tillståndshantering för ogiltiga operationer\par
+\par
+{\b Felhantering och återställning}\par
+\par
+{\b Professionella feldialoger:}\par
+Applikationen inkluderar omfattande felhantering:\par
+\bullet {\b Fillåsscenarier} - Professionella försök igen/avbryt-dialoger\par
+\bullet {\b Excel-åtkomstproblem} - Tydliga förklaringar och lösningar\par
+\bullet {\b PDF-bearbetningsfel} - Specifik felidentifiering\par
+\bullet {\b Konfigurationsproblem} - Automatiska återställningsförslag\par
+\par
+{\b Automatiska återställningsfunktioner:}\par
+\bullet Konfigurationsfilrekonstruktion när skadad\par
+\bullet Graciös hantering av saknade Excel-filer\par
+\bullet Automatisk säkerhetskopieskapande före kritiska operationer\par
+\bullet Sessionstillståndsbevarande under oväntade avstängningar\par
+\par
+{\b Avancerade arbetsflödesoptimeringar}\par
+\par
+{\b Batchbearbetningsöverväganden:}\par
+Medan applikationen bearbetar en PDF i taget, inkluderar arbetsflödesoptimeringar:\par
+\bullet Snabb filval genom senaste mappar\par
+\bullet Snabb fältkopiering och återanvändning genom låssystem\par
+\bullet Effektiv Excel-radskapande med bevarad formatering\par
+\bullet Minimala klick krävs för vanliga operationer\par
+\par
+{\b Multisessionarbetsflödesstöd:}\par
+\bullet Sessionstillståndsbevarande över applikationsomstarter\par
+\bullet Pågående arbetes skydd genom konfigurationspersistens\par
+\bullet Sömlös fortsättning av forskningsprojekt\par
+\bullet Korssessionsstatistikspårningsförberedelse\par
+\par
+{\b Integration med externa verktyg}\par
+\par
+{\b Excel-integrationsförbättringar:}\par
+\bullet Bevarande av befintliga Excel-formler och formatering\par
+\bullet Stöd för skyddade Excel-kalkylblad (med rätta behörigheter)\par
+\bullet Integration med Excels inbyggda filter- och sorteringsfunktioner\par
+\bullet Kompatibilitet med Excel-mallar och anpassad formatering\par
+\par
+{\b Filsystemintegration:}\par
+\bullet Integration med Windows filutforskare\par
+\bullet Stöd för nätverksenheter och molnlagringsplatser\par
+\bullet Riktig hantering av långa filsökvägar och specialtecken\par
+\bullet Kompatibilitet med olika PDF-skapandekällor\par
+\par
+{\b Tillgänglighetsfunktioner}\par
+\par
+{\b Tangentbordsnavigering:}\par
+\bullet Full applikationsnavigering med endast tangentbord\par
+\bullet Tabbordningsoptimering för effektiv fälttraversering\par
+\bullet Standard Windows-kortkommandon stöd\par
+\bullet Anpassade genvägar för applikationsspecifika funktioner\par
+\par
+{\b Visuell tillgänglighet:}\par
+\bullet Hög kontrast temaalternativ\par
+\bullet Skalbara text- och gränssnittselement\par
+\bullet Tydliga visuella indikatorer för fälttillstånd och validering\par
+\bullet Konsekvent färganvändning för informationshierarki\par
+\par
+{\b Skärmläsarkompatibilitet:}\par
+\bullet Riktig märkning av alla gränssnittselement\par
+\bullet Logisk tabbordning och fokushantering\par
+\bullet Statusmeddelanden för viktiga operationer\par
+\bullet Alternativ text för visuella indikatorer\par
+}
+\par
+\page
+
+{\f1\fs28\b 11. Felsökning}\par
+\par
+{\f0\fs20
+{\b Vanliga problem och lösningar}\par
+\par
+{\b Applikationsstartproblem}\par
+\par
+{\b "Applikationen startar inte"}\par
+{\b Symptom:} Dubbelklicka genväg eller köra {\f2 python app.py} visar fel eller inget händer\par
+{\b Möjliga orsaker och lösningar:}\par
+\bullet {\b Python inte installerat eller inte i PATH}\par
+  \bullet Lösning: Ominstallera Python med "Add to PATH" alternativ markerat\par
+  \bullet Test: Öppna Kommandotolk, skriv {\f2 python --version}\par
+\bullet {\b Saknade beroenden}\par
+  \bullet Lösning: Kör {\f2 pip install ttkbootstrap PyPDF2 openpyxl xlsxwriter}\par
+  \bullet Test: Importera varje bibliotek individuellt i Python-interpreter\par
+\bullet {\b Skadad konfigurationsfil}\par
+  \bullet Lösning: Ta bort {\f2 pdf_processor_config.json} och starta om applikation\par
+  \bullet Test: Kontrollera om JSON-filen innehåller giltig syntax\par
+\bullet {\b Filbehörighetsproblem}\par
+  \bullet Lösning: Kör Kommandotolk som Administratör\par
+  \bullet Test: Försök köra från annan mappplats\par
+\par
+{\b "Applikationen startar men visar felmeddelanden"}\par
+{\b Vanliga felmeddelanden:}\par
+\bullet {\f2 "ModuleNotFoundError: No module named 'ttkbootstrap'"}\par
+  \bullet Lösning: Installera saknad modul med {\f2 pip install ttkbootstrap}\par
+\bullet {\f2 "FileNotFoundError: [Errno 2] No such file or directory"}\par
+  \bullet Lösning: Kontrollera filsökvägar i konfiguration, säkerställ att Excel-fil existerar\par
+\bullet {\f2 "PermissionError: [Errno 13] Permission denied"}\par
+  \bullet Lösning: Kör som Administratör eller ändra filbehörigheter\par
+\par
+{\b PDF-bearbetningsproblem}\par
+\par
+{\b "Kan inte läsa PDF-fil"}\par
+{\b Symptom:} Röd feltext visas vid val av PDF, fil visas som oläslig\par
+{\b Möjliga orsaker och lösningar:}\par
+\bullet {\b Lösenordsskyddad PDF}\par
+  \bullet Lösning: Ta bort lösenordsskydd med PDF-redigerare\par
+  \bullet Alternativ: Använd oskyddad kopia av dokument\par
+\bullet {\b Skadad PDF-fil}\par
+  \bullet Lösning: Försök öppna PDF i Adobe Reader eller webbläsare\par
+  \bullet Om oläslig, skaffa ny kopia av dokument\par
+\bullet {\b Ej stödd PDF-version}\par
+  \bullet Lösning: Spara om PDF med nyare PDF-mjukvara\par
+  \bullet Försök "Skriv ut till PDF" för att skapa kompatibel version\par
+\bullet {\b Tom eller ogiltig PDF}\par
+  \bullet Lösning: Verifiera filstorlek > 0 bytes och korrekt .pdf ändelse\par
+  \bullet Kontrollera att fil inte skadades under nedladdning/överföring\par
+\par
+{\b "PDF-sidantal felaktigt"}\par
+{\b Symptom:} Visad sidantal matchar inte faktiska PDF-sidor\par
+{\b Lösningar:}\par
+\bullet Vissa PDF:er har komplex struktur - manuell korrigering acceptabel\par
+\bullet Uppdatera sidantalfält manuellt för att reflektera faktiska sidor\par
+\bullet Använd PDF-visare för att verifiera korrekt sidantal\par
+\par
+{\b "Filnamnsanalysering ger oväntade resultat"}\par
+{\b Symptom:} Datum, källa eller kommentarer extraherade felaktigt från filnamn\par
+{\b Lösningar:}\par
+\bullet Filnamnsanalysering är bästa möjliga - manuell redigering förväntas\par
+\bullet Redigera varje komponentfält till korrekta värden\par
+\bullet Använd konsekventa filnamnsformat för bättre automatisk analysering\par
+\bullet Överväg att döpa om käll-PDF:er till mer standardformat\par
+\par
+{\b Excel-integrationsproblem}\par
+\par
+{\b "Kan inte öppna Excel-fil" eller "Excel-filvalidering misslyckades"}\par
+{\b Symptom:} Fel vid val av Excel-fil eller försök att spara rader\par
+{\b Möjliga orsaker och lösningar:}\par
+\bullet {\b Saknade nödvändiga kolumnrubriker}\par
+  \bullet Lösning: Lägg till alla 19 nödvändiga rubriker exakt som specificerat\par
+  \bullet Kontrollera stavning och versalisering av rubriker\par
+  \bullet Rubriker kan vara i vilken ordning som helst men måste finnas\par
+\bullet {\b Excel-fil öppen i annan applikation}\par
+  \bullet Lösning: Stäng Excel-fil i andra applikationer\par
+  \bullet Vänta några sekunder och försök operation igen\par
+\bullet {\b Filformat stöds inte}\par
+  \bullet Lösning: Spara Excel-fil som .xlsx format (Excel 2007+)\par
+  \bullet Undvik .xls (äldre format) eller .csv filer\par
+\bullet {\b Filbehörighetsproblem}\par
+  \bullet Lösning: Kontrollera att fil inte är skrivskyddad eller protected\par
+  \bullet Försök kopiera fil till annan plats\par
+\par
+{\b "Excel-rader sparas inte korrekt"}\par
+{\b Symptom:} Sparoperation slutförs men ingen ny rad visas i Excel\par
+{\b Felsökningssteg:}\par
+1. Stäng och återöppna Excel-fil för att uppdatera vy\par
+2. Kontrollera om rad lades till i slutet av befintlig data\par
+3. Verifiera att Excel-filsökväg är korrekt i applikation\par
+4. Testa med ny, enkel Excel-fil för att isolera problem\par
+5. Kontrollera Windows Händelsevisare för systemnivåfel\par
+\par
+{\b "Rich text-formatering förlorad i Excel"}\par
+{\b Symptom:} Text visas i Excel men formatering (fet, färger) saknas\par
+{\b Kända problem och lösningar:}\par
+\bullet {\b Enhetlig formateringsbugg} - Text med enkel formateringstyp kan försvinna\par
+  \bullet Lösning: Blanda formateringstyper (lägg till fet till all-röd text)\par
+  \bullet Använd olika formateringskombinationer inom samma text\par
+\bullet {\b Excel-kompatibilitet} - Vissa Excel-versioner hanterar rich text annorlunda\par
+  \bullet Lösning: Testa med nyare Excel-version om tillgänglig\par
+  \bullet Spara Excel-fil i annat format och återöppna\par
+\par
+{\b Rich Text och formateringsproblem}\par
+\par
+{\b "Formateringsverktygsfält svarar inte"}\par
+{\b Symptom:} Klicka formateringsknappar har ingen effekt\par
+{\b Lösningar:}\par
+\bullet Klicka inuti textfält innan du använder verktygsfält\par
+\bullet Välj text först, tillämpa sedan formatering\par
+\bullet Försök använda kortkommandon istället (Ctrl+B, Ctrl+I)\par
+\bullet Rensa all formatering (T-knapp) och börja om\par
+\par
+{\b "Text visas förvrängd eller med konstiga tecken"}\par
+{\b Symptom:} Ovanliga tecken visas i textfält eller Excel-utdata\par
+{\b Lösningar:}\par
+\bullet Undvik att kopiera text från PDF:er direkt - skriv manuellt\par
+\bullet Använd endast standard tangentbordstecken\par
+\bullet Rensa formatering och skriv om påverkad text\par
+\bullet Kontrollera källdokument för teckenkodningsproblem\par
+\par
+{\b "Ångra/Gör om fungerar inte korrekt"}\par
+{\b Symptom:} Ctrl+Z och Ctrl+Y fungerar inte som förväntat\par
+{\b Lösningar:}\par
+\bullet Vissa komplexa formateringsoperationer kan inte ångras\par
+\bullet Använd Rensa formatering (T-knapp) för att återställa fält\par
+\bullet Spara fältinnehåll ofta för att undvika att förlora arbete\par
+\bullet Stäng och återöppna applikation om ångrasystem blir instabilt\par
+\par
+{\b Konfigurations- och inställningsproblem}\par
+\par
+{\b "Inställningar sparas inte mellan sessioner"}\par
+{\b Symptom:} Excel-filsökväg, tema eller låsta fält återställs vid applikationsomstart\par
+{\b Lösningar:}\par
+\bullet Kontrollera om {\f2 pdf_processor_config.json} fil existerar och är skrivbar\par
+\bullet Kör applikation som Administratör för att säkerställa filskrivbehörigheter\par
+\bullet Verifiera att hårddisk har tillräckligt ledigt utrymme\par
+\bullet Kontrollera att antivirusmjukvara inte blockerar konfigurationsfilåtkomst\par
+\par
+{\b "Låsta fält bevarar inte innehåll"}\par
+{\b Symptom:} Fält markerade som låsta behåller inte innehåll efter omstart\par
+{\b Felsökning:}\par
+1. Säkerställ att låsomkopplare är PÅ innan applikationen stängs\par
+2. Kontrollera att konfigurationsfil innehåller låsta fältdata\par
+3. Verifiera att fältnamn matchar exakt mellan applikation och config\par
+4. Testa med enkelt textinnehåll först, försök sedan rich text\par
+\par
+{\b "Applikationsfönster öppnas på fel position eller storlek"}\par
+{\b Symptom:} Fönster visas utanför skärm eller med felaktiga dimensioner\par
+{\b Lösningar:}\par
+\bullet Ta bort "window_geometry" rad från konfigurationsfil\par
+\bullet Använd Alt+Mellanslag, M för att flytta fönster om utanför skärm\par
+\bullet Återställ till standard genom att ta bort hela konfigurationsfil\par
+\bullet Kontrollera om flera skärmkonfiguration ändrats sedan senaste användning\par
+\par
+{\b Prestanda- och minnesproblem}\par
+\par
+{\b "Applikationen körs långsamt eller fryser"}\par
+{\b Symptom:} Långa fördröjningar vid bearbetning av filer eller gränssnittsuppdatering\par
+{\b Möjliga orsaker och lösningar:}\par
+\bullet {\b Stora PDF-filer}\par
+  \bullet Lösning: Bearbeta mindre PDF:er eller extrahera relevanta sidor först\par
+  \bullet Stäng andra applikationer för att frigöra minne\par
+\bullet {\b Stora Excel-filer}\par
+  \bullet Lösning: Arkivera gammal tidslinjedata till separata filer\par
+  \bullet Använd Excels inbyggda komprimeringsfunktioner\par
+\bullet {\b Systemresursbegränsningar}\par
+  \bullet Lösning: Stäng onödiga applikationer\par
+  \bullet Starta om dator för att rensa minne\par
+  \bullet Kontrollera tillgängligt diskutrymme\par
+\par
+{\b "Minnesfel eller applikationskrascher"}\par
+{\b Symptom:} Applikationen stängs plötsligt eller visar minnesrelaterade fel\par
+{\b Lösningar:}\par
+\bullet Starta om dator för att rensa minnesproblem\par
+\bullet Bearbeta filer i mindre batchar\par
+\bullet Kontrollera system för malware eller hårdvaruproblem\par
+\bullet Uppdatera Python och nödvändiga bibliotek till senaste versioner\par
+\par
+{\b Nätverk- och filåtkomstproblem}\par
+\par
+{\b "Kan inte komma åt filer på nätverksenheter"}\par
+{\b Symptom:} PDF- eller Excel-filer på nätverksplatser orsakar fel\par
+{\b Lösningar:}\par
+\bullet Kopiera filer till lokal enhet tillfälligt\par
+\bullet Säkerställ att nätverksenhet är korrekt mappad och åtkomlig\par
+\bullet Kontrollera nätverksbehörigheter för filåtkomst\par
+\bullet Använd UNC-sökvägar (\\\\server\\share) istället för mappade enhetsbokstäver\par
+\par
+{\b "Filer låsta av andra applikationer"}\par
+{\b Symptom:} Felmeddelanden om fil i användning eller låst\par
+{\b Lösningar:}\par
+\bullet Stäng Excel- eller PDF-visareapplikationer\par
+\bullet Vänta 30 sekunder och försök operation igen\par
+\bullet Starta om Windows Explorer (Ctrl+Shift+Esc → Explorer.exe)\par
+\bullet Använd Windows Resursövervakare för att identifiera låsande process\par
+\par
+{\b Avancerad felsökning}\par
+\par
+{\b Skapa felsökningsinformation}\par
+När du kontaktar support, samla denna information:\par
+1. Exakt felmeddelande text (kopiera/klistra in eller skärmbild)\par
+2. Steg för att återskapa problemet\par
+3. Systeminformation (Windows-version, Python-version)\par
+4. Konfigurationsfilinnehåll (om relevant)\par
+5. Exempel PDF- och Excel-filer som orsakar problem (om säkert att dela)\par
+\par
+{\b Systeminformationsinsamling}\par
+Kör dessa kommandon i Kommandotolk:\par
+\bullet {\f2 python --version} - Python-version\par
+\bullet {\f2 pip list} - Installerade paket\par
+\bullet {\f2 systeminfo} - Windows-systemdetaljer\par
+\par
+{\b Loggfilanalys}\par
+Applikationen kan skapa loggfiler för felsökning:\par
+\bullet Kontrollera applikationsmapp för .log filer\par
+\bullet Leta efter felmönster eller upprepade problem\par
+\bullet Inkludera relevanta loggutdrag vid rapportering av problem\par
+}
+\par
+\page
+
+{\f1\fs28\b 12. Teknisk support}\par
+\par
+{\f0\fs20
+{\b Få hjälp}\par
+\par
+{\b Inbyggda hjälpresurser}\par
+\par
+Applikationen inkluderar flera inbyggda hjälpfunktioner:\par
+\par
+{\b Verktygstips och kontexthjälp:}\par
+\bullet Håll muspekaren över vilket gränssnittselement som helst för hjälpsamma verktygstips\par
+\bullet Verktygstips förklarar fältsyften och användningsriktlinjer\par
+\bullet Kontextkänslig hjälp visas automatiskt\par
+\bullet Ingen internetanslutning krävs\par
+\par
+{\b Hjälpmeny:}\par
+\bullet {\b Excel-krav} - Detaljerad dialog som förklarar nödvändiga kolumnrubriker\par
+\bullet {\b Om} - Versionsinformation och grundläggande användningsstatistik\par
+\bullet {\b Applikationsinformation} - Aktuell sessionsstatistik och prestandadata\par
+\par
+{\b Självhjälpsfelsökning}\par
+\par
+{\b Innan du söker extern hjälp:}\par
+1. Kontrollera avsnitt 11 (Felsökning) i denna manual\par
+2. Försök starta om applikationen\par
+3. Verifiera att alla beroenden är korrekt installerade\par
+4. Testa med enkla, känt fungerande filer\par
+5. Kontrollera Windows Händelsevisare för systemfel\par
+\par
+{\b Diagnostiska steg:}\par
+1. {\b Isolera problemet}\par
+   \bullet Inträffar problem med alla PDF:er eller specifika filer?\par
+   \bullet Kan du återskapa problemet konsekvent?\par
+   \bullet Inträffar problem med nya vs. befintliga Excel-filer?\par
+\par
+2. {\b Testa grundfunktionalitet}\par
+   \bullet Kan applikationen starta framgångsrikt?\par
+   \bullet Kan du välja och validera en enkel PDF?\par
+   \bullet Kan du skapa en ny Excel-rad med minimal data?\par
+\par
+3. {\b Kontrollera systemkrav}\par
+   \bullet Verifiera Python-versionskompatibilitet\par
+   \bullet Bekräfta alla nödvändiga paket installerade\par
+   \bullet Kontrollera tillgängliga diskutrymme och minne\par
+\par
+{\b Skapa effektiva buggrapporter}\par
+\par
+{\b Information att inkludera:}\par
+\bullet {\b Applikationsversion} - Finns i Hjälp → Om\par
+\bullet {\b Operativsystem} - Windows-version och build\par
+\bullet {\b Python-version} - Utdata från {\f2 python --version}\par
+\bullet {\b Exakt felmeddelande} - Kopiera/klistra in eller tydlig skärmbild\par
+\bullet {\b Steg för att återskapa} - Detaljerad sekvens av åtgärder\par
+\bullet {\b Förväntat vs. faktiskt beteende} - Vad som borde hända vs. vad som händer\par
+\bullet {\b Exempelfiler} - Om säkert att dela, tillhandahåll problematiska PDF/Excel-filer\par
+\par
+{\b Buggrapportmall:}\par
+{\f2\fs16
+Ämne: [Kort beskrivning av problem]\par
+\par
+Applikationsversion: [Från Hjälp → Om]\par
+Windows-version: [t.ex., Windows 10 Build 19042]\par
+Python-version: [Utdata från python --version]\par
+\par
+Problembeskrivning:\par
+[Detaljerad beskrivning av vad som är fel]\par
+\par
+Steg för att återskapa:\par
+1. [Första steget]\par
+2. [Andra steget]\par
+3. [Fortsätt...]\par
+\par
+Förväntat resultat:\par
+[Vad som borde hända]\par
+\par
+Faktiskt resultat:\par
+[Vad som faktiskt händer]\par
+\par
+Felmeddelanden:\par
+[Exakt text för eventuella felmeddelanden]\par
+\par
+Ytterligare information:\par
+[Eventuella andra relevanta detaljer]\par
+}\par
+\par
+{\b Förstå applikationsbegränsningar}\par
+\par
+{\b Kända begränsningar:}\par
+\bullet {\b Enkel PDF-bearbetning} - Kan inte bearbeta flera PDF:er samtidigt\par
+\bullet {\b Excel Rich Text-bugg} - Enhetlig formatering kan försvinna i Excel-export\par
+\bullet {\b Nätverksfilprestanda} - Långsammare operation med filer på nätverksenheter\par
+\bullet {\b Stor fil minnesanvändning} - Mycket stora PDF:er kan orsaka minnesproblem\par
+\bullet {\b Endast Windows} - För närvarande utformad för Windows-operativsystem\par
+\par
+{\b Designbeslut och begränsningar:}\par
+\bullet {\b Hybrid Excel-system} - Komplext men nödvändigt för perfekt formatering\par
+\bullet {\b Endast session utdatamapp} - Säkerhetsfunktion för att förhindra oavsiktlig överskrivning\par
+\bullet {\b 19-kolumnskrav} - Specifik struktur behövs för tidslinjefunktionalitet\par
+\bullet {\b Konfigurationspersistens} - Vissa inställningar sparade, andra återställda för säkerhet\par
+\par
+{\b Prestandaoptimering}\par
+\par
+{\b Förbättra applikationsprestanda:}\par
+\par
+{\b Systemoptimering:}\par
+\bullet Stäng onödiga applikationer under intensiv användning\par
+\bullet Säkerställ tillräckligt ledigt diskutrymme (minimum 1 GB rekommenderat)\par
+\bullet Använd lokala enheter istället för nätverksplatser när möjligt\par
+\bullet Håll Windows och Python uppdaterade till senaste versioner\par
+\par
+{\b Filhantering:}\par
+\bullet Bearbeta PDF:er i mindre batchar för bättre prestanda\par
+\bullet Arkivera äldre Excel-tidslinjedata till separata filer\par
+\bullet Använd komprimerade PDF-filer när möjligt\par
+\bullet Organisera filer i grunda mappstrukturer\par
+\par
+{\b Applikationsinställningar:}\par
+\bullet Använd enklare teman för äldre hårdvara\par
+\bullet Minimera användning av rich text-formatering för mycket långa texter\par
+\bullet Lås ofta använda fält för att minska datainmatningstid\par
+\bullet Stäng och starta om applikationen periodiskt under långa sessioner\par
+\par
+{\b Säkerhetskopiering och återställningsstrategier}\par
+\par
+{\b Kritisk data att säkerhetskopiera:}\par
+\bullet {\b Excel-tidslinjefiler} - Din primära forskningsdata\par
+\bullet {\b Konfigurationsfil} - {\f2 pdf_processor_config.json}\par
+\bullet {\b Käll-PDF-filer} - Originaldokument\par
+\bullet {\b Applikationsfiler} - Komplett applikationsmapp\par
+\par
+{\b Rekommendationer för säkerhetskopieringsschema:}\par
+\bullet {\b Dagligen} - Excel-filer du aktivt arbetar med\par
+\bullet {\b Veckovis} - Konfigurationsfil och applikationsmapp\par
+\bullet {\b Månadsvis} - Komplett arkiv av allt forskningsmaterial\par
+\bullet {\b Före större ändringar} - Konfigurations- och Excel-filer\par
+\par
+{\b Återställningsprocedurer:}\par
+1. {\b Konfigurationsåterställning}\par
+   \bullet Återställ {\f2 pdf_processor_config.json} från säkerhetskopia\par
+   \bullet Eller ta bort fil och omkonfigurera applikation från början\par
+\par
+2. {\b Excel-filåterställning}\par
+   \bullet Använd Excels inbyggda AutoRecover-funktioner\par
+   \bullet Återställ från dina säkerhetskopior\par
+   \bullet Kontrollera temporära Excel-filer i systemets temp-mappar\par
+\par
+3. {\b Applikationsåterställning}\par
+   \bullet Ominstallera applikation från ursprunglig källa\par
+   \bullet Återställ konfigurations- och datafiler\par
+   \bullet Verifiera att alla beroenden fortfarande är installerade\par
+\par
+{\b Versionsuppdateringar och underhåll}\par
+\par
+{\b Hålla sig uppdaterad:}\par
+\bullet Kontrollera applikationsuppdateringar periodiskt\par
+\bullet Uppdatera Python och nödvändiga bibliotek vid behov\par
+\bullet Testa nya versioner med säkerhetskopior av din data\par
+\bullet Läs versionsanteckningar för nya funktioner och buggfixar\par
+\par
+{\b Säkra uppdateringsprocedurer:}\par
+1. Skapa komplett säkerhetskopia av nuvarande fungerande konfiguration\par
+2. Testa ny version med icke-kritisk data först\par
+3. Verifiera att alla funktioner fungerar korrekt\par
+4. Migrera riktig data endast efter framgångsrik testning\par
+5. Behåll tidigare version tillgänglig som reserv\par
+\par
+{\b Underhållsuppgifter:}\par
+\bullet {\b Månadsvis} - Rensa temporära filer och starta om system\par
+\bullet {\b Kvartalsvis} - Granska och arkivera gammal tidslinjedata\par
+\bullet {\b Årligen} - Komplett säkerhetskopieringsverifiering och systemstädning\par
+\bullet {\b Vid behov} - Uppdatera dokumentation och arbetsflödesprocedurer\par
+\par
+{\b Gemenskap och resurser}\par
+\par
+{\b Bästa praxis från användare:}\par
+\bullet Utveckla konsekventa namnkonventioner för kategorier\par
+\bullet Använd färgkodning systematiskt över projekt\par
+\bullet Skapa mallkonfigurationer för olika forskningstyper\par
+\bullet Underhåll separata Excel-filer för olika undersökningar\par
+\bullet Dokumentera dina arbetsflödesprocedurer för teamsamarbete\par
+\par
+{\b Professionella användningstips:}\par
+\bullet Regelbundna kvalitetskontroller av tidslinjematerials noggrannhet\par
+\bullet Kollegial granskning av kritiska tidslinjeposter\par
+\bullet Integration med andra forsknings- och analysverktyg\par
+\bullet Säkerhetskopieringsstrategier som möter professionella kvarhållningskrav\par
+\bullet Säkerhetsöverväganden för känsligt undersökningsmaterial\par
+\par
+{\b Slutsats}\par
+\par
+DJs Timeline-maskin är utformad för att vara ett pålitligt, professionellt verktyg för undersökande journalistik och forskning. Även om det är komplext i sina möjligheter, kommer att följa riktlinjerna i denna manual att hjälpa dig maximera dess effektivitet och minimera problem.\par
+\par
+Kom ihåg att applikationen kontinuerligt förbättras baserat på användarfeedback och verkliga användningsscenarier. Din erfarenhet och förslag bidrar till att göra det bättre för hela användargemenskapen.\par
+\par
+För frågor som inte täcks i denna manual kommer systematisk felsökning med de tillhandahållna riktlinjerna att lösa de flesta problem. När du är tveksam, börja med det enklaste möjliga testfallet och arbeta gradvis upp till mer komplexa scenarier.\par
+}
+\par
+\page
+
+{\pard\qc\f1\fs24\b Slut på manual\par
+\f0\fs18 DJs Timeline-maskin v1.17.16\par
+Dokumentationsdatum: 29 juli 2025\par}
+
+}
