@@ -307,7 +307,7 @@ class ExcelFieldManager:
         if col_name == 'Dag':
             # Standard horizontal layout for Dag field
             ctk.CTkLabel(parent_frame, text=f"{col_name}:",
-                    font=('Arial', 10)).grid(row=row, column=0, sticky="w", pady=(0, 5))
+                    font=ctk.CTkFont(size=12)).grid(row=row, column=0, sticky="w", pady=(0, 5))
 
             dag_var = tk.StringVar(value="Formel läggs till automatiskt")
             entry = ctk.CTkEntry(parent_frame,
@@ -323,7 +323,7 @@ class ExcelFieldManager:
         elif col_name == 'Inlagd':
             # Standard horizontal layout for Inlagd field
             ctk.CTkLabel(parent_frame, text=f"{col_name}:",
-                    font=('Arial', 10)).grid(row=row, column=0, sticky="w", pady=(0, 5))
+                    font=ctk.CTkFont(size=12)).grid(row=row, column=0, sticky="w", pady=(0, 5))
 
             entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],
                            state="readonly",
@@ -340,7 +340,7 @@ class ExcelFieldManager:
             header_frame.grid(row=row, column=0, columnspan=2, sticky="sew", pady=(0, 2))
 
             ctk.CTkLabel(header_frame, text=f"{col_name}:",
-                    font=('Arial', 10)).pack(side="left")
+                    font=ctk.CTkFont(size=12)).pack(side="left")
 
             # Add lock switch for text fields that should have one
             if has_lock:
@@ -409,7 +409,7 @@ class ExcelFieldManager:
             # Row 4: Character counter (left aligned, compact)
             limit = self.parent.handelse_char_limit if col_name == 'Händelse' else self.parent.char_limit
             counter_label = ctk.CTkLabel(parent_frame, text=f"{limit}",
-                                   font=('Arial', 8))
+                                   font=ctk.CTkFont(size=11))
             counter_label.grid(row=row+3, column=0, sticky="w", pady=(5, 8))
             self.parent.char_counters[col_name] = counter_label
 
@@ -423,7 +423,7 @@ class ExcelFieldManager:
         elif column_type == "column1":
             # Horizontal layout for column 1 and date fields in column 2 - saves vertical space
             ctk.CTkLabel(parent_frame, text=f"{col_name}:",
-                    font=('Arial', 10)).grid(row=row, column=0, sticky="w", pady=(0, 5))
+                    font=ctk.CTkFont(size=12)).grid(row=row, column=0, sticky="w", pady=(0, 5))
 
             # Set appropriate width based on field type
             if col_name in ['Startdatum', 'Slutdatum']:
@@ -466,7 +466,7 @@ class ExcelFieldManager:
             header_frame.grid(row=row, column=0, columnspan=2, sticky="ew", pady=(0, 2))
 
             ctk.CTkLabel(header_frame, text=f"{col_name}:",
-                    font=('Arial', 10)).pack(side="left")
+                    font=ctk.CTkFont(size=12)).pack(side="left")
 
             # Add lock switch for fields that should have one
             if has_lock:
@@ -512,7 +512,7 @@ class ExcelFieldManager:
 
         # Create Startdatum field (left side, row 0)
         ctk.CTkLabel(left_frame, text="Startdatum:",
-                font=('Arial', 10)).grid(row=0, column=0, sticky="w", pady=(0, 5))
+                font=ctk.CTkFont(size=12)).grid(row=0, column=0, sticky="w", pady=(0, 5))
 
         entry = ctk.CTkEntry(left_frame, textvariable=self.parent.excel_vars['Startdatum'],
                         font=ctk.CTkFont(size=12), width=120)
@@ -531,7 +531,7 @@ class ExcelFieldManager:
 
         # Create Starttid field (left side, row 1)
         ctk.CTkLabel(left_frame, text="Starttid:",
-                font=('Arial', 10)).grid(row=1, column=0, sticky="w")
+                font=ctk.CTkFont(size=12)).grid(row=1, column=0, sticky="w")
 
         entry = ctk.CTkEntry(left_frame, textvariable=self.parent.excel_vars['Starttid'],
                         font=ctk.CTkFont(size=12), width=80)
@@ -550,7 +550,7 @@ class ExcelFieldManager:
 
         # Create Slutdatum field (right side, row 0)
         ctk.CTkLabel(right_frame, text="Slutdatum:",
-                font=('Arial', 10)).grid(row=0, column=0, sticky="w", pady=(0, 5))
+                font=ctk.CTkFont(size=12)).grid(row=0, column=0, sticky="w", pady=(0, 5))
 
         entry = ctk.CTkEntry(right_frame, textvariable=self.parent.excel_vars['Slutdatum'],
                         font=ctk.CTkFont(size=12), width=120)
@@ -569,7 +569,7 @@ class ExcelFieldManager:
 
         # Create Sluttid field (right side, row 1)
         ctk.CTkLabel(right_frame, text="Sluttid:",
-                font=('Arial', 10)).grid(row=1, column=0, sticky="w")
+                font=ctk.CTkFont(size=12)).grid(row=1, column=0, sticky="w")
 
         entry = ctk.CTkEntry(right_frame, textvariable=self.parent.excel_vars['Sluttid'],
                         font=ctk.CTkFont(size=12), width=80)

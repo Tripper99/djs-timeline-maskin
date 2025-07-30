@@ -445,7 +445,7 @@ class PDFProcessorApp:
         pdf_path_frame = ctk.CTkFrame(group1, fg_color="transparent")
         pdf_path_frame.pack(fill="x", pady=(0, 10))
 
-        ctk.CTkLabel(pdf_path_frame, text="Vald fil:", font=ctk.CTkFont(size=10)).pack(side="left", padx=(10, 5))
+        ctk.CTkLabel(pdf_path_frame, text="Vald fil:", font=ctk.CTkFont(size=12)).pack(side="left", padx=(10, 5))
         pdf_path_entry = ctk.CTkEntry(pdf_path_frame, textvariable=self.pdf_path_var,
                                  state="readonly", font=ctk.CTkFont(size=12), width=300)
         pdf_path_entry.pack(side="left", padx=(10, 10))
@@ -459,7 +459,7 @@ class PDFProcessorApp:
                                "filnamnet parsas till komponenter och sidantalet räknas automatiskt.")
 
         # Output folder selection (same row)
-        ctk.CTkLabel(pdf_path_frame, text="Mapp för omdöpt pdf:", font=ctk.CTkFont(size=10)).pack(side="left", padx=(10, 5))
+        ctk.CTkLabel(pdf_path_frame, text="Mapp för omdöpt pdf:", font=ctk.CTkFont(size=12)).pack(side="left", padx=(10, 5))
         self.output_folder_entry = ctk.CTkEntry(pdf_path_frame, textvariable=self.output_folder_var,
                                            state="readonly", font=ctk.CTkFont(size=12), width=250)
         self.output_folder_entry.pack(side="left", padx=(10, 10))
@@ -503,28 +503,28 @@ class PDFProcessorApp:
         components_frame.pack(fill="x")
 
         # Date
-        ctk.CTkLabel(components_frame, text="Datum:", font=ctk.CTkFont(size=10)).grid(
+        ctk.CTkLabel(components_frame, text="Datum:", font=ctk.CTkFont(size=12)).grid(
             row=0, column=0, sticky="w", padx=(0, 10), pady=(0, 5))
         date_entry = ctk.CTkEntry(components_frame, textvariable=self.date_var, width=120, font=ctk.CTkFont(size=12))
         date_entry.grid(row=0, column=1, sticky="w", padx=(0, 20), pady=(0, 5))
         self.enable_undo_for_widget(date_entry)
 
         # Newspaper
-        ctk.CTkLabel(components_frame, text="Tidning:", font=ctk.CTkFont(size=10)).grid(
+        ctk.CTkLabel(components_frame, text="Tidning:", font=ctk.CTkFont(size=12)).grid(
             row=0, column=2, sticky="w", padx=(0, 10), pady=(0, 5))
         newspaper_entry = ctk.CTkEntry(components_frame, textvariable=self.newspaper_var, width=150, font=ctk.CTkFont(size=12))
         newspaper_entry.grid(row=0, column=3, sticky="w", padx=(0, 20), pady=(0, 5))
         self.enable_undo_for_widget(newspaper_entry)
 
         # Pages
-        ctk.CTkLabel(components_frame, text="Sidor:", font=ctk.CTkFont(size=10)).grid(
+        ctk.CTkLabel(components_frame, text="Sidor:", font=ctk.CTkFont(size=12)).grid(
             row=0, column=4, sticky="w", padx=(0, 10), pady=(0, 5))
         pages_entry = ctk.CTkEntry(components_frame, textvariable=self.pages_var, width=60, font=ctk.CTkFont(size=12))
         pages_entry.grid(row=0, column=5, sticky="w", padx=(0, 20), pady=(0, 5))
         self.enable_undo_for_widget(pages_entry)
 
         # Comment
-        ctk.CTkLabel(components_frame, text="Kommentar:", font=ctk.CTkFont(size=10)).grid(
+        ctk.CTkLabel(components_frame, text="Kommentar:", font=ctk.CTkFont(size=12)).grid(
             row=0, column=6, sticky="w", padx=(0, 10), pady=(0, 5))
         comment_entry = ctk.CTkEntry(components_frame, textvariable=self.comment_var, width=300, font=ctk.CTkFont(size=12))
         comment_entry.grid(row=0, column=7, sticky="w", padx=(0, 20), pady=(0, 5))
@@ -546,9 +546,9 @@ class PDFProcessorApp:
         excel_file_frame = ctk.CTkFrame(group3, fg_color="transparent")
         excel_file_frame.pack(fill="x", pady=(0, 10))
 
-        ctk.CTkLabel(excel_file_frame, text="Excel-fil:", font=ctk.CTkFont(size=10)).pack(side="left", padx=(10, 5))
+        ctk.CTkLabel(excel_file_frame, text="Excel-fil:", font=ctk.CTkFont(size=12)).pack(side="left", padx=(10, 5))
         excel_path_entry = ctk.CTkEntry(excel_file_frame, textvariable=self.excel_path_var,
-                                   state="readonly", font=('Arial', 9), width=60)
+                                   state="readonly", font=ctk.CTkFont(size=12), width=400)
         excel_path_entry.pack(side="left", padx=(10, 10))
         ToolTip(excel_path_entry, "Visar namn på den valda Excel-filen. Programmet kommer ihåg senast använda fil.")
 

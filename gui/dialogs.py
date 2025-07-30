@@ -83,11 +83,11 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
         text_frame = ctk.CTkFrame(main_frame)
         text_frame.pack(fill="both", expand=True, pady=(0, 15))
 
-        text_area = scrolledtext.ctk.CTkTextbox(text_frame, wrap=tk.WORD,
-                                            font=('Arial', 10), height=15)
+        text_area = ctk.CTkTextbox(text_frame, wrap="word",
+                                   font=ctk.CTkFont(size=12), height=300)
         text_area.pack(fill="both", expand=True)
         text_area.insert("1.0", req_text)
-        text_area.configure(state=tk.DISABLED)
+        text_area.configure(state="disabled")
 
         # Buttons frame
         buttons_frame = ctk.CTkFrame(main_frame)
@@ -486,12 +486,11 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
         text_frame = ctk.CTkFrame(main_frame)
         text_frame.pack(fill="x", pady=(0, 15))
 
-        import tkinter.scrolledtext as scrolledtext
-        text_area = scrolledtext.ctk.CTkTextbox(text_frame, wrap=tk.WORD,
-                                            font=('Arial', 10), height=10, width=70)
+        text_area = ctk.CTkTextbox(text_frame, wrap="word",
+                                   font=ctk.CTkFont(size=12), height=200, width=500)
         text_area.pack(fill="both")
         text_area.insert("1.0", preview_text + "\nFortsätt med denna uppdelning?")
-        text_area.configure(state=tk.DISABLED)
+        text_area.configure(state="disabled")
 
         # Button frame
         button_frame = ctk.CTkFrame(main_frame)
