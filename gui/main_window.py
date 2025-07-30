@@ -1584,28 +1584,17 @@ class PDFProcessorApp:
             if hasattr(self.excel_vars['Startdatum'], 'get'):
                 tid_start_content = self.excel_vars['Startdatum'].get().strip()
 
-        # NEW VALIDATION: Strict requirement for both Startdatum and Händelse
-        # Check if we're trying to save Excel data (any field has content)
-        has_any_content = False
-        for field_name, var in self.excel_vars.items():
-            # Skip automatic fields
-            if field_name in ['Dag', 'Inlagd']:
-                continue
-            if hasattr(var, 'get'):
-                content = ""
-                if hasattr(var, 'delete'):  # Text widget
-                    content = var.get("1.0", tk.END).strip()
-                else:  # StringVar
-                    content = var.get().strip()
-                if content:
-                    has_any_content = True
-                    break
+        # NEW VALIDATION: Simple rule for Excel operations
+        # If BOTH Startdatum and Händelse are empty, skip all Excel validation (PDF-only operation)
+        if not handelse_content and not tid_start_content:
+            return True  # No Excel validation needed - other fields will be ignored
 
-        # If any field has content, both Startdatum and Händelse must be filled
-        if has_any_content and not (handelse_content and tid_start_content):
+        # If either Startdatum OR Händelse has content, both must be filled
+        if not (handelse_content and tid_start_content):
             messagebox.showwarning(
                 "Obligatoriska fält saknas",
-                "Både Startdatum och Händelse måste vara ifyllda för att en ny excelrad ska kunna skrivas."
+                "Både Startdatum och Händelse måste vara ifyllda för att en ny excelrad ska kunna skrivas.\n\n" +
+                "Om du bara vill byta namn på en pdf så se till så att fälten Startdatum och Händelse är tomma."
             )
             # Focus on the empty field
             if not tid_start_content and 'Startdatum' in self.excel_vars:
