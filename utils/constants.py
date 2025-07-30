@@ -3,8 +3,8 @@ Constants and configuration values for the DJ Timeline application
 """
 
 # Configuration
-CONFIG_FILE = "pdf_processor_config.json"
-VERSION = "v1.19.0"
+CONFIG_FILE = "djs_timeline_machine_config.json"
+VERSION = "v1.19.1"
 
 # Required Excel columns - these must exist in the Excel file
 REQUIRED_EXCEL_COLUMNS = [

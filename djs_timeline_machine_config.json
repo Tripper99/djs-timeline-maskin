@@ -1,0 +1,68 @@
+{
+  "excel_file": "C:/Dropbox/Dokument/Python/APP DJs Timeline-maskin/Timeline_mall NYA KOLUMNERNA.xlsx",
+  "last_pdf_dir": "",
+  "window_geometry": "1800x700+26+26",
+  "theme": "simplex",
+  "output_folder": "",
+  "output_folder_locked": false,
+  "text_font_size": 9,
+  "locked_fields": {
+    "OBS": true,
+    "Kategori": true,
+    "Underkategori": true,
+    "Person/sak": false,
+    "Special": false,
+    "Händelse": true,
+    "Startdatum": true,
+    "Starttid": false,
+    "Slutdatum": false,
+    "Sluttid": false,
+    "Note1": true,
+    "Note2": true,
+    "Note3": true,
+    "Källa1": false,
+    "Källa2": false,
+    "Källa3": false,
+    "Övrigt": false
+  },
+  "locked_field_contents": {
+    "OBS": "Test locked. ",
+    "Kategori": "Media",
+    "Underkategori": "Nyheter",
+    "Händelse": "Plain text. \nRöd text. Röd text. Röd text. Röd text. ",
+    "Startdatum": "2025-12-15",
+    "Note1": "Plain text. \nRöd text. Röd text. Röd text. Röd text. ",
+    "Note2": "Plain text. \nRöd text. Röd text. Röd text. Röd text. ",
+    "Note3": "Plain text. \nRöd text. Röd text. Röd text. Röd text. "
+  },
+  "locked_field_formats": {
+    "Händelse": [
+      {
+        "tag": "red",
+        "start": "2.0",
+        "end": "2.40"
+      }
+    ],
+    "Note1": [
+      {
+        "tag": "red",
+        "start": "2.0",
+        "end": "2.40"
+      }
+    ],
+    "Note2": [
+      {
+        "tag": "red",
+        "start": "2.0",
+        "end": "2.40"
+      }
+    ],
+    "Note3": [
+      {
+        "tag": "red",
+        "start": "2.0",
+        "end": "2.40"
+      }
+    ]
+  }
+}

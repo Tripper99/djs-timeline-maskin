@@ -73,7 +73,7 @@ The application is structured with the following modular organization:
 
 ## Configuration
 
-The application uses JSON configuration stored in `pdf_processor_config.json` with:
+The application uses JSON configuration stored in `djs_timeline_machine_config.json` with:
 - **Excel file path** - Path to selected Excel file
 - **Last PDF directory** - Last used PDF directory for file dialog
 - **Window geometry** - Window size and position
