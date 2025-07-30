@@ -1225,7 +1225,7 @@ class PDFProcessorApp:
             return False
 
         # First check Startdatum and Händelse specifically
-        # These two fields must BOTH have content if either has content
+        # These two fields must BOTH have content for any Excel row to be saved
         startdatum_content = ""
         if 'Startdatum' in self.excel_vars:
             if hasattr(self.excel_vars['Startdatum'], 'get'):
@@ -1239,14 +1239,12 @@ class PDFProcessorApp:
                 else:  # StringVar
                     handelse_content = self.excel_vars['Händelse'].get().strip()
 
-        # If either Startdatum or Händelse has content, both must have content
-        if (startdatum_content or handelse_content):
-            if not (startdatum_content and handelse_content):
-                # One has content but not the other - don't save
-                return False
-            # Both have content - continue checking other fields
+        # NEW LOGIC: Excel row can ONLY be saved if BOTH Startdatum AND Händelse have content
+        if not (startdatum_content and handelse_content):
+            return False
 
-        # Check if any important field has content
+        # If we get here, both required fields have content
+        # Now check if there's any data worth saving
         important_fields = ['Startdatum', 'Händelse', 'OBS', 'Kategori', 'Underkategori',
                            'Person/sak', 'Special', 'Slutdatum', 'Note1', 'Note2', 'Note3',
                            'Källa1', 'Källa2', 'Källa3', 'Övrigt']
@@ -1364,11 +1362,28 @@ class PDFProcessorApp:
 
     def save_all_and_clear(self):
         """Main save function - rename file if changed and save Excel row if data exists"""
-        # First check if there's anything to do
+        # First check if there's a PDF to rename
         has_pdf_to_rename = self.current_pdf_path and self.has_filename_changed()
-        has_excel_data_to_save = self.should_save_excel_row()
 
-        if not has_pdf_to_rename and not has_excel_data_to_save:
+        # Check if any Excel fields have content (not just Startdatum/Händelse)
+        has_any_excel_content = False
+        if self.excel_vars:
+            for field_name, var in self.excel_vars.items():
+                # Skip automatic fields
+                if field_name in ['Dag', 'Inlagd']:
+                    continue
+                if hasattr(var, 'get'):
+                    content = ""
+                    if hasattr(var, 'delete'):  # Text widget
+                        content = var.get("1.0", tk.END).strip()
+                    else:  # StringVar
+                        content = var.get().strip()
+                    if content:
+                        has_any_excel_content = True
+                        break
+
+        # If nothing to do at all
+        if not has_pdf_to_rename and not has_any_excel_content:
             messagebox.showinfo(
                 "Inget att göra",
                 "Jag har inget att göra.\n\n" +
@@ -1377,9 +1392,11 @@ class PDFProcessorApp:
             )
             return
 
-        # Check for potential missing date when user has entered event info
-        if not self.validate_excel_data_before_save():
-            return  # User chose to cancel and fix the issue
+        # If there's Excel content, check if it can be saved
+        if has_any_excel_content:
+            # Check if Startdatum and Händelse are properly filled
+            if not self.validate_excel_data_before_save():
+                return  # User cancelled after seeing validation error
 
         # Check if Excel file exists before proceeding
         if self.excel_manager.excel_path and not Path(self.excel_manager.excel_path).exists():
@@ -1568,29 +1585,36 @@ class PDFProcessorApp:
                 tid_start_content = self.excel_vars['Startdatum'].get().strip()
 
         # NEW VALIDATION: Strict requirement for both Startdatum and Händelse
-        # If either field has content, both must have content
-        if (handelse_content or tid_start_content):
-            # Check if Händelse is missing but Startdatum exists
-            if tid_start_content and not handelse_content:
-                messagebox.showwarning(
-                    "Saknas händelse",
-                    "Du måste skriva något i Händelse-fältet för att en ny excelrad ska kunna sparas."
-                )
-                # Focus on Händelse field if possible
-                if 'Händelse' in self.excel_vars and hasattr(self.excel_vars['Händelse'], 'focus'):
-                    self.excel_vars['Händelse'].focus()
-                return False
+        # Check if we're trying to save Excel data (any field has content)
+        has_any_content = False
+        for field_name, var in self.excel_vars.items():
+            # Skip automatic fields
+            if field_name in ['Dag', 'Inlagd']:
+                continue
+            if hasattr(var, 'get'):
+                content = ""
+                if hasattr(var, 'delete'):  # Text widget
+                    content = var.get("1.0", tk.END).strip()
+                else:  # StringVar
+                    content = var.get().strip()
+                if content:
+                    has_any_content = True
+                    break
 
-            # Check if Startdatum is missing but Händelse exists
-            elif handelse_content and not tid_start_content:
-                messagebox.showwarning(
-                    "Saknas startdatum",
-                    "Du måste ange ett Startdatum för att en ny excelrad ska kunna sparas."
-                )
-                # Focus on Startdatum field if possible
-                if 'Startdatum' in self.excel_vars and hasattr(self.excel_vars['Startdatum'], 'focus'):
+        # If any field has content, both Startdatum and Händelse must be filled
+        if has_any_content and not (handelse_content and tid_start_content):
+            messagebox.showwarning(
+                "Obligatoriska fält saknas",
+                "Både Startdatum och Händelse måste vara ifyllda för att en ny excelrad ska kunna skrivas."
+            )
+            # Focus on the empty field
+            if not tid_start_content and 'Startdatum' in self.excel_vars:
+                if hasattr(self.excel_vars['Startdatum'], 'focus'):
                     self.excel_vars['Startdatum'].focus()
-                return False
+            elif not handelse_content and 'Händelse' in self.excel_vars:
+                if hasattr(self.excel_vars['Händelse'], 'focus'):
+                    self.excel_vars['Händelse'].focus()
+            return False
 
         # If both fields are empty, that's OK - no Excel row will be created
         # If both fields have content, that's also OK - Excel row will be created
