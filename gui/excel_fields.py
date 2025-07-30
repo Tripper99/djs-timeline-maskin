@@ -204,7 +204,7 @@ class ExcelFieldManager:
                 # Reset character counter for text fields
                 if col_name in self.parent.char_counters:
                     limit = self.parent.handelse_char_limit if col_name == 'Händelse' else self.parent.char_limit
-                    self.parent.char_counters[col_name].config(text=f"Tecken kvar: {limit}")
+                    self.parent.char_counters[col_name].configure(text=f"Tecken kvar: {limit}")
             else:  # StringVar
                 var.set("")
 
@@ -314,7 +314,7 @@ class ExcelFieldManager:
             entry = ctk.CTkEntry(parent_frame,
                            textvariable=dag_var,
                            state="readonly",
-                           font=('Arial', 9, 'italic'))
+                           font=ctk.CTkFont(size=12, slant='italic'))
             entry.grid(row=row, column=1, sticky="ew", pady=(0, 5))
 
             # Return 1 row used for Dag field
@@ -328,7 +328,7 @@ class ExcelFieldManager:
 
             entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],
                            state="readonly",
-                           font=('Arial', 9))
+                           font=ctk.CTkFont(size=12))
             entry.grid(row=row, column=1, sticky="ew", pady=(0, 5))
 
             # Return 1 row used for Inlagd field
@@ -430,17 +430,17 @@ class ExcelFieldManager:
             if col_name in ['Startdatum', 'Slutdatum']:
                 # Date fields: 2025-07-25 (10 chars + padding)
                 entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],
-                               font=('Arial', 9), width=12)
+                               font=ctk.CTkFont(size=12), width=120)
                 entry.grid(row=row, column=1, sticky="w", pady=(0, 5))
             elif col_name in ['Starttid', 'Sluttid']:
                 # Time fields: 18:45 (5 chars + padding)
                 entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],
-                               font=('Arial', 9), width=7)
+                               font=ctk.CTkFont(size=12), width=80)
                 entry.grid(row=row, column=1, sticky="w", pady=(0, 5))
             else:
                 # Other fields: expand to fill available space
                 entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],
-                               font=('Arial', 9))
+                               font=ctk.CTkFont(size=12))
                 entry.grid(row=row, column=1, sticky="ew", pady=(0, 5))
 
             # Enable undo tracking for Entry widget
@@ -478,7 +478,7 @@ class ExcelFieldManager:
 
             # Row 2: Entry field (full width)
             entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],
-                           font=('Arial', 9))
+                           font=ctk.CTkFont(size=12))
             entry.grid(row=row+1, column=0, columnspan=2, sticky="ew", pady=(0, 5))
 
             # Enable undo tracking for Entry widget
@@ -516,7 +516,7 @@ class ExcelFieldManager:
                 font=('Arial', 10)).grid(row=0, column=0, sticky="w", pady=(0, 5))
 
         entry = ctk.CTkEntry(left_frame, textvariable=self.parent.excel_vars['Startdatum'],
-                        font=('Arial', 9), width=12)
+                        font=ctk.CTkFont(size=12), width=120)
         entry.grid(row=0, column=1, sticky="w", padx=(5, 5), pady=(0, 5))
         entry.bind('<FocusOut>', lambda e: self.parent.validate_date_field(e, 'Startdatum'))
         entry.bind('<Return>', lambda e: self.parent.validate_date_field(e, 'Startdatum'))
@@ -535,7 +535,7 @@ class ExcelFieldManager:
                 font=('Arial', 10)).grid(row=1, column=0, sticky="w")
 
         entry = ctk.CTkEntry(left_frame, textvariable=self.parent.excel_vars['Starttid'],
-                        font=('Arial', 9), width=7)
+                        font=ctk.CTkFont(size=12), width=80)
         entry.grid(row=1, column=1, sticky="w", padx=(5, 5))
         entry.bind('<FocusOut>', lambda e: self.parent.validate_time_field(e, 'Starttid'))
         entry.bind('<Return>', lambda e: self.parent.validate_time_field(e, 'Starttid'))
@@ -554,7 +554,7 @@ class ExcelFieldManager:
                 font=('Arial', 10)).grid(row=0, column=0, sticky="w", pady=(0, 5))
 
         entry = ctk.CTkEntry(right_frame, textvariable=self.parent.excel_vars['Slutdatum'],
-                        font=('Arial', 9), width=12)
+                        font=ctk.CTkFont(size=12), width=120)
         entry.grid(row=0, column=1, sticky="w", padx=(5, 5), pady=(0, 5))
         entry.bind('<FocusOut>', lambda e: self.parent.validate_date_field(e, 'Slutdatum'))
         entry.bind('<Return>', lambda e: self.parent.validate_date_field(e, 'Slutdatum'))
@@ -573,7 +573,7 @@ class ExcelFieldManager:
                 font=('Arial', 10)).grid(row=1, column=0, sticky="w")
 
         entry = ctk.CTkEntry(right_frame, textvariable=self.parent.excel_vars['Sluttid'],
-                        font=('Arial', 9), width=7)
+                        font=ctk.CTkFont(size=12), width=80)
         entry.grid(row=1, column=1, sticky="w", padx=(5, 5))
         entry.bind('<FocusOut>', lambda e: self.parent.validate_time_field(e, 'Sluttid'))
         entry.bind('<Return>', lambda e: self.parent.validate_time_field(e, 'Sluttid'))

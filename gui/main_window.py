@@ -327,7 +327,7 @@ class PDFProcessorApp:
     def create_menu_bar(self):
         """Create menu bar with Help and Theme menus"""
         menubar = tk.Menu(self.root)
-        self.root.config(menu=menubar)
+        self.root.configure(menu=menubar)
 
         # Help menu
         help_menu = tk.Menu(menubar, tearoff=0)
@@ -447,7 +447,7 @@ class PDFProcessorApp:
 
         ctk.CTkLabel(pdf_path_frame, text="Vald fil:", font=ctk.CTkFont(size=10)).pack(side="left", padx=(10, 5))
         pdf_path_entry = ctk.CTkEntry(pdf_path_frame, textvariable=self.pdf_path_var,
-                                 state="readonly", font=('Arial', 9), width=40)
+                                 state="readonly", font=ctk.CTkFont(size=12), width=300)
         pdf_path_entry.pack(side="left", padx=(10, 10))
         ToolTip(pdf_path_entry, "Visar namn på den valda PDF-filen. Filen öppnas automatiskt när den väljs.")
 
@@ -461,7 +461,7 @@ class PDFProcessorApp:
         # Output folder selection (same row)
         ctk.CTkLabel(pdf_path_frame, text="Mapp för omdöpt pdf:", font=ctk.CTkFont(size=10)).pack(side="left", padx=(10, 5))
         self.output_folder_entry = ctk.CTkEntry(pdf_path_frame, textvariable=self.output_folder_var,
-                                           state="readonly", font=('Arial', 9), width=30)
+                                           state="readonly", font=ctk.CTkFont(size=12), width=250)
         self.output_folder_entry.pack(side="left", padx=(10, 10))
         ToolTip(self.output_folder_entry, "Visar mappen där omdöpta PDF-filer ska sparas. "
                                          "Fylls automatiskt med PDF-filens mapp om inte låst.")
@@ -505,28 +505,28 @@ class PDFProcessorApp:
         # Date
         ctk.CTkLabel(components_frame, text="Datum:", font=ctk.CTkFont(size=10)).grid(
             row=0, column=0, sticky="w", padx=(0, 10), pady=(0, 5))
-        date_entry = ctk.CTkEntry(components_frame, textvariable=self.date_var, width=15)
+        date_entry = ctk.CTkEntry(components_frame, textvariable=self.date_var, width=120, font=ctk.CTkFont(size=12))
         date_entry.grid(row=0, column=1, sticky="w", padx=(0, 20), pady=(0, 5))
         self.enable_undo_for_widget(date_entry)
 
         # Newspaper
         ctk.CTkLabel(components_frame, text="Tidning:", font=ctk.CTkFont(size=10)).grid(
             row=0, column=2, sticky="w", padx=(0, 10), pady=(0, 5))
-        newspaper_entry = ctk.CTkEntry(components_frame, textvariable=self.newspaper_var, width=20)
+        newspaper_entry = ctk.CTkEntry(components_frame, textvariable=self.newspaper_var, width=150, font=ctk.CTkFont(size=12))
         newspaper_entry.grid(row=0, column=3, sticky="w", padx=(0, 20), pady=(0, 5))
         self.enable_undo_for_widget(newspaper_entry)
 
         # Pages
         ctk.CTkLabel(components_frame, text="Sidor:", font=ctk.CTkFont(size=10)).grid(
             row=0, column=4, sticky="w", padx=(0, 10), pady=(0, 5))
-        pages_entry = ctk.CTkEntry(components_frame, textvariable=self.pages_var, width=5)
+        pages_entry = ctk.CTkEntry(components_frame, textvariable=self.pages_var, width=60, font=ctk.CTkFont(size=12))
         pages_entry.grid(row=0, column=5, sticky="w", padx=(0, 20), pady=(0, 5))
         self.enable_undo_for_widget(pages_entry)
 
         # Comment
         ctk.CTkLabel(components_frame, text="Kommentar:", font=ctk.CTkFont(size=10)).grid(
             row=0, column=6, sticky="w", padx=(0, 10), pady=(0, 5))
-        comment_entry = ctk.CTkEntry(components_frame, textvariable=self.comment_var, width=40)
+        comment_entry = ctk.CTkEntry(components_frame, textvariable=self.comment_var, width=300, font=ctk.CTkFont(size=12))
         comment_entry.grid(row=0, column=7, sticky="w", padx=(0, 20), pady=(0, 5))
         self.enable_undo_for_widget(comment_entry)
 
@@ -655,7 +655,7 @@ class PDFProcessorApp:
                 self.excel_path_var.set(Path(excel_path).name)
                 # No need to create fields - they're already created in setup_gui
                 # Enable the "Open Excel" button for previously loaded file
-                self.open_excel_btn.config(state="normal")
+                self.open_excel_btn.configure(state="normal")
                 logger.info(f"Loaded saved Excel file: {excel_path}")
 
     def load_saved_output_folder(self):
@@ -986,7 +986,7 @@ class PDFProcessorApp:
                 self.config['excel_file'] = working_path
                 self.config_manager.save_config(self.config)
                 # Enable the "Open Excel" button after successful load
-                self.open_excel_btn.config(state="normal")
+                self.open_excel_btn.configure(state="normal")
                 logger.info(f"Selected Excel file: {working_path}")
             else:
                 messagebox.showerror("Fel", "Kunde inte läsa Excel-filen")
@@ -1003,7 +1003,7 @@ class PDFProcessorApp:
                                f"Excel-filen kunde inte hittas:\n{Path(self.excel_manager.excel_path).name}\n\n" +
                                "Filen kan ha flyttats eller tagits bort.")
             # Disable the button since file is missing
-            self.open_excel_btn.config(state="disabled")
+            self.open_excel_btn.configure(state="disabled")
             return
 
         try:
@@ -1628,7 +1628,7 @@ class PDFProcessorApp:
             else:
                 style = "danger"
 
-            counter_label.config(text=f"Tecken kvar: {remaining}")
+            counter_label.configure(text=f"Tecken kvar: {remaining}")
 
         # Hard limit enforcement
         if char_count > limit:
@@ -1639,7 +1639,7 @@ class PDFProcessorApp:
 
             # Update counter to show 0
             if column_name in self.char_counters:
-                self.char_counters[column_name].config(text="Tecken kvar: 0")
+                self.char_counters[column_name].configure(text="Tecken kvar: 0")
 
     def validate_time_format(self, time_input):
         """
@@ -2173,7 +2173,7 @@ class PDFProcessorApp:
 
     def update_stats_display(self):
         """Update statistics display"""
-        self.filename_stats_label.config(text=self.get_stats_text())
+        self.filename_stats_label.configure(text=self.get_stats_text())
 
     def on_closing(self):
         """Handle application closing"""
@@ -2368,7 +2368,7 @@ class PDFProcessorApp:
         if hasattr(widget, 'config'):
             # Only enable undo for Text widgets (Entry widgets don't reliably support undo parameter)
             if isinstance(widget, tk.Text):
-                widget.config(undo=True, maxundo=20)
+                widget.configure(undo=True, maxundo=20)
             elif hasattr(widget, 'get') and hasattr(widget, 'delete'):
                 # This is an Entry widget - set up custom undo tracking
                 self.setup_entry_undo(widget)

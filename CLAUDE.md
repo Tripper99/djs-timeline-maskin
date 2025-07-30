@@ -218,4 +218,8 @@ This method might seem complicated but is important to understand that this is t
 - **Current version**: v1.19.2 (Output folder lock persistence fixed)
 - **Last tested**: 2025-07-30 - Output folder lock switch persistence working correctly
 
+## Resources
+
+- Access CustomTkinter manual here: https://customtkinter.tomschimansky.com/documentation/
+
 For detailed version history and development milestones, see DEVELOPMENT_HISTORY.md

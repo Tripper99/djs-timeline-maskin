@@ -87,7 +87,7 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
                                             font=('Arial', 10), height=15)
         text_area.pack(fill="both", expand=True)
         text_area.insert("1.0", req_text)
-        text_area.config(state=tk.DISABLED)
+        text_area.configure(state=tk.DISABLED)
 
         # Buttons frame
         buttons_frame = ctk.CTkFrame(main_frame)
@@ -201,7 +201,7 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
                     self.parent.config_manager.save_config(self.parent.config)
                     # No need to create fields - they're already created in setup_gui
                     # Enable the "Open Excel" button for newly created template
-                    self.parent.open_excel_btn.config(state="normal")
+                    self.parent.open_excel_btn.configure(state="normal")
                     logger.info(f"Loaded created template: {template_path}")
 
         except Exception as e:
@@ -491,7 +491,7 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
                                             font=('Arial', 10), height=10, width=70)
         text_area.pack(fill="both")
         text_area.insert("1.0", preview_text + "\nFortsätt med denna uppdelning?")
-        text_area.config(state=tk.DISABLED)
+        text_area.configure(state=tk.DISABLED)
 
         # Button frame
         button_frame = ctk.CTkFrame(main_frame)
