@@ -118,11 +118,11 @@ The breakthrough hybrid approach consista of:
 - Method 2 character-by-character algorithm for text extraction
 This method might seem complicated but is important to understand that this is the only way we've found to make the app to write perfect Excel rich text formatting with colors, bold, italic, line breaks.
 
-## Current Status (v1.18.1)
+## Current Status (v1.18.2)
 
-**COMPLETED ✅ - CLEAN FORMATTING SYSTEM**: Major simplification with italic removed for guaranteed Excel compatibility and improved user experience
+**COMPLETED ✅ - STABLE VERSION RESTORED**: Reset to v1.18.2 after discovering critical config saving issues in later versions
 
-### Working Features (v1.18.1):
+### Working Features (v1.18.2):
 - ✅ **Theme-Independent Color Buttons**: Formatting toolbar colors remain fixed across all themes ✅ NEW!
 - ✅ **Clean Formatting System**: Bold + 3 colors only - guaranteed Excel compatibility
 - ✅ **Excel Hybrid Method Protected**: No risk to reliable Excel export functionality
@@ -211,7 +211,7 @@ This method might seem complicated but is important to understand that this is t
 - Logging is configured for debugging
 - No automated tests are present in the codebase
 - No build process required - runs directly with Python interpreter
-- **Current version**: v1.18.1 (stable master with theme-independent color buttons)
-- **Last tested**: 2025-07-30 - Theme-independent color buttons verified working perfectly across all themes
+- **Current version**: v1.18.2 (stable master with working config saving - reset after v1.18.3/v1.18.4 issues)
+- **Last tested**: 2025-07-30 - Config saving verified working perfectly, locked fields and rich text preserved
 
 For detailed version history and development milestones, see DEVELOPMENT_HISTORY.md

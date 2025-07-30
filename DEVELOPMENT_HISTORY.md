@@ -4,6 +4,35 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v1.18.2 Stable Reset (2025-07-30) - Recovery from Critical Config Issues ✅
+**Achievement**: Successfully identified and resolved critical config saving issues by resetting to stable v1.18.2
+
+**Problem Discovered**: 
+Versions v1.18.3 and v1.18.4 contained critical bugs that broke the config saving mechanism. Despite appearing to work normally, these versions failed to save locked field data when closing the application, causing user data loss.
+
+**Root Cause Analysis**:
+- **v1.18.3**: Icon implementation accidentally broke the `setup_gui()` method structure
+- **v1.18.4**: Attempt to fix v1.18.3 created duplicate/incomplete method definitions
+- **Core Issue**: `on_closing()` method was never called due to incomplete window protocol binding setup
+- **Symptom**: App could read config data but couldn't save new changes
+
+**Recovery Process**:
+1. **Smart Reset Strategy**: Instead of complex debugging, reset to known working state (v1.18.2)
+2. **Issue Identification**: Discovered `setup_gui()` method structural problems in later versions
+3. **Verification**: Confirmed v1.18.2 has fully working config saving mechanism
+4. **Testing**: Validated locked fields, rich text formatting, and all config persistence works correctly
+
+**Key Lessons Learned**:
+- **Simple Changes First**: Config filename changes should be minimal, not complex debugging sessions
+- **Working Baseline**: Always maintain a known working version for fallback
+- **Method Structure Critical**: Window protocol binding setup must complete properly for config saving
+- **Testing Saves Time**: Quick reset to working version faster than extensive debugging
+
+**Current Status**: 
+- ✅ **Config Saving Works**: All locked fields and rich text formatting preserved across sessions
+- ✅ **Stable Foundation**: Ready for simple config filename change from solid base
+- ✅ **Clean Codebase**: No broken method structures or incomplete implementations
+
 ### v1.18.1 Success (2025-07-30) - Theme-Independent Color Buttons ✅
 **Achievement**: Fixed formatting toolbar color buttons to display consistent colors regardless of selected theme
 
