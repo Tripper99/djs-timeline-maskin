@@ -4,6 +4,33 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v1.19.2 Output Folder Lock Persistence Fixed (2025-07-30) - Consistent Lock Behavior ✅
+**Achievement**: Output folder lock switch now persists between sessions like all other lock switches
+
+**Problem**: The output folder lock switch was implemented with "session-only behavior" - it always started unlocked on app startup, unlike all other lock switches which preserve their state between sessions.
+
+**Root Cause**: Three methods had deliberate session-only implementation:
+- `load_saved_output_folder()` forced lock switch to False on startup
+- `on_output_folder_lock_change()` didn't save lock state to config  
+- `on_closing()` didn't preserve output folder lock state
+
+**Solution Implementation**:
+1. **Modified `load_saved_output_folder()`**: Now loads actual saved `output_folder_locked` state from config
+2. **Modified `on_output_folder_lock_change()`**: Now saves lock state to config when user changes it
+3. **Modified `on_closing()`**: Now saves current output folder lock state before app exit
+4. **Version Update**: v1.19.1 → v1.19.2
+
+**User Benefits**:
+- ✅ **Consistent Behavior**: All lock switches now work identically
+- ✅ **User Convenience**: No need to re-enable output folder lock every session
+- ✅ **Workflow Improvement**: Lock state remembered across app restarts
+- ✅ **Intuitive Operation**: Behavior matches user expectations
+
+**Technical Verification**:
+- Config file correctly shows `"output_folder_locked": true` when saved
+- Lock state loads properly on app startup
+- User testing confirmed fix works as intended
+
 ### v1.19.1 EXE Distribution Ready (2025-07-30) - Professional Config File Naming ✅
 **Achievement**: Successfully renamed config file for professional EXE distribution
 

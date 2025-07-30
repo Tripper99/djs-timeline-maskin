@@ -118,14 +118,16 @@ The breakthrough hybrid approach consista of:
 - Method 2 character-by-character algorithm for text extraction
 This method might seem complicated but is important to understand that this is the only way we've found to make the app to write perfect Excel rich text formatting with colors, bold, italic, line breaks.
 
-## Current Status (v1.19.1)
+## Current Status (v1.19.2)
 
-**COMPLETED ✅ - EXE DISTRIBUTION READY**: Professional config file naming and optimized window width for deployment
+**COMPLETED ✅ - OUTPUT FOLDER LOCK PERSISTENCE FIXED**: Output folder lock switch now behaves consistently with all other lock switches
 
-### Working Features (v1.19.1):
-- ✅ **Professional Config File**: `djs_timeline_machine_config.json` - EXE distribution ready ✅ NEW!
-- ✅ **Optimized Window Width**: 1800px startup width for better screen compatibility ✅ NEW!
-- ✅ **Theme-Independent Color Buttons**: Formatting toolbar colors remain fixed across all themes ✅ NEW!
+### Working Features (v1.19.2):
+- ✅ **Output Folder Lock Persistence**: Lock switch state saved and restored between sessions ✅ NEW!
+- ✅ **Consistent Lock Behavior**: All lock switches now behave identically - persistent across sessions ✅ NEW!
+- ✅ **Professional Config File**: `djs_timeline_machine_config.json` - EXE distribution ready
+- ✅ **Optimized Window Width**: 1800px startup width for better screen compatibility
+- ✅ **Theme-Independent Color Buttons**: Formatting toolbar colors remain fixed across all themes
 - ✅ **Clean Formatting System**: Bold + 3 colors only - guaranteed Excel compatibility
 - ✅ **Excel Hybrid Method Protected**: No risk to reliable Excel export functionality
 - ✅ **Simplified User Interface**: Bold, Red, Green, Blue, T-clear, A+ font buttons only
@@ -213,7 +215,7 @@ This method might seem complicated but is important to understand that this is t
 - Logging is configured for debugging
 - No automated tests are present in the codebase
 - No build process required - runs directly with Python interpreter
-- **Current version**: v1.19.1 (EXE-ready with professional config file naming)
-- **Last tested**: 2025-07-30 - Config file renamed successfully, all functionality verified working
+- **Current version**: v1.19.2 (Output folder lock persistence fixed)
+- **Last tested**: 2025-07-30 - Output folder lock switch persistence working correctly
 
 For detailed version history and development milestones, see DEVELOPMENT_HISTORY.md
