@@ -1,10 +1,10 @@
 {
   "excel_file": "C:/Dropbox/Dokument/Python/APP DJs Timeline-maskin/Timeline_mall NYA KOLUMNERNA.xlsx",
-  "last_pdf_dir": "",
+  "last_pdf_dir": "C:\\Dropbox\\DaCosta\\Dokument\\Tidningar, Radio, TV, debatter\\Artiklar från KB\\KB SAMLAT 250513 250514 250523 250527 250611\\Omdöpta filer inlagda i timeline",
   "window_geometry": "1920x777+0+0",
   "theme": "simplex",
-  "output_folder": "C:/Dropbox/DaCosta/Dokument/Tidningar, Radio, TV, debatter/Artiklar från KB/KB SAMLAT 250513 250514 250523 250527 250611/Omdöpta filer inlagda i timeline",
-  "output_folder_locked": true,
+  "output_folder": "",
+  "output_folder_locked": false,
   "text_font_size": 9,
   "locked_fields": {
     "OBS": true,
@@ -29,65 +29,43 @@
     "OBS": "Test locked. ",
     "Kategori": "Media",
     "Underkategori": "Nyheter",
-    "Händelse": "Plain text. \nRöd text. Röd text. Röd text. Röd text. \n\nTest i CustomTkinter. ",
+    "Händelse": "Kan hon ta reda på vem kvinnan var (Ivj Birgit Degerman)\n\n1984-07-21 AB Kan hon ta reda på vem kvinnan var (Ivj Birgit Degerman) (1 sid).pdf\n\nRöd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text.",
     "Startdatum": "2025-12-15",
-    "Note1": "Plain text. \nRöd text. Röd text. Röd text. Röd text. ",
-    "Note2": "Plain text. \nRöd text. Röd text. Röd text. Röd text. ",
-    "Note3": "Plain text. \nRöd text. Röd text. Röd text. Röd text. \nPlain text. \nRöd text. Röd text. Röd text. Röd text.",
+    "Note1": "Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. ",
+    "Note2": "Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. ",
+    "Note3": "Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. Röd text. ",
     "Källa1": "Test"
   },
   "locked_field_formats": {
-    "Händelse": [
+    "Note1": [
       {
         "tag": "bold",
-        "start": "4.0",
-        "end": "4.22"
-      },
-      {
-        "tag": "red",
-        "start": "2.0",
-        "end": "2.10"
-      },
-      {
-        "tag": "red",
-        "start": "2.13",
-        "end": "2.40"
+        "start": "1.0",
+        "end": "2.0"
       },
       {
         "tag": "blue",
-        "start": "4.0",
-        "end": "4.22"
-      },
-      {
-        "tag": "green",
-        "start": "2.10",
-        "end": "2.13"
-      }
-    ],
-    "Note1": [
-      {
-        "tag": "red",
-        "start": "2.0",
-        "end": "2.40"
+        "start": "1.0",
+        "end": "2.0"
       }
     ],
     "Note2": [
       {
-        "tag": "red",
-        "start": "2.0",
-        "end": "2.40"
+        "tag": "green",
+        "start": "1.0",
+        "end": "2.0"
       }
     ],
     "Note3": [
       {
-        "tag": "red",
-        "start": "2.0",
-        "end": "2.40"
+        "tag": "bold",
+        "start": "1.0",
+        "end": "2.0"
       },
       {
         "tag": "red",
-        "start": "4.0",
-        "end": "4.39"
+        "start": "1.0",
+        "end": "2.0"
       }
     ]
   }
