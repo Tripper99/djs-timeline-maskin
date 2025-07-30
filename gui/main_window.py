@@ -123,7 +123,7 @@ class PDFProcessorApp:
         current_theme = self.config.get('theme', 'simplex')
         self.root = tb.Window(themename=current_theme)
         self.root.title(f"DJs Timeline-maskin {VERSION}")
-        self.root.geometry("2000x1000")  # Initial size before responsive calculation
+        self.root.geometry("1800x1000")  # Initial size before responsive calculation
 
         # Set application icon
         try:
@@ -177,20 +177,20 @@ class PDFProcessorApp:
                         logger.info(f"Using saved geometry: {saved_geometry}")
                 else:
                     # Fallback to calculated geometry
-                    x = (screen_width // 2) - (2000 // 2)
+                    x = (screen_width // 2) - (1800 // 2)
                     y = 0
-                    self.root.geometry(f"2000x{window_height}+{x}+{y}")
+                    self.root.geometry(f"1800x{window_height}+{x}+{y}")
             except Exception as e:
                 logger.warning(f"Error parsing saved geometry {saved_geometry}: {e}")
                 # Fallback to calculated geometry
-                x = (screen_width // 2) - (2000 // 2)
+                x = (screen_width // 2) - (1800 // 2)
                 y = 0
-                self.root.geometry(f"2000x{window_height}+{x}+{y}")
+                self.root.geometry(f"1800x{window_height}+{x}+{y}")
         else:
             # No saved geometry, use calculated
-            x = (screen_width // 2) - (2000 // 2)
+            x = (screen_width // 2) - (1800 // 2)
             y = 0
-            self.root.geometry(f"2000x{window_height}+{x}+{y}")
+            self.root.geometry(f"1800x{window_height}+{x}+{y}")
 
         # Create menu bar
         self.create_menu_bar()
