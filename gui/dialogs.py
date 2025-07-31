@@ -7,7 +7,7 @@ Contains all dialog classes and methods extracted from main_window.py
 import logging
 import tkinter as tk
 from pathlib import Path
-from tkinter import filedialog, messagebox, scrolledtext
+from tkinter import filedialog, messagebox
 
 # Third-party GUI imports
 import customtkinter as ctk
@@ -53,7 +53,7 @@ class DialogManager:
 OBLIGATORISKA KOLUMNER:
 • OBS
 • Inlagd
-• Kategori  
+• Kategori
 • Underkategori
 • Person/sak
 • Special

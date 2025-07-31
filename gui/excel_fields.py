@@ -240,7 +240,7 @@ class ExcelFieldManager:
         # Define column groupings (updated with new field name)
         column1_fields = ['OBS', 'Inlagd', 'Kategori', 'Underkategori', 'Person/sak',
                          'Special', 'Dag', 'Källa1', 'Källa2', 'Källa3', 'Övrigt']
-        column2_fields = ['Händelse']  # Date/time fields are now handled separately in subframe
+        # Date/time fields are now handled separately in subframe
         column3_fields = ['Note1', 'Note2', 'Note3']
 
         # Configure column weights for better spacing - left column wider, text columns narrower with gaps
@@ -276,7 +276,7 @@ class ExcelFieldManager:
 
         # Create subframe for date/time fields
         datetime_frame = ctk.CTkFrame(col2_frame, fg_color="transparent")
-        datetime_frame.grid(row=0, column=0, sticky="ew", pady=(0, 5))
+        datetime_frame.grid(row=0, column=0, sticky="ew", padx=5, pady=(5, 5))
 
         # Configure two columns in the datetime subframe
         datetime_frame.grid_columnconfigure(0, weight=1)  # Left column
@@ -307,14 +307,14 @@ class ExcelFieldManager:
         if col_name == 'Dag':
             # Standard horizontal layout for Dag field
             ctk.CTkLabel(parent_frame, text=f"{col_name}:",
-                    font=ctk.CTkFont(size=12)).grid(row=row, column=0, sticky="w", pady=(0, 5))
+                    font=ctk.CTkFont(size=14, weight="bold")).grid(row=row, column=0, sticky="w", padx=(10, 5), pady=(0, 5))
 
             dag_var = tk.StringVar(value="Formel läggs till automatiskt")
             entry = ctk.CTkEntry(parent_frame,
                            textvariable=dag_var,
                            state="readonly",
                            font=ctk.CTkFont(size=12, slant='italic'))
-            entry.grid(row=row, column=1, sticky="ew", pady=(0, 5))
+            entry.grid(row=row, column=1, sticky="ew", padx=(5, 10), pady=(0, 5))
 
             # Return 1 row used for Dag field
             return 1
@@ -323,12 +323,12 @@ class ExcelFieldManager:
         elif col_name == 'Inlagd':
             # Standard horizontal layout for Inlagd field
             ctk.CTkLabel(parent_frame, text=f"{col_name}:",
-                    font=ctk.CTkFont(size=12)).grid(row=row, column=0, sticky="w", pady=(0, 5))
+                    font=ctk.CTkFont(size=14, weight="bold")).grid(row=row, column=0, sticky="w", padx=(10, 5), pady=(0, 5))
 
             entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],
                            state="readonly",
                            font=ctk.CTkFont(size=12))
-            entry.grid(row=row, column=1, sticky="ew", pady=(0, 5))
+            entry.grid(row=row, column=1, sticky="ew", padx=(5, 10), pady=(0, 5))
 
             # Return 1 row used for Inlagd field
             return 1
@@ -340,7 +340,7 @@ class ExcelFieldManager:
             header_frame.grid(row=row, column=0, columnspan=2, sticky="sew", pady=(0, 2))
 
             ctk.CTkLabel(header_frame, text=f"{col_name}:",
-                    font=ctk.CTkFont(size=12)).pack(side="left")
+                    font=ctk.CTkFont(size=14, weight="bold")).pack(side="left", padx=(10, 5))
 
             # Add lock switch for text fields that should have one
             if has_lock:
@@ -400,11 +400,11 @@ class ExcelFieldManager:
             # Move scrollable text container to row+2 to make room for toolbar
             # Make Händelse expand vertically to fill available space
             if col_name == 'Händelse':
-                scrollable_text.grid(row=row+2, column=0, columnspan=2, sticky="nsew", pady=(0, 2))
+                scrollable_text.grid(row=row+2, column=0, columnspan=2, sticky="nsew", padx=(10, 10), pady=(0, 2))
                 # Configure the text widget row to expand vertically
                 parent_frame.grid_rowconfigure(row+2, weight=1)
             else:
-                scrollable_text.grid(row=row+2, column=0, columnspan=2, sticky="ew", pady=(0, 2))
+                scrollable_text.grid(row=row+2, column=0, columnspan=2, sticky="ew", padx=(10, 10), pady=(0, 2))
 
             # Row 4: Character counter (left aligned, compact)
             limit = self.parent.handelse_char_limit if col_name == 'Händelse' else self.parent.char_limit
@@ -423,24 +423,24 @@ class ExcelFieldManager:
         elif column_type == "column1":
             # Horizontal layout for column 1 and date fields in column 2 - saves vertical space
             ctk.CTkLabel(parent_frame, text=f"{col_name}:",
-                    font=ctk.CTkFont(size=12)).grid(row=row, column=0, sticky="w", pady=(0, 5))
+                    font=ctk.CTkFont(size=14, weight="bold")).grid(row=row, column=0, sticky="w", padx=(10, 5), pady=(0, 5))
 
             # Set appropriate width based on field type
             if col_name in ['Startdatum', 'Slutdatum']:
                 # Date fields: 2025-07-25 (10 chars + padding)
                 entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],
                                font=ctk.CTkFont(size=12), width=120)
-                entry.grid(row=row, column=1, sticky="w", pady=(0, 5))
+                entry.grid(row=row, column=1, sticky="w", padx=(5, 10), pady=(0, 5))
             elif col_name in ['Starttid', 'Sluttid']:
                 # Time fields: 18:45 (5 chars + padding)
                 entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],
                                font=ctk.CTkFont(size=12), width=80)
-                entry.grid(row=row, column=1, sticky="w", pady=(0, 5))
+                entry.grid(row=row, column=1, sticky="w", padx=(5, 10), pady=(0, 5))
             else:
                 # Other fields: expand to fill available space
                 entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],
                                font=ctk.CTkFont(size=12))
-                entry.grid(row=row, column=1, sticky="ew", pady=(0, 5))
+                entry.grid(row=row, column=1, sticky="ew", padx=(5, 10), pady=(0, 5))
 
             # Enable undo tracking for Entry widget
             self.parent.enable_undo_for_widget(entry)
@@ -454,7 +454,7 @@ class ExcelFieldManager:
                 lock_switch = ctk.CTkCheckBox(parent_frame,
                                            text="Lås",
                                            variable=self.parent.lock_vars[col_name])
-                lock_switch.grid(row=row, column=2, sticky="w", padx=(5, 0), pady=(0, 5))
+                lock_switch.grid(row=row, column=2, sticky="w", padx=(5, 10), pady=(0, 5))
 
             # Return 1 row used for horizontal layout
             return 1
@@ -466,7 +466,7 @@ class ExcelFieldManager:
             header_frame.grid(row=row, column=0, columnspan=2, sticky="ew", pady=(0, 2))
 
             ctk.CTkLabel(header_frame, text=f"{col_name}:",
-                    font=ctk.CTkFont(size=12)).pack(side="left")
+                    font=ctk.CTkFont(size=14, weight="bold")).pack(side="left", padx=(10, 5))
 
             # Add lock switch for fields that should have one
             if has_lock:
@@ -512,7 +512,7 @@ class ExcelFieldManager:
 
         # Create Startdatum field (left side, row 0)
         ctk.CTkLabel(left_frame, text="Startdatum:",
-                font=ctk.CTkFont(size=12)).grid(row=0, column=0, sticky="w", pady=(0, 5))
+                font=ctk.CTkFont(size=14, weight="bold")).grid(row=0, column=0, sticky="w", padx=(10, 5), pady=(0, 5))
 
         entry = ctk.CTkEntry(left_frame, textvariable=self.parent.excel_vars['Startdatum'],
                         font=ctk.CTkFont(size=12), width=120)
@@ -527,11 +527,11 @@ class ExcelFieldManager:
         lock_switch = ctk.CTkCheckBox(left_frame,
                                     text="Lås",
                                     variable=self.parent.lock_vars['Startdatum'])
-        lock_switch.grid(row=0, column=2, sticky="w", pady=(0, 5))
+        lock_switch.grid(row=0, column=2, sticky="w", padx=(5, 10), pady=(0, 5))
 
         # Create Starttid field (left side, row 1)
         ctk.CTkLabel(left_frame, text="Starttid:",
-                font=ctk.CTkFont(size=12)).grid(row=1, column=0, sticky="w")
+                font=ctk.CTkFont(size=14, weight="bold")).grid(row=1, column=0, sticky="w", padx=(10, 5))
 
         entry = ctk.CTkEntry(left_frame, textvariable=self.parent.excel_vars['Starttid'],
                         font=ctk.CTkFont(size=12), width=80)
@@ -546,11 +546,11 @@ class ExcelFieldManager:
         lock_switch = ctk.CTkCheckBox(left_frame,
                                     text="Lås",
                                     variable=self.parent.lock_vars['Starttid'])
-        lock_switch.grid(row=1, column=2, sticky="w")
+        lock_switch.grid(row=1, column=2, sticky="w", padx=(5, 10))
 
         # Create Slutdatum field (right side, row 0)
         ctk.CTkLabel(right_frame, text="Slutdatum:",
-                font=ctk.CTkFont(size=12)).grid(row=0, column=0, sticky="w", pady=(0, 5))
+                font=ctk.CTkFont(size=14, weight="bold")).grid(row=0, column=0, sticky="w", padx=(10, 5), pady=(0, 5))
 
         entry = ctk.CTkEntry(right_frame, textvariable=self.parent.excel_vars['Slutdatum'],
                         font=ctk.CTkFont(size=12), width=120)
@@ -565,11 +565,11 @@ class ExcelFieldManager:
         lock_switch = ctk.CTkCheckBox(right_frame,
                                     text="Lås",
                                     variable=self.parent.lock_vars['Slutdatum'])
-        lock_switch.grid(row=0, column=2, sticky="w", pady=(0, 5))
+        lock_switch.grid(row=0, column=2, sticky="w", padx=(5, 10), pady=(0, 5))
 
         # Create Sluttid field (right side, row 1)
         ctk.CTkLabel(right_frame, text="Sluttid:",
-                font=ctk.CTkFont(size=12)).grid(row=1, column=0, sticky="w")
+                font=ctk.CTkFont(size=14, weight="bold")).grid(row=1, column=0, sticky="w", padx=(10, 5))
 
         entry = ctk.CTkEntry(right_frame, textvariable=self.parent.excel_vars['Sluttid'],
                         font=ctk.CTkFont(size=12), width=80)
@@ -584,4 +584,4 @@ class ExcelFieldManager:
         lock_switch = ctk.CTkCheckBox(right_frame,
                                     text="Lås",
                                     variable=self.parent.lock_vars['Sluttid'])
-        lock_switch.grid(row=1, column=2, sticky="w")
+        lock_switch.grid(row=1, column=2, sticky="w", padx=(5, 10))

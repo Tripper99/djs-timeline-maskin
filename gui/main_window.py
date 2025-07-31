@@ -212,18 +212,21 @@ class PDFProcessorApp:
         # Get interior frame for content
         content_frame = self.scrollable_frame.interior
 
+        # Set a subtle background color for better card contrast (commented out for testing)
+        # content_frame.configure(fg_color=("#F5F5F5", "#1A1A1A"))
+
         # Main container - removed expand=True to ensure bottom frame remains visible
-        main_frame = ctk.CTkFrame(content_frame)
+        main_frame = ctk.CTkFrame(content_frame, fg_color="transparent")
         main_frame.pack(fill="x", expand=False, padx=20, pady=20)
 
         # Variables
         self.setup_variables()
 
-        # Create GUI groups
-        self.create_group1(main_frame)  # PDF Selection
-        self.create_group2(main_frame)  # Filename Editing
-        self.create_group3(main_frame)  # Excel Integration
-        self.create_group4(main_frame)  # Excel Operations Buttons
+        # Create GUI groups using card-based design
+        self.create_card_section(main_frame, "1. PDF-fil", self.create_group1_content)  # PDF Selection
+        self.create_card_section(main_frame, "2. Filnamn komponenter", self.create_parent_content)  # Filename Editing
+        self.create_card_section(main_frame, "3. Excel-integration", self.create_group3_content)  # Excel Integration
+        self.create_card_section(main_frame, "4. Operationer", self.create_group4_content)  # Excel Operations Buttons
 
         # Bottom frame for statistics and version
         bottom_frame = ctk.CTkFrame(content_frame)
@@ -435,14 +438,81 @@ class PDFProcessorApp:
             messagebox.showerror("Fel", f"Kunde inte öppna manualen: {str(e)}")
             logger.error(f"Error opening manual: {e}")
 
-    def create_group1(self, parent):
-        """Group 1: PDF Selection"""
-        group1 = ctk.CTkFrame(parent)
-        ctk.CTkLabel(group1, text="1. PDF-fil", font=ctk.CTkFont(weight="bold")).pack(anchor="w", padx=10, pady=(10, 5))
-        group1.pack(fill="x", pady=(0, 15))
+    def create_card_section(self, parent, title, content_func):
+        """Create a professional card-style section with shadow effect"""
+        # Outer shadow frame (creates depth effect)
+        shadow_frame = ctk.CTkFrame(parent,
+                                   fg_color=("#E8E8E8", "#2B2B2B"),  # Light shadow color
+                                   corner_radius=12)
+        shadow_frame.pack(fill="x", pady=(0, 20), padx=2)
+
+        # Main card frame (offset for shadow effect)
+        card_frame = ctk.CTkFrame(shadow_frame,
+                                 fg_color=("#FFFFFF", "#1E1E1E"),  # Clean white/dark background
+                                 corner_radius=10,
+                                 border_width=1,
+                                 border_color=("#D0D0D0", "#404040"))
+        card_frame.pack(fill="both", expand=True, padx=2, pady=2)
+
+        # Header section with modern typography
+        header_frame = ctk.CTkFrame(card_frame,
+                                   fg_color=("#F8F9FA", "#2A2A2A"),
+                                   corner_radius=8)
+        header_frame.pack(fill="x", padx=15, pady=(15, 10))
+
+        title_label = ctk.CTkLabel(header_frame,
+                                  text=title,
+                                  font=ctk.CTkFont(size=18, weight="bold"),
+                                  text_color=("#1A1A1A", "#FFFFFF"))
+        title_label.pack(anchor="w", padx=15, pady=12)
+
+        # Content area
+        content_frame = ctk.CTkFrame(card_frame, fg_color="transparent")
+        content_frame.pack(fill="both", expand=True, padx=15, pady=(0, 15))
+
+        # Call the content creation function
+        content_func(content_frame)
+
+    def create_modern_entry(self, parent, label_text, width=200):
+        """Create a modern input field with depth"""
+        container = ctk.CTkFrame(parent, fg_color="transparent")
+
+        # Label with better typography
+        label = ctk.CTkLabel(container,
+                           text=label_text,
+                           font=ctk.CTkFont(size=12, weight="normal"),
+                           text_color=("#4A4A4A", "#B0B0B0"))
+        label.pack(anchor="w", pady=(0, 4))
+
+        # Entry with enhanced appearance
+        entry = ctk.CTkEntry(container,
+                           width=width,
+                           height=35,
+                           font=ctk.CTkFont(size=12),
+                           corner_radius=8,
+                           border_width=2,
+                           border_color=("#E0E0E0", "#404040"),
+                           fg_color=("#FFFFFF", "#2B2B2B"))
+        entry.pack(anchor="w")
+
+        return container, entry
+
+    def create_modern_button(self, parent, text, color="#1976D2", width=150):
+        """Create a modern button with enhanced styling"""
+        return ctk.CTkButton(parent,
+                           text=text,
+                           width=width,
+                           height=40,
+                           font=ctk.CTkFont(size=12, weight="bold"),
+                           fg_color=color,
+                           corner_radius=10,
+                           border_width=0)
+
+    def create_group1_content(self, parent):
+        """Group 1 Content: PDF Selection"""
 
         # First row: PDF path display
-        pdf_path_frame = ctk.CTkFrame(group1, fg_color="transparent")
+        pdf_path_frame = ctk.CTkFrame(parent, fg_color="transparent")
         pdf_path_frame.pack(fill="x", pady=(0, 10))
 
         ctk.CTkLabel(pdf_path_frame, text="Vald fil:", font=ctk.CTkFont(size=12)).pack(side="left", padx=(10, 5))
@@ -492,14 +562,11 @@ class PDFProcessorApp:
         self.reset_folder_btn.pack(side="left", padx=(10, 0))
         ToolTip(self.reset_folder_btn, "Rensa mappvalet och låser upp automatisk uppdatering.")
 
-    def create_group2(self, parent):
-        """Group 2: Filename Editing"""
-        group2 = ctk.CTkFrame(parent)
-        ctk.CTkLabel(group2, text="2. Filnamn komponenter", font=ctk.CTkFont(weight="bold")).pack(anchor="w", padx=10, pady=(10, 5))
-        group2.pack(fill="x", pady=(0, 15))
+    def create_parent_content(self, parent):
+        """Group 2 Content: Filename Editing"""
 
         # Create grid for filename components
-        components_frame = ctk.CTkFrame(group2, fg_color="transparent")
+        components_frame = ctk.CTkFrame(parent, fg_color="transparent")
         components_frame.pack(fill="x")
 
         # Date
@@ -536,14 +603,11 @@ class PDFProcessorApp:
                                          fg_color="#17a2b8", width=26)
         self.copy_to_excel_btn.grid(row=0, column=8, sticky="w", padx=(10, 0), pady=(0, 5))
 
-    def create_group3(self, parent):
-        """Group 3: Excel Integration"""
-        group3 = ctk.CTkFrame(parent)
-        ctk.CTkLabel(group3, text="3. Excel-integration", font=ctk.CTkFont(weight="bold")).pack(anchor="w", padx=10, pady=(10, 5))
-        group3.pack(fill="x", pady=(0, 8))
+    def create_group3_content(self, parent):
+        """Group 3 Content: Excel Integration"""
 
         # Excel file selection
-        excel_file_frame = ctk.CTkFrame(group3, fg_color="transparent")
+        excel_file_frame = ctk.CTkFrame(parent, fg_color="transparent")
         excel_file_frame.pack(fill="x", pady=(0, 10))
 
         ctk.CTkLabel(excel_file_frame, text="Excel-fil:", font=ctk.CTkFont(size=12)).pack(side="left", padx=(10, 5))
@@ -578,7 +642,7 @@ class PDFProcessorApp:
         help_btn.pack(side="left")
 
         # Excel column fields (scrollable, three-column layout)
-        self.excel_fields_frame = ctk.CTkFrame(group3, fg_color="transparent")
+        self.excel_fields_frame = ctk.CTkFrame(parent, fg_color="transparent")
         self.excel_fields_frame.pack(fill="both", expand=False, pady=(5, 0))  # Reduced padding to save vertical space
 
         # Configure the excel_fields_frame for responsive layout
@@ -590,14 +654,11 @@ class PDFProcessorApp:
         saved_font_size = self.config.get('text_font_size', 9)
         self.apply_text_font_size(saved_font_size)
 
-    def create_group4(self, parent):
-        """Group 4: Excel Operations Buttons"""
-        group4 = ctk.CTkFrame(parent)
-        ctk.CTkLabel(group4, text="Spara nya pdf-namnet och/eller nya excelraden", font=ctk.CTkFont(weight="bold")).pack(anchor="w", padx=10, pady=(10, 5))
-        group4.pack(fill="x", pady=(0, 8))
+    def create_group4_content(self, parent):
+        """Group 4 Content: Excel Operations Buttons"""
 
         # First row: Buttons for Excel operations
-        excel_buttons_frame = ctk.CTkFrame(group4, fg_color="transparent")
+        excel_buttons_frame = ctk.CTkFrame(parent, fg_color="transparent")
         excel_buttons_frame.pack(fill="x", pady=(0, 10))
 
         self.save_all_btn = ctk.CTkButton(excel_buttons_frame, text="Spara allt och rensa fälten",
@@ -612,7 +673,7 @@ class PDFProcessorApp:
 
 
         # Second row: Row color selection
-        color_frame = ctk.CTkFrame(group4, fg_color="transparent")
+        color_frame = ctk.CTkFrame(parent, fg_color="transparent")
         color_frame.pack(fill="x", pady=(5, 0))
 
         # Label for color selection
@@ -1621,13 +1682,6 @@ class PDFProcessorApp:
             counter_label = self.char_counters[column_name]
 
             # Color coding based on remaining characters
-            if remaining >= 200:
-                style = "success"
-            elif remaining >= 50:
-                style = "warning"
-            else:
-                style = "danger"
-
             counter_label.configure(text=f"Tecken kvar: {remaining}")
 
         # Hard limit enforcement
