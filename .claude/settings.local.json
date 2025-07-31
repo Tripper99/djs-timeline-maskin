@@ -15,7 +15,9 @@
       "WebFetch(domain:xlsxwriter.readthedocs.io)",
       "Bash(wc:*)",
       "WebFetch(domain:ttkbootstrap.readthedocs.io)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(rg:*)",
+      "mcp__Ref__ref_read_url"
     ],
     "deny": []
   }

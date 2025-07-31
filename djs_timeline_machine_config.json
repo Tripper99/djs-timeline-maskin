@@ -1,11 +1,11 @@
 {
   "excel_file": "C:/Dropbox/Dokument/Python/APP DJs Timeline-maskin/Timeline_mall NYA KOLUMNERNA.xlsx",
   "last_pdf_dir": "C:\\Dropbox\\DaCosta\\Dokument\\Tidningar, Radio, TV, debatter\\Artiklar från KB\\KB SAMLAT 250513 250514 250523 250527 250611\\Omdöpta filer inlagda i timeline",
-  "window_geometry": "1920x777+0+0",
+  "window_geometry": "1920x1037+-52+24",
   "theme": "simplex",
   "output_folder": "",
   "output_folder_locked": false,
-  "text_font_size": 9,
+  "text_font_size": 12,
   "locked_fields": {
     "OBS": true,
     "Kategori": true,
@@ -37,6 +37,13 @@
     "Källa1": "Test"
   },
   "locked_field_formats": {
+    "Händelse": [
+      {
+        "tag": "red",
+        "start": "1.0",
+        "end": "1.56"
+      }
+    ],
     "Note1": [
       {
         "tag": "bold",

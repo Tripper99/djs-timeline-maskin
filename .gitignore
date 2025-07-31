@@ -65,3 +65,6 @@ logs/
 # But keep example files if any
 !example_*.xlsx
 !example_*.pdf
+
+# Demo files - UI interaction examples
+demos/
