@@ -696,20 +696,23 @@ class PDFProcessorApp:
 
         for value, text, color in color_options:
             # Create colored button with selection state
+            current_selection = self.row_color_var.get() if hasattr(self, 'row_color_var') else "none"
+            is_selected = current_selection == value
+
             button = ctk.CTkButton(
                 color_frame,
                 text=text,
                 width=60,
-                height=28,
+                height=30,  # Slightly taller for better proportions
                 font=ctk.CTkFont(size=11),
                 fg_color=color if value != "none" else "#FFFFFF",
                 hover_color=self._get_hover_color(color),
-                text_color="#000000" if value != "none" else "#666666",
+                text_color="#333333" if value != "none" else "#666666",  # Better contrast
                 border_color="#666666",
-                border_width=1 if self.row_color_var.get() != value else 3,
+                border_width=3 if is_selected else 1,
                 command=lambda v=value: self._select_row_color(v)
             )
-            button.pack(side="left", padx=(0, 8))
+            button.pack(side="left", padx=(0, 10))  # Slightly more spacing
             self.color_buttons[value] = button
 
     def _get_hover_color(self, base_color):
