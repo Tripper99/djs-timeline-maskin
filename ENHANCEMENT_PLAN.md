@@ -164,11 +164,13 @@ colors = {
 - **Final Result**: Modern, professional UI with enhanced focus behaviors matching demo specifications
 
 ## Current Status
-- **Version**: v2.1.4 (Phase 5 completed)
-- **Last Completed**: Phase 5 - Left Column Enhanced Focus styling implemented
-- **Phases 1-4**: Completed in v2.1.3 (text widgets, focus behaviors, date/time fields)
-- **Phase 5**: ✅ Completed - Enhanced focus styling for all left column fields (OBS, Kategori, Underkategori, Person/sak, Special, Källa1-3, Övrigt)
-- **Next**: Phase 6 - Colored Radio Buttons for Row Background
+- **Version**: v2.1.5 (Phase 6 completed + additional enhancements)
+- **Phases 1-4**: ✅ Completed in v2.1.3 (text widgets, focus behaviors, date/time fields)
+- **Phase 5**: ✅ Completed in v2.1.4 - Enhanced focus styling for all left column fields
+- **Phase 6**: ✅ Completed in v2.1.5 - Colored Radio Buttons replaced with modern button style
+- **Phase 8**: ✅ Completed - Status bar font size fixed (8pt/9pt → 14pt)
+- **Additional**: ✅ Completed - Removed bold formatting from all field labels
+- **Next**: Phase 7 - Integration Testing & Polish
 
 ## Notes
 - All enhancements based on existing demo files in `/demos/` folder

@@ -234,13 +234,13 @@ class PDFProcessorApp:
 
         # Statistics label (left side)
         self.filename_stats_label = ctk.CTkLabel(bottom_frame, text=self.get_stats_text(),
-                                               font=ctk.CTkFont(size=9))
+                                               font=ctk.CTkFont(size=14))
         self.filename_stats_label.pack(side="left")
         ToolTip(self.filename_stats_label, "Statistik över användning: Antal PDF:er öppnade, "
                                          "filer omdöpta och Excel-rader tillagda under denna session.")
 
         # Version label (right side)
-        version_label = ctk.CTkLabel(bottom_frame, text=VERSION, font=ctk.CTkFont(size=8))
+        version_label = ctk.CTkLabel(bottom_frame, text=VERSION, font=ctk.CTkFont(size=14))
         version_label.pack(side="right")
         ToolTip(version_label, f"Programversion {VERSION}. DJs Timeline-maskin för PDF-filhantering och Excel-integration.")
 
@@ -677,36 +677,70 @@ class PDFProcessorApp:
         color_frame.pack(fill="x", pady=(5, 0))
 
         # Label for color selection
-        color_label = ctk.CTkLabel(color_frame, text="Nya radens färg:", font=ctk.CTkFont(size=10, weight="bold"))
+        color_label = ctk.CTkLabel(color_frame, text="Nya excelradens bakgrundsfärg:", font=ctk.CTkFont(size=10, weight="bold"))
         color_label.pack(side="left", padx=(0, 15))
 
-        # Color options with visual indicators
+        # Colored button options for row background
         color_options = [
             ("none", "Ingen", "#FFFFFF"),
-            ("yellow", "Gul", "#FFFF99"),
-            ("green", "Grön", "#CCFFCC"),
-            ("blue", "Ljusblå", "#CCE5FF"),
-            ("pink", "Ljusrosa", "#FFCCEE"),
-            ("gray", "Ljusgrå", "#E6E6E6")
+            ("yellow", "Gul", "#FFF59D"),    # Light yellow
+            ("green", "Grön", "#C8E6C9"),    # Light green
+            ("blue", "Blå", "#BBDEFB"),      # Light blue
+            ("red", "Röd", "#FFCDD2"),       # Light red
+            ("pink", "Rosa", "#F8BBD9"),     # Light pink
+            ("gray", "Grå", "#E0E0E0")       # Light grey
         ]
 
+        # Store button references for selection state management
+        self.color_buttons = {}
+
         for value, text, color in color_options:
-            # Create frame for each radio button with color sample
-            radio_frame = ctk.CTkFrame(color_frame, fg_color="transparent")
-            # Add consistent spacing between all options for better visual separation
-            radio_frame.pack(side="left", padx=(0, 20))
+            # Create colored button with selection state
+            button = ctk.CTkButton(
+                color_frame,
+                text=text,
+                width=60,
+                height=28,
+                font=ctk.CTkFont(size=11),
+                fg_color=color if value != "none" else "#FFFFFF",
+                hover_color=self._get_hover_color(color),
+                text_color="#000000" if value != "none" else "#666666",
+                border_color="#666666",
+                border_width=1 if self.row_color_var.get() != value else 3,
+                command=lambda v=value: self._select_row_color(v)
+            )
+            button.pack(side="left", padx=(0, 8))
+            self.color_buttons[value] = button
 
-            # Radio button
-            radio = ctk.CTkRadioButton(radio_frame, text=text, value=value,
-                                 variable=self.row_color_var)
-            radio.pack(side="left")
+    def _get_hover_color(self, base_color):
+        """Generate a slightly darker hover color for buttons"""
+        if base_color == "#FFFFFF":
+            return "#F0F0F0"
+        # Simple darkening by reducing each RGB component
+        try:
+            # Convert hex to RGB
+            r = int(base_color[1:3], 16)
+            g = int(base_color[3:5], 16)
+            b = int(base_color[5:7], 16)
+            # Darken by 20
+            r = max(0, r - 20)
+            g = max(0, g - 20)
+            b = max(0, b - 20)
+            return f"#{r:02x}{g:02x}{b:02x}"
+        except (ValueError, IndexError):
+            return base_color
 
-            # Color sample using Canvas widget - skip for "none" option
-            if value != "none":
-                color_sample = tk.Canvas(radio_frame, width=20, height=15, highlightthickness=1,
-                                       highlightbackground="black", highlightcolor="black")
-                color_sample.pack(side="left", padx=(5, 0))
-                color_sample.create_rectangle(0, 0, 20, 15, fill=color, outline="black")
+    def _select_row_color(self, selected_value):
+        """Handle color button selection and update visual state"""
+        # Update the variable
+        self.row_color_var.set(selected_value)
+
+        # Update button border widths to show selection
+        for value, button in self.color_buttons.items():
+            if value == selected_value:
+                button.configure(border_width=3)  # Selected state
+            else:
+                button.configure(border_width=1)  # Normal state
 
     def load_saved_excel_file(self):
         """Load previously saved Excel file if it exists"""
