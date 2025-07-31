@@ -52,13 +52,14 @@ python app.py
 - **Filnamnsgenerering**: Skapar strukturerade filnamn från PDF-innehåll
 - **Excel-integration**: Uppdaterar Excel-filer med extraherad information
 - **Konfigurationshantering**: Sparar användarinställningar
-- **Modernt GUI**: Byggt med ttkbootstrap för modern utseende
+- **Modernt GUI**: Byggt med CustomTkinter för professionell design och moderna interaktioner
+- **Enhanced Focus Behaviors**: Professionella fokus-övergångar och visuell feedback
 - **Låsning av fält**: Möjlighet att låsa fält för persistent data
 
 ## Teknisk information
 
 - **Python-version**: 3.7+
-- **GUI-ramverk**: ttkbootstrap/tkinter
+- **GUI-ramverk**: CustomTkinter (modern, professionell UI)
 - **PDF-bearbetning**: PyPDF2
 - **Excel-hantering**: openpyxl
 
