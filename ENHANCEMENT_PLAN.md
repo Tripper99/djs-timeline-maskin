@@ -164,9 +164,11 @@ colors = {
 - **Final Result**: Modern, professional UI with enhanced focus behaviors matching demo specifications
 
 ## Current Status
-- **Version**: v2.1.2 (ready for enhancements)
-- **Last Completed**: Card-based UI implementation with rounded corners and proper padding
-- **Next**: Phase 1 - Text Widget Styling (Rounded Corners)
+- **Version**: v2.1.4 (Phase 5 completed)
+- **Last Completed**: Phase 5 - Left Column Enhanced Focus styling implemented
+- **Phases 1-4**: Completed in v2.1.3 (text widgets, focus behaviors, date/time fields)
+- **Phase 5**: ✅ Completed - Enhanced focus styling for all left column fields (OBS, Kategori, Underkategori, Person/sak, Special, Källa1-3, Övrigt)
+- **Next**: Phase 6 - Colored Radio Buttons for Row Background
 
 ## Notes
 - All enhancements based on existing demo files in `/demos/` folder

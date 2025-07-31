@@ -79,6 +79,20 @@ class ExcelFieldManager:
         """Enhanced focus out behavior for time fields"""
         entry_widget.configure(border_color="#E0E0E0", border_width=1)
 
+    def _setup_left_column_field_focus(self, entry_widget, field_name):
+        """Setup enhanced focus behavior for left column fields"""
+        # Enhanced focus behavior
+        entry_widget.bind('<FocusIn>', lambda e: self._on_left_column_focus_in(entry_widget))
+        entry_widget.bind('<FocusOut>', lambda e: self._on_left_column_focus_out(entry_widget), add='+')
+
+    def _on_left_column_focus_in(self, entry_widget):
+        """Enhanced focus in behavior for left column fields"""
+        entry_widget.configure(border_color="#2196F3", border_width=2)
+
+    def _on_left_column_focus_out(self, entry_widget):
+        """Enhanced focus out behavior for left column fields"""
+        entry_widget.configure(border_color="#E0E0E0", border_width=1)
+
     def serialize_text_widget_formatting(self, text_widget) -> List[Dict[str, Any]]:
         """Serialize tkinter Text widget formatting to JSON-compatible format"""
         try:
@@ -487,13 +501,18 @@ class ExcelFieldManager:
                                font=ctk.CTkFont(size=12), width=80)
                 entry.grid(row=row, column=1, sticky="w", padx=(5, 10), pady=(0, 5))
             else:
-                # Other fields: expand to fill available space
+                # Other fields: expand to fill available space with enhanced focus styling
                 entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],
-                               font=ctk.CTkFont(size=12))
+                               font=ctk.CTkFont(size=12),
+                               border_color="#E0E0E0", border_width=1, fg_color="#F8F8F8")
                 entry.grid(row=row, column=1, sticky="ew", padx=(5, 10), pady=(0, 5))
 
             # Enable undo tracking for Entry widget
             self.parent.enable_undo_for_widget(entry)
+
+            # Add enhanced focus behavior for left column fields (excluding date/time fields)
+            if col_name not in ['Startdatum', 'Slutdatum', 'Starttid', 'Sluttid']:
+                self._setup_left_column_field_focus(entry, col_name)
 
             # Add time validation for time fields
             if col_name in ['Starttid', 'Sluttid']:
