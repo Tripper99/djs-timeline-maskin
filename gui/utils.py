@@ -44,32 +44,60 @@ class ToolTip:
 
 
 class ScrollableText(ctk.CTkFrame):
-    """A Text widget with vertical scrollbar"""
+    """A Text widget with vertical scrollbar and modern rounded appearance"""
 
     def __init__(self, parent, **text_options):
-        super().__init__(parent)
+        # Create frame with rounded corners
+        super().__init__(parent, corner_radius=8, fg_color="transparent")
 
         # Force autoseparators to False for better undo control
         text_options['autoseparators'] = False
 
-        # Create text widget with all provided options
-        self.text_widget = tk.Text(self, **text_options)
+        # Create text widget with modern styling
+        self.text_widget = tk.Text(self,
+                                  relief="flat",
+                                  bd=2,
+                                  highlightthickness=2,
+                                  highlightcolor="#2196F3",
+                                  highlightbackground="#E0E0E0",
+                                  **text_options)
 
         # Create scrollbar (always visible for consistent behavior)
-        # Note: CustomTkinter doesn't have a separate scrollbar widget
-        # We'll use tkinter's scrollbar for now
         self.scrollbar = tk.Scrollbar(self, orient="vertical",
                                      command=self.text_widget.yview)
 
         # Configure text widget scrolling
         self.text_widget.configure(yscrollcommand=self.scrollbar.set)
 
+        # Add focus enhancement bindings
+        self._setup_focus_behavior()
+
         # Layout widgets - use grid for better control
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
-        self.text_widget.grid(row=0, column=0, sticky="nsew")
-        self.scrollbar.grid(row=0, column=1, sticky="ns")
+        self.text_widget.grid(row=0, column=0, sticky="nsew", padx=2, pady=2)
+        self.scrollbar.grid(row=0, column=1, sticky="ns", pady=2)
+
+    def _setup_focus_behavior(self):
+        """Setup enhanced focus behavior with smooth transitions"""
+        # Bind focus events
+        self.text_widget.bind('<FocusIn>', self._on_focus_in)
+        self.text_widget.bind('<FocusOut>', self._on_focus_out)
+
+    def _on_focus_in(self, event=None):
+        """Enhanced focus in behavior"""
+        # Increase highlight thickness for focus glow effect
+        self.text_widget.configure(highlightthickness=3)
+        # Update the frame border color
+        self.configure(border_color="#2196F3", border_width=2)
+
+    def _on_focus_out(self, event=None):
+        """Enhanced focus out behavior"""
+        # Restore normal highlight thickness
+        self.text_widget.configure(highlightthickness=2)
+        # Restore normal frame border
+        self.configure(border_color="#E0E0E0", border_width=1)
 
     def __getattr__(self, name):
         """Delegate unknown attributes to the text widget"""

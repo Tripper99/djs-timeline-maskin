@@ -29,6 +29,56 @@ class ExcelFieldManager:
         # Text fields that support rich text formatting
         self.text_fields = {'Note1', 'Note2', 'Note3', 'Händelse'}
 
+    def _setup_date_field_focus(self, entry_widget, field_name):
+        """Setup enhanced focus behavior for date fields with click-to-clear"""
+        # Enhanced focus behavior
+        entry_widget.bind('<FocusIn>', lambda e: self._on_date_focus_in(entry_widget))
+        entry_widget.bind('<FocusOut>', lambda e: self._on_date_focus_out(entry_widget), add='+')
+
+        # Click-to-clear behavior (only clear on first click if field has focus)
+        def on_click(event):
+            # If the widget is already focused and has content, offer to clear
+            if entry_widget.focus_get() == entry_widget:
+                current_value = entry_widget.get()
+                if current_value.strip():
+                    # Clear the field on click when focused
+                    entry_widget.delete(0, 'end')
+
+        entry_widget.bind('<Button-1>', on_click, add='+')
+
+    def _on_date_focus_in(self, entry_widget):
+        """Enhanced focus in behavior for date fields"""
+        entry_widget.configure(border_color="#2196F3", border_width=2)
+
+    def _on_date_focus_out(self, entry_widget):
+        """Enhanced focus out behavior for date fields"""
+        entry_widget.configure(border_color="#E0E0E0", border_width=1)
+
+    def _setup_time_field_focus(self, entry_widget, field_name):
+        """Setup enhanced focus behavior for time fields with click-to-clear"""
+        # Enhanced focus behavior (same as date fields)
+        entry_widget.bind('<FocusIn>', lambda e: self._on_time_focus_in(entry_widget))
+        entry_widget.bind('<FocusOut>', lambda e: self._on_time_focus_out(entry_widget), add='+')
+
+        # Click-to-clear behavior (only clear on first click if field has focus)
+        def on_click(event):
+            # If the widget is already focused and has content, offer to clear
+            if entry_widget.focus_get() == entry_widget:
+                current_value = entry_widget.get()
+                if current_value.strip():
+                    # Clear the field on click when focused
+                    entry_widget.delete(0, 'end')
+
+        entry_widget.bind('<Button-1>', on_click, add='+')
+
+    def _on_time_focus_in(self, entry_widget):
+        """Enhanced focus in behavior for time fields"""
+        entry_widget.configure(border_color="#2196F3", border_width=2)
+
+    def _on_time_focus_out(self, entry_widget):
+        """Enhanced focus out behavior for time fields"""
+        entry_widget.configure(border_color="#E0E0E0", border_width=1)
+
     def serialize_text_widget_formatting(self, text_widget) -> List[Dict[str, Any]]:
         """Serialize tkinter Text widget formatting to JSON-compatible format"""
         try:
@@ -515,12 +565,17 @@ class ExcelFieldManager:
                 font=ctk.CTkFont(size=14, weight="bold")).grid(row=0, column=0, sticky="w", padx=(10, 5), pady=(0, 5))
 
         entry = ctk.CTkEntry(left_frame, textvariable=self.parent.excel_vars['Startdatum'],
-                        font=ctk.CTkFont(size=12), width=120)
+                        font=ctk.CTkFont(size=12), width=120,
+                        border_color="#E0E0E0", border_width=1)
         entry.grid(row=0, column=1, sticky="w", padx=(5, 5), pady=(0, 5))
         entry.bind('<FocusOut>', lambda e: self.parent.validate_date_field(e, 'Startdatum'))
         entry.bind('<Return>', lambda e: self.parent.validate_date_field(e, 'Startdatum'))
         entry.bind('<Tab>', lambda e: self.parent.validate_date_field(e, 'Startdatum'))
         entry.bind('<Button-1>', lambda e: self.parent.root.after(10, lambda: self.parent.validate_date_field(e, 'Startdatum')))
+
+        # Enhanced focus behaviors
+        self._setup_date_field_focus(entry, 'Startdatum')
+
         print("DEBUG: Date validation bindings added for Startdatum (FocusOut, Return, Tab, Button-1)")
         self.parent.enable_undo_for_widget(entry)
 
@@ -534,12 +589,17 @@ class ExcelFieldManager:
                 font=ctk.CTkFont(size=14, weight="bold")).grid(row=1, column=0, sticky="w", padx=(10, 5))
 
         entry = ctk.CTkEntry(left_frame, textvariable=self.parent.excel_vars['Starttid'],
-                        font=ctk.CTkFont(size=12), width=80)
+                        font=ctk.CTkFont(size=12), width=80,
+                        border_color="#E0E0E0", border_width=1)
         entry.grid(row=1, column=1, sticky="w", padx=(5, 5))
         entry.bind('<FocusOut>', lambda e: self.parent.validate_time_field(e, 'Starttid'))
         entry.bind('<Return>', lambda e: self.parent.validate_time_field(e, 'Starttid'))
         entry.bind('<Tab>', lambda e: self.parent.validate_time_field(e, 'Starttid'))
         entry.bind('<Button-1>', lambda e: self.parent.root.after(10, lambda: self.parent.validate_time_field(e, 'Starttid')))
+
+        # Enhanced focus behaviors
+        self._setup_time_field_focus(entry, 'Starttid')
+
         print("DEBUG: Time validation bindings added for Starttid (FocusOut, Return, Tab, Button-1)")
         self.parent.enable_undo_for_widget(entry)
 
@@ -553,12 +613,17 @@ class ExcelFieldManager:
                 font=ctk.CTkFont(size=14, weight="bold")).grid(row=0, column=0, sticky="w", padx=(10, 5), pady=(0, 5))
 
         entry = ctk.CTkEntry(right_frame, textvariable=self.parent.excel_vars['Slutdatum'],
-                        font=ctk.CTkFont(size=12), width=120)
+                        font=ctk.CTkFont(size=12), width=120,
+                        border_color="#E0E0E0", border_width=1)
         entry.grid(row=0, column=1, sticky="w", padx=(5, 5), pady=(0, 5))
         entry.bind('<FocusOut>', lambda e: self.parent.validate_date_field(e, 'Slutdatum'))
         entry.bind('<Return>', lambda e: self.parent.validate_date_field(e, 'Slutdatum'))
         entry.bind('<Tab>', lambda e: self.parent.validate_date_field(e, 'Slutdatum'))
         entry.bind('<Button-1>', lambda e: self.parent.root.after(10, lambda: self.parent.validate_date_field(e, 'Slutdatum')))
+
+        # Enhanced focus behaviors
+        self._setup_date_field_focus(entry, 'Slutdatum')
+
         print("DEBUG: Date validation bindings added for Slutdatum (FocusOut, Return, Tab, Button-1)")
         self.parent.enable_undo_for_widget(entry)
 
@@ -572,12 +637,17 @@ class ExcelFieldManager:
                 font=ctk.CTkFont(size=14, weight="bold")).grid(row=1, column=0, sticky="w", padx=(10, 5))
 
         entry = ctk.CTkEntry(right_frame, textvariable=self.parent.excel_vars['Sluttid'],
-                        font=ctk.CTkFont(size=12), width=80)
+                        font=ctk.CTkFont(size=12), width=80,
+                        border_color="#E0E0E0", border_width=1)
         entry.grid(row=1, column=1, sticky="w", padx=(5, 5))
         entry.bind('<FocusOut>', lambda e: self.parent.validate_time_field(e, 'Sluttid'))
         entry.bind('<Return>', lambda e: self.parent.validate_time_field(e, 'Sluttid'))
         entry.bind('<Tab>', lambda e: self.parent.validate_time_field(e, 'Sluttid'))
         entry.bind('<Button-1>', lambda e: self.parent.root.after(10, lambda: self.parent.validate_time_field(e, 'Sluttid')))
+
+        # Enhanced focus behaviors
+        self._setup_time_field_focus(entry, 'Sluttid')
+
         print("DEBUG: Time validation bindings added for Sluttid (FocusOut, Return, Tab, Button-1)")
         self.parent.enable_undo_for_widget(entry)
 
