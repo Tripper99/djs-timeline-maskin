@@ -337,7 +337,7 @@ class ExcelFieldManager:
         elif col_name.startswith('Note') or col_name == 'Händelse':
             # Row 1: Field name and lock switch (if applicable)
             header_frame = ctk.CTkFrame(parent_frame, fg_color="transparent")
-            header_frame.grid(row=row, column=0, columnspan=2, sticky="sew", pady=(0, 2))
+            header_frame.grid(row=row, column=0, columnspan=2, sticky="sew", pady=(5, 2))
 
             ctk.CTkLabel(header_frame, text=f"{col_name}:",
                     font=ctk.CTkFont(size=14, weight="bold")).pack(side="left", padx=(10, 5))
@@ -394,7 +394,7 @@ class ExcelFieldManager:
 
             # Row 2.5: Formatting toolbar (compact)
             toolbar_frame = ctk.CTkFrame(parent_frame, fg_color="transparent")
-            toolbar_frame.grid(row=row+1, column=0, columnspan=2, sticky="w", pady=(2, 2))
+            toolbar_frame.grid(row=row+1, column=0, columnspan=2, sticky="w", padx=(10, 5), pady=(2, 2))
             self.parent.create_formatting_toolbar(toolbar_frame, text_widget, col_name)
 
             # Move scrollable text container to row+2 to make room for toolbar

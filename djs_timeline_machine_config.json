@@ -1,7 +1,7 @@
 {
   "excel_file": "C:/Dropbox/Dokument/Python/APP DJs Timeline-maskin/Timeline_mall NYA KOLUMNERNA.xlsx",
   "last_pdf_dir": "C:\\Dropbox\\DaCosta\\Dokument\\Tidningar, Radio, TV, debatter\\Artiklar från KB\\KB SAMLAT 250513 250514 250523 250527 250611\\Omdöpta filer inlagda i timeline",
-  "window_geometry": "1894x800+114+22",
+  "window_geometry": "1894x800+58+0",
   "theme": "simplex",
   "output_folder": "",
   "output_folder_locked": false,
@@ -15,7 +15,7 @@
     "Händelse": true,
     "Startdatum": true,
     "Starttid": false,
-    "Slutdatum": false,
+    "Slutdatum": true,
     "Sluttid": false,
     "Note1": true,
     "Note2": true,
