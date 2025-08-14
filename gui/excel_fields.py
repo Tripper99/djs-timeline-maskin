@@ -6,6 +6,7 @@ Contains all Excel field creation and management methods extracted from main_win
 # Standard library imports
 import logging
 import tkinter as tk
+import tkinter.ttk as ttk
 from typing import Any, Dict, List, Tuple
 
 # Third-party GUI imports
@@ -294,12 +295,9 @@ class ExcelFieldManager:
             today_date = datetime.now().strftime('%Y-%m-%d')
             self.parent.excel_vars['Inlagd'].set(today_date)
 
-        # Create frame for Excel fields (responsive grid layout)
-        fields_container = ctk.CTkFrame(self.parent.excel_fields_frame, fg_color="transparent")
+        # Create resizable PanedWindow for Excel fields
+        fields_container = ttk.PanedWindow(self.parent.excel_fields_frame, orient="horizontal")
         fields_container.pack(fill="both", expand=True, pady=(5, 0))
-
-        # Configure responsive row expansion
-        fields_container.grid_rowconfigure(0, weight=1)
 
         # Define column groupings (updated with new field name)
         # Date/time fields at top for easy access
@@ -309,14 +307,8 @@ class ExcelFieldManager:
         # Middle column is now exclusively for Händelse
         column3_fields = ['Note1', 'Note2', 'Note3']
 
-        # Configure column weights for better spacing - left column wider, text columns narrower with gaps
-        fields_container.grid_columnconfigure(0, weight=4)  # Left column - 40% width (more fields)
-        fields_container.grid_columnconfigure(1, weight=3)  # Middle column - 30% width (Händelse)
-        fields_container.grid_columnconfigure(2, weight=3)  # Right column - 30% width (Note1-3)
-
-        # Create Column 1
+        # Create Column 1 (Left)
         col1_frame = ctk.CTkFrame(fields_container)
-        col1_frame.grid(row=0, column=0, sticky="nsew", padx=(5, 5), pady=2)
         col1_frame.grid_columnconfigure(0, weight=0)  # Field labels - fixed width
         col1_frame.grid_columnconfigure(1, weight=1)  # Entry fields - expand to fill space
         col1_frame.grid_columnconfigure(2, weight=0)  # Lock switches - fixed width
@@ -329,24 +321,55 @@ class ExcelFieldManager:
             rows_used = self.create_field_in_frame(col1_frame, col_name, row, column_type="column1")
             row += rows_used
 
-        # Create Column 2 - Exclusively for Händelse
+        # Add Column 1 to PanedWindow
+        fields_container.add(col1_frame, minsize=300)  # Minimum width to prevent over-compression
+
+        # Create Column 2 (Middle) - Exclusively for Händelse
         col2_frame = ctk.CTkFrame(fields_container)
-        col2_frame.grid(row=0, column=1, sticky="nsew", padx=(5, 5), pady=2)
         col2_frame.grid_columnconfigure(0, weight=1)  # Content takes full width
         col2_frame.grid_rowconfigure(2, weight=1)  # Text widget row expands to fill available space
 
         # Create Händelse field directly in the column
         self.create_field_in_frame(col2_frame, 'Händelse', 0, column_type="column2")
 
-        # Create Column 3
+        # Add Column 2 to PanedWindow
+        fields_container.add(col2_frame, minsize=200)  # Minimum width for Händelse
+
+        # Create Column 3 (Right)
         col3_frame = ctk.CTkFrame(fields_container)
-        col3_frame.grid(row=0, column=2, sticky="nsew", padx=(5, 5), pady=2)
         col3_frame.grid_columnconfigure(0, weight=1)  # Make all content expand full width
 
         row = 0
         for col_name in column3_fields:
             rows_used = self.create_field_in_frame(col3_frame, col_name, row, column_type="column3")
             row += rows_used
+
+        # Add Column 3 to PanedWindow
+        fields_container.add(col3_frame, minsize=200)  # Minimum width for Note fields
+
+        # Set initial sash positions for approximately 40/30/30 distribution
+        # Schedule this for after the window is displayed and has a known width
+        self.parent.root.after(100, lambda: self._set_initial_sash_positions(fields_container))
+
+    def _set_initial_sash_positions(self, panedwindow):
+        """Set initial sash positions for 40/30/30 distribution"""
+        try:
+            # Get the current width of the panedwindow
+            panedwindow.update_idletasks()
+            total_width = panedwindow.winfo_width()
+
+            if total_width > 100:  # Only set if we have a reasonable width
+                # Calculate positions for 40/30/30 split
+                pos1 = int(total_width * 0.4)  # 40% for left column
+                pos2 = int(total_width * 0.7)  # 70% for left+middle columns
+
+                # Set sash positions
+                panedwindow.sash_place(0, pos1, 0)  # First sash at 40%
+                panedwindow.sash_place(1, pos2, 0)  # Second sash at 70%
+
+                print(f"DEBUG: Set sash positions - Width: {total_width}, Pos1: {pos1}, Pos2: {pos2}")
+        except Exception as e:
+            print(f"DEBUG: Error setting sash positions: {e}")
 
     def create_field_in_frame(self, parent_frame, col_name, row, column_type="column1"):
         """Create a single field in the specified frame with layout optimized per column type"""
