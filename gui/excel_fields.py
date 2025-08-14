@@ -6,7 +6,6 @@ Contains all Excel field creation and management methods extracted from main_win
 # Standard library imports
 import logging
 import tkinter as tk
-import tkinter.ttk as ttk
 from typing import Any, Dict, List, Tuple
 
 # Third-party GUI imports
@@ -296,7 +295,7 @@ class ExcelFieldManager:
             self.parent.excel_vars['Inlagd'].set(today_date)
 
         # Create resizable PanedWindow for Excel fields
-        fields_container = ttk.PanedWindow(self.parent.excel_fields_frame, orient="horizontal")
+        fields_container = tk.PanedWindow(self.parent.excel_fields_frame, orient="horizontal")
         fields_container.pack(fill="both", expand=True, pady=(5, 0))
 
         # Define column groupings (updated with new field name)
