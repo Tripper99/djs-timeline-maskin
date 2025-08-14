@@ -302,19 +302,21 @@ class ExcelFieldManager:
         fields_container.grid_rowconfigure(0, weight=1)
 
         # Define column groupings (updated with new field name)
-        column1_fields = ['OBS', 'Inlagd', 'Kategori', 'Underkategori', 'Person/sak',
+        # Date/time fields at top for easy access
+        column1_fields = ['Startdatum', 'Starttid', 'Slutdatum', 'Sluttid',
+                         'OBS', 'Inlagd', 'Kategori', 'Underkategori', 'Person/sak',
                          'Special', 'Dag', 'Källa1', 'Källa2', 'Källa3', 'Övrigt']
-        # Date/time fields are now handled separately in subframe
+        # Middle column is now exclusively for Händelse
         column3_fields = ['Note1', 'Note2', 'Note3']
 
         # Configure column weights for better spacing - left column wider, text columns narrower with gaps
-        fields_container.grid_columnconfigure(0, weight=2)  # Left column - 40% width (more fields)
-        fields_container.grid_columnconfigure(1, weight=1)  # Middle column - 30% width (Händelse)
-        fields_container.grid_columnconfigure(2, weight=1)  # Right column - 30% width (Note1-3)
+        fields_container.grid_columnconfigure(0, weight=4)  # Left column - 40% width (more fields)
+        fields_container.grid_columnconfigure(1, weight=3)  # Middle column - 30% width (Händelse)
+        fields_container.grid_columnconfigure(2, weight=3)  # Right column - 30% width (Note1-3)
 
         # Create Column 1
         col1_frame = ctk.CTkFrame(fields_container)
-        col1_frame.grid(row=0, column=0, sticky="nsew", padx=(5, 10), pady=2)
+        col1_frame.grid(row=0, column=0, sticky="nsew", padx=(5, 5), pady=2)
         col1_frame.grid_columnconfigure(0, weight=0)  # Field labels - fixed width
         col1_frame.grid_columnconfigure(1, weight=1)  # Entry fields - expand to fill space
         col1_frame.grid_columnconfigure(2, weight=0)  # Lock switches - fixed width
@@ -327,34 +329,18 @@ class ExcelFieldManager:
             rows_used = self.create_field_in_frame(col1_frame, col_name, row, column_type="column1")
             row += rows_used
 
-        # Create Column 2
+        # Create Column 2 - Exclusively for Händelse
         col2_frame = ctk.CTkFrame(fields_container)
-        col2_frame.grid(row=0, column=1, sticky="nsew", padx=(10, 10), pady=2)
+        col2_frame.grid(row=0, column=1, sticky="nsew", padx=(5, 5), pady=2)
         col2_frame.grid_columnconfigure(0, weight=1)  # Content takes full width
+        col2_frame.grid_rowconfigure(0, weight=1)  # Händelse expands to fill all available space
 
-        # Row 0: Date/Time subframe (fixed height, no expansion)
-        col2_frame.grid_rowconfigure(0, weight=0)
-
-        # Row 1: Händelse (expands to fill available space)
-        col2_frame.grid_rowconfigure(1, weight=1)
-
-        # Create subframe for date/time fields
-        datetime_frame = ctk.CTkFrame(col2_frame, fg_color="transparent")
-        datetime_frame.grid(row=0, column=0, sticky="ew", padx=5, pady=(5, 5))
-
-        # Configure two columns in the datetime subframe
-        datetime_frame.grid_columnconfigure(0, weight=1)  # Left column
-        datetime_frame.grid_columnconfigure(1, weight=1)  # Right column
-
-        # Create date/time fields in the subframe
-        self._create_datetime_fields_in_subframe(datetime_frame)
-
-        # Create Händelse field below the subframe
-        self.create_field_in_frame(col2_frame, 'Händelse', 1, column_type="column2")
+        # Create Händelse field directly in the column
+        self.create_field_in_frame(col2_frame, 'Händelse', 0, column_type="column2")
 
         # Create Column 3
         col3_frame = ctk.CTkFrame(fields_container)
-        col3_frame.grid(row=0, column=2, sticky="nsew", padx=(10, 5), pady=2)
+        col3_frame.grid(row=0, column=2, sticky="nsew", padx=(5, 5), pady=2)
         col3_frame.grid_columnconfigure(0, weight=1)  # Make all content expand full width
 
         row = 0
@@ -401,7 +387,7 @@ class ExcelFieldManager:
         elif col_name.startswith('Note') or col_name == 'Händelse':
             # Row 1: Field name and lock switch (if applicable)
             header_frame = ctk.CTkFrame(parent_frame, fg_color="transparent")
-            header_frame.grid(row=row, column=0, columnspan=2, sticky="sew", pady=(5, 2))
+            header_frame.grid(row=row, column=0, columnspan=2, sticky="new", pady=(5, 2))
 
             ctk.CTkLabel(header_frame, text=f"{col_name}:",
                     font=ctk.CTkFont(size=14)).pack(side="left", padx=(10, 5))
@@ -458,7 +444,7 @@ class ExcelFieldManager:
 
             # Row 2.5: Formatting toolbar (compact)
             toolbar_frame = ctk.CTkFrame(parent_frame, fg_color="transparent")
-            toolbar_frame.grid(row=row+1, column=0, columnspan=2, sticky="w", padx=(10, 5), pady=(2, 2))
+            toolbar_frame.grid(row=row+1, column=0, columnspan=2, sticky="nw", padx=(10, 5), pady=(2, 2))
             self.parent.create_formatting_toolbar(toolbar_frame, text_widget, col_name)
 
             # Move scrollable text container to row+2 to make room for toolbar
@@ -561,116 +547,58 @@ class ExcelFieldManager:
             parent_frame.grid_columnconfigure(1, weight=1)
 
     def _create_datetime_fields_in_subframe(self, datetime_frame):
-        """Create date/time fields in a 2-column subframe layout with proper alignment"""
-        # Left column: Startdatum and Starttid
-        left_frame = ctk.CTkFrame(datetime_frame, fg_color="transparent")
-        left_frame.grid(row=0, column=0, sticky="ew", padx=(0, 10))
+        """Create date/time fields in a simple 2x2 grid layout"""
+        # Configure grid layout: 2 columns, 2 rows
+        datetime_frame.grid_columnconfigure(0, weight=1)  # Left column
+        datetime_frame.grid_columnconfigure(1, weight=1)  # Right column
 
-        # Right column: Slutdatum and Sluttid
-        right_frame = ctk.CTkFrame(datetime_frame, fg_color="transparent")
-        right_frame.grid(row=0, column=1, sticky="ew", padx=(10, 0))
+        # Create date fields in first row
+        self._create_single_datetime_field(datetime_frame, 'Startdatum', 0, 0)
+        self._create_single_datetime_field(datetime_frame, 'Slutdatum', 0, 1)
 
-        # Configure column weights for proper alignment within each side
-        left_frame.grid_columnconfigure(0, weight=0, minsize=85)   # Label column - fixed width
-        left_frame.grid_columnconfigure(1, weight=0)              # Entry column - fixed width
-        left_frame.grid_columnconfigure(2, weight=1)              # Lock column - remaining space
+        # Create time fields in second row
+        self._create_single_datetime_field(datetime_frame, 'Starttid', 1, 0)
+        self._create_single_datetime_field(datetime_frame, 'Sluttid', 1, 1)
 
-        right_frame.grid_columnconfigure(0, weight=0, minsize=85)  # Label column - fixed width
-        right_frame.grid_columnconfigure(1, weight=0)             # Entry column - fixed width
-        right_frame.grid_columnconfigure(2, weight=1)             # Lock column - remaining space
+    def _create_single_datetime_field(self, parent, field_name, row, col):
+        """Create a single date/time field with label, entry, and lock switch"""
+        # Create container frame for this field
+        field_frame = ctk.CTkFrame(parent, fg_color="transparent")
+        field_frame.grid(row=row, column=col, sticky="ew", padx=5, pady=2)
 
-        # Create Startdatum field (left side, row 0)
-        ctk.CTkLabel(left_frame, text="Startdatum:",
-                font=ctk.CTkFont(size=14)).grid(row=0, column=0, sticky="w", padx=(10, 5), pady=(0, 5))
+        # Configure internal layout
+        field_frame.grid_columnconfigure(1, weight=1)  # Entry expands
 
-        entry = ctk.CTkEntry(left_frame, textvariable=self.parent.excel_vars['Startdatum'],
-                        font=ctk.CTkFont(size=12), width=120,
+        # Create label
+        ctk.CTkLabel(field_frame, text=f"{field_name}:",
+                font=ctk.CTkFont(size=14)).grid(row=0, column=0, sticky="w", padx=(5, 5))
+
+        # Create entry field
+        entry = ctk.CTkEntry(field_frame, textvariable=self.parent.excel_vars[field_name],
+                        font=ctk.CTkFont(size=12),
                         border_color="#E0E0E0", border_width=1)
-        entry.grid(row=0, column=1, sticky="w", padx=(5, 5), pady=(0, 5))
-        entry.bind('<FocusOut>', lambda e: self.parent.validate_date_field(e, 'Startdatum'))
-        entry.bind('<Return>', lambda e: self.parent.validate_date_field(e, 'Startdatum'))
-        entry.bind('<Tab>', lambda e: self.parent.validate_date_field(e, 'Startdatum'))
-        entry.bind('<Button-1>', lambda e: self.parent.root.after(10, lambda: self.parent.validate_date_field(e, 'Startdatum')))
+        entry.grid(row=0, column=1, sticky="ew", padx=(5, 5))
 
-        # Enhanced focus behaviors
-        self._setup_date_field_focus(entry, 'Startdatum')
-
-        print("DEBUG: Date validation bindings added for Startdatum (FocusOut, Return, Tab, Button-1)")
-        self.parent.enable_undo_for_widget(entry)
-
-        lock_switch = ctk.CTkCheckBox(left_frame,
+        # Create lock switch
+        lock_switch = ctk.CTkCheckBox(field_frame,
                                     text="Lås",
-                                    variable=self.parent.lock_vars['Startdatum'])
-        lock_switch.grid(row=0, column=2, sticky="w", padx=(5, 10), pady=(0, 5))
+                                    variable=self.parent.lock_vars[field_name])
+        lock_switch.grid(row=0, column=2, sticky="w", padx=(5, 5))
 
-        # Create Starttid field (left side, row 1)
-        ctk.CTkLabel(left_frame, text="Starttid:",
-                font=ctk.CTkFont(size=14)).grid(row=1, column=0, sticky="w", padx=(10, 5))
+        # Add validation bindings
+        if 'datum' in field_name.lower():
+            entry.bind('<FocusOut>', lambda e: self.parent.validate_date_field(e, field_name))
+            entry.bind('<Return>', lambda e: self.parent.validate_date_field(e, field_name))
+            entry.bind('<Tab>', lambda e: self.parent.validate_date_field(e, field_name))
+            entry.bind('<Button-1>', lambda e: self.parent.root.after(10, lambda: self.parent.validate_date_field(e, field_name)))
+            self._setup_date_field_focus(entry, field_name)
+        else:  # time fields
+            entry.bind('<FocusOut>', lambda e: self.parent.validate_time_field(e, field_name))
+            entry.bind('<Return>', lambda e: self.parent.validate_time_field(e, field_name))
+            entry.bind('<Tab>', lambda e: self.parent.validate_time_field(e, field_name))
+            entry.bind('<Button-1>', lambda e: self.parent.root.after(10, lambda: self.parent.validate_time_field(e, field_name)))
+            self._setup_time_field_focus(entry, field_name)
 
-        entry = ctk.CTkEntry(left_frame, textvariable=self.parent.excel_vars['Starttid'],
-                        font=ctk.CTkFont(size=12), width=80,
-                        border_color="#E0E0E0", border_width=1)
-        entry.grid(row=1, column=1, sticky="w", padx=(5, 5))
-        entry.bind('<FocusOut>', lambda e: self.parent.validate_time_field(e, 'Starttid'))
-        entry.bind('<Return>', lambda e: self.parent.validate_time_field(e, 'Starttid'))
-        entry.bind('<Tab>', lambda e: self.parent.validate_time_field(e, 'Starttid'))
-        entry.bind('<Button-1>', lambda e: self.parent.root.after(10, lambda: self.parent.validate_time_field(e, 'Starttid')))
-
-        # Enhanced focus behaviors
-        self._setup_time_field_focus(entry, 'Starttid')
-
-        print("DEBUG: Time validation bindings added for Starttid (FocusOut, Return, Tab, Button-1)")
+        # Enable undo tracking
         self.parent.enable_undo_for_widget(entry)
-
-        lock_switch = ctk.CTkCheckBox(left_frame,
-                                    text="Lås",
-                                    variable=self.parent.lock_vars['Starttid'])
-        lock_switch.grid(row=1, column=2, sticky="w", padx=(5, 10))
-
-        # Create Slutdatum field (right side, row 0)
-        ctk.CTkLabel(right_frame, text="Slutdatum:",
-                font=ctk.CTkFont(size=14)).grid(row=0, column=0, sticky="w", padx=(10, 5), pady=(0, 5))
-
-        entry = ctk.CTkEntry(right_frame, textvariable=self.parent.excel_vars['Slutdatum'],
-                        font=ctk.CTkFont(size=12), width=120,
-                        border_color="#E0E0E0", border_width=1)
-        entry.grid(row=0, column=1, sticky="w", padx=(5, 5), pady=(0, 5))
-        entry.bind('<FocusOut>', lambda e: self.parent.validate_date_field(e, 'Slutdatum'))
-        entry.bind('<Return>', lambda e: self.parent.validate_date_field(e, 'Slutdatum'))
-        entry.bind('<Tab>', lambda e: self.parent.validate_date_field(e, 'Slutdatum'))
-        entry.bind('<Button-1>', lambda e: self.parent.root.after(10, lambda: self.parent.validate_date_field(e, 'Slutdatum')))
-
-        # Enhanced focus behaviors
-        self._setup_date_field_focus(entry, 'Slutdatum')
-
-        print("DEBUG: Date validation bindings added for Slutdatum (FocusOut, Return, Tab, Button-1)")
-        self.parent.enable_undo_for_widget(entry)
-
-        lock_switch = ctk.CTkCheckBox(right_frame,
-                                    text="Lås",
-                                    variable=self.parent.lock_vars['Slutdatum'])
-        lock_switch.grid(row=0, column=2, sticky="w", padx=(5, 10), pady=(0, 5))
-
-        # Create Sluttid field (right side, row 1)
-        ctk.CTkLabel(right_frame, text="Sluttid:",
-                font=ctk.CTkFont(size=14)).grid(row=1, column=0, sticky="w", padx=(10, 5))
-
-        entry = ctk.CTkEntry(right_frame, textvariable=self.parent.excel_vars['Sluttid'],
-                        font=ctk.CTkFont(size=12), width=80,
-                        border_color="#E0E0E0", border_width=1)
-        entry.grid(row=1, column=1, sticky="w", padx=(5, 5))
-        entry.bind('<FocusOut>', lambda e: self.parent.validate_time_field(e, 'Sluttid'))
-        entry.bind('<Return>', lambda e: self.parent.validate_time_field(e, 'Sluttid'))
-        entry.bind('<Tab>', lambda e: self.parent.validate_time_field(e, 'Sluttid'))
-        entry.bind('<Button-1>', lambda e: self.parent.root.after(10, lambda: self.parent.validate_time_field(e, 'Sluttid')))
-
-        # Enhanced focus behaviors
-        self._setup_time_field_focus(entry, 'Sluttid')
-
-        print("DEBUG: Time validation bindings added for Sluttid (FocusOut, Return, Tab, Button-1)")
-        self.parent.enable_undo_for_widget(entry)
-
-        lock_switch = ctk.CTkCheckBox(right_frame,
-                                    text="Lås",
-                                    variable=self.parent.lock_vars['Sluttid'])
-        lock_switch.grid(row=1, column=2, sticky="w", padx=(5, 10))
+        print(f"DEBUG: Validation bindings added for {field_name}")

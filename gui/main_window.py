@@ -217,7 +217,7 @@ class PDFProcessorApp:
 
         # Main container - removed expand=True to ensure bottom frame remains visible
         main_frame = ctk.CTkFrame(content_frame, fg_color="transparent")
-        main_frame.pack(fill="x", expand=False, padx=20, pady=20)
+        main_frame.pack(fill="x", expand=False, padx=12, pady=10)
 
         # Variables
         self.setup_variables()
@@ -230,7 +230,7 @@ class PDFProcessorApp:
 
         # Bottom frame for statistics and version
         bottom_frame = ctk.CTkFrame(content_frame)
-        bottom_frame.pack(fill="x", padx=20, pady=(0, 10))
+        bottom_frame.pack(fill="x", padx=12, pady=(0, 8))
 
         # Statistics label (left side)
         self.filename_stats_label = ctk.CTkLabel(bottom_frame, text=self.get_stats_text(),
@@ -444,7 +444,7 @@ class PDFProcessorApp:
         shadow_frame = ctk.CTkFrame(parent,
                                    fg_color=("#E8E8E8", "#2B2B2B"),  # Light shadow color
                                    corner_radius=12)
-        shadow_frame.pack(fill="x", pady=(0, 20), padx=2)
+        shadow_frame.pack(fill="x", pady=(0, 8), padx=2)
 
         # Main card frame (offset for shadow effect)
         card_frame = ctk.CTkFrame(shadow_frame,
@@ -458,17 +458,17 @@ class PDFProcessorApp:
         header_frame = ctk.CTkFrame(card_frame,
                                    fg_color=("#F8F9FA", "#2A2A2A"),
                                    corner_radius=8)
-        header_frame.pack(fill="x", padx=15, pady=(15, 10))
+        header_frame.pack(fill="x", padx=8, pady=(8, 5))
 
         title_label = ctk.CTkLabel(header_frame,
                                   text=title,
-                                  font=ctk.CTkFont(size=18, weight="bold"),
+                                  font=ctk.CTkFont(size=12, weight="bold"),
                                   text_color=("#1A1A1A", "#FFFFFF"))
-        title_label.pack(anchor="w", padx=15, pady=12)
+        title_label.pack(anchor="w", padx=8, pady=4)
 
         # Content area
         content_frame = ctk.CTkFrame(card_frame, fg_color="transparent")
-        content_frame.pack(fill="both", expand=True, padx=15, pady=(0, 15))
+        content_frame.pack(fill="both", expand=True, padx=8, pady=(0, 8))
 
         # Call the content creation function
         content_func(content_frame)
@@ -513,7 +513,7 @@ class PDFProcessorApp:
 
         # First row: PDF path display
         pdf_path_frame = ctk.CTkFrame(parent, fg_color="transparent")
-        pdf_path_frame.pack(fill="x", pady=(0, 10))
+        pdf_path_frame.pack(fill="x", pady=(0, 5))
 
         ctk.CTkLabel(pdf_path_frame, text="Vald fil:", font=ctk.CTkFont(size=12)).pack(side="left", padx=(10, 5))
         pdf_path_entry = ctk.CTkEntry(pdf_path_frame, textvariable=self.pdf_path_var,
@@ -608,7 +608,7 @@ class PDFProcessorApp:
 
         # Excel file selection
         excel_file_frame = ctk.CTkFrame(parent, fg_color="transparent")
-        excel_file_frame.pack(fill="x", pady=(0, 10))
+        excel_file_frame.pack(fill="x", pady=(0, 5))
 
         ctk.CTkLabel(excel_file_frame, text="Excel-fil:", font=ctk.CTkFont(size=12)).pack(side="left", padx=(10, 5))
         excel_path_entry = ctk.CTkEntry(excel_file_frame, textvariable=self.excel_path_var,
@@ -643,7 +643,7 @@ class PDFProcessorApp:
 
         # Excel column fields (scrollable, three-column layout)
         self.excel_fields_frame = ctk.CTkFrame(parent, fg_color="transparent")
-        self.excel_fields_frame.pack(fill="both", expand=False, pady=(5, 0))  # Reduced padding to save vertical space
+        self.excel_fields_frame.pack(fill="both", expand=False, pady=(3, 0))  # Reduced padding to save vertical space
 
         # Configure the excel_fields_frame for responsive layout
         self.excel_fields_frame.grid_columnconfigure(0, weight=1)
@@ -659,7 +659,7 @@ class PDFProcessorApp:
 
         # First row: Buttons for Excel operations
         excel_buttons_frame = ctk.CTkFrame(parent, fg_color="transparent")
-        excel_buttons_frame.pack(fill="x", pady=(0, 10))
+        excel_buttons_frame.pack(fill="x", pady=(0, 5))
 
         self.save_all_btn = ctk.CTkButton(excel_buttons_frame, text="Spara allt och rensa fälten",
                                      command=self.save_all_and_clear,
@@ -674,7 +674,7 @@ class PDFProcessorApp:
 
         # Second row: Row color selection
         color_frame = ctk.CTkFrame(parent, fg_color="transparent")
-        color_frame.pack(fill="x", pady=(5, 0))
+        color_frame.pack(fill="x", pady=(3, 0))
 
         # Label for color selection
         color_label = ctk.CTkLabel(color_frame, text="Nya excelradens bakgrundsfärg:", font=ctk.CTkFont(size=10, weight="bold"))
