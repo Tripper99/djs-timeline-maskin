@@ -333,7 +333,7 @@ class ExcelFieldManager:
         col2_frame = ctk.CTkFrame(fields_container)
         col2_frame.grid(row=0, column=1, sticky="nsew", padx=(5, 5), pady=2)
         col2_frame.grid_columnconfigure(0, weight=1)  # Content takes full width
-        col2_frame.grid_rowconfigure(0, weight=1)  # Händelse expands to fill all available space
+        col2_frame.grid_rowconfigure(2, weight=1)  # Text widget row expands to fill available space
 
         # Create Händelse field directly in the column
         self.create_field_in_frame(col2_frame, 'Händelse', 0, column_type="column2")
