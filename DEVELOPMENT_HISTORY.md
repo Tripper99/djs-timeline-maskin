@@ -4,6 +4,63 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.2.0 Resizable Column Handles (2025-08-15) - Major UX Enhancement ✅
+**Achievement**: Successfully implemented resizable column handles with native drag functionality for better large monitor support.
+
+**Core Problem Solved**: Left column compression on large monitors (especially 1920x1080+) made the application barely usable due to inadequate field width.
+
+**Technical Implementation**:
+- **PanedWindow Integration**: Replaced grid-based layout with tk.PanedWindow for native resize handles
+- **Minimum Width Protection**: Set constraints (300px left, 200px middle/right) to prevent over-compression
+- **Automatic Positioning**: Initial 40/30/30 distribution maintained with automated sash positioning
+- **Mixed Widget Architecture**: tk.PanedWindow container with CustomTkinter styled content
+
+**Key Development Insights**:
+- **Critical Error Discovered**: ttk.PanedWindow does NOT support minsize parameter (causes "unknown option -minsize" error)
+- **Solution**: Use tk.PanedWindow which has native minsize support
+- **Testing Importance**: Reinforced need to follow global MD guidelines for Ruff syntax check AND application startup testing
+
+**User Benefits**:
+- Drag handles between columns for customizable layout
+- Better usability on large monitors with expandable left column
+- Professional UX with native OS-style resize behavior
+- Maintains all existing functionality while adding flexibility
+
+### v2.1.9 Gap Issue Resolution (2025-08-15) - Critical Layout Fix ✅
+**Achievement**: Finally eliminated the persistent gap above Händelse field after multiple debugging attempts.
+
+**Problem Solving Process**:
+1. **Initial Attempts Failed**: Multiple confident "solutions" targeting padding, sticky values, frame nesting
+2. **Test Script Creation**: Built standalone reproduction (`test_excel_layout.py`) to isolate the issue
+3. **Key Insight**: User observation about yellow header frame differences between columns
+4. **Root Cause Discovery**: `col2_frame.grid_rowconfigure(0, weight=1)` was expanding the header row instead of text widget row
+
+**Technical Solution**:
+- **Correct Fix**: Changed `grid_rowconfigure(0, weight=1)` to `grid_rowconfigure(2, weight=1)`
+- **Logic**: Give expansion weight to text widget row (row 2) instead of header row (row 0)
+- **Result**: Header/toolbar stay compact at top, only text area expands vertically
+
+**Development Lessons**:
+- **Systematic Debugging**: Creating isolated test scripts more effective than guessing
+- **User Observations**: Critical insights often come from user feedback about visual differences
+- **Weight Distribution**: Grid row weights must target the correct row for intended expansion behavior
+- **Persistence Required**: Complex layout issues may require multiple investigation approaches
+
+### v2.1.8 Major Layout Restructuring (2025-08-15) - Foundation Work ✅
+**Achievement**: Comprehensive layout restructuring with dramatic compactness improvements and proper column distribution.
+
+**Major Changes Implemented**:
+- **Column Redistribution**: Moved date/time fields from complex nested subframe to top of left column
+- **UI Compactness**: Reduced section titles from 18pt to 12pt, cut padding by 50-70% throughout
+- **Layout Simplification**: Eliminated complex datetime subframe nesting (reduced from 4 to 2 levels)
+- **Weight System Fix**: Corrected column weights from (2,1,1) to (4,3,3) for true 40/30/30 distribution
+
+**Technical Achievements**:
+- **Nesting Reduction**: Simplified 4-level deep frame structure
+- **Space Optimization**: Reduced card shadow spacing, main container padding, internal frame spacing
+- **Field Reorganization**: Date/time fields at top of left column for easy access
+- **Middle Column Cleanup**: Exclusively for Händelse field without nested complications
+
 ### v2.1.7 Failed Responsive Layout Attempt (2025-08-14) - Learning Experience ❌
 **Problem**: Attempted to solve horizontal space constraints with responsive smart grid layout that was making left column fields barely readable on both 1920x1080 and 2560x1600 screens.
 
