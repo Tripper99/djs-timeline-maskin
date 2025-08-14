@@ -387,7 +387,7 @@ class ExcelFieldManager:
         elif col_name.startswith('Note') or col_name == 'Händelse':
             # Row 1: Field name and lock switch (if applicable)
             header_frame = ctk.CTkFrame(parent_frame, fg_color="transparent")
-            header_frame.grid(row=row, column=0, columnspan=2, sticky="new", pady=(5, 2))
+            header_frame.grid(row=row, column=0, columnspan=2, sticky="new", pady=(0, 2))
 
             ctk.CTkLabel(header_frame, text=f"{col_name}:",
                     font=ctk.CTkFont(size=14)).pack(side="left", padx=(10, 5))
@@ -450,7 +450,7 @@ class ExcelFieldManager:
             # Move scrollable text container to row+2 to make room for toolbar
             # Make Händelse expand vertically to fill available space
             if col_name == 'Händelse':
-                scrollable_text.grid(row=row+2, column=0, columnspan=2, sticky="nsew", padx=(10, 10), pady=(0, 2))
+                scrollable_text.grid(row=row+2, column=0, columnspan=2, sticky="new", padx=(10, 10), pady=(0, 2))
                 # Configure the text widget row to expand vertically
                 parent_frame.grid_rowconfigure(row+2, weight=1)
             else:
