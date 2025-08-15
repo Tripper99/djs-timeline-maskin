@@ -561,6 +561,8 @@ class EventHandlersMixin:
         self.excel_field_manager.clear_excel_fields()
         self.clear_pdf_and_filename_fields()
         self.row_color_var.set("none")
+        # Reset color button visual states
+        self._select_row_color("none")
 
         # STEP 6: Show appropriate status message
         pdf_renamed = "PDF-filen har döpts om" in operations_performed
@@ -695,6 +697,27 @@ class EventHandlersMixin:
 
         # Save current output folder lock state
         self.config['output_folder_locked'] = self.output_folder_lock_var.get()
+
+        # Save Excel column sash positions
+        try:
+            if hasattr(self, 'excel_fields_paned_window') and self.excel_fields_paned_window:
+                # Get current sash positions
+                sash_positions = []
+                total_width = self.excel_fields_paned_window.winfo_width()
+
+                for i in range(2):  # We have 2 sashes (3 columns)
+                    try:
+                        pos = self.excel_fields_paned_window.sash_coord(i)[0]  # Get x coordinate
+                        sash_positions.append(pos)
+                    except (tk.TclError, IndexError, AttributeError):
+                        break
+
+                if len(sash_positions) == 2 and total_width > 100:
+                    self.config['excel_sash_positions'] = sash_positions
+                    self.config['excel_sash_total_width'] = total_width
+                    logger.info(f"Saved Excel sash positions: {sash_positions} (width: {total_width})")
+        except Exception as e:
+            logger.warning(f"Error saving sash positions: {e}")
 
         self.config_manager.save_config(self.config)
 

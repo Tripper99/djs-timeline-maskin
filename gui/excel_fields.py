@@ -374,29 +374,64 @@ class ExcelFieldManager:
         # Add Column 3 to PanedWindow
         fields_container.add(col3_frame, minsize=200)  # Minimum width for Note fields
 
+        # Store reference to PanedWindow for position saving/restoring
+        self.parent.excel_fields_paned_window = fields_container
+
         # Set initial sash positions for approximately 40/30/30 distribution
         # Schedule this for after the window is displayed and has a known width
         self.parent.root.after(100, lambda: self._set_initial_sash_positions(fields_container))
 
     def _set_initial_sash_positions(self, panedwindow):
-        """Set initial sash positions for 40/30/30 distribution"""
+        """Set initial sash positions - restore saved positions or use 40/30/30 distribution"""
         try:
             # Get the current width of the panedwindow
             panedwindow.update_idletasks()
             total_width = panedwindow.winfo_width()
 
             if total_width > 100:  # Only set if we have a reasonable width
-                # Calculate positions for 40/30/30 split
-                pos1 = int(total_width * 0.4)  # 40% for left column
-                pos2 = int(total_width * 0.7)  # 70% for left+middle columns
+                # Try to restore saved sash positions
+                saved_positions = self.parent.config.get('excel_sash_positions', None)
 
-                # Set sash positions
-                panedwindow.sash_place(0, pos1, 0)  # First sash at 40%
-                panedwindow.sash_place(1, pos2, 0)  # Second sash at 70%
+                if saved_positions and len(saved_positions) == 2:
+                    # Restore saved positions (scaled to current width if needed)
+                    saved_width = self.parent.config.get('excel_sash_total_width', total_width)
+                    if saved_width > 0:
+                        # Scale positions proportionally to current width
+                        scale_factor = total_width / saved_width
+                        pos1 = min(int(saved_positions[0] * scale_factor), total_width - 400)  # Leave space for other columns
+                        pos2 = min(int(saved_positions[1] * scale_factor), total_width - 200)  # Leave space for right column
 
-                print(f"DEBUG: Set sash positions - Width: {total_width}, Pos1: {pos1}, Pos2: {pos2}")
+                        # Ensure logical ordering
+                        if pos1 >= pos2:
+                            pos2 = pos1 + 200
+
+                        panedwindow.sash_place(0, pos1, 0)
+                        panedwindow.sash_place(1, pos2, 0)
+                        logger.info(f"Restored sash positions: {pos1}, {pos2} (scaled from {saved_positions})")
+                    else:
+                        # Fallback to default if saved width is invalid
+                        self._set_default_sash_positions(panedwindow, total_width)
+                else:
+                    # No saved positions, use default 40/30/30 distribution
+                    self._set_default_sash_positions(panedwindow, total_width)
+
         except Exception as e:
-            print(f"DEBUG: Error setting sash positions: {e}")
+            logger.error(f"Error setting sash positions: {e}")
+
+    def _set_default_sash_positions(self, panedwindow, total_width):
+        """Set default 40/30/30 sash positions"""
+        try:
+            # Calculate positions for 40/30/30 split
+            pos1 = int(total_width * 0.4)  # 40% for left column
+            pos2 = int(total_width * 0.7)  # 70% for left+middle columns
+
+            # Set sash positions
+            panedwindow.sash_place(0, pos1, 0)  # First sash at 40%
+            panedwindow.sash_place(1, pos2, 0)  # Second sash at 70%
+
+            logger.info(f"Set default sash positions - Width: {total_width}, Pos1: {pos1}, Pos2: {pos2}")
+        except Exception as e:
+            logger.error(f"Error setting default sash positions: {e}")
 
     def create_field_in_frame(self, parent_frame, col_name, row, column_type="column1"):
         """Create a single field in the specified frame with layout optimized per column type"""
