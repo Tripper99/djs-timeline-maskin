@@ -21,7 +21,8 @@
       "Bash(timeout:*)",
       "Bash(del test_ctktextbox.py)",
       "Bash(rm:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(pip install:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"
