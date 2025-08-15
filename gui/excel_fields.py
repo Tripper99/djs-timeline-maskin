@@ -29,6 +29,31 @@ class ExcelFieldManager:
         # Text fields that support rich text formatting
         self.text_fields = {'Note1', 'Note2', 'Note3', 'Händelse'}
 
+    def _connect_entry_to_stringvar(self, entry_widget, string_var):
+        """Manually connect Entry widget to StringVar while preserving placeholder text"""
+        # Set initial value from StringVar if it has content
+        initial_value = string_var.get()
+        if initial_value:
+            entry_widget.insert(0, initial_value)
+
+        # Bind Entry changes to update StringVar
+        def on_entry_change(*args):
+            string_var.set(entry_widget.get())
+
+        # Bind StringVar changes to update Entry
+        def on_var_change(*args):
+            current_entry_value = entry_widget.get()
+            new_var_value = string_var.get()
+            if current_entry_value != new_var_value:
+                entry_widget.delete(0, 'end')
+                if new_var_value:  # Only insert if not empty (preserve placeholder)
+                    entry_widget.insert(0, new_var_value)
+
+        # Bind events
+        entry_widget.bind('<KeyRelease>', on_entry_change)
+        entry_widget.bind('<FocusOut>', on_entry_change)
+        string_var.trace('w', on_var_change)
+
     def _setup_date_field_focus(self, entry_widget, field_name):
         """Setup enhanced focus behavior for date fields with click-to-clear"""
         # Enhanced focus behavior
@@ -503,16 +528,20 @@ class ExcelFieldManager:
             # Set appropriate width based on field type - reduced height
             if col_name in ['Startdatum', 'Slutdatum']:
                 # Date fields: 2025-07-25 (10 chars + padding) with placeholder
-                entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],
+                entry = ctk.CTkEntry(parent_frame,
                                font=ctk.CTkFont(size=11), width=120, height=22,
                                placeholder_text="YYYY-MM-DD")
                 entry.grid(row=row, column=1, sticky="w", padx=(2, 3), pady=(0, 1))
+                # Manual connection to StringVar while preserving placeholder
+                self._connect_entry_to_stringvar(entry, self.parent.excel_vars[col_name])
             elif col_name in ['Starttid', 'Sluttid']:
                 # Time fields: 18:45 (5 chars + padding) with placeholder
-                entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],
+                entry = ctk.CTkEntry(parent_frame,
                                font=ctk.CTkFont(size=11), width=80, height=22,
                                placeholder_text="HH:MM")
                 entry.grid(row=row, column=1, sticky="w", padx=(2, 3), pady=(0, 1))
+                # Manual connection to StringVar while preserving placeholder
+                self._connect_entry_to_stringvar(entry, self.parent.excel_vars[col_name])
             else:
                 # Other fields: expand to fill available space with enhanced focus styling
                 entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],

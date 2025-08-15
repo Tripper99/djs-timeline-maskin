@@ -218,6 +218,9 @@ class LayoutManagerMixin:
                                          fg_color="#FF6B35", hover_color="#E55A2B",  # Orange color to stand out
                                          font=ctk.CTkFont(size=11, weight="bold"))
         self.copy_to_excel_btn.grid(row=0, column=8, sticky="w", padx=(5, 0), pady=(0, 1))
+        ToolTip(self.copy_to_excel_btn, "Kopierar de parsade filnamnskomponenterna (datum, tidning, sidor, kommentar) " +
+                                       "ned till Excel-fälten så du kan fortsätta redigera och lägga till mer information. " +
+                                       "Detta är INTE en sparknapp - använd den för att överföra filnamnsinformation till Excel-arbetsfältet.")
 
     def create_group3_content(self, parent):
         """Group 3 Content: Excel Integration"""
