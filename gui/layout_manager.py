@@ -88,13 +88,18 @@ class LayoutManagerMixin:
                     command=lambda t=theme: self.change_theme(t)
                 )
 
-    def create_simple_section(self, parent, content_func):
-        """Create a simple, compact section without headers or decorative styling"""
-        # Simple content frame with minimal styling and aggressive space savings
-        content_frame = ctk.CTkFrame(parent,
-                                   fg_color="transparent",
-                                   corner_radius=0)
-        content_frame.pack(fill="x", pady=(0, 2), padx=0)  # Minimal padding
+    def create_simple_section(self, parent, content_func, section_color=None):
+        """Create a simple, compact section with optional background color for visual separation"""
+        # Section frame with subtle background color and thin padding for visual separation
+        section_frame = ctk.CTkFrame(parent,
+                                   fg_color=section_color or ("gray90", "gray20"),
+                                   corner_radius=4)
+        section_frame.pack(fill="x", pady=(0, 4), padx=2)  # Thin padding and gaps between sections
+
+        # Content frame inside section
+        content_frame = ctk.CTkFrame(section_frame,
+                                   fg_color="transparent")
+        content_frame.pack(fill="x", pady=3, padx=4)  # Thin internal padding
 
         # Call the content creation function
         content_func(content_frame)
@@ -203,11 +208,11 @@ class LayoutManagerMixin:
         self.select_output_folder_btn.pack(side="left", padx=(0, 3))
         ToolTip(self.select_output_folder_btn, "Välj en mapp för omdöpta PDF-filer.")
 
-        # Lock switch for output folder - compact
-        self.output_folder_lock_switch = ctk.CTkCheckBox(pdf_path_frame, text="L", width=20,
+        # Lock switch for output folder - compact with lock symbol
+        self.output_folder_lock_switch = ctk.CTkCheckBox(pdf_path_frame, text="🔒", width=18,
                                                        variable=self.output_folder_lock_var,
                                                        command=self.on_output_folder_lock_change,
-                                                       font=ctk.CTkFont(size=10))
+                                                       font=ctk.CTkFont(size=12))
         self.output_folder_lock_switch.pack(side="left", padx=(2, 0))
         ToolTip(self.output_folder_lock_switch, "När låst: mappvalet ändras inte när ny PDF väljs. "
                                                "När olåst: mappvalet uppdateras automatiskt till PDF-filens mapp.")

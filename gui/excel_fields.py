@@ -331,6 +331,9 @@ class ExcelFieldManager:
         # Create Händelse field directly in the column
         self.create_field_in_frame(col2_frame, 'Händelse', 0, column_type="column2")
 
+        # Add operations box under Händelse field
+        self.create_operations_box(col2_frame)
+
         # Add Column 2 to PanedWindow
         fields_container.add(col2_frame, minsize=200)  # Minimum width for Händelse
 
@@ -414,13 +417,13 @@ class ExcelFieldManager:
             ctk.CTkLabel(header_frame, text=f"{col_name}:",
                     font=ctk.CTkFont(size=12)).pack(side="left", padx=(3, 2))
 
-            # Add lock switch for text fields that should have one - compact
+            # Add lock switch for text fields that should have one - compact with lock symbol
             if has_lock:
                 lock_switch = ctk.CTkCheckBox(header_frame,
-                                           text="L",
-                                           width=20,
+                                           text="🔒",
+                                           width=18,
                                            variable=self.parent.lock_vars[col_name],
-                                           font=ctk.CTkFont(size=9))
+                                           font=ctk.CTkFont(size=12))
                 lock_switch.pack(side="right")
 
             # Row 2: Text widget (full width)
@@ -474,17 +477,17 @@ class ExcelFieldManager:
             # Move scrollable text container to row+2 to make room for toolbar
             # Make Händelse expand vertically to fill available space
             if col_name == 'Händelse':
-                scrollable_text.grid(row=row+2, column=0, columnspan=2, sticky="new", padx=(10, 10), pady=(0, 2))
+                scrollable_text.grid(row=row+2, column=0, columnspan=2, sticky="new", padx=(3, 3), pady=(0, 1))
                 # Configure the text widget row to expand vertically
                 parent_frame.grid_rowconfigure(row+2, weight=1)
             else:
-                scrollable_text.grid(row=row+2, column=0, columnspan=2, sticky="ew", padx=(10, 10), pady=(0, 2))
+                scrollable_text.grid(row=row+2, column=0, columnspan=2, sticky="ew", padx=(3, 3), pady=(0, 1))
 
-            # Row 4: Character counter (left aligned, compact format)
+            # Row 4: Character counter (left aligned, compact format) - closer to text field
             limit = self.parent.handelse_char_limit if col_name == 'Händelse' else self.parent.char_limit
             counter_label = ctk.CTkLabel(parent_frame, text=f"0/{limit}",
                                    font=ctk.CTkFont(size=9))
-            counter_label.grid(row=row+3, column=0, sticky="w", pady=(1, 3))
+            counter_label.grid(row=row+3, column=0, sticky="w", pady=(0, 1))
             self.parent.char_counters[col_name] = counter_label
 
             # Store reference to scrollable text container (delegation will handle method calls)
@@ -499,23 +502,23 @@ class ExcelFieldManager:
             ctk.CTkLabel(parent_frame, text=f"{col_name}:",
                     font=ctk.CTkFont(size=12)).grid(row=row, column=0, sticky="w", padx=(3, 2), pady=(0, 1))
 
-            # Set appropriate width based on field type
+            # Set appropriate width based on field type - reduced height
             if col_name in ['Startdatum', 'Slutdatum']:
                 # Date fields: 2025-07-25 (10 chars + padding)
                 entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],
-                               font=ctk.CTkFont(size=12), width=120)
-                entry.grid(row=row, column=1, sticky="w", padx=(5, 10), pady=(0, 5))
+                               font=ctk.CTkFont(size=11), width=120, height=22)
+                entry.grid(row=row, column=1, sticky="w", padx=(2, 3), pady=(0, 1))
             elif col_name in ['Starttid', 'Sluttid']:
                 # Time fields: 18:45 (5 chars + padding)
                 entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],
-                               font=ctk.CTkFont(size=12), width=80)
-                entry.grid(row=row, column=1, sticky="w", padx=(5, 10), pady=(0, 5))
+                               font=ctk.CTkFont(size=11), width=80, height=22)
+                entry.grid(row=row, column=1, sticky="w", padx=(2, 3), pady=(0, 1))
             else:
                 # Other fields: expand to fill available space with enhanced focus styling
                 entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],
-                               font=ctk.CTkFont(size=12),
+                               font=ctk.CTkFont(size=11), height=22,
                                border_color="#E0E0E0", border_width=1, fg_color="#F8F8F8")
-                entry.grid(row=row, column=1, sticky="ew", padx=(5, 10), pady=(0, 5))
+                entry.grid(row=row, column=1, sticky="ew", padx=(2, 3), pady=(0, 1))
 
             # Enable undo tracking for Entry widget
             self.parent.enable_undo_for_widget(entry)
@@ -528,13 +531,13 @@ class ExcelFieldManager:
             if col_name in ['Starttid', 'Sluttid']:
                 entry.bind('<FocusOut>', lambda e, field=col_name: self.parent.validate_time_field(e, field))
 
-            # Add lock switch for fields that should have one (in column 2) - compact
+            # Add lock switch for fields that should have one (in column 2) - compact with lock symbol
             if has_lock:
                 lock_switch = ctk.CTkCheckBox(parent_frame,
-                                           text="L",
-                                           width=20,
+                                           text="🔒",
+                                           width=18,
                                            variable=self.parent.lock_vars[col_name],
-                                           font=ctk.CTkFont(size=9))
+                                           font=ctk.CTkFont(size=12))
                 lock_switch.grid(row=row, column=2, sticky="w", padx=(2, 3), pady=(0, 1))
 
             # Return 1 row used for horizontal layout
@@ -549,13 +552,13 @@ class ExcelFieldManager:
             ctk.CTkLabel(header_frame, text=f"{col_name}:",
                     font=ctk.CTkFont(size=12)).pack(side="left", padx=(3, 2))
 
-            # Add lock switch for fields that should have one - compact
+            # Add lock switch for fields that should have one - compact with lock symbol
             if has_lock:
                 lock_switch = ctk.CTkCheckBox(header_frame,
-                                           text="L",
-                                           width=20,
+                                           text="🔒",
+                                           width=18,
                                            variable=self.parent.lock_vars[col_name],
-                                           font=ctk.CTkFont(size=9))
+                                           font=ctk.CTkFont(size=12))
                 lock_switch.pack(side="right")
 
             # Row 2: Entry field (full width)
@@ -630,3 +633,65 @@ class ExcelFieldManager:
         # Enable undo tracking
         self.parent.enable_undo_for_widget(entry)
         print(f"DEBUG: Validation bindings added for {field_name}")
+
+    def create_operations_box(self, parent_frame):
+        """Create compact operations box under Händelse field"""
+        # Operations container with subtle background
+        ops_frame = ctk.CTkFrame(parent_frame, fg_color=("gray95", "gray15"), corner_radius=4)
+        ops_frame.grid(row=10, column=0, columnspan=2, sticky="ew", padx=3, pady=(5, 3))
+
+        # First row: Main operation buttons
+        buttons_frame = ctk.CTkFrame(ops_frame, fg_color="transparent")
+        buttons_frame.pack(fill="x", pady=(3, 2))
+
+        self.parent.save_all_btn = ctk.CTkButton(buttons_frame, text="Spara allt och rensa", width=140, height=22,
+                                     command=self.parent.save_all_and_clear,
+                                     fg_color="#28a745", font=ctk.CTkFont(size=10))
+        self.parent.save_all_btn.pack(side="left", padx=(3, 2))
+
+        self.parent.new_excel_row_btn = ctk.CTkButton(buttons_frame, text="Rensa utan spara", width=130, height=22,
+                                          command=self.parent.clear_all_without_saving,
+                                          fg_color="#17a2b8", font=ctk.CTkFont(size=10))
+        self.parent.new_excel_row_btn.pack(side="left", padx=(2, 3))
+
+        # Second row: Color selection - more compact
+        color_frame = ctk.CTkFrame(ops_frame, fg_color="transparent")
+        color_frame.pack(fill="x", pady=(1, 3))
+
+        # Label for color selection - smaller
+        color_label = ctk.CTkLabel(color_frame, text="Bakgrundsfärg:", font=ctk.CTkFont(size=9))
+        color_label.pack(side="left", padx=(3, 3))
+
+        # Colored button options - smaller
+        color_options = [
+            ("none", "Ingen", "#FFFFFF"),
+            ("yellow", "Gul", "#FFF59D"),
+            ("green", "Grön", "#C8E6C9"),
+            ("blue", "Blå", "#BBDEFB"),
+            ("red", "Röd", "#FFCDD2"),
+            ("pink", "Rosa", "#F8BBD9"),
+            ("gray", "Grå", "#E0E0E0")
+        ]
+
+        # Store button references for selection state management
+        self.parent.color_buttons = {}
+
+        for value, text, color in color_options:
+            current_selection = self.parent.row_color_var.get() if hasattr(self.parent, 'row_color_var') else "none"
+            is_selected = current_selection == value
+
+            button = ctk.CTkButton(
+                color_frame,
+                text=text,
+                width=32,
+                height=16,  # Very compact
+                font=ctk.CTkFont(size=8),
+                fg_color=color if value != "none" else "#FFFFFF",
+                hover_color=self.parent._get_hover_color(color),
+                text_color="#333333" if value != "none" else "#666666",
+                border_color="#666666",
+                border_width=2 if is_selected else 1,
+                command=lambda v=value: self.parent._select_row_color(v)
+            )
+            button.pack(side="left", padx=(0, 2))
+            self.parent.color_buttons[value] = button

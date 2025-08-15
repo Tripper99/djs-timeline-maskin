@@ -228,11 +228,10 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         # Variables
         self.setup_variables()
 
-        # Create GUI groups using simple compact design
-        self.create_simple_section(main_frame, self.create_group1_content)  # PDF Selection
-        self.create_simple_section(main_frame, self.create_parent_content)  # Filename Editing
-        self.create_simple_section(main_frame, self.create_group3_content)  # Excel Integration
-        self.create_simple_section(main_frame, self.create_group4_content)  # Excel Operations Buttons
+        # Create GUI groups using simple compact design with visual separation
+        self.create_simple_section(main_frame, self.create_group1_content, ("gray85", "gray25"))  # PDF Selection - lightest
+        self.create_simple_section(main_frame, self.create_parent_content, ("gray87", "gray23"))  # Filename Editing - medium
+        self.create_simple_section(main_frame, self.create_group3_content, ("gray89", "gray21"))  # Excel Integration (operations now integrated under Händelse)
 
         # Bottom frame for statistics and version
         bottom_frame = ctk.CTkFrame(content_frame)
