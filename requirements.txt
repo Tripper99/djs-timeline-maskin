@@ -1,3 +1,5 @@
 ttkbootstrap
 PyPDF2
 openpyxl
+xlsxwriter
+customtkinter

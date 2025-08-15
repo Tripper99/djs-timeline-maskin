@@ -39,7 +39,7 @@ class PDFProcessor:
                         _ = pdf_reader.pages[0]
                     except Exception as e:
                         logger.error(f"PDF appears corrupted, cannot read first page: {e}")
-                        raise ValueError("PDF-filen verkar vara skadad")
+                        raise ValueError("PDF-filen verkar vara skadad") from e
 
                 return page_count
 
@@ -53,7 +53,7 @@ class PDFProcessor:
             logger.error(f"Error reading PDF {pdf_path}: {e}")
             # Check if it's a known PDF corruption error
             if "xref" in str(e).lower() or "trailer" in str(e).lower() or "startxref" in str(e).lower():
-                raise ValueError("PDF-filen är skadad eller korrupt")
+                raise ValueError("PDF-filen är skadad eller korrupt") from e
             return 0
 
     @staticmethod
