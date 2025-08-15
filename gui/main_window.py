@@ -218,8 +218,8 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         # Get interior frame for content
         content_frame = self.scrollable_frame.interior
 
-        # Set a subtle background color for better card contrast (commented out for testing)
-        # content_frame.configure(fg_color=("#F5F5F5", "#1A1A1A"))
+        # Set a darker background for better section contrast
+        content_frame.configure(fg_color=("gray75", "#1A1A1A"))
 
         # Main container - removed expand=True to ensure bottom frame remains visible
         main_frame = ctk.CTkFrame(content_frame, fg_color="transparent")
@@ -228,10 +228,10 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         # Variables
         self.setup_variables()
 
-        # Create GUI groups using simple compact design with visual separation
-        self.create_simple_section(main_frame, self.create_group1_content, ("gray85", "gray25"))  # PDF Selection - lightest
-        self.create_simple_section(main_frame, self.create_parent_content, ("gray87", "gray23"))  # Filename Editing - medium
-        self.create_simple_section(main_frame, self.create_group3_content, ("gray89", "gray21"))  # Excel Integration (operations now integrated under Händelse)
+        # Create GUI groups using simple compact design with improved visual separation
+        self.create_simple_section(main_frame, self.create_group1_content, ("gray90", "gray25"))  # PDF Selection - lightest
+        self.create_simple_section(main_frame, self.create_parent_content, ("gray88", "gray23"))  # Filename Editing - medium
+        self.create_simple_section(main_frame, self.create_group3_content, ("gray86", "gray21"))  # Excel Integration (operations now integrated under Händelse)
 
         # Bottom frame for statistics and version
         bottom_frame = ctk.CTkFrame(content_frame)

@@ -90,11 +90,11 @@ class LayoutManagerMixin:
 
     def create_simple_section(self, parent, content_func, section_color=None):
         """Create a simple, compact section with optional background color for visual separation"""
-        # Section frame with subtle background color and thin padding for visual separation
+        # Section frame with subtle background color and increased padding for better visual separation
         section_frame = ctk.CTkFrame(parent,
                                    fg_color=section_color or ("gray90", "gray20"),
                                    corner_radius=4)
-        section_frame.pack(fill="x", pady=(0, 4), padx=2)  # Thin padding and gaps between sections
+        section_frame.pack(fill="x", pady=(0, 8), padx=3)  # Increased spacing between sections
 
         # Content frame inside section
         content_frame = ctk.CTkFrame(section_frame,

@@ -640,29 +640,29 @@ class ExcelFieldManager:
         ops_frame = ctk.CTkFrame(parent_frame, fg_color=("gray95", "gray15"), corner_radius=4)
         ops_frame.grid(row=10, column=0, columnspan=2, sticky="ew", padx=3, pady=(5, 3))
 
-        # First row: Main operation buttons
+        # First row: Main operation buttons - enlarged for better usability
         buttons_frame = ctk.CTkFrame(ops_frame, fg_color="transparent")
-        buttons_frame.pack(fill="x", pady=(3, 2))
+        buttons_frame.pack(fill="x", pady=(4, 3))
 
-        self.parent.save_all_btn = ctk.CTkButton(buttons_frame, text="Spara allt och rensa", width=140, height=22,
+        self.parent.save_all_btn = ctk.CTkButton(buttons_frame, text="Spara allt och rensa", width=160, height=28,
                                      command=self.parent.save_all_and_clear,
-                                     fg_color="#28a745", font=ctk.CTkFont(size=10))
-        self.parent.save_all_btn.pack(side="left", padx=(3, 2))
+                                     fg_color="#28a745", font=ctk.CTkFont(size=11))
+        self.parent.save_all_btn.pack(side="left", padx=(4, 3))
 
-        self.parent.new_excel_row_btn = ctk.CTkButton(buttons_frame, text="Rensa utan spara", width=130, height=22,
+        self.parent.new_excel_row_btn = ctk.CTkButton(buttons_frame, text="Rensa utan spara", width=150, height=28,
                                           command=self.parent.clear_all_without_saving,
-                                          fg_color="#17a2b8", font=ctk.CTkFont(size=10))
-        self.parent.new_excel_row_btn.pack(side="left", padx=(2, 3))
+                                          fg_color="#17a2b8", font=ctk.CTkFont(size=11))
+        self.parent.new_excel_row_btn.pack(side="left", padx=(3, 4))
 
-        # Second row: Color selection - more compact
+        # Second row: Color selection - enlarged for better usability
         color_frame = ctk.CTkFrame(ops_frame, fg_color="transparent")
-        color_frame.pack(fill="x", pady=(1, 3))
+        color_frame.pack(fill="x", pady=(2, 4))
 
-        # Label for color selection - smaller
-        color_label = ctk.CTkLabel(color_frame, text="Bakgrundsfärg:", font=ctk.CTkFont(size=9))
-        color_label.pack(side="left", padx=(3, 3))
+        # Label for color selection - larger
+        color_label = ctk.CTkLabel(color_frame, text="Bakgrundsfärg:", font=ctk.CTkFont(size=10))
+        color_label.pack(side="left", padx=(4, 4))
 
-        # Colored button options - smaller
+        # Colored button options - enlarged for better usability
         color_options = [
             ("none", "Ingen", "#FFFFFF"),
             ("yellow", "Gul", "#FFF59D"),
@@ -683,9 +683,9 @@ class ExcelFieldManager:
             button = ctk.CTkButton(
                 color_frame,
                 text=text,
-                width=32,
-                height=16,  # Very compact
-                font=ctk.CTkFont(size=8),
+                width=45,
+                height=22,  # Enlarged for better touch/click usability
+                font=ctk.CTkFont(size=9),
                 fg_color=color if value != "none" else "#FFFFFF",
                 hover_color=self.parent._get_hover_color(color),
                 text_color="#333333" if value != "none" else "#666666",
@@ -693,5 +693,5 @@ class ExcelFieldManager:
                 border_width=2 if is_selected else 1,
                 command=lambda v=value: self.parent._select_row_color(v)
             )
-            button.pack(side="left", padx=(0, 2))
+            button.pack(side="left", padx=(0, 3))
             self.parent.color_buttons[value] = button
