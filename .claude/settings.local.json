@@ -20,8 +20,10 @@
       "mcp__Ref__ref_read_url",
       "Bash(timeout:*)",
       "Bash(del test_ctktextbox.py)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(cp:*)"
     ],
-    "deny": []
+    "deny": [],
+    "defaultMode": "acceptEdits"
   }
 }
