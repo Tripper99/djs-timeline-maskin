@@ -23,7 +23,7 @@ class LayoutManagerMixin:
     """Mixin class containing layout-related methods for the main window"""
 
     def create_menu_bar(self):
-        """Create menu bar with Help and Theme menus"""
+        """Create menu bar with Help menu"""
         menubar = tk.Menu(self.root)
         self.root.configure(menu=menubar)
 
@@ -33,60 +33,6 @@ class LayoutManagerMixin:
         help_menu.add_command(label="Om programmet", command=self.show_program_help)
         help_menu.add_separator()
         help_menu.add_command(label="Excel-fil krav", command=self.dialog_manager.show_excel_help)
-
-        # Theme menu
-        theme_menu = tk.Menu(menubar, tearoff=0)
-        menubar.add_cascade(label="Tema", menu=theme_menu)
-
-        # Light themes submenu
-        light_themes_menu = tk.Menu(theme_menu, tearoff=0)
-        theme_menu.add_cascade(label="Ljusa teman", menu=light_themes_menu)
-
-        # Dark themes submenu
-        dark_themes_menu = tk.Menu(theme_menu, tearoff=0)
-        theme_menu.add_cascade(label="Mörka teman", menu=dark_themes_menu)
-
-        # Define light and dark themes (verified ttkbootstrap themes)
-        light_themes = [
-            "cosmo", "flatly", "journal", "litera", "lumen",
-            "minty", "pulse", "sandstone", "united", "yeti", "morph", "simplex",
-            "cerculean"
-        ]
-
-        dark_themes = [
-            "solar", "superhero", "darkly", "cyborg", "vapor"
-        ]
-
-        # Add light theme options to submenu
-        current_theme = self.config.get('theme', 'simplex')
-        for theme in sorted(light_themes):
-            # Use bold font for current theme
-            if theme == current_theme:
-                light_themes_menu.add_command(
-                    label=f"● {theme.capitalize()}",
-                    command=lambda t=theme: self.change_theme(t),
-                    font=('TkDefaultFont', 0, 'bold')
-                )
-            else:
-                light_themes_menu.add_command(
-                    label=f"  {theme.capitalize()}",
-                    command=lambda t=theme: self.change_theme(t)
-                )
-
-        # Add dark theme options to submenu
-        for theme in sorted(dark_themes):
-            # Use bold font for current theme
-            if theme == current_theme:
-                dark_themes_menu.add_command(
-                    label=f"● {theme.capitalize()}",
-                    command=lambda t=theme: self.change_theme(t),
-                    font=('TkDefaultFont', 0, 'bold')
-                )
-            else:
-                dark_themes_menu.add_command(
-                    label=f"  {theme.capitalize()}",
-                    command=lambda t=theme: self.change_theme(t)
-                )
 
     def create_simple_section(self, parent, content_func, section_color=None):
         """Create a simple, compact section with optional background color for visual separation"""
@@ -264,8 +210,8 @@ class LayoutManagerMixin:
         comment_entry.grid(row=0, column=7, sticky="w", padx=(0, 5), pady=(0, 1))
         self.enable_undo_for_widget(comment_entry)
 
-        # Copy to Excel button - 40% smaller
-        self.copy_to_excel_btn = ctk.CTkButton(components_frame, text="Kopiera till Excel", width=120, height=25,
+        # Copy to Excel button with down arrow - 40% smaller
+        self.copy_to_excel_btn = ctk.CTkButton(components_frame, text="Kopiera filnamn till Excel ↓", width=140, height=25,
                                          command=self.copy_filename_to_excel,
                                          fg_color="#17a2b8", font=ctk.CTkFont(size=10))
         self.copy_to_excel_btn.grid(row=0, column=8, sticky="w", padx=(3, 0), pady=(0, 1))
@@ -306,7 +252,13 @@ class LayoutManagerMixin:
         help_btn = ctk.CTkButton(excel_btn_frame, text="?", width=25, height=25,
                            command=self.dialog_manager.show_excel_help,
                            font=ctk.CTkFont(size=11))
-        help_btn.pack(side="left")
+        help_btn.pack(side="left", padx=(0, 2))
+
+        # Create Excel button - direct access to Excel creation from help dialog
+        self.create_excel_btn = ctk.CTkButton(excel_btn_frame, text="Skapa Excel", width=80, height=25,
+                                        command=self.dialog_manager.create_excel_template,
+                                        fg_color="#28a745", font=ctk.CTkFont(size=10))
+        self.create_excel_btn.pack(side="left")
 
         # Excel column fields (scrollable, three-column layout)
         self.excel_fields_frame = ctk.CTkFrame(parent, fg_color="transparent")

@@ -635,32 +635,23 @@ class ExcelFieldManager:
         print(f"DEBUG: Validation bindings added for {field_name}")
 
     def create_operations_box(self, parent_frame):
-        """Create compact operations box under Händelse field"""
-        # Operations container with subtle background
-        ops_frame = ctk.CTkFrame(parent_frame, fg_color=("gray95", "gray15"), corner_radius=4)
-        ops_frame.grid(row=10, column=0, columnspan=2, sticky="ew", padx=3, pady=(5, 3))
+        """Create reorganized operations box under Händelse field with separate containers"""
 
-        # First row: Main operation buttons - enlarged for better usability
-        buttons_frame = ctk.CTkFrame(ops_frame, fg_color="transparent")
-        buttons_frame.pack(fill="x", pady=(4, 3))
+        # First box: Color selection in light grey container (positioned above buttons)
+        color_box = ctk.CTkFrame(parent_frame, fg_color=("gray92", "gray18"), corner_radius=4)
+        color_box.grid(row=10, column=0, columnspan=2, sticky="ew", padx=3, pady=(5, 2))
 
-        self.parent.save_all_btn = ctk.CTkButton(buttons_frame, text="Spara allt och rensa", width=160, height=28,
-                                     command=self.parent.save_all_and_clear,
-                                     fg_color="#28a745", font=ctk.CTkFont(size=11))
-        self.parent.save_all_btn.pack(side="left", padx=(4, 3))
+        # Color selection frame with centered content
+        color_frame = ctk.CTkFrame(color_box, fg_color="transparent")
+        color_frame.pack(expand=True, pady=4)
 
-        self.parent.new_excel_row_btn = ctk.CTkButton(buttons_frame, text="Rensa utan spara", width=150, height=28,
-                                          command=self.parent.clear_all_without_saving,
-                                          fg_color="#17a2b8", font=ctk.CTkFont(size=11))
-        self.parent.new_excel_row_btn.pack(side="left", padx=(3, 4))
+        # Label for color selection - centered
+        color_label = ctk.CTkLabel(color_frame, text="Bakgrundsfärg:", font=ctk.CTkFont(size=10, weight="bold"))
+        color_label.pack(pady=(0, 3))
 
-        # Second row: Color selection - enlarged for better usability
-        color_frame = ctk.CTkFrame(ops_frame, fg_color="transparent")
-        color_frame.pack(fill="x", pady=(2, 4))
-
-        # Label for color selection - larger
-        color_label = ctk.CTkLabel(color_frame, text="Bakgrundsfärg:", font=ctk.CTkFont(size=10))
-        color_label.pack(side="left", padx=(4, 4))
+        # Container for color buttons - centered
+        color_buttons_frame = ctk.CTkFrame(color_frame, fg_color="transparent")
+        color_buttons_frame.pack()
 
         # Colored button options - enlarged for better usability
         color_options = [
@@ -681,7 +672,7 @@ class ExcelFieldManager:
             is_selected = current_selection == value
 
             button = ctk.CTkButton(
-                color_frame,
+                color_buttons_frame,
                 text=text,
                 width=45,
                 height=22,  # Enlarged for better touch/click usability
@@ -693,5 +684,27 @@ class ExcelFieldManager:
                 border_width=2 if is_selected else 1,
                 command=lambda v=value: self.parent._select_row_color(v)
             )
-            button.pack(side="left", padx=(0, 3))
+            button.pack(side="left", padx=2)
             self.parent.color_buttons[value] = button
+
+        # Second box: Operation buttons in separate light grey container (positioned below)
+        buttons_box = ctk.CTkFrame(parent_frame, fg_color=("gray92", "gray18"), corner_radius=4)
+        buttons_box.grid(row=11, column=0, columnspan=2, sticky="ew", padx=3, pady=(2, 3))
+
+        # Buttons frame with centered content
+        buttons_frame = ctk.CTkFrame(buttons_box, fg_color="transparent")
+        buttons_frame.pack(expand=True, pady=4)
+
+        # Container for buttons - centered
+        buttons_container = ctk.CTkFrame(buttons_frame, fg_color="transparent")
+        buttons_container.pack()
+
+        self.parent.save_all_btn = ctk.CTkButton(buttons_container, text="Spara allt och rensa", width=170, height=30,
+                                     command=self.parent.save_all_and_clear,
+                                     fg_color="#28a745", font=ctk.CTkFont(size=11, weight="bold"))
+        self.parent.save_all_btn.pack(side="left", padx=(0, 4))
+
+        self.parent.new_excel_row_btn = ctk.CTkButton(buttons_container, text="Rensa utan spara", width=160, height=30,
+                                          command=self.parent.clear_all_without_saving,
+                                          fg_color="#17a2b8", font=ctk.CTkFont(size=11, weight="bold"))
+        self.parent.new_excel_row_btn.pack(side="left", padx=(4, 0))
