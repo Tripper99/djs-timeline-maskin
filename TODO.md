@@ -2,14 +2,16 @@
 
 ## High Priority - Code Quality
 
-### 1. Split main_window.py into smaller, focused modules
-- [ ] Current file is 35,000+ tokens - needs modularization
-- [ ] Suggested split:
-  - [ ] PDF operations module
-  - [ ] Excel operations module
-  - [ ] Layout management module
-  - [ ] Event handlers module
-  - [ ] Statistics and state management module
+### 1. Split main_window.py into smaller, focused modules ✅
+- [x] Current file is 35,000+ tokens - needs modularization
+- [x] Suggested split:
+  - [x] PDF operations module (gui/pdf_operations.py)
+  - [x] Excel operations module (gui/excel_operations.py)
+  - [x] Layout management module (gui/layout_manager.py)
+  - [x] Event handlers module (gui/event_handlers.py)
+  - [x] Statistics and state management module (gui/stats_manager.py)
+  - [x] Undo/redo functionality module (gui/undo_manager.py)
+  - [x] Text formatting module (gui/formatting_manager.py)
 
 ### 2. Update requirements.txt to include all dependencies
 - [ ] Add xlsxwriter (currently missing)
