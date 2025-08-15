@@ -205,12 +205,12 @@ class ExcelOperationsMixin:
         char_count = len(content)
         limit = self.handelse_char_limit if column_name == 'Händelse' else self.char_limit
 
-        # Update counter display
+        # Update counter display (now inline with field label)
         if column_name in self.char_counters:
             counter_label = self.char_counters[column_name]
 
-            # Color coding based on remaining characters
-            counter_label.configure(text=f"{char_count}/{limit}")
+            # Update inline format: "Fieldname: (count/limit)"
+            counter_label.configure(text=f"{column_name}: ({char_count}/{limit})")
 
         # Hard limit enforcement
         if char_count > limit:
@@ -219,9 +219,9 @@ class ExcelOperationsMixin:
             text_widget.delete("1.0", tk.END)
             text_widget.insert("1.0", truncated_content)
 
-            # Update counter to show 0
+            # Update counter to show limit reached
             if column_name in self.char_counters:
-                self.char_counters[column_name].configure(text=f"{limit}/{limit}")
+                self.char_counters[column_name].configure(text=f"{column_name}: ({limit}/{limit})")
 
     def validate_time_format(self, time_input):
         """

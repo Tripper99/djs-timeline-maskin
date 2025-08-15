@@ -9,10 +9,10 @@ class StatsManagerMixin:
     """Mixin class for statistics management functionality"""
 
     def get_stats_text(self) -> str:
-        """Get statistics text"""
-        return (f"PDF:er öppnade: {self.stats['pdfs_opened']} | "
-                f"Filer omdöpta: {self.stats['files_renamed']} | "
-                f"Excel-rader: {self.stats['excel_rows_added']}")
+        """Get compact statistics text"""
+        return (f"PDF: {self.stats['pdfs_opened']} | "
+                f"Omdöpt: {self.stats['files_renamed']} | "
+                f"Excel: {self.stats['excel_rows_added']}")
 
     def update_stats_display(self):
         """Update statistics display"""

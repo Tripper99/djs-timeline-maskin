@@ -237,15 +237,15 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         bottom_frame = ctk.CTkFrame(content_frame)
         bottom_frame.pack(fill="x", padx=12, pady=(0, 8))
 
-        # Statistics label (left side)
+        # Statistics label (left side) - compact format
         self.filename_stats_label = ctk.CTkLabel(bottom_frame, text=self.get_stats_text(),
-                                               font=ctk.CTkFont(size=14))
+                                               font=ctk.CTkFont(size=11))
         self.filename_stats_label.pack(side="left")
         ToolTip(self.filename_stats_label, "Statistik över användning: Antal PDF:er öppnade, "
                                          "filer omdöpta och Excel-rader tillagda under denna session.")
 
-        # Version label (right side)
-        version_label = ctk.CTkLabel(bottom_frame, text=VERSION, font=ctk.CTkFont(size=14))
+        # Version label (right side) - smaller
+        version_label = ctk.CTkLabel(bottom_frame, text=VERSION, font=ctk.CTkFont(size=11))
         version_label.pack(side="right")
         ToolTip(version_label, f"Programversion {VERSION}. DJs Timeline-maskin för PDF-filhantering och Excel-integration.")
 

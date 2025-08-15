@@ -262,6 +262,8 @@ class LayoutManagerMixin:
                                         command=self.dialog_manager.create_excel_template,
                                         fg_color="#28a745", font=ctk.CTkFont(size=10))
         self.create_excel_btn.pack(side="left")
+        ToolTip(self.create_excel_btn, "Skapar en ny Excel-fil med alla nödvändiga kolumner fördefinierade. " +
+                                      "Perfekt för att snabbt komma igång med nya tidslinjeprojekt.")
 
         # Excel column fields (scrollable, three-column layout)
         self.excel_fields_frame = ctk.CTkFrame(parent, fg_color="transparent")

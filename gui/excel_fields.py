@@ -265,10 +265,10 @@ class ExcelFieldManager:
 
             if hasattr(var, 'delete'):  # Text widget
                 var.delete("1.0", tk.END)
-                # Reset character counter for text fields
+                # Reset character counter for text fields (now inline format)
                 if col_name in self.parent.char_counters:
                     limit = self.parent.handelse_char_limit if col_name == 'Händelse' else self.parent.char_limit
-                    self.parent.char_counters[col_name].configure(text=f"0/{limit}")
+                    self.parent.char_counters[col_name].configure(text=f"{col_name}: (0/{limit})")
             else:  # StringVar
                 var.set("")
 
@@ -410,12 +410,17 @@ class ExcelFieldManager:
 
         # Special vertical layout for text fields with character counters (Händelse, Note1-3)
         elif col_name.startswith('Note') or col_name == 'Händelse':
-            # Row 1: Field name and lock switch (if applicable)
+            # Row 1: Field name with inline character counter and lock switch (if applicable)
             header_frame = ctk.CTkFrame(parent_frame, fg_color="transparent")
             header_frame.grid(row=row, column=0, columnspan=2, sticky="new", pady=(0, 2))
 
-            ctk.CTkLabel(header_frame, text=f"{col_name}:",
-                    font=ctk.CTkFont(size=12)).pack(side="left", padx=(3, 2))
+            # Create label with inline character counter
+            limit = self.parent.handelse_char_limit if col_name == 'Händelse' else self.parent.char_limit
+            label_text = f"{col_name}: (0/{limit})"
+            field_label = ctk.CTkLabel(header_frame, text=label_text, font=ctk.CTkFont(size=12))
+            field_label.pack(side="left", padx=(3, 2))
+            # Store reference for counter updates
+            self.parent.char_counters[col_name] = field_label
 
             # Add lock switch for text fields that should have one - compact with lock symbol
             if has_lock:
@@ -483,18 +488,11 @@ class ExcelFieldManager:
             else:
                 scrollable_text.grid(row=row+2, column=0, columnspan=2, sticky="ew", padx=(3, 3), pady=(0, 1))
 
-            # Row 4: Character counter (left aligned, compact format) - closer to text field
-            limit = self.parent.handelse_char_limit if col_name == 'Händelse' else self.parent.char_limit
-            counter_label = ctk.CTkLabel(parent_frame, text=f"0/{limit}",
-                                   font=ctk.CTkFont(size=9))
-            counter_label.grid(row=row+3, column=0, sticky="w", pady=(0, 1))
-            self.parent.char_counters[col_name] = counter_label
-
             # Store reference to scrollable text container (delegation will handle method calls)
             self.parent.excel_vars[col_name] = scrollable_text
 
-            # Return the number of rows used (4 rows for text fields: header, toolbar, text, counter)
-            return 4
+            # Return the number of rows used (3 rows for text fields: header, toolbar, text - counter is now inline)
+            return 3
 
         # Layout depends on column type and field type
         elif column_type == "column1":
@@ -504,14 +502,16 @@ class ExcelFieldManager:
 
             # Set appropriate width based on field type - reduced height
             if col_name in ['Startdatum', 'Slutdatum']:
-                # Date fields: 2025-07-25 (10 chars + padding)
+                # Date fields: 2025-07-25 (10 chars + padding) with placeholder
                 entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],
-                               font=ctk.CTkFont(size=11), width=120, height=22)
+                               font=ctk.CTkFont(size=11), width=120, height=22,
+                               placeholder_text="YYYY-MM-DD")
                 entry.grid(row=row, column=1, sticky="w", padx=(2, 3), pady=(0, 1))
             elif col_name in ['Starttid', 'Sluttid']:
-                # Time fields: 18:45 (5 chars + padding)
+                # Time fields: 18:45 (5 chars + padding) with placeholder
                 entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],
-                               font=ctk.CTkFont(size=11), width=80, height=22)
+                               font=ctk.CTkFont(size=11), width=80, height=22,
+                               placeholder_text="HH:MM")
                 entry.grid(row=row, column=1, sticky="w", padx=(2, 3), pady=(0, 1))
             else:
                 # Other fields: expand to fill available space with enhanced focus styling
