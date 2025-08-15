@@ -646,7 +646,7 @@ class ExcelFieldManager:
         color_frame.pack(expand=True, pady=4)
 
         # Label for color selection - centered
-        color_label = ctk.CTkLabel(color_frame, text="Bakgrundsfärg:", font=ctk.CTkFont(size=10, weight="bold"))
+        color_label = ctk.CTkLabel(color_frame, text="Bakgrundsfärg på nya excel-raden:", font=ctk.CTkFont(size=10, weight="bold"))
         color_label.pack(pady=(0, 3))
 
         # Container for color buttons - centered
@@ -687,9 +687,9 @@ class ExcelFieldManager:
             button.pack(side="left", padx=2)
             self.parent.color_buttons[value] = button
 
-        # Second box: Operation buttons in separate light grey container (positioned below)
+        # Second box: Operation buttons in separate light grey container (positioned below with more spacing)
         buttons_box = ctk.CTkFrame(parent_frame, fg_color=("gray92", "gray18"), corner_radius=4)
-        buttons_box.grid(row=11, column=0, columnspan=2, sticky="ew", padx=3, pady=(2, 3))
+        buttons_box.grid(row=11, column=0, columnspan=2, sticky="ew", padx=3, pady=(8, 3))
 
         # Buttons frame with centered content
         buttons_frame = ctk.CTkFrame(buttons_box, fg_color="transparent")
@@ -699,12 +699,14 @@ class ExcelFieldManager:
         buttons_container = ctk.CTkFrame(buttons_frame, fg_color="transparent")
         buttons_container.pack()
 
-        self.parent.save_all_btn = ctk.CTkButton(buttons_container, text="Spara allt och rensa", width=170, height=30,
+        self.parent.save_all_btn = ctk.CTkButton(buttons_container, text="Spara allt och rensa", width=200, height=40,
                                      command=self.parent.save_all_and_clear,
-                                     fg_color="#28a745", font=ctk.CTkFont(size=11, weight="bold"))
-        self.parent.save_all_btn.pack(side="left", padx=(0, 4))
+                                     fg_color="#28a745", hover_color="#218838",
+                                     font=ctk.CTkFont(size=13, weight="bold"))
+        self.parent.save_all_btn.pack(side="left", padx=(0, 5))
 
-        self.parent.new_excel_row_btn = ctk.CTkButton(buttons_container, text="Rensa utan spara", width=160, height=30,
+        self.parent.new_excel_row_btn = ctk.CTkButton(buttons_container, text="Rensa utan spara", width=180, height=40,
                                           command=self.parent.clear_all_without_saving,
-                                          fg_color="#17a2b8", font=ctk.CTkFont(size=11, weight="bold"))
-        self.parent.new_excel_row_btn.pack(side="left", padx=(4, 0))
+                                          fg_color="#17a2b8", hover_color="#117a8b",
+                                          font=ctk.CTkFont(size=13, weight="bold"))
+        self.parent.new_excel_row_btn.pack(side="left", padx=(5, 0))

@@ -210,11 +210,14 @@ class LayoutManagerMixin:
         comment_entry.grid(row=0, column=7, sticky="w", padx=(0, 5), pady=(0, 1))
         self.enable_undo_for_widget(comment_entry)
 
-        # Copy to Excel button with down arrow - 40% smaller
-        self.copy_to_excel_btn = ctk.CTkButton(components_frame, text="Kopiera filnamn till Excel ↓", width=140, height=25,
+        # Copy to Excel button with arrows - distinct color and larger to stand out
+        self.copy_to_excel_btn = ctk.CTkButton(components_frame,
+                                         text="↓ Kopiera ned filnamnet till Excelfältet ↓",
+                                         width=220, height=30,
                                          command=self.copy_filename_to_excel,
-                                         fg_color="#17a2b8", font=ctk.CTkFont(size=10))
-        self.copy_to_excel_btn.grid(row=0, column=8, sticky="w", padx=(3, 0), pady=(0, 1))
+                                         fg_color="#FF6B35", hover_color="#E55A2B",  # Orange color to stand out
+                                         font=ctk.CTkFont(size=11, weight="bold"))
+        self.copy_to_excel_btn.grid(row=0, column=8, sticky="w", padx=(5, 0), pady=(0, 1))
 
     def create_group3_content(self, parent):
         """Group 3 Content: Excel Integration"""
