@@ -608,6 +608,41 @@ The application demonstrates **exceptional engineering practices** with:
 3. **Feature Enhancement**: Build upon solid architectural foundation
 4. **Documentation**: Create detailed API documentation for mixin interfaces
 
+## 9. Recent Improvements & UI Evolution (v2.2.7-v2.2.11)
+
+### Space Optimization & User Experience Enhancements
+
+**Major GUI Improvements**:
+- **Space Efficiency**: Optimized for lower resolution screens by eliminating unnecessary padding
+- **Inline Character Counters**: Moved counters from separate rows to field labels ("Händelse: (0/1000)") saving ~4 rows of vertical space
+- **Visual Hierarchy**: Implemented color-coded button system (orange=transfer, green=save, blue=reset) for clear workflow indication
+- **Reorganized Operations**: Color selection and operation buttons moved to separate light grey containers under Händelse field
+
+**Session Persistence Features**:
+- **Column Width Memory**: Excel column sash positions automatically saved to config and restored on startup
+- **Proportional Scaling**: Saved positions adapt to different screen sizes maintaining user preferences
+- **Color Button State Consistency**: Visual selection states properly reset after save operations
+- **Smart Fallbacks**: New users get sensible 40/30/30 defaults, existing users keep customized layouts
+
+**Technical Implementations**:
+- **Placeholder Text Solution**: Manual Entry-StringVar binding to preserve CustomTkinter placeholder functionality for date/time fields (YYYY-MM-DD, HH:MM)
+- **Enhanced Tooltips**: Comprehensive explanations added to key workflow buttons
+- **Background Color Coding**: Different section backgrounds (gray90, gray88, gray86) for improved visual organization
+- **Compact Statistics**: Streamlined display format ("PDF: X | Omdöpt: Y | Excel: Z") with reduced font size
+
+**User Workflow Improvements**:
+- **Orange Copy Button**: "↓ Kopiera ned filnamnet till Excelfältet ↓" with distinctive color and arrows clearly indicates data transfer step
+- **Enlarged Action Buttons**: Save/Reset buttons increased to 200x40/180x40 pixels for better prominence and accessibility
+- **Removed Obsolete Elements**: Theme menu removed (not applicable to CustomTkinter framework)
+- **Direct Excel Creation**: "Skapa Excel" button added next to help for immediate template creation access
+
+### Current Status Summary (v2.2.11)
+The application now provides **maximum space efficiency** while maintaining excellent usability through smart design choices:
+- **Vertical Space Savings**: ~4 rows saved through inline counters and reduced padding
+- **Clear Visual Hierarchy**: Color-coded buttons guide users through the workflow
+- **Session Persistence**: User preferences maintained across application sessions
+- **Enhanced Guidance**: Placeholder text and comprehensive tooltips improve user experience
+
 ### Conclusion
 The codebase represents a **mature, exceptionally well-engineered desktop application** that has successfully undergone major architectural improvement. The transition from a monolithic 35,000+ token file to a sophisticated 7-mixin modular architecture demonstrates excellent software engineering practices and provides a solid foundation for continued development and enhancement.
 

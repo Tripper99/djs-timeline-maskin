@@ -20,7 +20,7 @@ class ConfigManager:
         self.default_config = {
             "excel_file": "",
             "last_pdf_dir": "",
-            "window_geometry": "1800x1400",
+            "window_geometry": "1400x680",
             "theme": "simplex",
             "output_folder": "",  # Store output folder path for renamed PDFs
             "output_folder_locked": False,  # Store if output folder selection is locked

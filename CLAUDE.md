@@ -8,7 +8,29 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.2.3)
+## Current Status (v2.2.11)
+
+**Space Optimization & Session Persistence Achievement (v2.2.7-v2.2.11)**:
+- Successfully optimized GUI for maximum space efficiency on lower resolution screens
+- Eliminated unnecessary padding and decorative elements while maintaining functionality
+- Implemented inline character counters saving ~4 rows of vertical space
+- Added auto-disappearing placeholder text for improved user guidance (YYYY-MM-DD, HH:MM)
+- Created clear visual hierarchy with prominent action buttons using color coding
+- Fixed session persistence issues: color button states and column width memory
+
+**Major UI/UX Improvements (v2.2.7-v2.2.11)**:
+- **Orange copy button**: "↓ Kopiera ned filnamnet till Excelfältet ↓" with arrows and distinctive color for clear workflow indication
+- **Enlarged operation buttons**: Save/Reset buttons made 200x40/180x40 pixels for better prominence
+- **Reorganized operations area**: Color selection and buttons in separate light grey containers under Händelse field
+- **Compact statistics**: Changed from "PDF:er öppnade: X" to "PDF: X" format with smaller font
+- **Visual separation**: Different background colors between sections (gray90, gray88, gray86) for better organization
+- **Removed obsolete elements**: Theme menu removed (not applicable to CustomTkinter)
+
+**Session Persistence Features (v2.2.11)**:
+- **Column width memory**: Excel column sash positions saved to config and restored on startup
+- **Color button state consistency**: Visual selection state properly resets after save operations
+- **Proportional scaling**: Saved column positions adapt to different screen sizes automatically
+- **Smart fallbacks**: New users get sensible 40/30/30 defaults, existing users keep preferences
 
 **Comprehensive Testing Implementation (v2.2.3)**:
 - Successfully implemented complete test suite with 120 tests total
@@ -26,30 +48,12 @@ The application has been refactored from a single large file into a modular stru
 - Excel hybrid operations preserved exactly without any modifications
 - All functionality tested and verified working perfectly
 
-**Modular Architecture Benefits**:
-- Individual modules are focused and maintainable (19-747 lines each)
-- Clean mixin inheritance pattern with no circular dependencies
-- Enhanced code readability and debugging capabilities
-- Future feature additions now much easier with clear separation
-- Textbook example of successful refactoring
-
-**Project Documentation Update (v2.2.1)**:
-- Comprehensive codebase analysis completed and updated in `codebase_analysis.md`
-- TODO list updated with completed modularization task
-- Claude Code command files added for automated analysis and documentation updates
-
-**Major Layout Improvements (v2.2.0)**:
-- Fixed persistent gap above Händelse field that resisted multiple fix attempts
-- Achieved proper 40/30/30 column distribution in Excel integration section
-- Implemented resizable column handles using tk.PanedWindow for better large monitor support
-- Date/time fields moved to top of left column for easy access
-- UI made significantly more compact with reduced padding throughout
-
 **Key Technical Solutions**:
-- Modularization: Careful extraction with no logic changes, preserving sensitive Excel hybrid method
-- Gap issue: Fixed by correcting row weight distribution (giving weight to text widget row instead of header row)
-- Column proportions: Restructured layout to move date/time fields from complex nested subframe to left column
-- Resizable handles: Native tk.PanedWindow with minimum width constraints (300px left, 200px middle/right)
+- **Space optimization**: Inline counters, reduced padding, compact labels
+- **Placeholder text**: Manual Entry-StringVar binding to preserve CustomTkinter placeholder functionality
+- **Session persistence**: Config-based saving/restoration of UI state (sash positions, color states)
+- **Visual hierarchy**: Color-coded buttons (orange=transfer, green=save, blue=reset) for clear workflow
+- **Modular architecture**: Clean mixin inheritance with no circular dependencies
 
 **Testing Notes**:
 - Comprehensive test suite available: `python -m pytest tests/ -v`
@@ -57,7 +61,7 @@ The application has been refactored from a single large file into a modular stru
 - Run integration tests before releases: `python -m pytest tests/test_integration_workflows.py -v -s`
 - See TESTING_GUIDE.md for complete testing workflow procedures
 - Test application startup after layout changes
-- ttk.PanedWindow does not support minsize parameter - use tk.PanedWindow instead
+- Critical: Always test placeholder text visibility and session persistence features
 
 ## Additional guideline on github commit
 **Never* mention yourself (Claude) in comment when doing commit. *Never* write stuff like "🤖 Generated with [Claude Code](https://claude.ai/code) Co-Authored-By: Claude <noreply@anthropic.com>". 

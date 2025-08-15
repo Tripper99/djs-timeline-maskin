@@ -13,7 +13,7 @@ DJs Timeline-maskin är ett GUI-verktyg som hjälper till att:
 ## Installation
 
 ### Krav
-- Python 3.7 eller senare
+- Python 3.8 eller senare
 - Pip (Python package manager)
 
 ### Installera dependencies

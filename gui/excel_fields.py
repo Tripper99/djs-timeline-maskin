@@ -377,9 +377,37 @@ class ExcelFieldManager:
         # Store reference to PanedWindow for position saving/restoring
         self.parent.excel_fields_paned_window = fields_container
 
-        # Set initial sash positions for approximately 40/30/30 distribution
+        # Set initial sash positions for approximately 30/35/35 distribution
         # Schedule this for after the window is displayed and has a known width
-        self.parent.root.after(100, lambda: self._set_initial_sash_positions(fields_container))
+        # Use multiple attempts with increasing delays to ensure proper width
+        self.parent.root.after(500, lambda: self._set_initial_sash_positions_with_retry(fields_container, attempt=1))
+
+    def _set_initial_sash_positions_with_retry(self, panedwindow, attempt=1, max_attempts=5):
+        """Set initial sash positions with retry logic for proper width detection"""
+        try:
+            # Get the current width of the panedwindow
+            panedwindow.update_idletasks()
+            total_width = panedwindow.winfo_width()
+            min_required_width = 800  # Minimum reasonable width for 3 columns
+
+            logger.info(f"SASH RETRY {attempt}: Panedwindow width: {total_width} (min required: {min_required_width})")
+
+            if total_width >= min_required_width:
+                # Width is good, proceed with positioning
+                logger.info(f"SASH RETRY {attempt}: Width sufficient, setting positions")
+                self._set_initial_sash_positions(panedwindow)
+            elif attempt < max_attempts:
+                # Width too small, retry with longer delay
+                retry_delay = 300 * attempt  # Increasing delay: 300ms, 600ms, 900ms, etc.
+                logger.info(f"SASH RETRY {attempt}: Width too small ({total_width}), retrying in {retry_delay}ms")
+                self.parent.root.after(retry_delay, lambda: self._set_initial_sash_positions_with_retry(panedwindow, attempt + 1, max_attempts))
+            else:
+                # All attempts failed, use whatever width we have
+                logger.warning(f"SASH RETRY {attempt}: All attempts failed, using width {total_width}")
+                self._set_initial_sash_positions(panedwindow)
+
+        except Exception as e:
+            logger.error(f"Error in sash positioning retry {attempt}: {e}")
 
     def _set_initial_sash_positions(self, panedwindow):
         """Set initial sash positions - restore saved positions or use 40/30/30 distribution"""
@@ -387,14 +415,18 @@ class ExcelFieldManager:
             # Get the current width of the panedwindow
             panedwindow.update_idletasks()
             total_width = panedwindow.winfo_width()
+            min_reasonable_width = 800  # Minimum width for 3 columns with proper proportions
+            logger.info(f"SASH DEBUG: Panedwindow total width: {total_width} (min reasonable: {min_reasonable_width})")
 
-            if total_width > 100:  # Only set if we have a reasonable width
+            if total_width >= min_reasonable_width:  # Only set if we have a reasonable width
                 # Try to restore saved sash positions
                 saved_positions = self.parent.config.get('excel_sash_positions', None)
+                logger.info(f"SASH DEBUG: Saved positions from config: {saved_positions}")
 
                 if saved_positions and len(saved_positions) == 2:
                     # Restore saved positions (scaled to current width if needed)
                     saved_width = self.parent.config.get('excel_sash_total_width', total_width)
+                    logger.info(f"SASH DEBUG: Saved width: {saved_width}, current width: {total_width}")
                     if saved_width > 0:
                         # Scale positions proportionally to current width
                         scale_factor = total_width / saved_width
@@ -412,24 +444,42 @@ class ExcelFieldManager:
                         # Fallback to default if saved width is invalid
                         self._set_default_sash_positions(panedwindow, total_width)
                 else:
-                    # No saved positions, use default 40/30/30 distribution
+                    # No saved positions, use default 30/35/35 distribution
+                    logger.info("SASH DEBUG: No saved positions found, using default 30/35/35")
                     self._set_default_sash_positions(panedwindow, total_width)
+            else:
+                logger.warning(f"SASH DEBUG: Total width too small ({total_width} < {min_reasonable_width}), skipping sash positioning")
 
         except Exception as e:
             logger.error(f"Error setting sash positions: {e}")
 
     def _set_default_sash_positions(self, panedwindow, total_width):
-        """Set default 40/30/30 sash positions"""
+        """Set default 30/35/35 sash positions"""
         try:
-            # Calculate positions for 40/30/30 split
-            pos1 = int(total_width * 0.4)  # 40% for left column
-            pos2 = int(total_width * 0.7)  # 70% for left+middle columns
+            # Calculate positions for 30/35/35 split
+            pos1 = int(total_width * 0.3)  # 30% for left column
+            pos2 = int(total_width * 0.65)  # 65% for left+middle columns
+
+            # Validate positions make sense
+            min_col_width = 200  # Minimum column width
+            if pos1 < min_col_width:
+                pos1 = min_col_width
+            if pos2 < pos1 + min_col_width:
+                pos2 = pos1 + min_col_width
+            if total_width - pos2 < min_col_width:
+                pos2 = total_width - min_col_width
 
             # Set sash positions
             panedwindow.sash_place(0, pos1, 0)  # First sash at 40%
             panedwindow.sash_place(1, pos2, 0)  # Second sash at 70%
 
+            # Calculate actual proportions for verification
+            col1_pct = (pos1 / total_width) * 100
+            col2_pct = ((pos2 - pos1) / total_width) * 100
+            col3_pct = ((total_width - pos2) / total_width) * 100
+
             logger.info(f"Set default sash positions - Width: {total_width}, Pos1: {pos1}, Pos2: {pos2}")
+            logger.info(f"Actual proportions: {col1_pct:.1f}% / {col2_pct:.1f}% / {col3_pct:.1f}%")
         except Exception as e:
             logger.error(f"Error setting default sash positions: {e}")
 

@@ -85,3 +85,14 @@
   - [x] Phase 1: 115 autonomous unit tests for core modules
   - [x] Phase 2: 5 semi-autonomous integration tests for complete workflows
 - [x] Create TESTING_GUIDE.md documentation for future test usage
+- [x] **UI Optimization for Lower Resolution Screens (v2.2.7-v2.2.11)**:
+  - [x] Change button texts for clearer workflow indication
+  - [x] Add direct Excel creation button
+  - [x] Remove obsolete theme menu
+  - [x] Implement space-saving inline character counters (~4 rows saved)
+  - [x] Add color-coded button system (orange=transfer, green=save, blue=reset)
+  - [x] Enlarge action buttons for better accessibility
+  - [x] Add placeholder text for date/time fields
+  - [x] Implement session persistence for column widths and color button states
+  - [x] Fix critical startup bug (checp_dependencies → check_dependencies)
+  - [x] Enhance user guidance with comprehensive tooltips

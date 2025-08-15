@@ -132,7 +132,7 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         # Create main window with CustomTkinter
         self.root = ctk.CTk()
         self.root.title(f"DJs Timeline-maskin {VERSION}")
-        self.root.geometry("1800x1000")  # Initial size before responsive calculation
+        self.root.geometry("1400x900")  # Initial size before responsive calculation
 
         # Set application icon
         try:
@@ -150,19 +150,9 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
 
-        # Get actual available screen area (excludes taskbar)
-        try:
-            # Try to get the actual working area height
-            work_area_height = self.root.winfo_vrootheight()
-            if work_area_height > 0:
-                available_height = work_area_height
-            else:
-                available_height = screen_height - 80  # Fallback: assume larger taskbar
-        except Exception:
-            available_height = screen_height - 80  # Fallback
-
-        window_height = min(max(int(available_height * 0.75), 700), 800)  # Much more aggressive height reduction for laptops
-        logger.info(f"Screen: {screen_width}x{screen_height}, work area: {available_height}, calculated window height: {window_height}")
+        # Use content-based height instead of screen percentage
+        window_height = 680  # Fixed height based on actual content requirements
+        logger.info(f"Screen: {screen_width}x{screen_height}, using content-based window height: {window_height}")
 
         # Debug actual screen measurements after DPI fix
         logger.info(f"DPI aware measurements - Screen: {self.root.winfo_screenwidth()}x{self.root.winfo_screenheight()}")
@@ -186,20 +176,20 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
                         logger.info(f"Using saved geometry: {saved_geometry}")
                 else:
                     # Fallback to calculated geometry
-                    x = (screen_width // 2) - (1800 // 2)
-                    y = 0
-                    self.root.geometry(f"1800x{window_height}+{x}+{y}")
+                    x = 100  # Simple left positioning with reasonable margin
+                    y = 50   # Small offset from top
+                    self.root.geometry(f"1400x{window_height}+{x}+{y}")
             except Exception as e:
                 logger.warning(f"Error parsing saved geometry {saved_geometry}: {e}")
                 # Fallback to calculated geometry
-                x = (screen_width // 2) - (1800 // 2)
-                y = 0
-                self.root.geometry(f"1800x{window_height}+{x}+{y}")
+                x = 100  # Simple left positioning with reasonable margin
+                y = 50   # Small offset from top
+                self.root.geometry(f"1400x{window_height}+{x}+{y}")
         else:
             # No saved geometry, use calculated
-            x = (screen_width // 2) - (1800 // 2)
-            y = 0
-            self.root.geometry(f"1800x{window_height}+{x}+{y}")
+            x = 100  # Simple left positioning with reasonable margin
+            y = 50   # Small offset from top
+            self.root.geometry(f"1400x{window_height}+{x}+{y}")
 
         # Create menu bar
         self.create_menu_bar()

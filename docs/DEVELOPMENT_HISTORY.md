@@ -4,6 +4,69 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.2.11 Session Persistence & Bug Fixes (2025-08-15) - Critical Fixes ✅
+**Achievement**: Fixed critical typo preventing app startup and added comprehensive session persistence features.
+
+**Critical Bug Fix**:
+- **Startup Crash**: Fixed `checp_dependencies` → `check_dependencies` typo in app.py that prevented application from starting
+- **Lesson**: Reinforced importance of comprehensive syntax checking before commits
+
+**Session Persistence Features**:
+- **Column Width Memory**: Excel column sash positions automatically saved to config and restored on startup
+- **Proportional Scaling**: Saved positions adapt to different screen sizes maintaining user preferences  
+- **Smart Fallbacks**: New users get sensible 40/30/30 defaults, existing users keep customized layouts
+- **Color Button State Reset**: Visual selection states properly reset after save operations
+
+**Technical Implementation**:
+- **Sash Position Saving**: Implemented in `on_closing()` with error handling for edge cases
+- **Proportional Restoration**: Calculate relative positions based on total width changes
+- **Manual Entry-StringVar Binding**: Custom solution for placeholder text visibility with CustomTkinter
+- **Enhanced Save Logic**: Added `_select_row_color("none")` call in `save_all_and_clear()`
+
+### v2.2.10 Placeholder Text & Polish (2025-08-15) - UX Enhancement ✅
+**Achievement**: Enhanced user guidance through placeholder text and interface polish.
+
+**User Experience Improvements**:
+- **Placeholder Text**: Added "YYYY-MM-DD" and "HH:MM" placeholders for date/time fields
+- **Enhanced Tooltips**: Comprehensive explanations for all major workflow buttons
+- **Background Color Coding**: Different section backgrounds (gray90, gray88, gray86) for visual organization
+- **Compact Statistics**: Streamlined format ("PDF: X | Omdöpt: Y | Excel: Z") with reduced font size
+
+**Technical Challenge Solved**:
+- **CustomTkinter Limitation**: Entry widgets with `textvariable` parameter ignore `placeholder_text`
+- **Solution**: Removed `textvariable` and implemented manual Entry-StringVar binding
+- **Method**: `_connect_entry_to_stringvar()` preserves placeholder functionality while maintaining data binding
+
+### v2.2.9 Space Optimization Phase 2 (2025-08-15) - Efficiency Focus ✅
+**Achievement**: Implemented major space-saving features saving ~4 rows of vertical space.
+
+**Space Efficiency Improvements**:
+- **Inline Character Counters**: Moved from separate rows to field labels ("Händelse: (0/1000)")
+- **Reduced Padding**: Eliminated unnecessary vertical spacing throughout interface
+- **Operations Reorganization**: Color selection and buttons moved to light grey containers under Händelse
+
+**User Workflow Enhancement**:
+- **Clear Visual Hierarchy**: Color-coded button system (orange=transfer, green=save, blue=reset)
+- **Enhanced Guidance**: Arrows and distinctive colors guide users through workflow steps
+- **Prominent Action Buttons**: Save/Reset buttons enlarged to 200x40/180x40 pixels for better accessibility
+
+### v2.2.8 Button Enhancements (2025-08-15) - Visual Hierarchy ✅
+**Achievement**: Enhanced button visibility and user guidance through visual improvements.
+
+**Button Improvements**:
+- **Orange Copy Button**: "↓ Kopiera ned filnamnet till Excelfältet ↓" with distinctive color (#FF6B35) and arrows
+- **Enlarged Action Buttons**: Save and Reset buttons made more prominent with increased size
+- **Visual Consistency**: Color scheme provides clear workflow indication
+
+### v2.2.7 UI Improvements Phase 1 (2025-08-15) - Workflow Enhancement ✅
+**Achievement**: Implemented specific UI improvements for better workflow clarity.
+
+**Interface Updates**:
+- **Button Text Changes**: Changed "Kopiera till Excel" to clearer "Kopiera filnamn till Excel ↓"
+- **Direct Excel Access**: Added "Skapa Excel" button next to help for immediate template creation
+- **Menu Cleanup**: Removed obsolete theme menu (not applicable to CustomTkinter framework)
+- **Enhanced Copy Button**: Clear indication of data transfer direction with arrow
+
 ### v2.2.0 Resizable Column Handles (2025-08-15) - Major UX Enhancement ✅
 **Achievement**: Successfully implemented resizable column handles with native drag functionality for better large monitor support.
 
