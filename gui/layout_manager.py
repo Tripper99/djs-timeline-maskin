@@ -88,6 +88,17 @@ class LayoutManagerMixin:
                     command=lambda t=theme: self.change_theme(t)
                 )
 
+    def create_simple_section(self, parent, content_func):
+        """Create a simple, compact section without headers or decorative styling"""
+        # Simple content frame with minimal styling and aggressive space savings
+        content_frame = ctk.CTkFrame(parent,
+                                   fg_color="transparent",
+                                   corner_radius=0)
+        content_frame.pack(fill="x", pady=(0, 2), padx=0)  # Minimal padding
+
+        # Call the content creation function
+        content_func(content_frame)
+
     def create_card_section(self, parent, title, content_func):
         """Create a professional card-style section with shadow effect"""
         # Outer shadow frame (creates depth effect)
@@ -163,53 +174,54 @@ class LayoutManagerMixin:
 
         # First row: PDF path display
         pdf_path_frame = ctk.CTkFrame(parent, fg_color="transparent")
-        pdf_path_frame.pack(fill="x", pady=(0, 5))
+        pdf_path_frame.pack(fill="x", pady=(0, 1))
 
-        ctk.CTkLabel(pdf_path_frame, text="Vald fil:", font=ctk.CTkFont(size=12)).pack(side="left", padx=(10, 5))
+        ctk.CTkLabel(pdf_path_frame, text="Vald fil:", font=ctk.CTkFont(size=11)).pack(side="left", padx=(3, 2))
         pdf_path_entry = ctk.CTkEntry(pdf_path_frame, textvariable=self.pdf_path_var,
-                                 state="readonly", font=ctk.CTkFont(size=12), width=300)
-        pdf_path_entry.pack(side="left", padx=(10, 10))
+                                 state="readonly", font=ctk.CTkFont(size=11), width=300, height=25)
+        pdf_path_entry.pack(side="left", padx=(2, 3))
         ToolTip(pdf_path_entry, "Visar namn på den valda PDF-filen. Filen öppnas automatiskt när den väljs.")
 
-        # Select PDF button
-        select_pdf_btn = ctk.CTkButton(pdf_path_frame, text="Välj PDF",
-                                  command=self.select_pdf_file, )
-        select_pdf_btn.pack(side="left", padx=(0, 20))
+        # Select PDF button - 40% smaller
+        select_pdf_btn = ctk.CTkButton(pdf_path_frame, text="Välj PDF", width=70, height=25,
+                                  command=self.select_pdf_file, font=ctk.CTkFont(size=11))
+        select_pdf_btn.pack(side="left", padx=(0, 5))
         ToolTip(select_pdf_btn, "Välj en PDF-fil för bearbetning. Filen öppnas automatiskt för granskning, "
                                "filnamnet parsas till komponenter och sidantalet räknas automatiskt.")
 
         # Output folder selection (same row)
-        ctk.CTkLabel(pdf_path_frame, text="Mapp för omdöpt pdf:", font=ctk.CTkFont(size=12)).pack(side="left", padx=(10, 5))
+        ctk.CTkLabel(pdf_path_frame, text="Mapp för omdöpt pdf:", font=ctk.CTkFont(size=11)).pack(side="left", padx=(3, 2))
         self.output_folder_entry = ctk.CTkEntry(pdf_path_frame, textvariable=self.output_folder_var,
-                                           state="readonly", font=ctk.CTkFont(size=12), width=250)
-        self.output_folder_entry.pack(side="left", padx=(10, 10))
+                                           state="readonly", font=ctk.CTkFont(size=11), width=250, height=25)
+        self.output_folder_entry.pack(side="left", padx=(2, 3))
         ToolTip(self.output_folder_entry, "Visar mappen där omdöpta PDF-filer ska sparas. "
                                          "Fylls automatiskt med PDF-filens mapp om inte låst.")
 
-        # Select output folder button
-        self.select_output_folder_btn = ctk.CTkButton(pdf_path_frame, text="Välj mapp",
-                                                 command=self.select_output_folder, )
-        self.select_output_folder_btn.pack(side="left", padx=(0, 10))
+        # Select output folder button - 40% smaller
+        self.select_output_folder_btn = ctk.CTkButton(pdf_path_frame, text="Välj mapp", width=70, height=25,
+                                                 command=self.select_output_folder, font=ctk.CTkFont(size=11))
+        self.select_output_folder_btn.pack(side="left", padx=(0, 3))
         ToolTip(self.select_output_folder_btn, "Välj en mapp för omdöpta PDF-filer.")
 
-        # Lock switch for output folder
-        self.output_folder_lock_switch = ctk.CTkCheckBox(pdf_path_frame, text="Lås",
+        # Lock switch for output folder - compact
+        self.output_folder_lock_switch = ctk.CTkCheckBox(pdf_path_frame, text="L", width=20,
                                                        variable=self.output_folder_lock_var,
-                                                       command=self.on_output_folder_lock_change)
-        self.output_folder_lock_switch.pack(side="left", padx=(5, 0))
+                                                       command=self.on_output_folder_lock_change,
+                                                       font=ctk.CTkFont(size=10))
+        self.output_folder_lock_switch.pack(side="left", padx=(2, 0))
         ToolTip(self.output_folder_lock_switch, "När låst: mappvalet ändras inte när ny PDF väljs. "
                                                "När olåst: mappvalet uppdateras automatiskt till PDF-filens mapp.")
 
-        # Open folder button (between lock and reset)
-        self.open_folder_btn = ctk.CTkButton(pdf_path_frame, text="Öppna mapp",
-                                        command=self.open_output_folder, fg_color="#28a745", width=12)
-        self.open_folder_btn.pack(side="left", padx=(10, 0))
+        # Open folder button - 40% smaller
+        self.open_folder_btn = ctk.CTkButton(pdf_path_frame, text="Öppna", width=50, height=25,
+                                        command=self.open_output_folder, fg_color="#28a745", font=ctk.CTkFont(size=10))
+        self.open_folder_btn.pack(side="left", padx=(3, 0))
         ToolTip(self.open_folder_btn, "Öppna den valda mappen i filutforskaren.")
 
-        # Reset button (same row)
-        self.reset_folder_btn = ctk.CTkButton(pdf_path_frame, text="Nollställ mapp",
-                                         command=self.reset_output_folder, fg_color="#17a2b8", width=15)
-        self.reset_folder_btn.pack(side="left", padx=(10, 0))
+        # Reset button - 40% smaller
+        self.reset_folder_btn = ctk.CTkButton(pdf_path_frame, text="Nollställ", width=60, height=25,
+                                         command=self.reset_output_folder, fg_color="#17a2b8", font=ctk.CTkFont(size=10))
+        self.reset_folder_btn.pack(side="left", padx=(3, 0))
         ToolTip(self.reset_folder_btn, "Rensa mappvalet och låser upp automatisk uppdatering.")
 
     def create_parent_content(self, parent):
@@ -217,83 +229,83 @@ class LayoutManagerMixin:
 
         # Create grid for filename components
         components_frame = ctk.CTkFrame(parent, fg_color="transparent")
-        components_frame.pack(fill="x")
+        components_frame.pack(fill="x", pady=(0, 1))
 
         # Date
-        ctk.CTkLabel(components_frame, text="Datum:", font=ctk.CTkFont(size=12)).grid(
-            row=0, column=0, sticky="w", padx=(0, 10), pady=(0, 5))
-        date_entry = ctk.CTkEntry(components_frame, textvariable=self.date_var, width=120, font=ctk.CTkFont(size=12))
-        date_entry.grid(row=0, column=1, sticky="w", padx=(0, 20), pady=(0, 5))
+        ctk.CTkLabel(components_frame, text="Datum:", font=ctk.CTkFont(size=11)).grid(
+            row=0, column=0, sticky="w", padx=(0, 3), pady=(0, 1))
+        date_entry = ctk.CTkEntry(components_frame, textvariable=self.date_var, width=100, height=25, font=ctk.CTkFont(size=11))
+        date_entry.grid(row=0, column=1, sticky="w", padx=(0, 5), pady=(0, 1))
         self.enable_undo_for_widget(date_entry)
 
         # Newspaper
-        ctk.CTkLabel(components_frame, text="Tidning:", font=ctk.CTkFont(size=12)).grid(
-            row=0, column=2, sticky="w", padx=(0, 10), pady=(0, 5))
-        newspaper_entry = ctk.CTkEntry(components_frame, textvariable=self.newspaper_var, width=150, font=ctk.CTkFont(size=12))
-        newspaper_entry.grid(row=0, column=3, sticky="w", padx=(0, 20), pady=(0, 5))
+        ctk.CTkLabel(components_frame, text="Tidning:", font=ctk.CTkFont(size=11)).grid(
+            row=0, column=2, sticky="w", padx=(0, 3), pady=(0, 1))
+        newspaper_entry = ctk.CTkEntry(components_frame, textvariable=self.newspaper_var, width=120, height=25, font=ctk.CTkFont(size=11))
+        newspaper_entry.grid(row=0, column=3, sticky="w", padx=(0, 5), pady=(0, 1))
         self.enable_undo_for_widget(newspaper_entry)
 
         # Pages
-        ctk.CTkLabel(components_frame, text="Sidor:", font=ctk.CTkFont(size=12)).grid(
-            row=0, column=4, sticky="w", padx=(0, 10), pady=(0, 5))
-        pages_entry = ctk.CTkEntry(components_frame, textvariable=self.pages_var, width=60, font=ctk.CTkFont(size=12))
-        pages_entry.grid(row=0, column=5, sticky="w", padx=(0, 20), pady=(0, 5))
+        ctk.CTkLabel(components_frame, text="Sidor:", font=ctk.CTkFont(size=11)).grid(
+            row=0, column=4, sticky="w", padx=(0, 3), pady=(0, 1))
+        pages_entry = ctk.CTkEntry(components_frame, textvariable=self.pages_var, width=50, height=25, font=ctk.CTkFont(size=11))
+        pages_entry.grid(row=0, column=5, sticky="w", padx=(0, 5), pady=(0, 1))
         self.enable_undo_for_widget(pages_entry)
 
         # Comment
-        ctk.CTkLabel(components_frame, text="Kommentar:", font=ctk.CTkFont(size=12)).grid(
-            row=0, column=6, sticky="w", padx=(0, 10), pady=(0, 5))
-        comment_entry = ctk.CTkEntry(components_frame, textvariable=self.comment_var, width=300, font=ctk.CTkFont(size=12))
-        comment_entry.grid(row=0, column=7, sticky="w", padx=(0, 20), pady=(0, 5))
+        ctk.CTkLabel(components_frame, text="Kommentar:", font=ctk.CTkFont(size=11)).grid(
+            row=0, column=6, sticky="w", padx=(0, 3), pady=(0, 1))
+        comment_entry = ctk.CTkEntry(components_frame, textvariable=self.comment_var, width=250, height=25, font=ctk.CTkFont(size=11))
+        comment_entry.grid(row=0, column=7, sticky="w", padx=(0, 5), pady=(0, 1))
         self.enable_undo_for_widget(comment_entry)
 
-        # Copy to Excel button (moved to same row, made 25% smaller)
-        self.copy_to_excel_btn = ctk.CTkButton(components_frame, text="Kopiera filnamn till Excel-fältet",
+        # Copy to Excel button - 40% smaller
+        self.copy_to_excel_btn = ctk.CTkButton(components_frame, text="Kopiera till Excel", width=120, height=25,
                                          command=self.copy_filename_to_excel,
-                                         fg_color="#17a2b8", width=26)
-        self.copy_to_excel_btn.grid(row=0, column=8, sticky="w", padx=(10, 0), pady=(0, 5))
+                                         fg_color="#17a2b8", font=ctk.CTkFont(size=10))
+        self.copy_to_excel_btn.grid(row=0, column=8, sticky="w", padx=(3, 0), pady=(0, 1))
 
     def create_group3_content(self, parent):
         """Group 3 Content: Excel Integration"""
 
         # Excel file selection
         excel_file_frame = ctk.CTkFrame(parent, fg_color="transparent")
-        excel_file_frame.pack(fill="x", pady=(0, 5))
+        excel_file_frame.pack(fill="x", pady=(0, 1))
 
-        ctk.CTkLabel(excel_file_frame, text="Excel-fil:", font=ctk.CTkFont(size=12)).pack(side="left", padx=(10, 5))
+        ctk.CTkLabel(excel_file_frame, text="Excel-fil:", font=ctk.CTkFont(size=11)).pack(side="left", padx=(3, 2))
         excel_path_entry = ctk.CTkEntry(excel_file_frame, textvariable=self.excel_path_var,
-                                   state="readonly", font=ctk.CTkFont(size=12), width=400)
-        excel_path_entry.pack(side="left", padx=(10, 10))
+                                   state="readonly", font=ctk.CTkFont(size=11), width=400, height=25)
+        excel_path_entry.pack(side="left", padx=(2, 3))
         ToolTip(excel_path_entry, "Visar namn på den valda Excel-filen. Programmet kommer ihåg senast använda fil.")
 
         # Button frame for Excel file selection and help
         excel_btn_frame = ctk.CTkFrame(excel_file_frame, fg_color="transparent")
         excel_btn_frame.pack(side="left")
 
-        self.select_excel_btn = ctk.CTkButton(excel_btn_frame, text="Välj Excel",
+        self.select_excel_btn = ctk.CTkButton(excel_btn_frame, text="Välj Excel", width=70, height=25,
                                          command=self.select_excel_file,
-                                         fg_color="#17a2b8")
-        self.select_excel_btn.pack(side="left", padx=(0, 5))
+                                         fg_color="#17a2b8", font=ctk.CTkFont(size=11))
+        self.select_excel_btn.pack(side="left", padx=(0, 2))
         ToolTip(self.select_excel_btn, "Välj Excel-fil (.xlsx) för dataintegrering. "
                                       "Du får möjlighet att skapa en säkerhetskopia att arbeta med.")
 
-        # Open Excel button
-        self.open_excel_btn = ctk.CTkButton(excel_btn_frame, text="Öppna Excel",
+        # Open Excel button - 40% smaller
+        self.open_excel_btn = ctk.CTkButton(excel_btn_frame, text="Öppna", width=60, height=25,
                                        command=self.open_excel_file,
-                                       fg_color="#28a745", state="disabled")
-        self.open_excel_btn.pack(side="left", padx=(0, 5))
+                                       fg_color="#28a745", state="disabled", font=ctk.CTkFont(size=11))
+        self.open_excel_btn.pack(side="left", padx=(0, 2))
         ToolTip(self.open_excel_btn, "Öppna den valda Excel-filen i externt program. "
                                     "Blir tillgänglig när en Excel-fil har valts.")
 
-        # Help button (question mark)
-        help_btn = ctk.CTkButton(excel_btn_frame, text="?",
+        # Help button - smaller
+        help_btn = ctk.CTkButton(excel_btn_frame, text="?", width=25, height=25,
                            command=self.dialog_manager.show_excel_help,
-                           width=30)
+                           font=ctk.CTkFont(size=11))
         help_btn.pack(side="left")
 
         # Excel column fields (scrollable, three-column layout)
         self.excel_fields_frame = ctk.CTkFrame(parent, fg_color="transparent")
-        self.excel_fields_frame.pack(fill="both", expand=False, pady=(3, 0))  # Reduced padding to save vertical space
+        self.excel_fields_frame.pack(fill="both", expand=False, pady=(1, 0))  # Minimal padding
 
         # Configure the excel_fields_frame for responsive layout
         self.excel_fields_frame.grid_columnconfigure(0, weight=1)
@@ -309,28 +321,28 @@ class LayoutManagerMixin:
 
         # First row: Buttons for Excel operations
         excel_buttons_frame = ctk.CTkFrame(parent, fg_color="transparent")
-        excel_buttons_frame.pack(fill="x", pady=(0, 5))
+        excel_buttons_frame.pack(fill="x", pady=(0, 1))
 
-        self.save_all_btn = ctk.CTkButton(excel_buttons_frame, text="Spara allt och rensa fälten",
+        self.save_all_btn = ctk.CTkButton(excel_buttons_frame, text="Spara allt och rensa", width=140, height=25,
                                      command=self.save_all_and_clear,
-                                     fg_color="#28a745", width=30)
-        self.save_all_btn.pack(side="left", padx=(0, 10))
+                                     fg_color="#28a745", font=ctk.CTkFont(size=11))
+        self.save_all_btn.pack(side="left", padx=(0, 3))
 
-        self.new_excel_row_btn = ctk.CTkButton(excel_buttons_frame, text="Rensa allt utan att spara",
+        self.new_excel_row_btn = ctk.CTkButton(excel_buttons_frame, text="Rensa utan spara", width=130, height=25,
                                           command=self.clear_all_without_saving,
-                                          fg_color="#17a2b8", width=30)
-        self.new_excel_row_btn.pack(side="left", padx=(0, 20))
+                                          fg_color="#17a2b8", font=ctk.CTkFont(size=11))
+        self.new_excel_row_btn.pack(side="left", padx=(0, 5))
 
 
         # Second row: Row color selection
         color_frame = ctk.CTkFrame(parent, fg_color="transparent")
-        color_frame.pack(fill="x", pady=(3, 0))
+        color_frame.pack(fill="x", pady=(1, 0))
 
-        # Label for color selection
-        color_label = ctk.CTkLabel(color_frame, text="Nya excelradens bakgrundsfärg:", font=ctk.CTkFont(size=10, weight="bold"))
-        color_label.pack(side="left", padx=(0, 15))
+        # Label for color selection - smaller
+        color_label = ctk.CTkLabel(color_frame, text="Excelrad bakgrundsfärg:", font=ctk.CTkFont(size=10))
+        color_label.pack(side="left", padx=(0, 5))
 
-        # Colored button options for row background
+        # Colored button options for row background - 50% smaller
         color_options = [
             ("none", "Ingen", "#FFFFFF"),
             ("yellow", "Gul", "#FFF59D"),    # Light yellow
@@ -345,24 +357,24 @@ class LayoutManagerMixin:
         self.color_buttons = {}
 
         for value, text, color in color_options:
-            # Create colored button with selection state
+            # Create colored button with selection state - 50% smaller
             current_selection = self.row_color_var.get() if hasattr(self, 'row_color_var') else "none"
             is_selected = current_selection == value
 
             button = ctk.CTkButton(
                 color_frame,
                 text=text,
-                width=60,
-                height=30,  # Slightly taller for better proportions
-                font=ctk.CTkFont(size=11),
+                width=40,
+                height=20,  # 50% smaller
+                font=ctk.CTkFont(size=9),
                 fg_color=color if value != "none" else "#FFFFFF",
                 hover_color=self._get_hover_color(color),
-                text_color="#333333" if value != "none" else "#666666",  # Better contrast
+                text_color="#333333" if value != "none" else "#666666",
                 border_color="#666666",
                 border_width=3 if is_selected else 1,
                 command=lambda v=value: self._select_row_color(v)
             )
-            button.pack(side="left", padx=(0, 10))  # Slightly more spacing
+            button.pack(side="left", padx=(0, 3))  # Reduced spacing
             self.color_buttons[value] = button
 
     def _get_hover_color(self, base_color):

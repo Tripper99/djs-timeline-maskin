@@ -113,40 +113,46 @@ class FormattingManagerMixin:
         """Create formatting toolbar with buttons and bind keyboard shortcuts"""
         # Ensure custom button styles are configured
         self.configure_button_styles()
-        # Bold button - styled with bold text using Unicode
-        bold_btn = ctk.CTkButton(parent_frame, text="𝐁", width=30,
-                           command=lambda: self.toggle_format(text_widget, "bold"))
-        bold_btn.pack(side="left", padx=(0, 2))
+        # Bold button - styled with bold text using Unicode - 50% smaller
+        bold_btn = ctk.CTkButton(parent_frame, text="𝐁", width=18, height=18,
+                           command=lambda: self.toggle_format(text_widget, "bold"),
+                           font=ctk.CTkFont(size=10))
+        bold_btn.pack(side="left", padx=(0, 1))
 
         # Color buttons with fixed colors (order: Red, Green, Blue)
-        # Red button - fixed red color
-        red_btn = ctk.CTkButton(parent_frame, text="●", width=30,
+        # Red button - fixed red color - 50% smaller
+        red_btn = ctk.CTkButton(parent_frame, text="●", width=18, height=18,
                           command=lambda: self.toggle_format(text_widget, "red"),
-                          fg_color="#DC3545", hover_color="#C82333")
-        red_btn.pack(side="left", padx=(0, 2))
+                          fg_color="#DC3545", hover_color="#C82333",
+                          font=ctk.CTkFont(size=10))
+        red_btn.pack(side="left", padx=(0, 1))
 
-        # Green button - fixed green color
-        green_btn = ctk.CTkButton(parent_frame, text="●", width=30,
+        # Green button - fixed green color - 50% smaller
+        green_btn = ctk.CTkButton(parent_frame, text="●", width=18, height=18,
                             command=lambda: self.toggle_format(text_widget, "green"),
-                            fg_color="#28A745", hover_color="#218838")
-        green_btn.pack(side="left", padx=(0, 2))
+                            fg_color="#28A745", hover_color="#218838",
+                            font=ctk.CTkFont(size=10))
+        green_btn.pack(side="left", padx=(0, 1))
 
-        # Blue button - fixed blue color
-        blue_btn = ctk.CTkButton(parent_frame, text="●", width=30,
+        # Blue button - fixed blue color - 50% smaller
+        blue_btn = ctk.CTkButton(parent_frame, text="●", width=18, height=18,
                            command=lambda: self.toggle_format(text_widget, "blue"),
-                           fg_color="#007BFF", hover_color="#0069D9")
-        blue_btn.pack(side="left", padx=(0, 2))
+                           fg_color="#007BFF", hover_color="#0069D9",
+                           font=ctk.CTkFont(size=10))
+        blue_btn.pack(side="left", padx=(0, 1))
 
-        # Clear formatting button - removes ALL formatting and restores theme default color
-        default_btn = ctk.CTkButton(parent_frame, text="T", width=30,
+        # Clear formatting button - removes ALL formatting and restores theme default color - 50% smaller
+        default_btn = ctk.CTkButton(parent_frame, text="T", width=18, height=18,
                               command=lambda: self.clear_all_formatting(text_widget),
-                              fg_color="gray60", hover_color="gray50")
-        default_btn.pack(side="left", padx=(0, 2))
+                              fg_color="gray60", hover_color="gray50",
+                              font=ctk.CTkFont(size=10))
+        default_btn.pack(side="left", padx=(0, 1))
 
-        # Font size toggle button
-        font_btn = ctk.CTkButton(parent_frame, text="A+", width=30,
-                           command=lambda: self.toggle_text_font_size())
-        font_btn.pack(side="left", padx=(2, 0))
+        # Font size toggle button - 50% smaller
+        font_btn = ctk.CTkButton(parent_frame, text="A+", width=20, height=18,
+                           command=lambda: self.toggle_text_font_size(),
+                           font=ctk.CTkFont(size=9))
+        font_btn.pack(side="left", padx=(1, 0))
 
         # Bind keyboard shortcuts for this text widget
         text_widget.bind('<Control-b>', lambda e: self.toggle_format(text_widget, "bold"))

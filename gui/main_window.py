@@ -228,11 +228,11 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         # Variables
         self.setup_variables()
 
-        # Create GUI groups using card-based design
-        self.create_card_section(main_frame, "1. PDF-fil", self.create_group1_content)  # PDF Selection
-        self.create_card_section(main_frame, "2. Filnamn komponenter", self.create_parent_content)  # Filename Editing
-        self.create_card_section(main_frame, "3. Excel-integration", self.create_group3_content)  # Excel Integration
-        self.create_card_section(main_frame, "4. Operationer", self.create_group4_content)  # Excel Operations Buttons
+        # Create GUI groups using simple compact design
+        self.create_simple_section(main_frame, self.create_group1_content)  # PDF Selection
+        self.create_simple_section(main_frame, self.create_parent_content)  # Filename Editing
+        self.create_simple_section(main_frame, self.create_group3_content)  # Excel Integration
+        self.create_simple_section(main_frame, self.create_group4_content)  # Excel Operations Buttons
 
         # Bottom frame for statistics and version
         bottom_frame = ctk.CTkFrame(content_frame)

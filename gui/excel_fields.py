@@ -268,7 +268,7 @@ class ExcelFieldManager:
                 # Reset character counter for text fields
                 if col_name in self.parent.char_counters:
                     limit = self.parent.handelse_char_limit if col_name == 'Händelse' else self.parent.char_limit
-                    self.parent.char_counters[col_name].configure(text=f"Tecken kvar: {limit}")
+                    self.parent.char_counters[col_name].configure(text=f"0/{limit}")
             else:  # StringVar
                 var.set("")
 
@@ -379,7 +379,7 @@ class ExcelFieldManager:
         if col_name == 'Dag':
             # Standard horizontal layout for Dag field
             ctk.CTkLabel(parent_frame, text=f"{col_name}:",
-                    font=ctk.CTkFont(size=14)).grid(row=row, column=0, sticky="w", padx=(10, 5), pady=(0, 5))
+                    font=ctk.CTkFont(size=12)).grid(row=row, column=0, sticky="w", padx=(3, 2), pady=(0, 1))
 
             dag_var = tk.StringVar(value="Formel läggs till automatiskt")
             entry = ctk.CTkEntry(parent_frame,
@@ -395,7 +395,7 @@ class ExcelFieldManager:
         elif col_name == 'Inlagd':
             # Standard horizontal layout for Inlagd field
             ctk.CTkLabel(parent_frame, text=f"{col_name}:",
-                    font=ctk.CTkFont(size=14)).grid(row=row, column=0, sticky="w", padx=(10, 5), pady=(0, 5))
+                    font=ctk.CTkFont(size=12)).grid(row=row, column=0, sticky="w", padx=(3, 2), pady=(0, 1))
 
             entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],
                            state="readonly",
@@ -412,13 +412,15 @@ class ExcelFieldManager:
             header_frame.grid(row=row, column=0, columnspan=2, sticky="new", pady=(0, 2))
 
             ctk.CTkLabel(header_frame, text=f"{col_name}:",
-                    font=ctk.CTkFont(size=14)).pack(side="left", padx=(10, 5))
+                    font=ctk.CTkFont(size=12)).pack(side="left", padx=(3, 2))
 
-            # Add lock switch for text fields that should have one
+            # Add lock switch for text fields that should have one - compact
             if has_lock:
                 lock_switch = ctk.CTkCheckBox(header_frame,
-                                           text="Lås",
-                                           variable=self.parent.lock_vars[col_name])
+                                           text="L",
+                                           width=20,
+                                           variable=self.parent.lock_vars[col_name],
+                                           font=ctk.CTkFont(size=9))
                 lock_switch.pack(side="right")
 
             # Row 2: Text widget (full width)
@@ -478,11 +480,11 @@ class ExcelFieldManager:
             else:
                 scrollable_text.grid(row=row+2, column=0, columnspan=2, sticky="ew", padx=(10, 10), pady=(0, 2))
 
-            # Row 4: Character counter (left aligned, compact)
+            # Row 4: Character counter (left aligned, compact format)
             limit = self.parent.handelse_char_limit if col_name == 'Händelse' else self.parent.char_limit
-            counter_label = ctk.CTkLabel(parent_frame, text=f"{limit}",
-                                   font=ctk.CTkFont(size=11))
-            counter_label.grid(row=row+3, column=0, sticky="w", pady=(5, 8))
+            counter_label = ctk.CTkLabel(parent_frame, text=f"0/{limit}",
+                                   font=ctk.CTkFont(size=9))
+            counter_label.grid(row=row+3, column=0, sticky="w", pady=(1, 3))
             self.parent.char_counters[col_name] = counter_label
 
             # Store reference to scrollable text container (delegation will handle method calls)
@@ -495,7 +497,7 @@ class ExcelFieldManager:
         elif column_type == "column1":
             # Horizontal layout for column 1 and date fields in column 2 - saves vertical space
             ctk.CTkLabel(parent_frame, text=f"{col_name}:",
-                    font=ctk.CTkFont(size=14)).grid(row=row, column=0, sticky="w", padx=(10, 5), pady=(0, 5))
+                    font=ctk.CTkFont(size=12)).grid(row=row, column=0, sticky="w", padx=(3, 2), pady=(0, 1))
 
             # Set appropriate width based on field type
             if col_name in ['Startdatum', 'Slutdatum']:
@@ -526,12 +528,14 @@ class ExcelFieldManager:
             if col_name in ['Starttid', 'Sluttid']:
                 entry.bind('<FocusOut>', lambda e, field=col_name: self.parent.validate_time_field(e, field))
 
-            # Add lock switch for fields that should have one (in column 2)
+            # Add lock switch for fields that should have one (in column 2) - compact
             if has_lock:
                 lock_switch = ctk.CTkCheckBox(parent_frame,
-                                           text="Lås",
-                                           variable=self.parent.lock_vars[col_name])
-                lock_switch.grid(row=row, column=2, sticky="w", padx=(5, 10), pady=(0, 5))
+                                           text="L",
+                                           width=20,
+                                           variable=self.parent.lock_vars[col_name],
+                                           font=ctk.CTkFont(size=9))
+                lock_switch.grid(row=row, column=2, sticky="w", padx=(2, 3), pady=(0, 1))
 
             # Return 1 row used for horizontal layout
             return 1
@@ -543,13 +547,15 @@ class ExcelFieldManager:
             header_frame.grid(row=row, column=0, columnspan=2, sticky="ew", pady=(0, 2))
 
             ctk.CTkLabel(header_frame, text=f"{col_name}:",
-                    font=ctk.CTkFont(size=14)).pack(side="left", padx=(10, 5))
+                    font=ctk.CTkFont(size=12)).pack(side="left", padx=(3, 2))
 
-            # Add lock switch for fields that should have one
+            # Add lock switch for fields that should have one - compact
             if has_lock:
                 lock_switch = ctk.CTkCheckBox(header_frame,
-                                           text="Lås",
-                                           variable=self.parent.lock_vars[col_name])
+                                           text="L",
+                                           width=20,
+                                           variable=self.parent.lock_vars[col_name],
+                                           font=ctk.CTkFont(size=9))
                 lock_switch.pack(side="right")
 
             # Row 2: Entry field (full width)

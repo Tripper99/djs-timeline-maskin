@@ -204,14 +204,13 @@ class ExcelOperationsMixin:
 
         char_count = len(content)
         limit = self.handelse_char_limit if column_name == 'Händelse' else self.char_limit
-        remaining = limit - char_count
 
         # Update counter display
         if column_name in self.char_counters:
             counter_label = self.char_counters[column_name]
 
             # Color coding based on remaining characters
-            counter_label.configure(text=f"Tecken kvar: {remaining}")
+            counter_label.configure(text=f"{char_count}/{limit}")
 
         # Hard limit enforcement
         if char_count > limit:
@@ -222,7 +221,7 @@ class ExcelOperationsMixin:
 
             # Update counter to show 0
             if column_name in self.char_counters:
-                self.char_counters[column_name].configure(text="Tecken kvar: 0")
+                self.char_counters[column_name].configure(text=f"{limit}/{limit}")
 
     def validate_time_format(self, time_input):
         """
