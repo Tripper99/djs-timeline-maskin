@@ -8,9 +8,14 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.2.0)
+## Current Status (v2.2.1)
 
-**Major Layout Improvements Completed**:
+**Project Documentation Update**:
+- Comprehensive codebase analysis completed and documented in `codebase_analysis.md`
+- TODO list created with prioritized improvement tasks in `TODO.md`
+- Claude Code command files added for automated analysis and documentation updates
+
+**Major Layout Improvements (v2.2.0)**:
 - Fixed persistent gap above Händelse field that resisted multiple fix attempts
 - Achieved proper 40/30/30 column distribution in Excel integration section
 - Implemented resizable column handles using tk.PanedWindow for better large monitor support
