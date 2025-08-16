@@ -1,5 +1,5 @@
 # Configuration files
-pdf_processor_config.json
+djs_timeline_machine_config.json
 
 # Python
 __pycache__/
@@ -62,6 +62,7 @@ logs/
 *.xlsx
 *.xls
 *.pdf
+
 # But keep example files if any
 !example_*.xlsx
 !example_*.pdf

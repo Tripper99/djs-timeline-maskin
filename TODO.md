@@ -96,3 +96,7 @@
   - [x] Implement session persistence for column widths and color button states
   - [x] Fix critical startup bug (checp_dependencies → check_dependencies)
   - [x] Enhance user guidance with comprehensive tooltips
+- [x] **Font Size Field Stability Fix (v2.2.13)**:
+  - [x] Fixed Note1-3 fields growing when changing font size
+  - [x] Added grid weight constraints to maintain stable field dimensions
+  - [x] Ensured only text size changes, not field physical size
