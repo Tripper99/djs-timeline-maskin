@@ -385,7 +385,7 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         """Show the field configuration dialog"""
         try:
             from gui.field_config_dialog import show_field_config_dialog
-            show_field_config_dialog(self, self._on_field_config_applied)
+            show_field_config_dialog(self.root, self._on_field_config_applied)
         except Exception as e:
             logger.error(f"Failed to show field config dialog: {e}")
             messagebox.showerror("Fel", f"Kunde inte öppna fältkonfiguration: {str(e)}")
