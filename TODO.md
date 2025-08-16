@@ -100,3 +100,9 @@
   - [x] Fixed Note1-3 fields growing when changing font size
   - [x] Added grid weight constraints to maintain stable field dimensions
   - [x] Ensured only text size changes, not field physical size
+- [x] **Time Field Validation UX Fix (v2.2.15)**:
+  - [x] Fixed time fields trapping users with validation errors on focus loss
+  - [x] Made time field behavior consistent with date fields
+  - [x] Removed aggressive FocusOut validation binding from time fields
+  - [x] Maintained data validation integrity during save operations
+  - [x] Used bug-finder-debugger agent for systematic root cause analysis

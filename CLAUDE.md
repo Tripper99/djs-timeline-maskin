@@ -8,7 +8,14 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.2.13)
+## Current Status (v2.2.15)
+
+**Time Field Validation UX Fix (v2.2.15)**:
+- Fixed critical UX issue where time fields trapped users with validation errors on focus loss
+- Made time field behavior consistent with date fields (placeholder text restoration, no forced validation)
+- Removed aggressive FocusOut validation binding from time fields while maintaining data integrity during save operations
+- Used bug-finder-debugger agent for systematic root cause analysis and precise fix implementation
+- Solution: Removed `entry.bind('<FocusOut>', lambda e, field=col_name: self.parent.validate_time_field(e, field))` from excel_fields.py:650
 
 **Font Size Field Stability Fix (v2.2.13)**:
 - Fixed critical issue where Note1-3 fields were growing when changing font size
@@ -78,5 +85,13 @@ The application has been refactored from a single large file into a modular stru
   * Prioritize technical accuracy. Point out bugs, inefficiencies, and better approaches immediately. 
   * Confirm understanding with minimal acknowledgment. Focus on code quality, performance, and maintainability. 
   * Challenge bad ideas with specific alternatives.
+
+- **UX Validation & Bug Investigation Approach** (learned in v2.2.15):
+  * Use specialized sub-agents (bug-finder-debugger) for systematic investigation of behavioral issues
+  * Always compare working vs non-working patterns to identify root cause differences
+  * Focus on user experience consistency - fields of same type should behave identically
+  * Distinguish between data validation (necessary) and UX validation (can be overly aggressive)
+  * Document specific code locations and event bindings when investigating GUI behavior issues
+  * Test behavioral changes thoroughly to ensure consistent UX across similar UI elements
   
   [... rest of the existing content remains unchanged ...]

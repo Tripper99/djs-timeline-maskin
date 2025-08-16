@@ -4,6 +4,39 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.2.15 Time Field Validation UX Fix (2025-08-16) - Critical UX Issue ✅
+**Achievement**: Fixed time field validation behavior to match date fields, eliminating forced validation on empty field focus loss.
+
+**Problem Solved**: 
+- **User Trap Issue**: Time fields (Starttid, Sluttid) were showing validation errors when users clicked away without entering data
+- **Inconsistent UX**: Date fields worked correctly (placeholder text restoration, no error), but time fields forced validation
+- **Poor Workflow**: Users were trapped by error messages just for clicking elsewhere without input
+
+**Root Cause Investigation**:
+- **Bug-finder-debugger Agent Analysis**: Used specialized agent to investigate behavioral differences
+- **Technical Discovery**: Time fields had aggressive FocusOut validation binding (`gui/excel_fields.py:650`) while date fields didn't
+- **Code Location**: `entry.bind('<FocusOut>', lambda e, field=col_name: self.parent.validate_time_field(e, field))`
+- **Validation Logic**: Both field types handled empty input correctly, but time fields enforced validation on focus loss
+
+**Technical Solution**:
+- **Removed FocusOut Binding**: Eliminated the problematic validation binding from time fields
+- **Consistent Behavior**: Time fields now behave identically to date fields
+- **Maintained Data Integrity**: Time validation still occurs during save operations
+- **Clean Implementation**: Simple fix with clear code comments explaining the change
+
+**Results & Benefits**:
+- ✅ **Consistent UX**: Date and time fields now have identical behavior patterns
+- ✅ **No User Trapping**: Users can freely click away from empty time fields without error messages
+- ✅ **Placeholder Restoration**: Time fields properly restore placeholder text like date fields
+- ✅ **Data Validation Preserved**: Validation still occurs during actual save operations
+- ✅ **Improved Workflow**: Eliminated frustrating forced validation interruptions
+
+**Development Process Excellence**:
+- **Specialized Agent Usage**: Leveraged bug-finder-debugger agent for thorough root cause analysis
+- **Precise Investigation**: Agent provided exact code locations and behavioral analysis
+- **Clean Fix Implementation**: Single-line removal with proper documentation
+- **Comprehensive Testing**: Verified consistent behavior between field types
+
 ### v2.2.11 Session Persistence & Bug Fixes (2025-08-15) - Critical Fixes ✅
 **Achievement**: Fixed critical typo preventing app startup and added comprehensive session persistence features.
 
