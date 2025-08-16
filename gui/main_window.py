@@ -348,7 +348,7 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
     def show_program_help(self):
         """Open Manual.rtf with external application"""
         try:
-            manual_path = Path(__file__).parent.parent / "Manual.rtf"
+            manual_path = Path(__file__).parent.parent / "docs" / "Manual.rtf"
 
             if not manual_path.exists():
                 messagebox.showerror("Fel", f"Manualen hittades inte: {manual_path}")
