@@ -8,7 +8,13 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.2.11)
+## Current Status (v2.2.13)
+
+**Font Size Field Stability Fix (v2.2.13)**:
+- Fixed critical issue where Note1-3 fields were growing when changing font size
+- Added grid weight constraints to Note fields matching Händelse field behavior
+- Now only text size changes while field dimensions remain stable across all font sizes (9pt, 12pt, 15pt)
+- Solution: Added `grid_rowconfigure(row+2, weight=1)` to Note1, Note2, Note3 fields in excel_fields.py
 
 **Space Optimization & Session Persistence Achievement (v2.2.7-v2.2.11)**:
 - Successfully optimized GUI for maximum space efficiency on lower resolution screens
