@@ -11,10 +11,10 @@ from typing import Any, Dict, List, Tuple
 # Third-party GUI imports
 import customtkinter as ctk
 
+from core.field_definitions import FIELD_ORDER, field_manager
 from gui.utils import ScrollableText
 
 # Local imports
-from utils.constants import REQUIRED_EXCEL_COLUMNS
 
 logger = logging.getLogger(__name__)
 
@@ -26,8 +26,17 @@ class ExcelFieldManager:
         """Initialize Excel field manager with reference to parent application"""
         self.parent = parent_app
 
-        # Text fields that support rich text formatting
-        self.text_fields = {'Note1', 'Note2', 'Note3', 'Händelse'}
+        # Text fields that support rich text formatting (using internal IDs)
+        self.text_field_ids = {'note1', 'note2', 'note3', 'handelse'}
+
+    def _is_text_field(self, field_id: str) -> bool:
+        """Check if a field is a text field that supports rich text formatting"""
+        return field_id in self.text_field_ids
+
+    def _get_field_id_from_display_name(self, display_name: str) -> str:
+        """Get internal field ID from display name"""
+        internal_id = field_manager.get_internal_id(display_name)
+        return internal_id if internal_id else display_name.lower()
 
     def _connect_entry_to_stringvar(self, entry_widget, string_var):
         """Manually connect Entry widget to StringVar while preserving placeholder text"""
@@ -303,21 +312,23 @@ class ExcelFieldManager:
         for widget in self.parent.excel_fields_frame.winfo_children():
             widget.destroy()
 
-        # Use static list of required columns instead of reading from Excel
-        column_names = REQUIRED_EXCEL_COLUMNS
+        # Get current display names from field manager (for reference/future use)
+        # column_names = field_manager.get_all_display_names()
 
         # Clear and recreate excel_vars for all required columns
         self.parent.excel_vars.clear()
-        for col_name in column_names:
+        for field_id in FIELD_ORDER:
+            display_name = field_manager.get_display_name(field_id)
             # Don't create variables for automatically calculated fields
-            if col_name != 'Dag':
-                self.parent.excel_vars[col_name] = tk.StringVar()
+            if field_id != 'dag':
+                self.parent.excel_vars[display_name] = tk.StringVar()
 
         # Auto-fill today's date in "Inlagd" field
-        if 'Inlagd' in self.parent.excel_vars:
+        inlagd_display_name = field_manager.get_display_name('inlagd')
+        if inlagd_display_name in self.parent.excel_vars:
             from datetime import datetime
             today_date = datetime.now().strftime('%Y-%m-%d')
-            self.parent.excel_vars['Inlagd'].set(today_date)
+            self.parent.excel_vars[inlagd_display_name].set(today_date)
 
         # Create resizable PanedWindow for Excel fields
         fields_container = tk.PanedWindow(self.parent.excel_fields_frame, orient="horizontal")
@@ -485,11 +496,14 @@ class ExcelFieldManager:
 
     def create_field_in_frame(self, parent_frame, col_name, row, column_type="column1"):
         """Create a single field in the specified frame with layout optimized per column type"""
+        # Get internal field ID for this display name
+        field_id = self._get_field_id_from_display_name(col_name)
+
         # Check if this field should have a lock switch (all except Dag and Inlagd)
         has_lock = col_name in self.parent.lock_vars
 
         # Special handling for Dag column - make it read-only with explanation
-        if col_name == 'Dag':
+        if field_id == 'dag':
             # Standard horizontal layout for Dag field
             ctk.CTkLabel(parent_frame, text=f"{col_name}:",
                     font=ctk.CTkFont(size=12)).grid(row=row, column=0, sticky="w", padx=(3, 2), pady=(0, 1))
@@ -505,7 +519,7 @@ class ExcelFieldManager:
             return 1
 
         # Special handling for Inlagd - read-only, always today's date
-        elif col_name == 'Inlagd':
+        elif field_id == 'inlagd':
             # Standard horizontal layout for Inlagd field
             ctk.CTkLabel(parent_frame, text=f"{col_name}:",
                     font=ctk.CTkFont(size=12)).grid(row=row, column=0, sticky="w", padx=(3, 2), pady=(0, 1))
@@ -519,13 +533,13 @@ class ExcelFieldManager:
             return 1
 
         # Special vertical layout for text fields with character counters (Händelse, Note1-3)
-        elif col_name.startswith('Note') or col_name == 'Händelse':
+        elif self._is_text_field(field_id):
             # Row 1: Field name with inline character counter and lock switch (if applicable)
             header_frame = ctk.CTkFrame(parent_frame, fg_color="transparent")
             header_frame.grid(row=row, column=0, columnspan=2, sticky="new", pady=(0, 2))
 
             # Create label with inline character counter
-            limit = self.parent.handelse_char_limit if col_name == 'Händelse' else self.parent.char_limit
+            limit = self.parent.handelse_char_limit if field_id == 'handelse' else self.parent.char_limit
             label_text = f"{col_name}: (0/{limit})"
             field_label = ctk.CTkLabel(header_frame, text=label_text, font=ctk.CTkFont(size=12))
             field_label.pack(side="left", padx=(3, 2))
@@ -542,9 +556,9 @@ class ExcelFieldManager:
                 lock_switch.pack(side="right")
 
             # Row 2: Text widget (full width)
-            if col_name == 'Händelse':
+            if field_id == 'handelse':
                 height = 22  # Match combined height of Note1-3 (8+8+6=22)
-            elif col_name in ['Note1', 'Note2']:
+            elif field_id in ['note1', 'note2']:
                 height = 8  # Increased from 6 to make character counters visible
             else:
                 height = 6  # Increased from 4 (Note3 and other text fields)
@@ -591,7 +605,7 @@ class ExcelFieldManager:
 
             # Move scrollable text container to row+2 to make room for toolbar
             # Make Händelse expand vertically to fill available space
-            if col_name == 'Händelse':
+            if field_id == 'handelse':
                 scrollable_text.grid(row=row+2, column=0, columnspan=2, sticky="new", padx=(3, 3), pady=(0, 1))
                 # Configure the text widget row to expand vertically
                 parent_frame.grid_rowconfigure(row+2, weight=1)
@@ -599,7 +613,7 @@ class ExcelFieldManager:
                 scrollable_text.grid(row=row+2, column=0, columnspan=2, sticky="ew", padx=(3, 3), pady=(0, 1))
                 # FIX: Configure Note field rows to maintain fixed physical size regardless of font size
                 # This prevents the fields from growing when font size increases
-                if col_name in ['Note1', 'Note2', 'Note3']:
+                if field_id in ['note1', 'note2', 'note3']:
                     parent_frame.grid_rowconfigure(row+2, weight=1)
 
             # Store reference to scrollable text container (delegation will handle method calls)
@@ -615,7 +629,7 @@ class ExcelFieldManager:
                     font=ctk.CTkFont(size=12)).grid(row=row, column=0, sticky="w", padx=(3, 2), pady=(0, 1))
 
             # Set appropriate width based on field type - reduced height
-            if col_name in ['Startdatum', 'Slutdatum']:
+            if field_id in ['startdatum', 'slutdatum']:
                 # Date fields: 2025-07-25 (10 chars + padding) with placeholder
                 entry = ctk.CTkEntry(parent_frame,
                                font=ctk.CTkFont(size=11), width=120, height=22,
@@ -623,7 +637,7 @@ class ExcelFieldManager:
                 entry.grid(row=row, column=1, sticky="w", padx=(2, 3), pady=(0, 1))
                 # Manual connection to StringVar while preserving placeholder
                 self._connect_entry_to_stringvar(entry, self.parent.excel_vars[col_name])
-            elif col_name in ['Starttid', 'Sluttid']:
+            elif field_id in ['starttid', 'sluttid']:
                 # Time fields: 18:45 (5 chars + padding) with placeholder
                 entry = ctk.CTkEntry(parent_frame,
                                font=ctk.CTkFont(size=11), width=80, height=22,

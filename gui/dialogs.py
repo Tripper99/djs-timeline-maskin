@@ -126,13 +126,9 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
             ws = wb.active
             ws.title = "Timeline"
 
-            # Define column headers in the specified order (updated with new field name)
-            headers = [
-                "OBS", "Inlagd", "Kategori", "Underkategori", "Person/sak",
-                "Special", "Händelse", "Dag", "Startdatum", "Starttid", "Slutdatum", "Sluttid",
-                "Note1", "Note2", "Note3", "Källa1", "Källa2", "Källa3",
-                "Övrigt"  # Updated from "Korrelerande historisk händelse"
-            ]
+            # Get current field display names (may be custom names)
+            from core.field_definitions import field_manager
+            headers = field_manager.get_all_display_names()
 
             # Add headers to first row
             for col_idx, header in enumerate(headers, 1):

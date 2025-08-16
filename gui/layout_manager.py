@@ -23,9 +23,14 @@ class LayoutManagerMixin:
     """Mixin class containing layout-related methods for the main window"""
 
     def create_menu_bar(self):
-        """Create menu bar with Help menu"""
+        """Create menu bar with Tools and Help menus"""
         menubar = tk.Menu(self.root)
         self.root.configure(menu=menubar)
+
+        # Tools menu
+        tools_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Verktyg", menu=tools_menu)
+        tools_menu.add_command(label="Konfigurera fält...", command=self._show_field_config_dialog)
 
         # Help menu
         help_menu = tk.Menu(menubar, tearoff=0)

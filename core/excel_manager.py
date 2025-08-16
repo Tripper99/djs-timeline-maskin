@@ -13,7 +13,7 @@ import xlsxwriter
 from openpyxl.styles import Alignment, Border, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
-from utils.constants import REQUIRED_EXCEL_COLUMNS
+from core.field_definitions import field_manager
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +56,15 @@ class ExcelManager:
         """Get list of column names from Excel file"""
         return self.column_names.copy() if self.column_names else []
 
+    def _get_field_display_name(self, internal_id: str) -> str:
+        """Get the current display name for a field by its internal ID"""
+        return field_manager.get_display_name(internal_id)
+
+    def _has_column(self, internal_id: str) -> bool:
+        """Check if a column exists in the Excel file by internal field ID"""
+        display_name = self._get_field_display_name(internal_id)
+        return display_name in self.columns
+
     def validate_excel_columns(self) -> List[str]:
         """Validate that all required columns exist in the Excel file
 
@@ -63,14 +72,44 @@ class ExcelManager:
             List of missing column names (empty if all columns present)
         """
         if not self.column_names:
-            return REQUIRED_EXCEL_COLUMNS.copy()  # All columns missing if no file loaded
+            # Get current display names from field manager
+            required_columns = field_manager.get_all_display_names()
+            return required_columns.copy()  # All columns missing if no file loaded
 
         missing_columns = []
-        for required_col in REQUIRED_EXCEL_COLUMNS:
+        # Check for current display names (which may be custom)
+        required_columns = field_manager.get_all_display_names()
+        for required_col in required_columns:
             if required_col not in self.column_names:
                 missing_columns.append(required_col)
 
         return missing_columns
+
+    def create_template(self, template_path: str) -> bool:
+        """Create an Excel template with current field names"""
+        try:
+            import openpyxl
+
+            # Create new workbook
+            wb = openpyxl.Workbook()
+            ws = wb.active
+            ws.title = "Timeline"
+
+            # Get current field display names
+            headers = field_manager.get_all_display_names()
+
+            # Add headers to first row
+            for col_idx, header in enumerate(headers, 1):
+                ws.cell(row=1, column=col_idx, value=header)
+
+            # Save template
+            wb.save(template_path)
+            logger.info(f"Created Excel template with custom field names: {template_path}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to create Excel template: {e}")
+            return False
 
     def add_row(self, data: Dict[str, str], filename: str, row_color: str = "none") -> bool:
         """Add new row to Excel file with special column handling and optional background color"""
@@ -90,8 +129,9 @@ class ExcelManager:
             special_data = data.copy()
 
             # Händelse - preserve user content and add filename if filename exists and not already there
-            if 'Händelse' in self.columns:
-                current_content = data.get('Händelse', '')
+            handelse_field = self._get_field_display_name('handelse')
+            if self._has_column('handelse'):
+                current_content = data.get(handelse_field, '')
                 # Handle both string and CellRichText objects
                 if hasattr(current_content, '__class__') and current_content.__class__.__name__ == 'CellRichText':
                     # For CellRichText, we consider it as having content if it has any parts
@@ -99,13 +139,13 @@ class ExcelManager:
                     if has_content and filename:
                         # For CellRichText, we can't easily check if filename is already included
                         # so we'll just keep the current content as-is
-                        special_data['Händelse'] = current_content
+                        special_data[handelse_field] = current_content
                     elif not has_content:
                         # Empty CellRichText, add filename if it exists
-                        special_data['Händelse'] = filename if filename else ""
+                        special_data[handelse_field] = filename if filename else ""
                     else:
                         # Has content but no filename, keep as-is
-                        special_data['Händelse'] = current_content
+                        special_data[handelse_field] = current_content
                 else:
                     # Handle string content
                     current_content = str(current_content).strip()
@@ -113,30 +153,32 @@ class ExcelManager:
                         # User has added content, check if filename exists and is already included
                         if filename and filename not in current_content:
                             # Add filename at the end if filename exists and not already present
-                            special_data['Händelse'] = f"{current_content}\n{filename}"
+                            special_data[handelse_field] = f"{current_content}\n{filename}"
                         else:
                             # Keep user content as is
-                            special_data['Händelse'] = current_content
+                            special_data[handelse_field] = current_content
                     else:
                         # No user content, only add filename if it exists
                         if filename:
-                            special_data['Händelse'] = f"\n\n{filename}"
+                            special_data[handelse_field] = f"\n\n{filename}"
                         else:
-                            special_data['Händelse'] = ""
+                            special_data[handelse_field] = ""
 
             # Startdatum - only use date from filename if user hasn't filled it in
-            if 'Startdatum' in self.columns and 'date' in data:
-                user_tid_start = special_data.get('Startdatum', '').strip()
+            startdatum_field = self._get_field_display_name('startdatum')
+            if self._has_column('startdatum') and 'date' in data:
+                user_tid_start = special_data.get(startdatum_field, '').strip()
                 if not user_tid_start:  # Only set if user hasn't provided their own value
                     try:
                         date_obj = datetime.strptime(data['date'], '%Y-%m-%d')
-                        special_data['Startdatum'] = date_obj.date()
+                        special_data[startdatum_field] = date_obj.date()
                     except ValueError:
-                        special_data['Startdatum'] = data.get('date', '')
+                        special_data[startdatum_field] = data.get('date', '')
 
             # Källa1 - full filename (only if filename exists)
-            if 'Källa1' in self.columns:
-                special_data['Källa1'] = filename if filename else ""
+            kalla1_field = self._get_field_display_name('kalla1')
+            if self._has_column('kalla1'):
+                special_data[kalla1_field] = filename if filename else ""
 
             # Write data to row
             for col_name, col_idx in self.columns.items():

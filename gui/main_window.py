@@ -77,6 +77,9 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         # Load and restore locked fields after GUI is created
         self.excel_field_manager.restore_locked_fields()
 
+        # Load custom field names into field manager
+        self._load_custom_field_names()
+
         # Apply saved font size to text fields
         saved_font_size = self.config.get('text_font_size', 9)
         self.apply_text_font_size(saved_font_size)
@@ -367,6 +370,114 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         except Exception as e:
             messagebox.showerror("Fel", f"Kunde inte öppna manualen: {str(e)}")
             logger.error(f"Error opening manual: {e}")
+
+    def _load_custom_field_names(self):
+        """Load custom field names from config into field manager"""
+        try:
+            from core.field_definitions import field_manager
+            custom_names = self.config_manager.load_custom_field_names()
+            field_manager.set_custom_names(custom_names)
+            logger.info(f"Loaded custom field names: {custom_names}")
+        except Exception as e:
+            logger.error(f"Failed to load custom field names: {e}")
+
+    def _show_field_config_dialog(self):
+        """Show the field configuration dialog"""
+        try:
+            from gui.field_config_dialog import show_field_config_dialog
+            show_field_config_dialog(self, self._on_field_config_applied)
+        except Exception as e:
+            logger.error(f"Failed to show field config dialog: {e}")
+            messagebox.showerror("Fel", f"Kunde inte öppna fältkonfiguration: {str(e)}")
+
+    def _on_field_config_applied(self):
+        """Called when field configuration changes are applied"""
+        try:
+            logger.info("Field configuration applied - performing complete reset")
+
+            # Show progress/info message
+            messagebox.showinfo(
+                "Tillämpar ändringar",
+                "Fältnamn uppdateras...\nAlla data raderas och programmet ritas om."
+            )
+
+            # Step 1: Clear all field data
+            self._clear_all_field_data()
+
+            # Step 2: Delete configuration file
+            self.config_manager.clear_config()
+
+            # Step 3: Reload configuration with new field names
+            self.config = self.config_manager.load_config()
+            self._load_custom_field_names()
+
+            # Step 4: Recreate Excel fields with new names
+            self.excel_field_manager.create_excel_fields()
+
+            # Step 5: Reset other UI components
+            self._reset_ui_state()
+
+            logger.info("Field configuration applied successfully")
+            messagebox.showinfo("Klart", "Fältnamn har uppdaterats!\nAlla data har raderats och programmet har ritats om.")
+
+        except Exception as e:
+            logger.error(f"Failed to apply field configuration: {e}")
+            messagebox.showerror("Fel", f"Kunde inte tillämpa fältkonfiguration: {str(e)}")
+
+    def _clear_all_field_data(self):
+        """Clear all field data (including locked fields)"""
+        try:
+            # Clear all excel_vars
+            for var in self.excel_vars.values():
+                if hasattr(var, 'set'):
+                    var.set("")
+                elif hasattr(var, 'clear'):
+                    var.clear()
+
+            # Clear PDF fields
+            self.date_var.set("")
+            self.newspaper_var.set("")
+            self.comment_var.set("")
+            self.pages_var.set("")
+
+            # Reset output folder
+            self.output_folder_var.set("")
+            self._actual_output_folder = ""
+
+            # Clear current PDF
+            self.current_pdf_path = ""
+            self.current_pdf_pages = 0
+
+            # Reset row color
+            self.row_color_var.set("none")
+
+            logger.info("All field data cleared")
+
+        except Exception as e:
+            logger.error(f"Failed to clear field data: {e}")
+
+    def _reset_ui_state(self):
+        """Reset UI state to defaults"""
+        try:
+            # Reset font size to default
+            self.text_font_size = 9
+            self.apply_text_font_size(9)
+
+            # Reset statistics
+            self.stats = {
+                'pdfs_opened': 0,
+                'files_renamed': 0,
+                'excel_rows_added': 0
+            }
+
+            # Update UI elements
+            self.update_stats_display()
+            self.update_filename_preview()
+
+            logger.info("UI state reset to defaults")
+
+        except Exception as e:
+            logger.error(f"Failed to reset UI state: {e}")
 
     def run(self):
         """Start the application"""

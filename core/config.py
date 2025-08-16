@@ -27,7 +27,9 @@ class ConfigManager:
             "text_font_size": 9,  # Store text font size for Händelse and Note fields
             "locked_fields": {},  # Store which fields are locked (field_name: True/False)
             "locked_field_contents": {},  # Store content of locked fields (field_name: content)
-            "locked_field_formats": {}  # Store rich text formatting of locked fields (field_name: format_data)
+            "locked_field_formats": {},  # Store rich text formatting of locked fields (field_name: format_data)
+            "custom_field_names": {},  # Store custom field names (internal_id: display_name)
+            "config_version": "2.3.0"  # Track config version for migrations
         }
 
     def load_config(self) -> Dict:
@@ -36,7 +38,10 @@ class ConfigManager:
             try:
                 with open(self.config_file, encoding='utf-8') as f:
                     config = json.load(f)
-                    return {**self.default_config, **config}
+                    # Merge with defaults and migrate if needed
+                    config = {**self.default_config, **config}
+                    config = self.migrate_config(config)
+                    return config
             except (OSError, json.JSONDecodeError) as e:
                 logger.warning(f"Failed to load config: {e}")
         return self.default_config.copy()
@@ -88,3 +93,45 @@ class ConfigManager:
         except Exception as e:
             logger.error(f"Failed to load locked fields: {e}")
             return {}, {}, {}
+
+    def save_custom_field_names(self, custom_names: Dict[str, str]) -> None:
+        """Save custom field names"""
+        try:
+            current_config = self.load_config()
+            current_config["custom_field_names"] = custom_names
+            self.save_config(current_config)
+            logger.info(f"Saved custom field names: {custom_names}")
+        except Exception as e:
+            logger.error(f"Failed to save custom field names: {e}")
+
+    def load_custom_field_names(self) -> Dict[str, str]:
+        """Load custom field names"""
+        try:
+            config = self.load_config()
+            custom_names = config.get("custom_field_names", {})
+            logger.info(f"Loaded custom field names: {custom_names}")
+            return custom_names
+        except Exception as e:
+            logger.error(f"Failed to load custom field names: {e}")
+            return {}
+
+    def clear_config(self) -> None:
+        """Clear/delete the configuration file"""
+        try:
+            if self.config_file.exists():
+                self.config_file.unlink()
+                logger.info("Configuration file deleted")
+        except Exception as e:
+            logger.error(f"Failed to delete config file: {e}")
+
+    def migrate_config(self, config: Dict) -> Dict:
+        """Migrate configuration to latest version"""
+        current_version = config.get("config_version", "2.2.15")
+
+        if current_version < "2.3.0":
+            # Add new fields for v2.3.0
+            config.setdefault("custom_field_names", {})
+            config["config_version"] = "2.3.0"
+            logger.info("Migrated config to v2.3.0")
+
+        return config
