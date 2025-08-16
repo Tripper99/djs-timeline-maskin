@@ -4,7 +4,7 @@ Constants and configuration values for the DJ Timeline application
 
 # Configuration
 CONFIG_FILE = "djs_timeline_machine_config.json"
-VERSION = "v2.2.14"
+VERSION = "v2.2.15"
 
 # Required Excel columns - these must exist in the Excel file
 REQUIRED_EXCEL_COLUMNS = [

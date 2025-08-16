@@ -645,9 +645,8 @@ class ExcelFieldManager:
             if col_name not in ['Startdatum', 'Slutdatum', 'Starttid', 'Sluttid']:
                 self._setup_left_column_field_focus(entry, col_name)
 
-            # Add time validation for time fields
-            if col_name in ['Starttid', 'Sluttid']:
-                entry.bind('<FocusOut>', lambda e, field=col_name: self.parent.validate_time_field(e, field))
+            # Note: Time field validation removed to match date field behavior
+            # Time validation will still occur during save operations
 
             # Add lock switch for fields that should have one (in column 2) - compact with lock symbol
             if has_lock:
