@@ -597,6 +597,10 @@ class ExcelFieldManager:
                 parent_frame.grid_rowconfigure(row+2, weight=1)
             else:
                 scrollable_text.grid(row=row+2, column=0, columnspan=2, sticky="ew", padx=(3, 3), pady=(0, 1))
+                # FIX: Configure Note field rows to maintain fixed physical size regardless of font size
+                # This prevents the fields from growing when font size increases
+                if col_name in ['Note1', 'Note2', 'Note3']:
+                    parent_frame.grid_rowconfigure(row+2, weight=1)
 
             # Store reference to scrollable text container (delegation will handle method calls)
             self.parent.excel_vars[col_name] = scrollable_text
