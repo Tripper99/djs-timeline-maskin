@@ -61,6 +61,33 @@
   - [ ] Locked Excel file scenarios
   - [ ] Invalid configuration recovery
 
+## Current Bugs to Fix
+
+### 1. Custom Field Names Not Displaying in UI (v2.3.0)
+**Problem**: Custom field names are saved correctly but not displayed in the UI after applying changes.
+
+**Root Cause**: `gui/excel_fields.py` (lines 339-343) uses hardcoded field names instead of getting them from field_manager.
+
+**Fix Plan**:
+1. Replace hardcoded field name arrays with internal field ID arrays:
+   ```python
+   # Instead of: column1_fields = ['Startdatum', 'Starttid', ...]  # HARDCODED!
+   # Use: column1_field_ids = ['startdatum', 'starttid', ...]  # Internal IDs
+   ```
+
+2. Convert IDs to current display names dynamically:
+   ```python
+   column1_fields = [field_manager.get_display_name(fid) for fid in column1_field_ids]
+   column3_fields = [field_manager.get_display_name(fid) for fid in column3_field_ids]
+   ```
+
+3. Test that custom names appear correctly in:
+   - Column 1 fields (dates, times, categories, etc.)
+   - Column 2 field (Händelse - though protected)
+   - Column 3 fields (Note1-3)
+
+**Files to modify**: `gui/excel_fields.py` (lines 339-356)
+
 ## Future Improvements
 
 ### 4. Consider async operations for file processing
