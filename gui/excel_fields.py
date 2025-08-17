@@ -334,13 +334,15 @@ class ExcelFieldManager:
         fields_container = tk.PanedWindow(self.parent.excel_fields_frame, orient="horizontal")
         fields_container.pack(fill="both", expand=True, pady=(5, 0))
 
-        # Define column groupings (updated with new field name)
-        # Date/time fields at top for easy access
-        column1_fields = ['Startdatum', 'Starttid', 'Slutdatum', 'Sluttid',
-                         'OBS', 'Inlagd', 'Kategori', 'Underkategori', 'Person/sak',
-                         'Special', 'Dag', 'Källa1', 'Källa2', 'Källa3', 'Övrigt']
-        # Middle column is now exclusively for Händelse
-        column3_fields = ['Note1', 'Note2', 'Note3']
+        # Define column groupings using field manager to get current display names
+        # Get field IDs for each column and convert to display names
+        column1_field_ids = field_manager.get_fields_by_column('column1')
+        column1_fields = [field_manager.get_display_name(field_id) for field_id in FIELD_ORDER
+                         if field_id in column1_field_ids]
+
+        column3_field_ids = field_manager.get_fields_by_column('column3')
+        column3_fields = [field_manager.get_display_name(field_id) for field_id in FIELD_ORDER
+                         if field_id in column3_field_ids]
 
         # Create Column 1 (Left)
         col1_frame = ctk.CTkFrame(fields_container)
