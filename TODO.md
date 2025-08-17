@@ -63,30 +63,18 @@
 
 ## Current Bugs to Fix
 
-### 1. Custom Field Names Not Displaying in UI (v2.3.0)
+### 1. Custom Field Names Not Displaying in UI (v2.3.0) ✅ **FIXED in v2.3.3**
 **Problem**: Custom field names are saved correctly but not displayed in the UI after applying changes.
 
-**Root Cause**: `gui/excel_fields.py` (lines 339-343) uses hardcoded field names instead of getting them from field_manager.
+**Root Cause Identified**: `_on_field_config_applied()` method called `clear_config()` which deleted the entire config file immediately after custom names were saved to it.
 
-**Fix Plan**:
-1. Replace hardcoded field name arrays with internal field ID arrays:
-   ```python
-   # Instead of: column1_fields = ['Startdatum', 'Starttid', ...]  # HARDCODED!
-   # Use: column1_field_ids = ['startdatum', 'starttid', ...]  # Internal IDs
-   ```
+**Solution Implemented (v2.3.3)**:
+- Removed `self.config_manager.clear_config()` from `_on_field_config_applied()` method
+- Changed from complete config deletion to selective user data clearing only
+- Preserved config file containing custom field names during field configuration reset
+- Added comprehensive debug logging throughout custom field name data flow
 
-2. Convert IDs to current display names dynamically:
-   ```python
-   column1_fields = [field_manager.get_display_name(fid) for fid in column1_field_ids]
-   column3_fields = [field_manager.get_display_name(fid) for fid in column3_field_ids]
-   ```
-
-3. Test that custom names appear correctly in:
-   - Column 1 fields (dates, times, categories, etc.)
-   - Column 2 field (Händelse - though protected)
-   - Column 3 fields (Note1-3)
-
-**Files to modify**: `gui/excel_fields.py` (lines 339-356)
+**Result**: Custom field names now persist correctly and display immediately in main UI after Apply.
 
 ## Future Improvements
 
@@ -133,3 +121,9 @@
   - [x] Removed aggressive FocusOut validation binding from time fields
   - [x] Maintained data validation integrity during save operations
   - [x] Used bug-finder-debugger agent for systematic root cause analysis
+- [x] **Custom Field Names Display Bug Fix (v2.3.3)**:
+  - [x] Fixed critical bug where custom field names were saved but not displayed in UI
+  - [x] Identified root cause: config file deletion immediately after saving custom names
+  - [x] Removed config deletion from field configuration apply process
+  - [x] Added comprehensive debug logging for custom field name data flow
+  - [x] Verified fix works for both first-time and existing users

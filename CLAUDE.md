@@ -8,18 +8,22 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.3.0)
+## Current Status (v2.3.3)
+
+**Custom Field Names Display Bug Fix (v2.3.3)**:
+- ✅ FIXED critical bug where custom field names were saved but not displayed in main UI
+- **Root Cause**: `_on_field_config_applied()` method deleted entire config file immediately after custom names were saved
+- **Solution**: Removed config deletion, changed to selective user data clearing only
+- **Result**: Custom field names now persist correctly and display immediately after Apply
+- **Debug Enhancement**: Added comprehensive logging throughout custom field name data flow
 
 **Custom Field Naming Feature Implementation (v2.3.0)**:
-- Successfully implemented comprehensive custom field naming system with 99% functionality
+- Successfully implemented comprehensive custom field naming system with 100% functionality
 - Created field identity system separating internal IDs from user-configurable display names
 - Developed professional 900x700 configuration dialog with real-time validation and visual feedback
 - Enhanced configuration management with custom field names storage and migration
 - Updated Excel integration to use dynamic field names instead of hardcoded columns
 - Implemented complete data reset and UI redraw mechanism when field names change
-- **KNOWN BUG**: Custom field names are saved correctly but not displayed in main UI after applying changes
-  - Root cause: `gui/excel_fields.py` lines 339-343 use hardcoded field names instead of field_manager lookup
-  - Fix documented in TODO.md for next session implementation
 
 **Architecture Highlights**:
 - **Field Identity System**: Clean separation between internal field IDs (`startdatum`, `starttid`) and display names ("Startdatum", "Starttid") 
@@ -127,3 +131,11 @@ The application has been refactored from a single large file into a modular stru
   * Implement complete reset mechanisms with warning dialogs for data-destructive operations
   * Always identify and document any remaining bugs with specific fix plans for next session
   * Use specialized sub-agents (architecture-planner, code-writer) for systematic implementation phases
+
+- **Critical Bug Investigation Methodology** (learned in v2.3.3):
+  * Use multiple specialized subagents (bug-finder-debugger, architecture-planner) for systematic root cause analysis
+  * Trace complete data flow from save → storage → reload → display to identify exact failure points
+  * Add comprehensive debug logging at every critical data transition point
+  * Verify fixes work for all edge cases (first-time users, existing users, config deletion scenarios)
+  * Never assume initial analysis is correct - use systematic investigation to verify root cause
+  * Document exact sequence of events leading to failure for future reference

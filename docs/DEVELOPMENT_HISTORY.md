@@ -4,6 +4,41 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.3.3 Field Names Display Bug Fix (2025-08-17) - Critical Bug Fix ✅
+**Achievement**: Fixed critical bug where custom field names were saved correctly but not displayed in main UI after applying changes.
+
+**Problem Solved**:
+- **Bug Report**: Custom field names configured in dialog not showing in main application window
+- **Root Cause**: `_on_field_config_applied()` method called `clear_config()` which deleted the entire config file immediately after custom names were saved
+- **Investigation**: Used systematic bug-finder-debugger and architecture-planner agents to trace complete data flow
+
+**Technical Solution Implemented**:
+- **Core Fix**: Removed `self.config_manager.clear_config()` from `_on_field_config_applied()` method 
+- **Data Flow**: Preserved config file containing custom field names during field configuration reset
+- **Selective Reset**: Changed from complete config deletion to selective user data clearing only
+- **Debug Enhancement**: Added comprehensive logging throughout custom field name data flow for future troubleshooting
+
+**Root Cause Analysis**:
+```
+1. Dialog saves custom names to config ✅
+2. Dialog calls _on_field_config_applied() ✅  
+3. Method calls clear_config() which deletes entire config file ❌
+4. Method tries to reload custom names but they're gone ❌
+5. field_manager gets empty {} and UI shows default names ❌
+```
+
+**Technical Implementation**:
+- **Modified**: `gui/main_window.py` - Removed config deletion, added debug logging
+- **Enhanced**: Custom field name tracking through complete application lifecycle
+- **Verified**: Works for both first-time users (no config) and existing users (config exists)
+
+**Development Process Insights**:
+- **Agent Usage**: Systematically used bug-finder-debugger to trace data flow and identify exact failure point
+- **Validation**: Added extensive debug logging to verify fix works correctly
+- **Testing**: Verified fix works with user's testing method (delete config file before testing)
+
+**Result**: Custom field names now persist correctly through configuration changes and display immediately in main UI after Apply.
+
 ### v2.3.0 Custom Field Naming Feature (2025-08-16) - Major Enhancement ✅ 
 **Achievement**: Implemented comprehensive custom field naming system allowing users to rename 12 of 19 Excel fields with professional configuration interface.
 
