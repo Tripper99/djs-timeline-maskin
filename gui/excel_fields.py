@@ -336,13 +336,19 @@ class ExcelFieldManager:
 
         # Define column groupings using field manager to get current display names
         # Get field IDs for each column and convert to display names
+        logger.debug(f"DEBUG: field_manager custom names at UI creation: {field_manager.get_custom_names()}")
+
         column1_field_ids = field_manager.get_fields_by_column('column1')
         column1_fields = [field_manager.get_display_name(field_id) for field_id in FIELD_ORDER
                          if field_id in column1_field_ids]
+        logger.debug(f"DEBUG: Column1 field IDs: {column1_field_ids}")
+        logger.debug(f"DEBUG: Column1 display names: {column1_fields}")
 
         column3_field_ids = field_manager.get_fields_by_column('column3')
         column3_fields = [field_manager.get_display_name(field_id) for field_id in FIELD_ORDER
                          if field_id in column3_field_ids]
+        logger.debug(f"DEBUG: Column3 field IDs: {column3_field_ids}")
+        logger.debug(f"DEBUG: Column3 display names: {column3_fields}")
 
         # Create Column 1 (Left)
         col1_frame = ctk.CTkFrame(fields_container)
@@ -503,6 +509,9 @@ class ExcelFieldManager:
 
         # Check if this field should have a lock switch (all except Dag and Inlagd)
         has_lock = col_name in self.parent.lock_vars
+        logger.debug(f"DEBUG: Creating field '{col_name}' (field_id: {field_id})")
+        logger.debug(f"DEBUG: Available lock_vars keys: {list(self.parent.lock_vars.keys())}")
+        logger.debug(f"DEBUG: Field '{col_name}' has_lock: {has_lock}")
 
         # Special handling for Dag column - make it read-only with explanation
         if field_id == 'dag':

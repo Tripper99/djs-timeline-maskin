@@ -360,9 +360,22 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         """Load custom field names from config into field manager"""
         try:
             from core.field_definitions import field_manager
+            # Debug: Check field_manager state before loading
+            logger.debug(f"DEBUG: field_manager custom names BEFORE loading: {field_manager.get_custom_names()}")
+
             custom_names = self.config_manager.load_custom_field_names()
+            logger.info(f"DEBUG: Loaded custom field names from config: {custom_names}")
+
             field_manager.set_custom_names(custom_names)
-            logger.info(f"Loaded custom field names: {custom_names}")
+            logger.info(f"DEBUG: field_manager custom names AFTER setting: {field_manager.get_custom_names()}")
+
+            # Verify a few display names
+            if custom_names:
+                for field_id in ['obs', 'kategori', 'note1']:
+                    if field_id in custom_names:
+                        display_name = field_manager.get_display_name(field_id)
+                        logger.debug(f"DEBUG: field_id '{field_id}' → display_name '{display_name}'")
+
         except Exception as e:
             logger.error(f"Failed to load custom field names: {e}")
 
@@ -371,10 +384,16 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         try:
             from core.field_definitions import FIELD_DEFINITIONS, field_manager
 
+            # Debug: Check field_manager state before initialization
+            logger.debug(f"DEBUG: field_manager custom names at lock_vars init: {field_manager.get_custom_names()}")
+
             # Clear existing lock_vars
+            old_keys = list(self.lock_vars.keys())
             self.lock_vars.clear()
+            logger.debug(f"DEBUG: Cleared old lock_vars keys: {old_keys}")
 
             # Create lock variables for all lockable fields (all except 'dag' and 'inlagd')
+            field_mappings = []
             for field_id, field_def in FIELD_DEFINITIONS.items():
                 # Skip fields that shouldn't have locks
                 if field_id in ['dag', 'inlagd']:
@@ -382,11 +401,13 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
 
                 # Get the current display name (could be custom or default)
                 display_name = field_manager.get_display_name(field_id)
+                field_mappings.append(f"{field_id} → {display_name}")
 
                 # Create lock variable with display name as key
                 self.lock_vars[display_name] = tk.BooleanVar()
 
-            logger.info(f"Initialized lock_vars with keys: {list(self.lock_vars.keys())}")
+            logger.info(f"DEBUG: Field ID mappings: {field_mappings}")
+            logger.info(f"DEBUG: Initialized lock_vars with keys: {list(self.lock_vars.keys())}")
         except Exception as e:
             logger.error(f"Failed to initialize lock_vars: {e}")
 
@@ -402,7 +423,9 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
     def _on_field_config_applied(self):
         """Called when field configuration changes are applied"""
         try:
-            logger.info("Field configuration applied - performing complete reset")
+            from core.field_definitions import field_manager
+            logger.info("Field configuration applied - performing selective reset (preserving config)")
+            logger.debug(f"DEBUG: field_manager state at START of apply: {field_manager.get_custom_names()}")
 
             # Show progress/info message
             messagebox.showinfo(
@@ -412,15 +435,15 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
 
             # Step 1: Clear all field data
             self._clear_all_field_data()
+            logger.debug(f"DEBUG: field_manager state after clear_all_field_data: {field_manager.get_custom_names()}")
 
-            # Step 2: Delete configuration file
-            self.config_manager.clear_config()
-
-            # Step 3: Reload configuration with new field names
+            # Step 2: Reload configuration with saved field names (do not delete config)
             self.config = self.config_manager.load_config()
+            logger.debug("DEBUG: Config reloaded, now calling _load_custom_field_names()")
             self._load_custom_field_names()
+            logger.debug(f"DEBUG: field_manager state after _load_custom_field_names: {field_manager.get_custom_names()}")
 
-            # Step 3.5: Reinitialize lock_vars with new field names
+            # Step 3: Reinitialize lock_vars with new field names
             self._initialize_lock_vars()
 
             # Step 4: Recreate Excel fields with new names
