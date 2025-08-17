@@ -280,11 +280,13 @@ class LayoutManagerMixin:
         # Configure the excel_fields_frame for responsive layout
         self.excel_fields_frame.grid_columnconfigure(0, weight=1)
 
-        self.excel_field_manager.create_excel_fields()
+        # Only create excel fields if manager exists (delayed creation pattern)
+        if hasattr(self, 'excel_field_manager') and self.excel_field_manager:
+            self.excel_field_manager.create_excel_fields()
 
-        # Apply saved font size to text fields after they're created
-        saved_font_size = self.config.get('text_font_size', 9)
-        self.apply_text_font_size(saved_font_size)
+            # Apply saved font size to text fields after they're created
+            saved_font_size = self.config.get('text_font_size', 9)
+            self.apply_text_font_size(saved_font_size)
 
     def create_group4_content(self, parent):
         """Group 4 Content: Excel Operations Buttons"""

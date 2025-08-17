@@ -55,7 +55,6 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         self.config = self.config_manager.load_config()
         self.excel_manager = ExcelManager()
         self.dialog_manager = DialogManager(self)
-        self.excel_field_manager = ExcelFieldManager(self)
 
         # Internal data storage
         self.current_pdf_path = ""
@@ -72,20 +71,27 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         # Load custom field names BEFORE setting up GUI
         self._load_custom_field_names()
 
-        # Initialize lock_vars with current field display names BEFORE GUI
+        # Setup GUI (this creates the root window needed for tkinter variables)
+        self.setup_gui()
+
+        # Initialize lock_vars with current field display names AFTER root window exists
         self._initialize_lock_vars()
 
-        # Setup GUI (this will use the correct field names)
-        self.setup_gui()
+        # Create ExcelFieldManager AFTER lock_vars are initialized
+        self.excel_field_manager = ExcelFieldManager(self)
+
+        # Now create the Excel fields that were skipped during setup_gui()
+        self.excel_field_manager.create_excel_fields()
+
+        # Apply saved font size to text fields after they're created
+        saved_font_size = self.config.get('text_font_size', 9)
+        self.apply_text_font_size(saved_font_size)
+
         self.load_saved_excel_file()  # Load previously selected Excel file
         self.load_saved_output_folder()  # Load previously selected output folder
 
         # Load and restore locked fields after GUI is created
         self.excel_field_manager.restore_locked_fields()
-
-        # Apply saved font size to text fields
-        saved_font_size = self.config.get('text_font_size', 9)
-        self.apply_text_font_size(saved_font_size)
 
     def parse_geometry(self, geometry_string):
         """
