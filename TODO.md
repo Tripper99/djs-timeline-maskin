@@ -76,6 +76,11 @@
 
 **Result**: Custom field names now persist correctly and display immediately in main UI after Apply.
 
+### 2. Font Size Bug - Händelse Only (v2.3.3)
+**Problem**: All font size change buttons only affect Händelse field, not Note1-3 fields.
+**Expected**: Font size buttons should change text size in all text fields (Händelse, Note1, Note2, Note3).
+**Impact**: Users cannot adjust font size for note fields, reducing usability for longer text entry.
+
 ## Future Improvements
 
 ### 4. Consider async operations for file processing
@@ -83,7 +88,23 @@
 - [ ] Consider background processing for large Excel files
 - [ ] Implement progress indicators for long operations
 
-### 5. Add type hints throughout the codebase
+### 5. Field Configuration Dialog Enhancements
+**Field Name Templates System**:
+- [ ] Add "Återställ till standard" (Restore to default names) button - clears all custom name fields
+- [ ] Add "Spara namnmall" (Save name template) button - saves current field configuration as template
+- [ ] Add "Ladda namnmall" (Load name template) button - loads previously saved template
+- [ ] Add "Spara namnmall som..." (Save name template as...) button - save with custom template name
+- [ ] Display current template name (if template has been saved/loaded)
+- [ ] Enable "Spara namnmall" only when at least one field has been changed from current state
+- [ ] Create template storage system (JSON files or config section)
+
+**Dialog Visual Improvements**:
+- [ ] Fix the overall look and feel of the field name config window
+- [ ] Improve button layout and spacing
+- [ ] Enhance visual feedback for template operations
+- [ ] Add template management section to dialog
+
+### 6. Add type hints throughout the codebase
 - [ ] Add type hints to all function signatures
 - [ ] Add type hints for class attributes
 - [ ] Use typing module for complex types
