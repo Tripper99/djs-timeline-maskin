@@ -69,16 +69,19 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
             'excel_rows_added': 0
         }
 
-        # Setup GUI
+        # Load custom field names BEFORE setting up GUI
+        self._load_custom_field_names()
+
+        # Initialize lock_vars with current field display names BEFORE GUI
+        self._initialize_lock_vars()
+
+        # Setup GUI (this will use the correct field names)
         self.setup_gui()
         self.load_saved_excel_file()  # Load previously selected Excel file
         self.load_saved_output_folder()  # Load previously selected output folder
 
         # Load and restore locked fields after GUI is created
         self.excel_field_manager.restore_locked_fields()
-
-        # Load custom field names into field manager
-        self._load_custom_field_names()
 
         # Apply saved font size to text fields
         saved_font_size = self.config.get('text_font_size', 9)
@@ -285,26 +288,8 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         # Internal clipboard for format preservation
         self.internal_clipboard = None  # Stores (text, tags) tuples
 
-        # Lock switches for ALL fields except Dag and Inlagd (which is read-only)
-        self.lock_vars = {
-            'OBS': tk.BooleanVar(),
-            'Kategori': tk.BooleanVar(),
-            'Underkategori': tk.BooleanVar(),
-            'Person/sak': tk.BooleanVar(),
-            'Special': tk.BooleanVar(),
-            'Händelse': tk.BooleanVar(),
-            'Startdatum': tk.BooleanVar(),
-            'Starttid': tk.BooleanVar(),
-            'Slutdatum': tk.BooleanVar(),
-            'Sluttid': tk.BooleanVar(),
-            'Note1': tk.BooleanVar(),
-            'Note2': tk.BooleanVar(),
-            'Note3': tk.BooleanVar(),
-            'Källa1': tk.BooleanVar(),
-            'Källa2': tk.BooleanVar(),
-            'Källa3': tk.BooleanVar(),
-            'Övrigt': tk.BooleanVar()  # Updated from "Korrelerande historisk händelse"
-        }
+        # Lock switches will be initialized dynamically after field names are loaded
+        self.lock_vars = {}
 
         # Output folder for renamed PDFs
         self.output_folder_var = tk.StringVar(value="")
@@ -381,6 +366,30 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         except Exception as e:
             logger.error(f"Failed to load custom field names: {e}")
 
+    def _initialize_lock_vars(self):
+        """Initialize lock variables with current field display names"""
+        try:
+            from core.field_definitions import FIELD_DEFINITIONS, field_manager
+
+            # Clear existing lock_vars
+            self.lock_vars.clear()
+
+            # Create lock variables for all lockable fields (all except 'dag' and 'inlagd')
+            for field_id, field_def in FIELD_DEFINITIONS.items():
+                # Skip fields that shouldn't have locks
+                if field_id in ['dag', 'inlagd']:
+                    continue
+
+                # Get the current display name (could be custom or default)
+                display_name = field_manager.get_display_name(field_id)
+
+                # Create lock variable with display name as key
+                self.lock_vars[display_name] = tk.BooleanVar()
+
+            logger.info(f"Initialized lock_vars with keys: {list(self.lock_vars.keys())}")
+        except Exception as e:
+            logger.error(f"Failed to initialize lock_vars: {e}")
+
     def _show_field_config_dialog(self):
         """Show the field configuration dialog"""
         try:
@@ -410,6 +419,9 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
             # Step 3: Reload configuration with new field names
             self.config = self.config_manager.load_config()
             self._load_custom_field_names()
+
+            # Step 3.5: Reinitialize lock_vars with new field names
+            self._initialize_lock_vars()
 
             # Step 4: Recreate Excel fields with new names
             self.excel_field_manager.create_excel_fields()
