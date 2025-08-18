@@ -4,6 +4,52 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.5.8 Field Configuration Dialog UI Issues (2025-08-18) - Multiple Fix Attempts ⚠️
+**Challenge**: Persistent field width inconsistency issues in field configuration dialog despite multiple technical approaches.
+
+**Problems Encountered**:
+1. **Field Width Inconsistency**: Entry fields showing different widths between protected and editable field types
+2. **Grid System Complexity**: Two-column layout interfering with individual field grid configurations
+3. **Multiple Fix Attempts**: Various technical approaches tried without complete resolution
+
+**Technical Approaches Attempted**:
+
+**Attempt 1 - Remove Fixed Widths**:
+- Removed `width=100/40/20/60` parameters from labels, counters, icons, checkboxes
+- **Result**: Made inconsistency worse - some fields became much wider than others
+- **Root Cause**: Removed constraints without replacing with proper layout system
+
+**Attempt 2 - Standardized Grid System**:
+- Implemented comprehensive grid column configuration with `minsize` parameters
+- Added `columnspan=2` for protected fields to match editable field visual width
+- **Result**: minsize parameters not effective, protected fields still inconsistent
+- **Root Cause**: Protected fields spanning 2 columns get combined minsize (250px vs 200px)
+
+**Attempt 3 - Uniform Layout Strategy**:
+- Removed `columnspan=2` from protected fields  
+- Added explicit `width=300` to ALL entry fields (protected and editable)
+- Removed mysterious column headers ("VÄNSTER KOLUMN"/"HÖGER KOLUMN")
+- **Status**: Latest attempt - pending user testing
+
+**Technical Insights Gained**:
+- **Grid Weight Conflicts**: `weight=1` on column 1 conflicts with explicit width constraints
+- **CustomTkinter Behavior**: minsize parameters don't override columnspan width calculations
+- **Layout Architecture**: Two-column dialog layout creates complexity for individual field consistency
+- **Protected vs Editable**: Different field types require identical grid structure for visual consistency
+
+**Successful Fixes in v2.5.8**:
+- ✅ **"Spara mall" Button Logic**: Fixed broken data collection using `self.current_values` instead of widget entries
+- ✅ **Column Headers Removed**: Cleaned up interface by removing "VÄNSTER/HÖGER KOLUMN" labels
+- ✅ **Template Save Functionality**: Now works identically to "Spara som..." with proper success messages
+
+**Development Process Excellence**:
+- **Systematic Investigation**: Used bug-finder-debugger and architecture-planner agents for root cause analysis
+- **Multiple Technical Approaches**: Tried various grid system strategies to find optimal solution  
+- **User Feedback Integration**: Adapted approach based on actual visual results vs intended outcomes
+- **Documentation of Attempts**: Preserved technical insights for future development sessions
+
+**Current Status**: Field width issue requires further investigation - explicit width approach pending user validation.
+
 ### v2.5.7 Field Disabling Persistence Bug Fix (2025-08-18) - Startup Initialization Synchronization ✅
 **Achievement**: Fixed critical bug where field disabled states were not restored after app restart, despite being correctly saved to configuration.
 

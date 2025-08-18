@@ -190,6 +190,22 @@
 **Result**: Disabled fields now correctly persist and restore their state after app restart.
 **Status**: ✅ COMPLETED
 
+#### 4.6 Field Configuration Dialog UI Issues ⚠️ **IN PROGRESS (v2.5.8)**
+**Problems**: Multiple UI issues in field configuration dialog requiring resolution:
+- **Field Width Inconsistency**: Entry fields have inconsistent widths despite multiple fix attempts
+- **Grid System Problems**: minsize and columnspan approaches not achieving uniform field appearance  
+- **Visual Inconsistency**: Protected fields (Startdatum, Källa) appear different from editable fields
+- **Layout Conflicts**: Two-column layout system interfering with individual field layouts
+
+**Investigation Status**:
+- ✅ "Spara mall" button functionality fixed (data collection logic corrected)
+- ✅ Column headers removed ("VÄNSTER KOLUMN"/"HÖGER KOLUMN")
+- ⚠️ Field width standardization attempted but not fully resolved
+- ⚠️ Multiple grid system approaches tried without complete success
+
+**Current Approach**: Explicit width=300 parameter added to all entry fields for uniform sizing
+**Next Steps**: User testing to determine if latest approach achieves desired visual consistency
+
 ## Future Improvements
 
 ### 4. Consider async operations for file processing

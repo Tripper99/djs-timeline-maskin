@@ -211,32 +211,14 @@ class FieldConfigDialog:
 
     def _create_left_column(self, parent):
         """Create left column with first set of fields."""
-        # Column header
-        left_header = ctk.CTkLabel(
-            parent,
-            text="VÄNSTER KOLUMN",
-            font=ctk.CTkFont(size=14, weight="bold"),
-            text_color="#2196F3"
-        )
-        left_header.grid(row=0, column=0, pady=(10, 15), padx=10, sticky="w")
-
-        row = 1
+        row = 0
         for field_id in LEFT_COLUMN_ORDER:
             self._create_field_row(parent, field_id, row, 0)
             row += 1
 
     def _create_right_column(self, parent):
         """Create right column with second set of fields."""
-        # Column header
-        right_header = ctk.CTkLabel(
-            parent,
-            text="HÖGER KOLUMN",
-            font=ctk.CTkFont(size=14, weight="bold"),
-            text_color="#2196F3"
-        )
-        right_header.grid(row=0, column=1, pady=(10, 15), padx=10, sticky="w")
-
-        row = 1
+        row = 0
         for field_id in RIGHT_COLUMN_ORDER:
             self._create_field_row(parent, field_id, row, 1)
             row += 1
@@ -275,15 +257,17 @@ class FieldConfigDialog:
                 placeholder_text=display_name,
                 font=ctk.CTkFont(size=12),
                 state="disabled",
-                fg_color="gray90"
+                fg_color="gray90",
+                width=300
             )
-            protected_entry.grid(row=0, column=1, columnspan=2, padx=5, pady=8, sticky="ew")
+            protected_entry.grid(row=0, column=1, padx=5, pady=8, sticky="ew")
         else:
             # Editable field
             entry = ctk.CTkEntry(
                 field_frame,
                 placeholder_text="Ange nytt namn...",
-                font=ctk.CTkFont(size=12)
+                font=ctk.CTkFont(size=12),
+                width=300
             )
             entry.grid(row=0, column=1, padx=5, pady=8, sticky="ew")
 
