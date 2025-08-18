@@ -30,9 +30,10 @@ class ConfigManager:
             "locked_field_formats": {},  # Store rich text formatting of locked fields (field_name: format_data)
             "custom_field_names": {},  # Store custom field names (internal_id: display_name)
             "field_visibility": {},  # Store field visibility states (field_id: True/False)
-            "hidden_fields": [],  # List of hidden field IDs
+            "disabled_fields": [],  # List of disabled field IDs
+            "hidden_fields": [],  # Backward compatibility - aliases disabled_fields
             "active_template": "",  # Currently active template name
-            "config_version": "2.5.0"  # Track config version for migrations
+            "config_version": "2.5.2"  # Track config version for migrations
         }
 
     def load_config(self) -> Dict:
@@ -118,31 +119,44 @@ class ConfigManager:
             logger.error(f"Failed to load custom field names: {e}")
             return {}
 
-    def save_field_visibility(self, hidden_fields: list) -> None:
-        """Save field visibility configuration"""
+    def save_field_state(self, disabled_fields: list) -> None:
+        """Save field state configuration"""
         try:
             current_config = self.load_config()
-            current_config["hidden_fields"] = hidden_fields
+            current_config["disabled_fields"] = disabled_fields
+            # Keep both keys for backward compatibility
+            current_config["hidden_fields"] = disabled_fields
             # Also update field_visibility dict for backward compatibility
             current_config["field_visibility"] = {
-                field_id: field_id not in hidden_fields
-                for field_id in hidden_fields
+                field_id: field_id not in disabled_fields
+                for field_id in disabled_fields
             }
             self.save_config(current_config)
-            logger.info(f"Saved field visibility: {len(hidden_fields)} hidden fields")
+            logger.info(f"Saved field state: {len(disabled_fields)} disabled fields")
         except Exception as e:
-            logger.error(f"Failed to save field visibility: {e}")
+            logger.error(f"Failed to save field state: {e}")
 
-    def load_field_visibility(self) -> list:
-        """Load field visibility configuration"""
+    # Backward compatibility alias
+    def save_field_visibility(self, hidden_fields: list) -> None:
+        """Backward compatibility alias for save_field_state."""
+        self.save_field_state(hidden_fields)
+
+    def load_field_state(self) -> list:
+        """Load field state configuration"""
         try:
             config = self.load_config()
-            hidden_fields = config.get("hidden_fields", [])
-            logger.info(f"Loaded field visibility: {len(hidden_fields)} hidden fields")
-            return hidden_fields
+            # Support both new and old key names for backward compatibility
+            disabled_fields = config.get("disabled_fields", config.get("hidden_fields", []))
+            logger.info(f"Loaded field state: {len(disabled_fields)} disabled fields")
+            return disabled_fields
         except Exception as e:
-            logger.error(f"Failed to load field visibility: {e}")
+            logger.error(f"Failed to load field state: {e}")
             return []
+
+    # Backward compatibility alias
+    def load_field_visibility(self) -> list:
+        """Backward compatibility alias for load_field_state."""
+        return self.load_field_state()
 
     def save_active_template(self, template_name: str) -> None:
         """Save the active template name"""
@@ -189,5 +203,14 @@ class ConfigManager:
             config.setdefault("active_template", "")
             config["config_version"] = "2.5.0"
             logger.info("Migrated config to v2.5.0")
+
+        if current_version < "2.5.2":
+            # Add new fields for v2.5.2 (disabled fields terminology)
+            # Migrate hidden_fields to disabled_fields
+            hidden_fields = config.get("hidden_fields", [])
+            config.setdefault("disabled_fields", hidden_fields)
+            # Keep hidden_fields for backward compatibility
+            config["config_version"] = "2.5.2"
+            logger.info("Migrated config to v2.5.2 - added disabled fields support")
 
         return config

@@ -13,7 +13,7 @@ from core.config import ConfigManager
 from core.field_definitions import (
     FIELD_DEFINITIONS,
     LEFT_COLUMN_ORDER,
-    REQUIRED_VISIBLE_FIELDS,
+    REQUIRED_ENABLED_FIELDS,
     RIGHT_COLUMN_ORDER,
     field_manager,
 )
@@ -43,11 +43,11 @@ class FieldConfigDialog:
         self.field_entries: Dict[str, ctk.CTkEntry] = {}
         self.char_count_labels: Dict[str, ctk.CTkLabel] = {}
         self.validation_icons: Dict[str, ctk.CTkLabel] = {}
-        self.hide_checkboxes: Dict[str, ctk.CTkCheckBox] = {}
+        self.disable_checkboxes: Dict[str, ctk.CTkCheckBox] = {}  # Internal: disabled fields
 
         # Current field values and states
         self.current_values: Dict[str, str] = {}
-        self.current_hidden_fields: set = set()
+        self.current_disabled_fields: set = set()  # Internal: disabled fields
         self.validation_errors: Dict[str, str] = {}
 
         # Create dialog
@@ -299,7 +299,7 @@ class FieldConfigDialog:
             self.validation_icons[field_id] = icon_label
 
         # Hide checkbox (except for required fields)
-        if field_id not in REQUIRED_VISIBLE_FIELDS:
+        if field_id not in REQUIRED_ENABLED_FIELDS:
             hide_checkbox = ctk.CTkCheckBox(
                 field_frame,
                 text="Dölj",
@@ -307,7 +307,7 @@ class FieldConfigDialog:
                 command=lambda fid=field_id: self._on_hide_checkbox_changed(fid)
             )
             hide_checkbox.grid(row=0, column=4, padx=(5, 10), pady=8)
-            self.hide_checkboxes[field_id] = hide_checkbox
+            self.disable_checkboxes[field_id] = hide_checkbox
 
     def _create_footer(self):
         """Create dialog footer with action buttons."""
@@ -369,10 +369,10 @@ class FieldConfigDialog:
         custom_names = self.config_manager.load_custom_field_names()
         field_manager.set_custom_names(custom_names)
 
-        # Load field visibility
-        hidden_fields = self.config_manager.load_field_visibility()
-        field_state_manager.set_hidden_fields(hidden_fields)
-        self.current_hidden_fields = set(hidden_fields)
+        # Load field state
+        disabled_fields = self.config_manager.load_field_state()
+        field_state_manager.set_disabled_fields(disabled_fields)
+        self.current_disabled_fields = set(disabled_fields)
 
         # Populate field entries
         for field_id, entry in self.field_entries.items():
@@ -386,10 +386,10 @@ class FieldConfigDialog:
             else:
                 self.current_values[field_id] = ""
 
-        # Update hide checkboxes
-        for field_id, checkbox in self.hide_checkboxes.items():
-            is_hidden = field_id in self.current_hidden_fields
-            checkbox.select() if is_hidden else checkbox.deselect()
+        # Update disable checkboxes
+        for field_id, checkbox in self.disable_checkboxes.items():
+            is_disabled = field_id in self.current_disabled_fields
+            checkbox.select() if is_disabled else checkbox.deselect()
 
     def _on_template_selected(self, template_name: str):
         """Handle template selection from dropdown."""
@@ -408,7 +408,7 @@ class FieldConfigDialog:
 
         # Apply template configuration
         custom_names = template_config.get('custom_names', {})
-        hidden_fields = template_config.get('hidden_fields', [])
+        disabled_fields = template_config.get('disabled_fields', template_config.get('hidden_fields', []))
 
         # Clear current entries
         for entry in self.field_entries.values():
@@ -421,11 +421,11 @@ class FieldConfigDialog:
                 self.field_entries[field_id].insert(0, custom_name)
                 self.current_values[field_id] = custom_name
 
-        # Apply field visibility
-        self.current_hidden_fields = set(hidden_fields)
-        for field_id, checkbox in self.hide_checkboxes.items():
-            is_hidden = field_id in self.current_hidden_fields
-            checkbox.select() if is_hidden else checkbox.deselect()
+        # Apply field state
+        self.current_disabled_fields = set(disabled_fields)
+        for field_id, checkbox in self.disable_checkboxes.items():
+            is_disabled = field_id in self.current_disabled_fields
+            checkbox.select() if is_disabled else checkbox.deselect()
 
         # Update validation
         self._update_validation()
@@ -462,7 +462,7 @@ class FieldConfigDialog:
 
         config = {
             'custom_names': custom_names,
-            'hidden_fields': list(self.current_hidden_fields)
+            'disabled_fields': list(self.current_disabled_fields)
         }
 
         # Save template
@@ -516,13 +516,13 @@ class FieldConfigDialog:
 
     def _on_hide_checkbox_changed(self, field_id: str):
         """Handle hide checkbox changes."""
-        checkbox = self.hide_checkboxes[field_id]
+        checkbox = self.disable_checkboxes[field_id]
         is_checked = checkbox.get()
 
         if is_checked:
-            self.current_hidden_fields.add(field_id)
+            self.current_disabled_fields.add(field_id)
         else:
-            self.current_hidden_fields.discard(field_id)
+            self.current_disabled_fields.discard(field_id)
 
         logger.debug(f"Field {field_id} visibility changed: {'hidden' if is_checked else 'visible'}")
 
@@ -601,10 +601,10 @@ class FieldConfigDialog:
         self.current_values.clear()
 
         # Reset visibility checkboxes
-        for checkbox in self.hide_checkboxes.values():
+        for checkbox in self.disable_checkboxes.values():
             checkbox.deselect()
 
-        self.current_hidden_fields.clear()
+        self.current_disabled_fields.clear()
 
         # Update validation
         self._update_validation()
@@ -632,17 +632,17 @@ class FieldConfigDialog:
             self.config_manager.save_custom_field_names(custom_names)
 
             # Save field visibility
-            self.config_manager.save_field_visibility(list(self.current_hidden_fields))
+            self.config_manager.save_field_state(list(self.current_disabled_fields))
 
             # Save active template
             self.config_manager.save_active_template(self.current_template)
 
             # Update field manager
             field_manager.set_custom_names(custom_names)
-            field_manager.set_hidden_fields(list(self.current_hidden_fields))
-            field_state_manager.set_hidden_fields(list(self.current_hidden_fields))
+            field_manager.set_disabled_fields(list(self.current_disabled_fields))
+            field_state_manager.set_disabled_fields(list(self.current_disabled_fields))
 
-            logger.info(f"Applied configuration: {len(custom_names)} custom names, {len(self.current_hidden_fields)} hidden fields")
+            logger.info(f"Applied configuration: {len(custom_names)} custom names, {len(self.current_disabled_fields)} disabled fields")
 
             # Call the callback to trigger application update
             if self.on_apply_callback:

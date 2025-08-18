@@ -211,8 +211,10 @@ RIGHT_COLUMN_ORDER = [
     'handelse', 'note1', 'note2', 'note3'
 ]
 
-# Fields that cannot be hidden (required for basic functionality)
-REQUIRED_VISIBLE_FIELDS = ['startdatum', 'kalla1', 'handelse']
+# Fields that cannot be disabled (required for basic functionality)
+REQUIRED_ENABLED_FIELDS = ['startdatum', 'kalla1', 'handelse']
+# Backward compatibility alias
+REQUIRED_VISIBLE_FIELDS = REQUIRED_ENABLED_FIELDS
 
 
 class FieldDefinitionManager:
@@ -220,7 +222,7 @@ class FieldDefinitionManager:
 
     def __init__(self):
         self._custom_names: Dict[str, str] = {}
-        self._hidden_fields: set = set()  # Track hidden fields
+        self._disabled_fields: set = set()  # Track disabled fields
 
     def get_display_name(self, internal_id: str) -> str:
         """Get the display name for a field (custom or default)."""
@@ -346,52 +348,92 @@ class FieldDefinitionManager:
 
         return errors
 
-    # Visibility management methods
-    def set_field_visibility(self, field_id: str, visible: bool) -> bool:
-        """Set field visibility if allowed."""
-        if not visible and field_id in REQUIRED_VISIBLE_FIELDS:
-            return False  # Cannot hide required fields
+    # Field state management methods
+    def set_field_enabled(self, field_id: str, enabled: bool) -> bool:
+        """Set field enabled state if allowed."""
+        if not enabled and field_id in REQUIRED_ENABLED_FIELDS:
+            return False  # Cannot disable required fields
 
-        if visible:
-            self._hidden_fields.discard(field_id)
+        if enabled:
+            self._disabled_fields.discard(field_id)
         else:
-            self._hidden_fields.add(field_id)
+            self._disabled_fields.add(field_id)
         return True
 
+    # Backward compatibility alias
+    def set_field_visibility(self, field_id: str, visible: bool) -> bool:
+        """Backward compatibility alias for set_field_enabled."""
+        return self.set_field_enabled(field_id, visible)
+
+    def is_field_enabled(self, field_id: str) -> bool:
+        """Check if a field is enabled."""
+        return field_id not in self._disabled_fields
+
+    def is_field_disabled(self, field_id: str) -> bool:
+        """Check if a field is disabled."""
+        return field_id in self._disabled_fields
+
+    # Backward compatibility aliases
     def is_field_visible(self, field_id: str) -> bool:
-        """Check if a field is visible."""
-        return field_id not in self._hidden_fields
+        """Backward compatibility alias for is_field_enabled."""
+        return self.is_field_enabled(field_id)
 
     def is_field_hidden(self, field_id: str) -> bool:
-        """Check if a field is hidden."""
-        return field_id in self._hidden_fields
+        """Backward compatibility alias for is_field_disabled."""
+        return self.is_field_disabled(field_id)
 
+    def get_enabled_fields(self) -> List[str]:
+        """Get list of enabled field IDs in order."""
+        return [f for f in FIELD_ORDER if f not in self._disabled_fields]
+
+    def get_enabled_display_names(self) -> List[str]:
+        """Get display names for enabled fields only."""
+        return [self.get_display_name(f) for f in self.get_enabled_fields()]
+
+    def get_disabled_fields(self) -> List[str]:
+        """Get list of disabled field IDs."""
+        return list(self._disabled_fields)
+
+    # Backward compatibility aliases
     def get_visible_fields(self) -> List[str]:
-        """Get list of visible field IDs in order."""
-        return [f for f in FIELD_ORDER if f not in self._hidden_fields]
+        """Backward compatibility alias for get_enabled_fields."""
+        return self.get_enabled_fields()
 
     def get_visible_display_names(self) -> List[str]:
-        """Get display names for visible fields only."""
-        return [self.get_display_name(f) for f in self.get_visible_fields()]
+        """Backward compatibility alias for get_enabled_display_names."""
+        return self.get_enabled_display_names()
 
     def get_hidden_fields(self) -> List[str]:
-        """Get list of hidden field IDs."""
-        return list(self._hidden_fields)
+        """Backward compatibility alias for get_disabled_fields."""
+        return self.get_disabled_fields()
 
-    def set_hidden_fields(self, hidden_fields: List[str]) -> None:
-        """Set hidden fields from a list."""
-        self._hidden_fields = {
-            f for f in hidden_fields
-            if f not in REQUIRED_VISIBLE_FIELDS
+    def set_disabled_fields(self, disabled_fields: List[str]) -> None:
+        """Set disabled fields from a list."""
+        self._disabled_fields = {
+            f for f in disabled_fields
+            if f not in REQUIRED_ENABLED_FIELDS
         }
 
+    def can_disable_field(self, field_id: str) -> bool:
+        """Check if a field can be disabled."""
+        return field_id not in REQUIRED_ENABLED_FIELDS
+
+    def reset_all_enabled(self) -> None:
+        """Reset all fields to enabled."""
+        self._disabled_fields.clear()
+
+    # Backward compatibility aliases
+    def set_hidden_fields(self, hidden_fields: List[str]) -> None:
+        """Backward compatibility alias for set_disabled_fields."""
+        self.set_disabled_fields(hidden_fields)
+
     def can_hide_field(self, field_id: str) -> bool:
-        """Check if a field can be hidden."""
-        return field_id not in REQUIRED_VISIBLE_FIELDS
+        """Backward compatibility alias for can_disable_field."""
+        return self.can_disable_field(field_id)
 
     def reset_visibility(self) -> None:
-        """Reset all fields to visible."""
-        self._hidden_fields.clear()
+        """Backward compatibility alias for reset_all_enabled."""
+        self.reset_all_enabled()
 
 
 # Global instance for use throughout the application

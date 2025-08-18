@@ -12,6 +12,8 @@ from typing import Any, Dict, List, Tuple
 import customtkinter as ctk
 
 from core.field_definitions import field_manager
+from core.field_state_manager import field_state_manager
+from gui.field_styling import apply_field_state
 from gui.utils import ScrollableText
 
 # Local imports
@@ -312,13 +314,19 @@ class ExcelFieldManager:
         for widget in self.parent.excel_fields_frame.winfo_children():
             widget.destroy()
 
-        # Get only VISIBLE fields from field manager
-        visible_field_ids = field_manager.get_visible_fields()
-        logger.info(f"Creating Excel fields for {len(visible_field_ids)} visible fields")
+        # Get ALL fields from field manager - we now show all fields, just disabled
+        from core.field_definitions import FIELD_ORDER
+        all_field_ids = FIELD_ORDER
+        disabled_field_ids = field_state_manager.get_disabled_fields()
+        enabled_field_ids = [f for f in all_field_ids if f not in disabled_field_ids]
 
-        # Clear and recreate excel_vars for only VISIBLE columns
+        logger.info(f"Creating Excel fields for {len(all_field_ids)} total fields")
+        logger.info(f"Disabled fields: {disabled_field_ids}")
+        logger.info(f"Enabled fields: {enabled_field_ids}")
+
+        # Clear and recreate excel_vars for ALL columns
         self.parent.excel_vars.clear()
-        for field_id in visible_field_ids:
+        for field_id in all_field_ids:
             display_name = field_manager.get_display_name(field_id)
             # Don't create variables for automatically calculated fields
             if field_id != 'dag':
@@ -340,18 +348,18 @@ class ExcelFieldManager:
         logger.debug(f"DEBUG: field_manager custom names at UI creation: {field_manager.get_custom_names()}")
 
         column1_field_ids = field_manager.get_fields_by_column('column1')
-        # Only include visible fields in the column
-        column1_fields = [field_manager.get_display_name(field_id) for field_id in visible_field_ids
+        # Include ALL fields in the column, both enabled and disabled
+        column1_fields = [field_manager.get_display_name(field_id) for field_id in all_field_ids
                          if field_id in column1_field_ids]
         logger.debug(f"DEBUG: Column1 field IDs: {column1_field_ids}")
-        logger.debug(f"DEBUG: Column1 display names (visible only): {column1_fields}")
+        logger.debug(f"DEBUG: Column1 display names (all): {column1_fields}")
 
         column3_field_ids = field_manager.get_fields_by_column('column3')
-        # Only include visible fields in the column
-        column3_fields = [field_manager.get_display_name(field_id) for field_id in visible_field_ids
+        # Include ALL fields in the column, both enabled and disabled
+        column3_fields = [field_manager.get_display_name(field_id) for field_id in all_field_ids
                          if field_id in column3_field_ids]
         logger.debug(f"DEBUG: Column3 field IDs: {column3_field_ids}")
-        logger.debug(f"DEBUG: Column3 display names: {column3_fields}")
+        logger.debug(f"DEBUG: Column3 display names (all): {column3_fields}")
 
         # Create Column 1 (Left)
         col1_frame = ctk.CTkFrame(fields_container)
@@ -375,8 +383,9 @@ class ExcelFieldManager:
         col2_frame.grid_columnconfigure(0, weight=1)  # Content takes full width
         col2_frame.grid_rowconfigure(2, weight=1)  # Text widget row expands to fill available space
 
-        # Create Händelse field directly in the column
-        self.create_field_in_frame(col2_frame, 'Händelse', 0, column_type="column2")
+        # Create Händelse field directly in the column (using current display name)
+        handelse_display_name = field_manager.get_display_name('handelse')
+        self.create_field_in_frame(col2_frame, handelse_display_name, 0, column_type="column2")
 
         # Add operations box under Händelse field
         self.create_operations_box(col2_frame)
@@ -510,6 +519,10 @@ class ExcelFieldManager:
         # Get internal field ID for this display name
         field_id = self._get_field_id_from_display_name(col_name)
 
+        # Check if this field is disabled
+        is_field_disabled = field_state_manager.is_field_disabled(field_id)
+        logger.debug(f"DEBUG: Field '{col_name}' (field_id: {field_id}) is_disabled: {is_field_disabled}")
+
         # Check if this field should have a lock switch (all except Dag and Inlagd)
         has_lock = col_name in self.parent.lock_vars
         logger.debug(f"DEBUG: Creating field '{col_name}' (field_id: {field_id})")
@@ -519,8 +532,9 @@ class ExcelFieldManager:
         # Special handling for Dag column - make it read-only with explanation
         if field_id == 'dag':
             # Standard horizontal layout for Dag field
-            ctk.CTkLabel(parent_frame, text=f"{col_name}:",
-                    font=ctk.CTkFont(size=12)).grid(row=row, column=0, sticky="w", padx=(3, 2), pady=(0, 1))
+            dag_label = ctk.CTkLabel(parent_frame, text=f"{col_name}:",
+                    font=ctk.CTkFont(size=12))
+            dag_label.grid(row=row, column=0, sticky="w", padx=(3, 2), pady=(0, 1))
 
             dag_var = tk.StringVar(value="Formel läggs till automatiskt")
             entry = ctk.CTkEntry(parent_frame,
@@ -529,19 +543,30 @@ class ExcelFieldManager:
                            font=ctk.CTkFont(size=12, slant='italic'))
             entry.grid(row=row, column=1, sticky="ew", padx=(5, 10), pady=(0, 5))
 
+            # Apply disabled styling if field is disabled
+            if is_field_disabled:
+                field_widgets = {'label': dag_label, 'input': entry}
+                apply_field_state(field_widgets, field_id, is_field_disabled)
+
             # Return 1 row used for Dag field
             return 1
 
         # Special handling for Inlagd - read-only, always today's date
         elif field_id == 'inlagd':
             # Standard horizontal layout for Inlagd field
-            ctk.CTkLabel(parent_frame, text=f"{col_name}:",
-                    font=ctk.CTkFont(size=12)).grid(row=row, column=0, sticky="w", padx=(3, 2), pady=(0, 1))
+            inlagd_label = ctk.CTkLabel(parent_frame, text=f"{col_name}:",
+                    font=ctk.CTkFont(size=12))
+            inlagd_label.grid(row=row, column=0, sticky="w", padx=(3, 2), pady=(0, 1))
 
             entry = ctk.CTkEntry(parent_frame, textvariable=self.parent.excel_vars[col_name],
                            state="readonly",
                            font=ctk.CTkFont(size=12))
             entry.grid(row=row, column=1, sticky="ew", padx=(5, 10), pady=(0, 5))
+
+            # Apply disabled styling if field is disabled
+            if is_field_disabled:
+                field_widgets = {'label': inlagd_label, 'input': entry}
+                apply_field_state(field_widgets, field_id, is_field_disabled)
 
             # Return 1 row used for Inlagd field
             return 1
@@ -633,14 +658,22 @@ class ExcelFieldManager:
             # Store reference to scrollable text container (delegation will handle method calls)
             self.parent.excel_vars[col_name] = scrollable_text
 
+            # Apply disabled styling if field is disabled
+            if is_field_disabled:
+                field_widgets = {'label': field_label, 'input': text_widget}
+                if has_lock:
+                    field_widgets['checkbox'] = lock_switch
+                apply_field_state(field_widgets, field_id, is_field_disabled)
+
             # Return the number of rows used (3 rows for text fields: header, toolbar, text - counter is now inline)
             return 3
 
         # Layout depends on column type and field type
         elif column_type == "column1":
             # Horizontal layout for column 1 and date fields in column 2 - saves vertical space
-            ctk.CTkLabel(parent_frame, text=f"{col_name}:",
-                    font=ctk.CTkFont(size=12)).grid(row=row, column=0, sticky="w", padx=(3, 2), pady=(0, 1))
+            field_label = ctk.CTkLabel(parent_frame, text=f"{col_name}:",
+                    font=ctk.CTkFont(size=12))
+            field_label.grid(row=row, column=0, sticky="w", padx=(3, 2), pady=(0, 1))
 
             # Set appropriate width based on field type - reduced height
             if field_id in ['startdatum', 'slutdatum']:
@@ -677,6 +710,7 @@ class ExcelFieldManager:
             # Time validation will still occur during save operations
 
             # Add lock switch for fields that should have one (in column 2) - compact with lock symbol
+            lock_switch = None
             if has_lock:
                 lock_switch = ctk.CTkCheckBox(parent_frame,
                                            text="🔒",
@@ -684,6 +718,13 @@ class ExcelFieldManager:
                                            variable=self.parent.lock_vars[col_name],
                                            font=ctk.CTkFont(size=12))
                 lock_switch.grid(row=row, column=2, sticky="w", padx=(2, 3), pady=(0, 1))
+
+            # Apply disabled styling if field is disabled
+            if is_field_disabled:
+                field_widgets = {'label': field_label, 'input': entry}
+                if lock_switch:
+                    field_widgets['checkbox'] = lock_switch
+                apply_field_state(field_widgets, field_id, is_field_disabled)
 
             # Return 1 row used for horizontal layout
             return 1
@@ -694,10 +735,12 @@ class ExcelFieldManager:
             header_frame = ctk.CTkFrame(parent_frame, fg_color="transparent")
             header_frame.grid(row=row, column=0, columnspan=2, sticky="ew", pady=(0, 2))
 
-            ctk.CTkLabel(header_frame, text=f"{col_name}:",
-                    font=ctk.CTkFont(size=12)).pack(side="left", padx=(3, 2))
+            field_label = ctk.CTkLabel(header_frame, text=f"{col_name}:",
+                    font=ctk.CTkFont(size=12))
+            field_label.pack(side="left", padx=(3, 2))
 
             # Add lock switch for fields that should have one - compact with lock symbol
+            lock_switch = None
             if has_lock:
                 lock_switch = ctk.CTkCheckBox(header_frame,
                                            text="🔒",
@@ -713,6 +756,13 @@ class ExcelFieldManager:
 
             # Enable undo tracking for Entry widget
             self.parent.enable_undo_for_widget(entry)
+
+            # Apply disabled styling if field is disabled
+            if is_field_disabled:
+                field_widgets = {'label': field_label, 'input': entry}
+                if lock_switch:
+                    field_widgets['checkbox'] = lock_switch
+                apply_field_state(field_widgets, field_id, is_field_disabled)
 
             # Return 2 rows used for vertical layout
             return 2

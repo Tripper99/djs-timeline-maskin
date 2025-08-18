@@ -66,7 +66,8 @@ class TemplateManager:
             "description": "Standardkonfiguration för fältnamn",
             "field_config": {
                 "custom_names": {},  # Empty = use default names
-                "hidden_fields": [],  # All fields visible by default
+                "disabled_fields": [],  # All fields enabled by default
+                "hidden_fields": [],  # Backward compatibility alias for disabled_fields
             }
         }
 
@@ -106,7 +107,7 @@ class TemplateManager:
 
         Args:
             name: Template name
-            field_config: Dictionary with custom_names and hidden_fields
+            field_config: Dictionary with custom_names and disabled_fields
             description: Optional template description
 
         Returns:
@@ -122,13 +123,20 @@ class TemplateManager:
             logger.error("Invalid template configuration")
             return False
 
-        # Create template data
+        # Create template data with backward compatibility
+        field_config_with_compat = field_config.copy()
+        # Ensure both disabled_fields and hidden_fields are present for compatibility
+        if "disabled_fields" in field_config_with_compat:
+            field_config_with_compat["hidden_fields"] = field_config_with_compat["disabled_fields"]
+        elif "hidden_fields" in field_config_with_compat:
+            field_config_with_compat["disabled_fields"] = field_config_with_compat["hidden_fields"]
+
         template_data = {
             "template_name": name,
             "version": self.TEMPLATE_VERSION,
             "created_date": datetime.now().isoformat(),
             "description": description,
-            "field_config": field_config
+            "field_config": field_config_with_compat
         }
 
         # Save to file
@@ -155,7 +163,7 @@ class TemplateManager:
                 try:
                     import shutil
                     shutil.move(backup_path, file_path)
-                except:
+                except Exception:
                     pass
             return False
 
@@ -184,8 +192,15 @@ class TemplateManager:
                 logger.error(f"Invalid template data: {name}")
                 return None
 
+            # Add backward compatibility for disabled_fields
+            field_config = template_data.get('field_config', {})
+            if "disabled_fields" not in field_config and "hidden_fields" in field_config:
+                field_config["disabled_fields"] = field_config["hidden_fields"]
+            elif "hidden_fields" not in field_config and "disabled_fields" in field_config:
+                field_config["hidden_fields"] = field_config["disabled_fields"]
+
             logger.info(f"Loaded template: {name}")
-            return template_data.get('field_config', {})
+            return field_config
 
         except json.JSONDecodeError as e:
             logger.error(f"Template file corrupted: {name} - {e}")
@@ -297,16 +312,21 @@ class TemplateManager:
         if not isinstance(config, dict):
             return False
 
-        # Check required keys
-        if 'custom_names' not in config or 'hidden_fields' not in config:
+        # Check required keys - accept either disabled_fields or hidden_fields
+        if 'custom_names' not in config:
+            return False
+
+        if 'disabled_fields' not in config and 'hidden_fields' not in config:
             return False
 
         # Validate custom_names is a dict
         if not isinstance(config['custom_names'], dict):
             return False
 
-        # Validate hidden_fields is a list
-        if not isinstance(config['hidden_fields'], list):
+        # Validate field lists are lists (support both formats)
+        if 'disabled_fields' in config and not isinstance(config['disabled_fields'], list):
+            return False
+        if 'hidden_fields' in config and not isinstance(config['hidden_fields'], list):
             return False
 
         # Validate custom names values are strings
@@ -314,10 +334,12 @@ class TemplateManager:
             if not isinstance(key, str) or not isinstance(value, str):
                 return False
 
-        # Validate hidden fields are strings
-        for field in config['hidden_fields']:
-            if not isinstance(field, str):
-                return False
+        # Validate field lists contain only strings
+        for field_list_key in ['disabled_fields', 'hidden_fields']:
+            if field_list_key in config:
+                for field in config[field_list_key]:
+                    if not isinstance(field, str):
+                        return False
 
         return True
 
