@@ -640,7 +640,7 @@ class ExcelFieldManager:
             # Row 2.5: Formatting toolbar (compact)
             toolbar_frame = ctk.CTkFrame(parent_frame, fg_color="transparent")
             toolbar_frame.grid(row=row+1, column=0, columnspan=2, sticky="nw", padx=(10, 5), pady=(2, 2))
-            self.parent.create_formatting_toolbar(toolbar_frame, text_widget, col_name)
+            self.parent.create_formatting_toolbar(toolbar_frame, text_widget, col_name, field_id)
 
             # Move scrollable text container to row+2 to make room for toolbar
             # Make Händelse expand vertically to fill available space

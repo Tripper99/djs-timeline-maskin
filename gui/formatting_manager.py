@@ -11,6 +11,9 @@ import tkinter as tk
 # GUI imports
 import customtkinter as ctk
 
+# Core imports
+from core.field_definitions import field_manager
+
 # Setup logging
 logger = logging.getLogger(__name__)
 
@@ -81,9 +84,22 @@ class FormattingManagerMixin:
 
         logger.info(f"Text font size changed from {current_size}pt to {new_size}pt")
 
+    def get_text_field_display_names(self):
+        """Get current display names for all text fields that support font sizing"""
+        text_field_internal_ids = ['handelse', 'note1', 'note2', 'note3']
+        try:
+            return [field_manager.get_display_name(field_id) for field_id in text_field_internal_ids]
+        except Exception as e:
+            # Fallback to hardcoded names if field_manager unavailable
+            logger.warning(f"Could not get dynamic field names, using fallback: {e}")
+            return ['Händelse', 'Note1', 'Note2', 'Note3']
+
     def apply_text_font_size(self, font_size):
-        """Apply font size to all text fields (Händelse and Note1-3) and update formatting tags"""
-        text_fields = ['Händelse', 'Note1', 'Note2', 'Note3']
+        """Apply font size to all text fields dynamically and update formatting tags"""
+        # Get current display names for text fields
+        text_fields = self.get_text_field_display_names()
+
+        logger.debug(f"Applying font size {font_size}pt to text fields: {text_fields}")
 
         for field_name in text_fields:
             if field_name in self.excel_vars:
@@ -109,7 +125,7 @@ class FormattingManagerMixin:
         # Colors are set directly on buttons
         pass
 
-    def create_formatting_toolbar(self, parent_frame, text_widget, col_name):
+    def create_formatting_toolbar(self, parent_frame, text_widget, col_name, field_id=None):
         """Create formatting toolbar with buttons and bind keyboard shortcuts"""
         # Ensure custom button styles are configured
         self.configure_button_styles()
@@ -148,11 +164,12 @@ class FormattingManagerMixin:
                               font=ctk.CTkFont(size=10))
         default_btn.pack(side="left", padx=(0, 1))
 
-        # Font size toggle button - 50% smaller
-        font_btn = ctk.CTkButton(parent_frame, text="A+", width=20, height=18,
-                           command=lambda: self.toggle_text_font_size(),
-                           font=ctk.CTkFont(size=9))
-        font_btn.pack(side="left", padx=(1, 0))
+        # Font size toggle button - 50% smaller (only for Händelse field)
+        if field_id == 'handelse':
+            font_btn = ctk.CTkButton(parent_frame, text="A+", width=20, height=18,
+                               command=lambda: self.toggle_text_font_size(),
+                               font=ctk.CTkFont(size=9))
+            font_btn.pack(side="left", padx=(1, 0))
 
         # Bind keyboard shortcuts for this text widget
         text_widget.bind('<Control-b>', lambda e: self.toggle_format(text_widget, "bold"))
