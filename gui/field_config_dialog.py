@@ -248,7 +248,12 @@ class FieldConfigDialog:
         # Field container frame
         field_frame = ctk.CTkFrame(parent)
         field_frame.grid(row=row, column=column, sticky="ew", padx=10, pady=2)
-        field_frame.grid_columnconfigure(1, weight=1)
+        # Standardized grid system for consistent field widths
+        field_frame.grid_columnconfigure(0, minsize=120, weight=0)  # Label - fixed
+        field_frame.grid_columnconfigure(1, minsize=200, weight=1)  # Entry - expandable
+        field_frame.grid_columnconfigure(2, minsize=50, weight=0)   # Counter - fixed
+        field_frame.grid_columnconfigure(3, minsize=30, weight=0)   # Icon - fixed
+        field_frame.grid_columnconfigure(4, minsize=80, weight=0)   # Checkbox - fixed
 
         # Field label
         display_name = field_def.default_display_name
@@ -272,7 +277,7 @@ class FieldConfigDialog:
                 state="disabled",
                 fg_color="gray90"
             )
-            protected_entry.grid(row=0, column=1, padx=5, pady=8, sticky="ew")
+            protected_entry.grid(row=0, column=1, columnspan=2, padx=5, pady=8, sticky="ew")
         else:
             # Editable field
             entry = ctk.CTkEntry(
