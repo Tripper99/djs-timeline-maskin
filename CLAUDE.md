@@ -8,9 +8,9 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.5.5)
+## Current Status (v2.5.6)
 
-**Latest Achievement (v2.5.5)**: Successfully implemented Källa field protection and renaming using comprehensive sub-agent analysis. The Källa field now behaves identically to other system-critical fields (Startdatum, Händelse) - cannot be renamed and cannot be disabled, achieving architectural consistency while maintaining full backward compatibility.
+**Latest Achievement (v2.5.6)**: Successfully resolved font size button issues using systematic sub-agent investigation. Implemented dynamic field name resolution to restore complete font size control functionality. The A+ button now appears only on Händelse field but correctly affects ALL text fields (Händelse, Note1, Note2, Note3) regardless of field renaming, achieving clean UI design with full functionality restoration.
 
 **Key Features**:
 - **Field Protection Consistency**: Källa field now protected like Startdatum and Händelse (cannot be renamed or disabled)
@@ -100,3 +100,4 @@ The application has been refactored from a single large file into a modular stru
   * After making changes the user must get an oportunity to do testruns. 
   * If and when user says that changes works, you should do a new commit, with comments reflecting the successful code change. 
   * Never write comments about successful revisions unless the user has done test runs. 
+- When presenting a plan for code change always start the plan with saving of new version and git commit. The reason for this is that user can't approav plan if he is not sure that you will remember the backup procedure.

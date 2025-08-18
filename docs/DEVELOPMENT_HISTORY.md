@@ -4,6 +4,51 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.5.6 Font Size Button System Fix (2025-08-18) - Complete Font Size Control Restoration ✅
+**Achievement**: Successfully resolved font size button issues using systematic sub-agent investigation and architectural analysis, restoring complete font size control functionality across all text fields.
+
+**Problems Solved**:
+
+**Issue 1 - Font Size Button Placement**: Font size buttons ("A+") appeared on all text fields (Händelse, Note1, Note2, Note3) when they should only appear on the Händelse field.
+
+**Issue 2 - Font Size Scope Bug**: The A+ button on Händelse field only affected the Händelse field itself, not all text fields as intended and as it worked previously.
+
+**Root Cause Investigation (bug-finder-debugger agent)**:
+- **Placement Issue**: `create_formatting_toolbar()` method created font size buttons for ALL text fields because it didn't differentiate between Händelse and Note fields
+- **Scope Issue**: `apply_text_font_size()` method used hardcoded field display names `['Händelse', 'Note1', 'Note2', 'Note3']` instead of dynamic lookup from field manager
+- **Critical Discovery**: When users renamed Note1-3 fields through configuration, text widgets were stored with NEW display names, but font size method still searched for OLD hardcoded names
+
+**Architecture Planning (architecture-planner agent)**:
+- Analyzed sophisticated field management system with internal IDs vs display names
+- Identified correct pattern: Use internal field IDs `['handelse', 'note1', 'note2', 'note3']` and resolve to current display names
+- Designed surgical fix preserving all existing functionality with comprehensive error handling
+
+**Implementation Strategy**:
+1. **Font Button Placement Fix**: Added conditional logic in `create_formatting_toolbar()` to only create font size button when `field_id == 'handelse'`
+2. **Font Scope Fix**: Replaced hardcoded field names with dynamic lookup using `field_manager.get_display_name()`
+3. **Robust Architecture**: Created `get_text_field_display_names()` helper method with fallback handling for missing field manager
+
+**Technical Implementation**:
+- **File Modified**: `gui/formatting_manager.py` (surgical changes only)
+- **Added Import**: `from core.field_definitions import field_manager`
+- **Dynamic Resolution**: `[field_manager.get_display_name(id) for id in ['handelse', 'note1', 'note2', 'note3']]`
+- **Error Handling**: Fallback to hardcoded names with warning logging if field_manager unavailable
+- **Debug Logging**: Added comprehensive logging for troubleshooting font size operations
+
+**Results Achieved**:
+- ✅ Font size buttons removed from Note1-3 fields (clean UI)
+- ✅ A+ button appears only on Händelse field (consistent interface)
+- ✅ A+ button affects ALL text fields regardless of field renaming (restored functionality)
+- ✅ Works with both default and custom field names (robust operation)
+- ✅ Comprehensive error handling and logging (maintainable code)
+- ✅ Full backward compatibility (no breaking changes)
+
+**Development Process Excellence**:
+- **Sub-Agent Utilization**: Used bug-finder-debugger and architecture-planner for systematic analysis
+- **Thorough Investigation**: Complete root cause analysis before implementation
+- **Safe Implementation**: Surgical changes with comprehensive testing
+- **User Verification**: Confirmed fix works correctly before finalization
+
 ### v2.5.5 Källa Field Protection and Renaming (2025-08-18) - Architectural Consistency Enhancement ✅
 **Achievement**: Successfully implemented Källa field protection and renaming using comprehensive sub-agent analysis, achieving architectural consistency with other system-critical fields.
 

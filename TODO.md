@@ -164,15 +164,20 @@
 **Result**: Källa field now appears grayed out in configuration dialog and behaves identically to other system-critical fields.
 **Status**: ✅ COMPLETED
 
-#### 4.3 Font Size Buttons on Note Fields
+#### 4.3 Font Size Buttons on Note Fields ✅ **FIXED in v2.5.6**
 **Problem**: Font size change buttons appear on Note1-3 fields but should be removed.
-**Impact**: Creates unnecessary UI clutter and inconsistent interface. Only Händelse should have font size controls.
-**Status**: ❌ Must be fixed in next session
+**Solution**: Added conditional logic in `create_formatting_toolbar()` to only create font size button for Händelse field.
+**Status**: ✅ COMPLETED
 
-#### 4.4 Font Size Button Behavior Inconsistency
+#### 4.4 Font Size Button Behavior Inconsistency ✅ **FIXED in v2.5.6**
 **Problem**: Font size change button on Händelse field should control font size for ALL text fields (Händelse, Note1, Note2, Note3), not just the Händelse field.
-**Impact**: Users cannot easily control font size consistently across all text fields in the application.
-**Status**: ❌ Must be fixed in next session
+**Root Cause**: Font size method used hardcoded field names instead of dynamic lookup from field manager.
+**Solution**: 
+- Implemented dynamic field name resolution using `field_manager.get_display_name()`
+- Created `get_text_field_display_names()` helper method with fallback handling
+- A+ button now correctly affects ALL text fields regardless of field renaming
+- Added comprehensive error handling and debug logging
+**Status**: ✅ COMPLETED
 
 ## Future Improvements
 
