@@ -8,9 +8,9 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.5.3)
+## Current Status (v2.5.4)
 
-**Latest Achievement (v2.5.3)**: Fixed critical Excel file reset bug and custom field names regression. Excel file now properly resets when field names change (ensuring data integrity), while custom field names are preserved through careful config management. Used specialized sub-agents to identify classic "stale data overwrite" bug pattern.
+**Latest Achievement (v2.5.4)**: Implemented bulletproof field name uniqueness validation using context-injection pattern. Users now receive immediate real-time feedback when entering duplicate field names, preventing configuration errors through sophisticated context-aware validation architecture designed with specialized sub-agents.
 
 **Key Features**:
 - **Visual Consistency**: All fields always visible with disabled fields clearly indicated through professional grayed-out styling
