@@ -8,102 +8,45 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.3.3)
+## Current Status (v2.5.1)
 
-**Custom Field Names Display Bug Fix (v2.3.3)**:
-- ✅ FIXED critical bug where custom field names were saved but not displayed in main UI
-- **Root Cause**: `_on_field_config_applied()` method deleted entire config file immediately after custom names were saved
-- **Solution**: Removed config deletion, changed to selective user data clearing only
-- **Result**: Custom field names now persist correctly and display immediately after Apply
-- **Debug Enhancement**: Added comprehensive logging throughout custom field name data flow
+**Latest Achievement (v2.5.1)**: Field hiding functionality now works consistently across all Excel operations. Hidden fields marked as "Dölj" are properly excluded from Excel template creation.
 
-**Custom Field Naming Feature Implementation (v2.3.0)**:
-- Successfully implemented comprehensive custom field naming system with 100% functionality
-- Created field identity system separating internal IDs from user-configurable display names
-- Developed professional 900x700 configuration dialog with real-time validation and visual feedback
-- Enhanced configuration management with custom field names storage and migration
-- Updated Excel integration to use dynamic field names instead of hardcoded columns
-- Implemented complete data reset and UI redraw mechanism when field names change
+**Key Features**:
+- Template management system with field hiding capability
+- Custom field naming with professional configuration dialog  
+- Modular architecture with 7 specialized mixin modules
+- Comprehensive test suite (120 tests)
+- Session persistence and space-optimized UI
+- Swedish localization throughout
 
-**Architecture Highlights**:
-- **Field Identity System**: Clean separation between internal field IDs (`startdatum`, `starttid`) and display names ("Startdatum", "Starttid") 
-- **Validation Framework**: Max 13 chars, no spaces, no duplicates with Swedish error messages
-- **Professional Dialog**: Two-column layout with protected vs renamable fields, real-time feedback
-- **Complete Reset Mechanism**: Warning dialogs, data clearing, configuration reset, UI redraw
-- **Excel Integration**: Dynamic column headers using `field_manager.get_all_display_names()`
+**Architecture Status**:
+- Clean modular design with main_window.py reduced from 35,000+ tokens to 384 lines
+- Field identity system with separation between internal IDs and display names
+- Professional configuration dialogs with real-time validation
+- Excel integration respects field visibility consistently
 
-**Technical Implementation**:
-- `core/field_definitions.py`: Field identity system with FieldDefinitionManager class
-- `core/field_validator.py`: Comprehensive validation with real-time feedback
-- `gui/field_config_dialog.py`: 610-line professional configuration interface
-- Enhanced: `core/config.py`, `core/excel_manager.py`, `gui/main_window.py`, `gui/layout_manager.py`
-- Updated: Tools menu with "Konfigurera fält..." option
-
-**Time Field Validation UX Fix (v2.2.15)**:
-- Fixed critical UX issue where time fields trapped users with validation errors on focus loss
-- Made time field behavior consistent with date fields (placeholder text restoration, no forced validation)
-- Removed aggressive FocusOut validation binding from time fields while maintaining data integrity during save operations
-- Used bug-finder-debugger agent for systematic root cause analysis and precise fix implementation
-- Solution: Removed `entry.bind('<FocusOut>', lambda e, field=col_name: self.parent.validate_time_field(e, field))` from excel_fields.py:650
-
-**Font Size Field Stability Fix (v2.2.13)**:
-- Fixed critical issue where Note1-3 fields were growing when changing font size
-- Added grid weight constraints to Note fields matching Händelse field behavior
-- Now only text size changes while field dimensions remain stable across all font sizes (9pt, 12pt, 15pt)
-- Solution: Added `grid_rowconfigure(row+2, weight=1)` to Note1, Note2, Note3 fields in excel_fields.py
-
-**Space Optimization & Session Persistence Achievement (v2.2.7-v2.2.11)**:
-- Successfully optimized GUI for maximum space efficiency on lower resolution screens
-- Eliminated unnecessary padding and decorative elements while maintaining functionality
-- Implemented inline character counters saving ~4 rows of vertical space
-- Added auto-disappearing placeholder text for improved user guidance (YYYY-MM-DD, HH:MM)
-- Created clear visual hierarchy with prominent action buttons using color coding
-- Fixed session persistence issues: color button states and column width memory
-
-**Major UI/UX Improvements (v2.2.7-v2.2.11)**:
-- **Orange copy button**: "↓ Kopiera ned filnamnet till Excelfältet ↓" with arrows and distinctive color for clear workflow indication
-- **Enlarged operation buttons**: Save/Reset buttons made 200x40/180x40 pixels for better prominence
-- **Reorganized operations area**: Color selection and buttons in separate light grey containers under Händelse field
-- **Compact statistics**: Changed from "PDF:er öppnade: X" to "PDF: X" format with smaller font
-- **Visual separation**: Different background colors between sections (gray90, gray88, gray86) for better organization
-- **Removed obsolete elements**: Theme menu removed (not applicable to CustomTkinter)
-
-**Session Persistence Features (v2.2.11)**:
-- **Column width memory**: Excel column sash positions saved to config and restored on startup
-- **Color button state consistency**: Visual selection state properly resets after save operations
-- **Proportional scaling**: Saved column positions adapt to different screen sizes automatically
-- **Smart fallbacks**: New users get sensible 40/30/30 defaults, existing users keep preferences
-
-**Comprehensive Testing Implementation (v2.2.3)**:
-- Successfully implemented complete test suite with 120 tests total
-- Phase 1: 115 autonomous unit tests covering core business logic (filename_parser, pdf_processor, excel_manager, config)
-- Phase 2: 5 semi-autonomous integration tests covering complete user workflows
-- Tests achieve 96% autonomous coverage with 4% requiring user verification
-- Created TESTING_GUIDE.md with comprehensive documentation for future development workflow
-- All tests pass and provide robust foundation for safe refactoring and feature development
-
-**Major Architectural Achievement (v2.2.2)**:
-- Successfully modularized main_window.py from 35,000+ tokens into 7 specialized mixin modules
-- Achieved exceptional code organization with clean separation of concerns
-- Created PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMixin, EventHandlersMixin, UndoManagerMixin, FormattingManagerMixin, and StatsManagerMixin
-- Main window reduced from ~3000 lines to 384 lines with identical functionality
-- Excel hybrid operations preserved exactly without any modifications
-- All functionality tested and verified working perfectly
-
-**Key Technical Solutions**:
-- **Space optimization**: Inline counters, reduced padding, compact labels
-- **Placeholder text**: Manual Entry-StringVar binding to preserve CustomTkinter placeholder functionality
-- **Session persistence**: Config-based saving/restoration of UI state (sash positions, color states)
-- **Visual hierarchy**: Color-coded buttons (orange=transfer, green=save, blue=reset) for clear workflow
-- **Modular architecture**: Clean mixin inheritance with no circular dependencies
-
-**Testing Notes**:
+**Testing Framework**:
 - Comprehensive test suite available: `python -m pytest tests/ -v`
 - Always run Ruff syntax check before committing: `ruff check . --fix`
-- Run integration tests before releases: `python -m pytest tests/test_integration_workflows.py -v -s`
-- See TESTING_GUIDE.md for complete testing workflow procedures
-- Test application startup after layout changes
-- Critical: Always test placeholder text visibility and session persistence features
+- Integration tests: `python -m pytest tests/test_integration_workflows.py -v -s`
+- See TESTING_GUIDE.md for complete workflow procedures
+
+## Documentation Management Guidelines
+
+**CLAUDE.md Content Strategy**:
+- Keep CLAUDE.md focused on current status and working principles only
+- Include only the very latest development achievement (current version) in Current Status section
+- Remove older development history when adding new entries to prevent document growth
+- For detailed development history, technical analysis, and version milestones → use `docs\DEVELOPMENT_HISTORY.md`
+- Always reference DEVELOPMENT_HISTORY.md for comprehensive historical details
+- Maintain clean, actionable guidance rather than extensive historical records
+
+**Development History Documentation**:
+- Comprehensive technical details, root cause analyses, and implementation insights go in `docs\DEVELOPMENT_HISTORY.md`
+- Each major version should have detailed entry with problem/solution/technical excellence documentation
+- Include investigation methodology, sub-agent usage, and development process insights
+- Preserve valuable technical knowledge for future development sessions
 
 ## Additional guideline on github commit
 **Never* mention yourself (Claude) in comment when doing commit. *Never* write stuff like "🤖 Generated with [Claude Code](https://claude.ai/code) Co-Authored-By: Claude <noreply@anthropic.com>". 
@@ -132,13 +75,14 @@ The application has been refactored from a single large file into a modular stru
   * Always identify and document any remaining bugs with specific fix plans for next session
   * Use specialized sub-agents (architecture-planner, code-writer) for systematic implementation phases
 
-- **Critical Bug Investigation Methodology** (learned in v2.3.3):
-  * Use multiple specialized subagents (bug-finder-debugger, architecture-planner) for systematic root cause analysis
-  * Trace complete data flow from save → storage → reload → display to identify exact failure points
+- **Critical Bug Investigation Methodology** (learned in v2.3.3 & v2.5.1):
+  * Use multiple specialized subagents (bug-finder-debugger, architecture-planner, code-reviewer-refactorer) for systematic root cause analysis
+  * Trace complete data flow from configuration → storage → usage to identify exact failure points
+  * Search for architectural inconsistencies - look for pattern violations (e.g., 9 methods use correct approach, 1 uses wrong approach)
   * Add comprehensive debug logging at every critical data transition point
-  * Verify fixes work for all edge cases (first-time users, existing users, config deletion scenarios)
-  * Never assume initial analysis is correct - use systematic investigation to verify root cause
-  * Document exact sequence of events leading to failure for future reference
+  * Verify fixes work for all edge cases and don't cause regression in existing functionality
+  * Use systematic investigation with sub-agents rather than assumptions - they often reveal deeper architectural insights
+  * Document exact sequence of events and technical solutions for future reference
 
 - **mandatory git commit routine**
   * Before writing code you should always make a new version and commit it to git with comments on what you are about to do. 

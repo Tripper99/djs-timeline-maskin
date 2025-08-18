@@ -4,6 +4,55 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.5.1 Field Hiding Bug Fix (2025-08-18) - Critical Bug Fix ✅
+**Achievement**: Fixed critical bug where hidden fields marked as "Dölj" were still included in Excel template creation despite field hiding functionality working correctly elsewhere in application.
+
+**Problem Solved**:
+- **Bug Report**: Template management system and field configuration dialog working correctly, but hidden fields still appeared in Excel templates created via "Skapa Excel-mall" dialog
+- **User Impact**: Field hiding functionality completely broken for Excel template creation, defeating the purpose of the feature
+- **Scope**: Only affected Excel template creation dialog; all other Excel operations correctly respected field visibility
+
+**Investigation Process**:
+- **Systematic Analysis**: Used specialized sub-agents (bug-finder-debugger, architecture-planner, code-reviewer-refactorer) for comprehensive root cause investigation
+- **Data Flow Tracing**: Traced complete field visibility flow from configuration → storage → Excel creation
+- **Consistency Analysis**: Found 9 methods correctly using `get_visible_display_names()` vs 1 method incorrectly using `get_all_display_names()`
+
+**Root Cause Analysis**:
+- **Specific Location**: `gui/dialogs.py:131` in `create_excel_template()` method
+- **Wrong Method Call**: Used `field_manager.get_all_display_names()` instead of `field_manager.get_visible_display_names()`
+- **Architecture Inconsistency**: Template creation was implemented before field visibility feature, never updated to respect visibility logic
+- **Pattern Violation**: All other Excel operations (ExcelManager methods) correctly filtered to visible fields only
+
+**Technical Solution Implemented**:
+```python
+# BEFORE (broken):
+headers = field_manager.get_all_display_names()
+
+# AFTER (fixed):
+headers = field_manager.get_visible_display_names()
+```
+
+**Code Changes**:
+- **Single Line Fix**: Changed method call in `gui/dialogs.py:131`
+- **Comment Update**: Enhanced clarity with "only visible fields" annotation
+- **Surgical Approach**: Minimal change with maximum impact, maintaining all existing functionality
+
+**Testing Results**:
+- ✅ Hidden fields properly excluded from Excel template creation
+- ✅ Visible fields with custom names correctly included
+- ✅ No regression in existing functionality
+- ✅ Field hiding now works consistently across all Excel operations
+
+**Development Process Insights**:
+- **Sub-agent Usage**: Demonstrates value of systematic bug analysis using specialized agents
+- **Architecture Review**: Identified broader pattern for preventing similar inconsistencies
+- **Documentation Value**: Clear commit messages and detailed analysis for future reference
+
+**Technical Excellence**:
+- **Version Management**: Proper v2.5.1 versioning with clear start/complete commits
+- **Code Quality**: Ruff syntax validation passed
+- **User Validation**: Immediate user testing confirmed fix effectiveness
+
 ### v2.4.2 Lock Buttons Missing Bug Fix (2025-08-17) - Critical Bug Fix ✅
 **Achievement**: Fixed critical bug where all lock buttons (🔒 checkboxes) disappeared from main window Excel fields due to initialization timing issue.
 

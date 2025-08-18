@@ -125,6 +125,20 @@
 **Solution**: Font size buttons now correctly change text size in all text fields (Händelse, Note1, Note2, Note3).
 **Status**: Fixed - Users can now adjust font size for all note fields.
 
+### 3. Field Hiding Bug - Excel Template Creation ✅ **FIXED in v2.5.1**
+**Problem**: Hidden fields marked as "Dölj" were still being included in Excel template creation despite field hiding configuration working correctly elsewhere in application.
+
+**Root Cause Identified**: `gui/dialogs.py:131` was using `get_all_display_names()` instead of `get_visible_display_names()` when creating Excel templates.
+
+**Investigation Process**: Used specialized sub-agents (bug-finder-debugger, architecture-planner, code-reviewer-refactorer) for systematic root cause analysis. Found inconsistency where 9 methods correctly used `get_visible_display_names()` but template creation dialog used `get_all_display_names()`.
+
+**Solution Implemented (v2.5.1)**:
+- Changed single line in `gui/dialogs.py:131` from `get_all_display_names()` to `get_visible_display_names()`
+- Updated comment to clarify visibility filtering: "Get current field display names (may be custom names) - only visible fields"
+- Surgical fix aligns template creation with visibility logic used throughout application
+
+**Result**: Field hiding now works consistently across all Excel operations. Hidden fields are properly excluded from Excel template creation while maintaining all existing functionality.
+
 ## Future Improvements
 
 ### 4. Consider async operations for file processing
