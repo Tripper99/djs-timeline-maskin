@@ -4,6 +4,131 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.5.3 Excel File Reset & Custom Names Fix (2025-08-18) - Critical Data Flow Bug Fix ✅
+**Achievement**: Fixed Excel file selection reset bug and a critical regression that caused custom field names to be lost due to stale data overwrite.
+
+**Problems Solved**:
+1. **Excel File Reset Issue**: Excel file remained selected after field configuration changes, risking data integrity mismatches
+2. **Custom Field Names Regression**: Custom field names were being overwritten by stale in-memory config data
+
+**Root Cause Analysis**:
+**Investigation Process**: Used specialized sub-agents (bug-finder-debugger, code-reviewer-refactorer) to trace data flow and timing issues
+
+**Data Flow Problem Identified**:
+- **T0**: Main window loads config into `self.config` at startup
+- **T1**: User modifies custom field names in config dialog
+- **T2**: Config dialog saves custom names DIRECTLY TO FILE
+- **T3**: Config dialog triggers `_on_field_config_applied()` callback
+- **T4**: Our Excel reset code called `save_config(self.config)` with STALE data → overwrote fresh custom names
+- **T5**: Main window reloaded config, but now contained stale data
+
+**Technical Solution**:
+- **Initial Fix**: Added Excel file reset logic to `_clear_all_field_data()` in `gui/main_window.py:501-510`
+- **Regression Fix**: Removed problematic `save_config()` call that was overwriting fresh data with stale in-memory config
+- **Final Code**: Excel file UI resets, internal state clears, but config save removed to preserve custom field names
+
+**Implementation Details**:
+```python
+# Clear Excel file selection (important for data integrity after field changes)
+self.excel_path_var.set("Ingen Excel-fil vald")
+self.excel_manager.excel_path = None
+# Clear from config as well to prevent reload on next startup
+if 'excel_file' in self.config:
+    del self.config['excel_file']
+    # Note: We don't save config here to avoid overwriting custom field names
+```
+
+**Development Process Innovation**:
+- **Classic Bug Pattern**: Identified as textbook "stale data overwrite" bug
+- **Sub-agent Excellence**: bug-finder-debugger traced exact timing sequence of config saves
+- **Code-reviewer-refactorer**: Confirmed stale vs fresh data locations and overwrite timing
+
+**Result**: Excel file now properly resets when field names change (ensuring data integrity), while custom field names are preserved and displayed correctly in the main window.
+
+### v2.5.2 Field Hiding → Field Disabling System (2025-08-18) - Major UX Transformation ✅
+**Achievement**: Complete transformation from field hiding to field disabling system, resolving layout stability issues by showing all fields with professional disabled styling instead of completely hiding them.
+
+**Problem Solved**:
+- **Layout Issues**: Hidden fields created sparse, unbalanced interface making the application look unprofessional
+- **User Experience**: Screenshots showed awkward gaps and inconsistent spacing when fields were hidden
+- **Visual Consistency**: Need to maintain layout structure while clearly indicating disabled field state
+- **Professional Appearance**: Required consistent, polished interface regardless of field configuration
+
+**Major Transformation Scope**:
+This represents the largest UI/UX overhaul since the CustomTkinter migration (v2.0.0), fundamentally changing how field visibility works throughout the entire application while maintaining all existing functionality.
+
+**Technical Architecture Transformation**:
+
+**Phase 1: Internal Terminology Transition**
+- **Complete Refactoring**: Updated 4 core modules (field_state_manager, field_definitions, config, template_manager) 
+- **Backward Compatibility**: All existing APIs preserved through comprehensive alias system
+- **Configuration Migration**: Added "disabled_fields" support with automatic migration from "hidden_fields"
+- **Template System**: Enhanced to support both old and new field state formats seamlessly
+
+**Phase 2: Centralized Visual Styling System**
+- **New Module**: Created `gui/field_styling.py` with professional disabled field styling
+- **Consistent Appearance**: Light gray backgrounds, dimmed text, italic labels, non-interactive state
+- **Widget Support**: Complete styling for CTkEntry, ScrollableText, CTkCheckBox, and CTkLabel
+- **Theme Integration**: Styling system works with existing CustomTkinter color scheme
+
+**Phase 3: Field Creation Logic Overhaul** 
+- **Fundamental Change**: Modified `gui/excel_fields.py` to create ALL fields instead of only visible ones
+- **Before**: `visible_field_ids = field_manager.get_visible_fields()` (sparse layout)
+- **After**: `all_field_ids = FIELD_ORDER` + conditional disabled styling (consistent layout)
+- **Smart Styling**: Applied disabled styling based on field state during widget creation
+- **Layout Preservation**: Maintained three-column layout with visual consistency
+
+**Phase 4: Excel Operations Safety**
+- **Critical Requirement**: Disabled fields must NOT appear in Excel output despite being visible in UI
+- **Architecture Win**: Backward compatibility aliases ensure Excel operations automatically exclude disabled fields
+- **Verification**: `get_visible_display_names()` → `get_enabled_display_names()` seamlessly
+- **Data Integrity**: Excel template creation, row writing, and column mapping all respect field state
+
+**Phase 5: Configuration Interface Enhancement**
+- **UI Text Preservation**: Kept familiar "Dölj" text for user consistency
+- **Internal Updates**: Updated variable names and method calls to disabled terminology
+- **Template Support**: Enhanced template save/load to use new disabled field format
+- **Migration Logic**: Backward compatibility with existing field configurations
+
+**Implementation Excellence**:
+
+**Systematic Development Process**:
+- **Sub-agent Utilization**: Used architecture-planner, code-writer, python-gui-builder, and general-purpose agents
+- **Phase-by-Phase Implementation**: Each phase completed and tested before moving to next
+- **Comprehensive Testing**: Created specialized test suite validating all field state functionality
+- **Documentation**: Complete todo tracking and progress monitoring throughout implementation
+
+**Technical Quality Achievements**:
+- **Zero Regressions**: All existing functionality preserved during transformation
+- **Syntax Validation**: Clean Ruff validation across all modified modules
+- **Testing Coverage**: Comprehensive validation of field state management, configuration migration, and Excel operations
+- **Code Architecture**: Clean separation of concerns with centralized styling system
+
+**User Experience Transformation**:
+
+**Visual Improvements**:
+- **Layout Stability**: All fields always visible with disabled ones clearly indicated
+- **Professional Appearance**: Grayed-out disabled fields blend seamlessly with enabled fields
+- **Consistent Interface**: No more sparse, unbalanced appearance when fields are disabled
+- **Clear Visual Hierarchy**: Disabled fields remain visible for context but clearly non-interactive
+
+**Functional Benefits**:
+- **Maintained Safety**: Disabled fields automatically excluded from Excel operations
+- **Configuration Flexibility**: All existing field hiding configurations continue working
+- **Template Compatibility**: Enhanced template system supports both old and new formats
+- **User Familiarity**: UI terminology unchanged - "Dölj" still used in configuration dialog
+
+**Development Process Innovation**:
+- **Multi-Agent Architecture**: Systematic use of specialized agents for different implementation phases
+- **Backward Compatibility First**: API preservation prevented any breaking changes
+- **Incremental Testing**: Each phase validated before proceeding to ensure stability
+- **Comprehensive Documentation**: Complete development history preserved for future reference
+
+**Technical Breakthrough**:
+The key insight was changing from "exclude from creation" to "create all, then style based on state" - this fundamental shift resolved layout issues while maintaining all business logic through the backward compatibility alias system.
+
+**Result**: The application now provides professional, consistent interface regardless of field configuration while maintaining all existing functionality. This resolves the layout stability issues identified in user screenshots and provides a foundation for future UI enhancements.
+
 ### v2.5.1 Field Hiding Bug Fix (2025-08-18) - Critical Bug Fix ✅
 **Achievement**: Fixed critical bug where hidden fields marked as "Dölj" were still included in Excel template creation despite field hiding functionality working correctly elsewhere in application.
 

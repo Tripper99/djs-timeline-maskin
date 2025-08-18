@@ -107,7 +107,12 @@
 
 ## Current Bugs to Fix
 
-### 1. Custom Field Names Not Displaying in UI (v2.3.0) ✅ **FIXED in v2.3.3**
+### 1. Excel File Selection Reset Bug ✅ **FIXED in v2.5.3**
+**Problem**: When field names are changed in the configuration dialog, the selected Excel file remained selected.
+**Solution**: Added Excel file reset logic to `_clear_all_field_data()` method.
+**Regression Found & Fixed**: Initial fix caused custom field names to be lost due to stale data overwrite - fixed by removing problematic save_config() call.
+
+### 2. Custom Field Names Not Displaying in UI (v2.3.0) ✅ **FIXED in v2.3.3**
 **Problem**: Custom field names are saved correctly but not displayed in the UI after applying changes.
 
 **Root Cause Identified**: `_on_field_config_applied()` method called `clear_config()` which deleted the entire config file immediately after custom names were saved to it.
@@ -138,6 +143,29 @@
 - Surgical fix aligns template creation with visibility logic used throughout application
 
 **Result**: Field hiding now works consistently across all Excel operations. Hidden fields are properly excluded from Excel template creation while maintaining all existing functionality.
+
+### 4. Post-v2.5.2 Issues - Next Session Priority
+**Context**: These issues were identified after successful completion of the field disabling system (v2.5.2). Field disabling system works correctly but these related issues need attention.
+
+#### 4.1 Excel File Selection Reset Bug ✅ **FIXED in v2.5.3**
+**Problem**: When field names are changed in the configuration dialog, the selected Excel file in the main window remains selected but should be reset.
+**Solution**: Added Excel file reset logic, then fixed regression by removing stale config save.
+**Status**: ✅ COMPLETED
+
+#### 4.2 Källa1 Field Protection Missing  
+**Problem**: Källa1 (Source1) field name can currently be changed in the configuration dialog, but it shouldn't be editable.
+**Impact**: This is a required field that should remain protected like other system fields (Startdatum, Händelse).
+**Status**: ❌ Must be fixed in next session
+
+#### 4.3 Font Size Buttons on Note Fields
+**Problem**: Font size change buttons appear on Note1-3 fields but should be removed.
+**Impact**: Creates unnecessary UI clutter and inconsistent interface. Only Händelse should have font size controls.
+**Status**: ❌ Must be fixed in next session
+
+#### 4.4 Font Size Button Behavior Inconsistency
+**Problem**: Font size change button on Händelse field should control font size for ALL text fields (Händelse, Note1, Note2, Note3), not just the Händelse field.
+**Impact**: Users cannot easily control font size consistently across all text fields in the application.
+**Status**: ❌ Must be fixed in next session
 
 ## Future Improvements
 

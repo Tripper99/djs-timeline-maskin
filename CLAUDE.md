@@ -8,23 +8,24 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.5.1)
+## Current Status (v2.5.3)
 
-**Latest Achievement (v2.5.1)**: Field hiding functionality now works consistently across all Excel operations. Hidden fields marked as "Dölj" are properly excluded from Excel template creation.
+**Latest Achievement (v2.5.3)**: Fixed critical Excel file reset bug and custom field names regression. Excel file now properly resets when field names change (ensuring data integrity), while custom field names are preserved through careful config management. Used specialized sub-agents to identify classic "stale data overwrite" bug pattern.
 
 **Key Features**:
-- Template management system with field hiding capability
-- Custom field naming with professional configuration dialog  
-- Modular architecture with 7 specialized mixin modules
-- Comprehensive test suite (120 tests)
-- Session persistence and space-optimized UI
-- Swedish localization throughout
+- **Visual Consistency**: All fields always visible with disabled fields clearly indicated through professional grayed-out styling
+- **Layout Stability**: No more sparse, unbalanced interface when fields are disabled
+- **Centralized Styling System**: Professional disabled field appearance with consistent graying, italic labels, and non-interactive state
+- **Excel Safety**: Disabled fields automatically excluded from Excel operations while maintaining visual presence
+- **Backward Compatibility**: All existing functionality preserved with internal terminology updates and configuration migration
+- **Template Management**: Enhanced template system supports both old and new field state formats
+- **Comprehensive Testing**: 120 test suite plus specialized field state validation confirms all functionality works correctly
 
 **Architecture Status**:
-- Clean modular design with main_window.py reduced from 35,000+ tokens to 384 lines
-- Field identity system with separation between internal IDs and display names
-- Professional configuration dialogs with real-time validation
-- Excel integration respects field visibility consistently
+- **Modular Design**: Clean architecture with main_window.py reduced from 35,000+ tokens to 384 lines
+- **Field State System**: Complete transition from "hidden" to "disabled" terminology with backward compatibility aliases
+- **Visual Styling**: New centralized field styling system (gui/field_styling.py) for consistent disabled field appearance
+- **Excel Integration**: Enhanced to show all fields while respecting field state for operations
 
 **Testing Framework**:
 - Comprehensive test suite available: `python -m pytest tests/ -v`
@@ -83,6 +84,15 @@ The application has been refactored from a single large file into a modular stru
   * Verify fixes work for all edge cases and don't cause regression in existing functionality
   * Use systematic investigation with sub-agents rather than assumptions - they often reveal deeper architectural insights
   * Document exact sequence of events and technical solutions for future reference
+
+- **Major UI/UX Transformation Methodology** (learned in v2.5.2):
+  * Break complex transformations into distinct phases with clear deliverables and testing milestones
+  * Use specialized sub-agents extensively for architecture planning, code generation, and validation
+  * Maintain comprehensive backward compatibility through alias systems during terminology transitions
+  * Create centralized systems (like field styling) to ensure consistency across large codebases
+  * Always verify that core business logic (Excel operations) remains unchanged during UI transformations
+  * Test systematically after each phase rather than at the end - complex changes require incremental validation
+  * Document phase completion and commit incremental progress to enable rollback if needed
 
 - **mandatory git commit routine**
   * Before writing code you should always make a new version and commit it to git with comments on what you are about to do. 

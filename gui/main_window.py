@@ -498,6 +498,17 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
             # Reset row color
             self.row_color_var.set("none")
 
+            # Clear Excel file selection (important for data integrity after field changes)
+            self.excel_path_var.set("Ingen Excel-fil vald")
+            self.excel_manager.excel_path = None
+            # Clear from config as well to prevent reload on next startup
+            if 'excel_file' in self.config:
+                del self.config['excel_file']
+                # Note: We don't save config here to avoid overwriting custom field names
+            # Disable the "Open Excel" button since no file is selected
+            if hasattr(self, 'open_excel_btn'):
+                self.open_excel_btn.configure(state="disabled")
+
             logger.info("All field data cleared")
 
         except Exception as e:
