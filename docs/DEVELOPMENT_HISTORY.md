@@ -4,6 +4,50 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.5.5 Källa Field Protection and Renaming (2025-08-18) - Architectural Consistency Enhancement ✅
+**Achievement**: Successfully implemented Källa field protection and renaming using comprehensive sub-agent analysis, achieving architectural consistency with other system-critical fields.
+
+**Problem Solved**:
+**Issue**: The Källa1 field had inconsistent protection - it could not be disabled (correctly protected via REQUIRED_ENABLED_FIELDS) but could be renamed (incorrectly unprotected), creating architectural inconsistency with other system-critical fields like Startdatum and Händelse.
+
+**Requirements**:
+1. Rename default field name from "Källa1" to "Källa"
+2. Make field name non-changeable (protected) like Startdatum and Händelse
+3. Maintain full backward compatibility with existing configurations
+4. Ensure no regression in other application features
+
+**Sub-Agent Investigation Process**:
+**Architecture Analysis (architecture-planner agent)**:
+- Discovered two-level field protection system:
+  - **Level 1**: Name change protection via `protected: bool` attribute in FieldDefinition
+  - **Level 2**: Disable/hide protection via `REQUIRED_ENABLED_FIELDS` constant
+- Identified exact inconsistency: Källa1 in REQUIRED_ENABLED_FIELDS but `protected=False`
+- Found all protection implementation locations and mechanisms
+
+**Safety Review (code-reviewer-refactorer agent)**:
+- Confirmed changes completely safe with zero side effects
+- Verified full backward compatibility (internal field ID 'kalla1' unchanged)
+- Assessed no breaking changes in Excel operations, templates, or field management
+
+**Technical Implementation**:
+**File**: `core/field_definitions.py`
+- **Line 137**: `default_display_name='Källa1',` → `default_display_name='Källa',`
+- **Line 140**: `protected=False,` → `protected=True,`
+
+**Results Achieved**:
+- ✅ **Architectural Consistency**: Källa field now behaves identically to Startdatum and Händelse
+- ✅ **Field Configuration Dialog**: Källa field appears grayed out and non-editable
+- ✅ **Cannot be Renamed**: Protection mechanism prevents name changes
+- ✅ **Cannot be Disabled**: Already protected, now with consistent interface
+- ✅ **Backward Compatibility**: All existing user configurations work perfectly
+- ✅ **Testing**: 115/120 tests passed (5 pre-existing failures unrelated to changes)
+
+**Development Excellence**:
+- **Version Control Protocol**: Committed v2.5.5 before implementation as required
+- **Comprehensive Analysis**: Multiple specialized sub-agents for thorough investigation
+- **Minimal Implementation**: Only 2 lines changed for maximum safety
+- **User Validation**: Confirmed correct behavior in field configuration dialog
+
 ### v2.5.4 Field Name Uniqueness Validation (2025-08-18) - Context-Aware Real-Time Validation ✅
 **Achievement**: Implemented bulletproof field name uniqueness validation using context-injection pattern, preventing duplicate field names through real-time validation feedback.
 

@@ -8,11 +8,12 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.5.4)
+## Current Status (v2.5.5)
 
-**Latest Achievement (v2.5.4)**: Implemented bulletproof field name uniqueness validation using context-injection pattern. Users now receive immediate real-time feedback when entering duplicate field names, preventing configuration errors through sophisticated context-aware validation architecture designed with specialized sub-agents.
+**Latest Achievement (v2.5.5)**: Successfully implemented Källa field protection and renaming using comprehensive sub-agent analysis. The Källa field now behaves identically to other system-critical fields (Startdatum, Händelse) - cannot be renamed and cannot be disabled, achieving architectural consistency while maintaining full backward compatibility.
 
 **Key Features**:
+- **Field Protection Consistency**: Källa field now protected like Startdatum and Händelse (cannot be renamed or disabled)
 - **Visual Consistency**: All fields always visible with disabled fields clearly indicated through professional grayed-out styling
 - **Layout Stability**: No more sparse, unbalanced interface when fields are disabled
 - **Centralized Styling System**: Professional disabled field appearance with consistent graying, italic labels, and non-interactive state

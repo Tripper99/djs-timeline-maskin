@@ -154,10 +154,15 @@
 **Solution**: Added Excel file reset logic, then fixed regression by removing stale config save.
 **Status**: ✅ COMPLETED
 
-#### 4.2 Källa1 Field Protection Missing  
-**Problem**: Källa1 (Source1) field name can currently be changed in the configuration dialog, but it shouldn't be editable.
-**Impact**: This is a required field that should remain protected like other system fields (Startdatum, Händelse).
-**Status**: ❌ Must be fixed in next session
+#### 4.2 Källa1 Field Protection Missing ✅ **FIXED in v2.5.5**
+**Problem**: Källa1 (Source1) field name could be changed in the configuration dialog, but shouldn't be editable.
+**Solution**: 
+- Renamed default field name from "Källa1" to "Källa"
+- Made field name non-changeable (protected=True) like Startdatum and Händelse
+- Used comprehensive sub-agent analysis for safe implementation
+- Maintained full backward compatibility
+**Result**: Källa field now appears grayed out in configuration dialog and behaves identically to other system-critical fields.
+**Status**: ✅ COMPLETED
 
 #### 4.3 Font Size Buttons on Note Fields
 **Problem**: Font size change buttons appear on Note1-3 fields but should be removed.
