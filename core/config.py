@@ -29,7 +29,10 @@ class ConfigManager:
             "locked_field_contents": {},  # Store content of locked fields (field_name: content)
             "locked_field_formats": {},  # Store rich text formatting of locked fields (field_name: format_data)
             "custom_field_names": {},  # Store custom field names (internal_id: display_name)
-            "config_version": "2.3.0"  # Track config version for migrations
+            "field_visibility": {},  # Store field visibility states (field_id: True/False)
+            "hidden_fields": [],  # List of hidden field IDs
+            "active_template": "",  # Currently active template name
+            "config_version": "2.5.0"  # Track config version for migrations
         }
 
     def load_config(self) -> Dict:
@@ -115,6 +118,51 @@ class ConfigManager:
             logger.error(f"Failed to load custom field names: {e}")
             return {}
 
+    def save_field_visibility(self, hidden_fields: list) -> None:
+        """Save field visibility configuration"""
+        try:
+            current_config = self.load_config()
+            current_config["hidden_fields"] = hidden_fields
+            # Also update field_visibility dict for backward compatibility
+            current_config["field_visibility"] = {
+                field_id: field_id not in hidden_fields
+                for field_id in hidden_fields
+            }
+            self.save_config(current_config)
+            logger.info(f"Saved field visibility: {len(hidden_fields)} hidden fields")
+        except Exception as e:
+            logger.error(f"Failed to save field visibility: {e}")
+
+    def load_field_visibility(self) -> list:
+        """Load field visibility configuration"""
+        try:
+            config = self.load_config()
+            hidden_fields = config.get("hidden_fields", [])
+            logger.info(f"Loaded field visibility: {len(hidden_fields)} hidden fields")
+            return hidden_fields
+        except Exception as e:
+            logger.error(f"Failed to load field visibility: {e}")
+            return []
+
+    def save_active_template(self, template_name: str) -> None:
+        """Save the active template name"""
+        try:
+            current_config = self.load_config()
+            current_config["active_template"] = template_name
+            self.save_config(current_config)
+            logger.info(f"Saved active template: {template_name}")
+        except Exception as e:
+            logger.error(f"Failed to save active template: {e}")
+
+    def load_active_template(self) -> str:
+        """Load the active template name"""
+        try:
+            config = self.load_config()
+            return config.get("active_template", "")
+        except Exception as e:
+            logger.error(f"Failed to load active template: {e}")
+            return ""
+
     def clear_config(self) -> None:
         """Clear/delete the configuration file"""
         try:
@@ -133,5 +181,13 @@ class ConfigManager:
             config.setdefault("custom_field_names", {})
             config["config_version"] = "2.3.0"
             logger.info("Migrated config to v2.3.0")
+
+        if current_version < "2.5.0":
+            # Add new fields for v2.5.0 (field visibility and templates)
+            config.setdefault("field_visibility", {})
+            config.setdefault("hidden_fields", [])
+            config.setdefault("active_template", "")
+            config["config_version"] = "2.5.0"
+            logger.info("Migrated config to v2.5.0")
 
         return config

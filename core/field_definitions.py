@@ -200,12 +200,27 @@ FIELD_ORDER = [
     'note1', 'note2', 'note3', 'kalla1', 'kalla2', 'kalla3', 'ovrigt'
 ]
 
+# Two-column layout order for field configuration dialog (matching main window)
+LEFT_COLUMN_ORDER = [
+    'obs', 'inlagd', 'kategori', 'underkategori', 'person_sak', 'special',
+    'dag', 'startdatum', 'starttid', 'slutdatum', 'sluttid'
+]
+
+RIGHT_COLUMN_ORDER = [
+    'kalla1', 'kalla2', 'kalla3', 'ovrigt',
+    'handelse', 'note1', 'note2', 'note3'
+]
+
+# Fields that cannot be hidden (required for basic functionality)
+REQUIRED_VISIBLE_FIELDS = ['startdatum', 'kalla1', 'handelse']
+
 
 class FieldDefinitionManager:
     """Manages field definitions and custom field names."""
 
     def __init__(self):
         self._custom_names: Dict[str, str] = {}
+        self._hidden_fields: set = set()  # Track hidden fields
 
     def get_display_name(self, internal_id: str) -> str:
         """Get the display name for a field (custom or default)."""
@@ -330,6 +345,53 @@ class FieldDefinitionManager:
             errors.append("Field name cannot be empty")
 
         return errors
+
+    # Visibility management methods
+    def set_field_visibility(self, field_id: str, visible: bool) -> bool:
+        """Set field visibility if allowed."""
+        if not visible and field_id in REQUIRED_VISIBLE_FIELDS:
+            return False  # Cannot hide required fields
+
+        if visible:
+            self._hidden_fields.discard(field_id)
+        else:
+            self._hidden_fields.add(field_id)
+        return True
+
+    def is_field_visible(self, field_id: str) -> bool:
+        """Check if a field is visible."""
+        return field_id not in self._hidden_fields
+
+    def is_field_hidden(self, field_id: str) -> bool:
+        """Check if a field is hidden."""
+        return field_id in self._hidden_fields
+
+    def get_visible_fields(self) -> List[str]:
+        """Get list of visible field IDs in order."""
+        return [f for f in FIELD_ORDER if f not in self._hidden_fields]
+
+    def get_visible_display_names(self) -> List[str]:
+        """Get display names for visible fields only."""
+        return [self.get_display_name(f) for f in self.get_visible_fields()]
+
+    def get_hidden_fields(self) -> List[str]:
+        """Get list of hidden field IDs."""
+        return list(self._hidden_fields)
+
+    def set_hidden_fields(self, hidden_fields: List[str]) -> None:
+        """Set hidden fields from a list."""
+        self._hidden_fields = {
+            f for f in hidden_fields
+            if f not in REQUIRED_VISIBLE_FIELDS
+        }
+
+    def can_hide_field(self, field_id: str) -> bool:
+        """Check if a field can be hidden."""
+        return field_id not in REQUIRED_VISIBLE_FIELDS
+
+    def reset_visibility(self) -> None:
+        """Reset all fields to visible."""
+        self._hidden_fields.clear()
 
 
 # Global instance for use throughout the application

@@ -72,13 +72,13 @@ class ExcelManager:
             List of missing column names (empty if all columns present)
         """
         if not self.column_names:
-            # Get current display names from field manager
-            required_columns = field_manager.get_all_display_names()
+            # Get only visible field display names from field manager
+            required_columns = field_manager.get_visible_display_names()
             return required_columns.copy()  # All columns missing if no file loaded
 
         missing_columns = []
-        # Check for current display names (which may be custom)
-        required_columns = field_manager.get_all_display_names()
+        # Check for visible display names only (which may be custom)
+        required_columns = field_manager.get_visible_display_names()
         for required_col in required_columns:
             if required_col not in self.column_names:
                 missing_columns.append(required_col)
@@ -95,8 +95,8 @@ class ExcelManager:
             ws = wb.active
             ws.title = "Timeline"
 
-            # Get current field display names
-            headers = field_manager.get_all_display_names()
+            # Get only visible field display names
+            headers = field_manager.get_visible_display_names()
 
             # Add headers to first row
             for col_idx, header in enumerate(headers, 1):
