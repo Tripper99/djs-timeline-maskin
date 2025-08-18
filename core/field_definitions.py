@@ -134,10 +134,10 @@ FIELD_DEFINITIONS: Dict[str, FieldDefinition] = {
     ),
     'kalla1': FieldDefinition(
         internal_id='kalla1',
-        default_display_name='Källa1',
+        default_display_name='Källa',
         field_type=FieldType.ENTRY,
         column_group='column1',
-        protected=False,
+        protected=True,
         description='Första källreferens (kort textfält)'
     ),
     'kalla2': FieldDefinition(
