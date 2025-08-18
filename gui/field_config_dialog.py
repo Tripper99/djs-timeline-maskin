@@ -639,6 +639,7 @@ class FieldConfigDialog:
 
             # Update field manager
             field_manager.set_custom_names(custom_names)
+            field_manager.set_hidden_fields(list(self.current_hidden_fields))
             field_state_manager.set_hidden_fields(list(self.current_hidden_fields))
 
             logger.info(f"Applied configuration: {len(custom_names)} custom names, {len(self.current_hidden_fields)} hidden fields")

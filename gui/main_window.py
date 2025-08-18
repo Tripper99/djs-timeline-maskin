@@ -363,17 +363,23 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
             logger.error(f"Error opening manual: {e}")
 
     def _load_custom_field_names(self):
-        """Load custom field names from config into field manager"""
+        """Load custom field names and visibility from config into field manager"""
         try:
             from core.field_definitions import field_manager
             # Debug: Check field_manager state before loading
             logger.debug(f"DEBUG: field_manager custom names BEFORE loading: {field_manager.get_custom_names()}")
 
+            # Load custom names
             custom_names = self.config_manager.load_custom_field_names()
             logger.info(f"DEBUG: Loaded custom field names from config: {custom_names}")
 
             field_manager.set_custom_names(custom_names)
             logger.info(f"DEBUG: field_manager custom names AFTER setting: {field_manager.get_custom_names()}")
+
+            # Load field visibility
+            hidden_fields = self.config_manager.load_field_visibility()
+            logger.info(f"Loading field visibility: {len(hidden_fields)} hidden fields")
+            field_manager.set_hidden_fields(hidden_fields)
 
             # Verify a few display names
             if custom_names:
@@ -443,10 +449,10 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
             self._clear_all_field_data()
             logger.debug(f"DEBUG: field_manager state after clear_all_field_data: {field_manager.get_custom_names()}")
 
-            # Step 2: Reload configuration with saved field names (do not delete config)
+            # Step 2: Reload configuration with saved field names and visibility (do not delete config)
             self.config = self.config_manager.load_config()
             logger.debug("DEBUG: Config reloaded, now calling _load_custom_field_names()")
-            self._load_custom_field_names()
+            self._load_custom_field_names()  # This now loads both names and visibility
             logger.debug(f"DEBUG: field_manager state after _load_custom_field_names: {field_manager.get_custom_names()}")
 
             # Step 3: Reinitialize lock_vars with new field names

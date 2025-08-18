@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Tuple
 # Third-party GUI imports
 import customtkinter as ctk
 
-from core.field_definitions import FIELD_ORDER, field_manager
+from core.field_definitions import field_manager
 from gui.utils import ScrollableText
 
 # Local imports
@@ -312,12 +312,13 @@ class ExcelFieldManager:
         for widget in self.parent.excel_fields_frame.winfo_children():
             widget.destroy()
 
-        # Get current display names from field manager (for reference/future use)
-        # column_names = field_manager.get_all_display_names()
+        # Get only VISIBLE fields from field manager
+        visible_field_ids = field_manager.get_visible_fields()
+        logger.info(f"Creating Excel fields for {len(visible_field_ids)} visible fields")
 
-        # Clear and recreate excel_vars for all required columns
+        # Clear and recreate excel_vars for only VISIBLE columns
         self.parent.excel_vars.clear()
-        for field_id in FIELD_ORDER:
+        for field_id in visible_field_ids:
             display_name = field_manager.get_display_name(field_id)
             # Don't create variables for automatically calculated fields
             if field_id != 'dag':
@@ -339,13 +340,15 @@ class ExcelFieldManager:
         logger.debug(f"DEBUG: field_manager custom names at UI creation: {field_manager.get_custom_names()}")
 
         column1_field_ids = field_manager.get_fields_by_column('column1')
-        column1_fields = [field_manager.get_display_name(field_id) for field_id in FIELD_ORDER
+        # Only include visible fields in the column
+        column1_fields = [field_manager.get_display_name(field_id) for field_id in visible_field_ids
                          if field_id in column1_field_ids]
         logger.debug(f"DEBUG: Column1 field IDs: {column1_field_ids}")
-        logger.debug(f"DEBUG: Column1 display names: {column1_fields}")
+        logger.debug(f"DEBUG: Column1 display names (visible only): {column1_fields}")
 
         column3_field_ids = field_manager.get_fields_by_column('column3')
-        column3_fields = [field_manager.get_display_name(field_id) for field_id in FIELD_ORDER
+        # Only include visible fields in the column
+        column3_fields = [field_manager.get_display_name(field_id) for field_id in visible_field_ids
                          if field_id in column3_field_ids]
         logger.debug(f"DEBUG: Column3 field IDs: {column3_field_ids}")
         logger.debug(f"DEBUG: Column3 display names: {column3_fields}")
