@@ -366,6 +366,7 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         """Load custom field names and visibility from config into field manager"""
         try:
             from core.field_definitions import field_manager
+            from core.field_state_manager import field_state_manager
             # Debug: Check field_manager state before loading
             logger.debug(f"DEBUG: field_manager custom names BEFORE loading: {field_manager.get_custom_names()}")
 
@@ -380,6 +381,8 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
             hidden_fields = self.config_manager.load_field_visibility()
             logger.info(f"Loading field visibility: {len(hidden_fields)} hidden fields")
             field_manager.set_hidden_fields(hidden_fields)
+            # Fix persistence bug: synchronize field_state_manager with field_manager
+            field_state_manager.set_disabled_fields(hidden_fields)
 
             # Verify a few display names
             if custom_names:
