@@ -180,8 +180,13 @@ class ExcelManager:
             if self._has_column('kalla1'):
                 special_data[kalla1_field] = filename if filename else ""
 
-            # Write data to row
+            # Write data to row - only for VISIBLE columns
+            visible_column_names = field_manager.get_visible_display_names()
             for col_name, col_idx in self.columns.items():
+                # Skip hidden columns
+                if col_name not in visible_column_names:
+                    continue
+
                 value = special_data.get(col_name, '')
                 cell = self.worksheet.cell(row=next_row, column=col_idx)
                 cell.value = value
@@ -437,7 +442,13 @@ class ExcelManager:
             else:
                 default_format = write_workbook.add_format({'text_wrap': True})
 
+            # Only write VISIBLE columns
+            visible_column_names = field_manager.get_visible_display_names()
             for col_name, col_idx in self.columns.items():
+                # Skip hidden columns
+                if col_name not in visible_column_names:
+                    continue
+
                 value = special_data.get(col_name, '')
 
                 # Special handling for Dag column - create formula
