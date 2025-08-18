@@ -74,6 +74,9 @@ class FieldConfigDialog:
         self._create_main_content()
         self._create_footer()
 
+        # Initialize button states
+        self._update_save_button_state()
+
         # Load current values
         self._load_current_configuration()
 
@@ -129,7 +132,7 @@ class FieldConfigDialog:
         """Create template control row with dropdown and buttons."""
         template_frame = ctk.CTkFrame(self.dialog)
         template_frame.grid(row=1, column=0, sticky="ew", padx=20, pady=10)
-        template_frame.grid_columnconfigure(4, weight=1)  # Spacer column
+        template_frame.grid_columnconfigure(5, weight=1)  # Spacer column
 
         # Template dropdown
         templates = template_manager.list_templates()
@@ -146,32 +149,42 @@ class FieldConfigDialog:
         # Template buttons
         open_button = ctk.CTkButton(
             template_frame,
-            text="Öppna template",
+            text="Öppna mall",
             width=120,
             height=32,
             command=self._open_template
         )
         open_button.grid(row=0, column=1, padx=5, pady=15)
 
-        save_button = ctk.CTkButton(
+        # New save current template button
+        self.save_button = ctk.CTkButton(
             template_frame,
-            text="Spara som",
+            text="Spara mall",
+            width=100,
+            height=32,
+            command=self._save_current_template
+        )
+        self.save_button.grid(row=0, column=2, padx=5, pady=15)
+
+        save_as_button = ctk.CTkButton(
+            template_frame,
+            text="Spara som...",
             width=100,
             height=32,
             command=self._save_as_template
         )
-        save_button.grid(row=0, column=2, padx=5, pady=15)
+        save_as_button.grid(row=0, column=3, padx=5, pady=15)
 
         delete_button = ctk.CTkButton(
             template_frame,
-            text="Radera template",
+            text="Radera mall",
             width=130,
             height=32,
             fg_color="#DC3545",
             hover_color="#C82333",
             command=self._delete_template
         )
-        delete_button.grid(row=0, column=3, padx=5, pady=15)
+        delete_button.grid(row=0, column=4, padx=5, pady=15)
 
         # Help button on right side
         help_button = ctk.CTkButton(
@@ -183,7 +196,7 @@ class FieldConfigDialog:
             hover_color="gray50",
             command=self._show_help
         )
-        help_button.grid(row=0, column=5, padx=(10, 15), pady=15)
+        help_button.grid(row=0, column=6, padx=(10, 15), pady=15)
 
     def _create_main_content(self):
         """Create main content area with two-column field layout."""
@@ -266,8 +279,7 @@ class FieldConfigDialog:
             entry = ctk.CTkEntry(
                 field_frame,
                 placeholder_text="Ange nytt namn...",
-                font=ctk.CTkFont(size=12),
-                width=150
+                font=ctk.CTkFont(size=12)
             )
             entry.grid(row=0, column=1, padx=5, pady=8, sticky="ew")
 
@@ -396,6 +408,17 @@ class FieldConfigDialog:
         self.current_template = template_name
         logger.info(f"Template selected: {template_name}")
 
+        # Update save button state - disable for Standard template
+        self._update_save_button_state()
+
+    def _update_save_button_state(self):
+        """Update save button state based on current template."""
+        if hasattr(self, 'save_button'):
+            if self.current_template == "Standard":
+                self.save_button.configure(state="disabled")
+            else:
+                self.save_button.configure(state="normal")
+
     def _open_template(self):
         """Open/load the selected template."""
         if not self.current_template:
@@ -431,6 +454,59 @@ class FieldConfigDialog:
         self._update_validation()
 
         logger.info(f"Loaded template: {self.current_template}")
+
+    def _save_current_template(self):
+        """Save changes to the currently selected template."""
+        # Check if current template is Standard (protected)
+        if self.current_template == "Standard":
+            messagebox.showwarning(
+                "Kan inte spara",
+                "Standard-mallen kan inte ändras. Använd 'Spara som...' för att skapa en ny mall."
+            )
+            return
+
+        # Show confirmation dialog
+        result = messagebox.askyesno(
+            "Bekräfta sparande",
+            f"Vill du spara ändringarna till mallen '{self.current_template}'?"
+        )
+
+        if not result:
+            return
+
+        # Prepare template configuration
+        field_config = {
+            'custom_names': {},
+            'disabled_fields': list(self.current_disabled_fields)
+        }
+
+        # Get custom field names
+        for field_id, entry in self.field_entries.items():
+            custom_name = entry.get().strip() if hasattr(entry, 'get') else ""
+            if custom_name and custom_name != field_manager.get_default_display_name(field_id):
+                field_config['custom_names'][field_id] = custom_name
+
+        # Save the template
+        try:
+            template_manager.save_template(
+                self.current_template,
+                field_config,
+                f"Uppdaterad mall: {self.current_template}"
+            )
+
+            messagebox.showinfo(
+                "Mall sparad",
+                f"Mallen '{self.current_template}' har sparats."
+            )
+
+            logger.info(f"Saved current template: {self.current_template}")
+
+        except Exception as e:
+            logger.error(f"Error saving current template: {e}")
+            messagebox.showerror(
+                "Fel vid sparande",
+                f"Kunde inte spara mallen: {str(e)}"
+            )
 
     def _save_as_template(self):
         """Save current configuration as a new template."""
