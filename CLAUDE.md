@@ -139,3 +139,9 @@ The application has been refactored from a single large file into a modular stru
   * Verify fixes work for all edge cases (first-time users, existing users, config deletion scenarios)
   * Never assume initial analysis is correct - use systematic investigation to verify root cause
   * Document exact sequence of events leading to failure for future reference
+
+- **mandatory git commit routine**
+  * Before writing code you should always make a new version and commit it to git with comments on what you are about to do. 
+  * After making changes the user must get an oportunity to do testruns. 
+  * If and when user says that changes works, you should do a new commit, with comments reflecting the successful code change. 
+  * Never write comments about successful revisions unless the user has done test runs. 

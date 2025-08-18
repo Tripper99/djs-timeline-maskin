@@ -61,6 +61,50 @@
   - [ ] Locked Excel file scenarios
   - [ ] Invalid configuration recovery
 
+## CRITICAL - Lost Implementations to Restore
+
+### 1. **Template Management System (v2.4.0) - LOST, MUST RE-IMPLEMENT**
+**Status**: ❌ Complete implementation lost due to git rollback without commit
+**Original Achievement**: Full template save/load system for field configurations was completed but never committed
+
+**Lost Features to Restore**:
+- **Template Infrastructure**: Professional template manager with JSON storage in `%APPDATA%/DJs Timeline Machine/templates/`
+- **Template Save Dialog**: 450x350 professional interface with name validation, description, and field preview
+- **Template Controls Integration**: Clean toolbar with dropdown, load/save/reset/delete buttons + help button
+- **UI Layout Improvements**: Restructured dialog with enhanced header, compact field sections, removed warning clutter
+- **Space Optimization**: ~150px vertical space saved through compact layouts and professional design
+- **Swedish UI**: Complete Swedish language support throughout template system
+- **Architecture**: Clean separation with TemplateManager, TemplateSaveDialog, and enhanced FieldConfigDialog
+- **Error Handling**: Comprehensive confirmations for destructive operations and template file management
+
+**Implementation Requirements**:
+- TemplateManager class for JSON template storage/loading
+- TemplateSaveDialog with professional 450x350 interface
+- Template dropdown integration in field configuration dialog
+- Load/Save/Reset/Delete template buttons with Swedish labels
+- Template validation (name, description, field preview)
+- %APPDATA% directory management for template storage
+
+### 2. **Field Name Uniqueness Validation (v2.4.1) - LOST, MUST RE-IMPLEMENT**
+**Status**: ❌ Complete validation system lost due to git rollback without commit
+**Original Achievement**: Comprehensive real-time validation system was completed but never committed
+
+**Lost Features to Restore**:
+- **Real-time Validation**: Context updating for uniqueness checking during field name entry
+- **Save-time Validation**: Comprehensive validation with Swedish error dialogs before applying changes
+- **Validation Error Dialog**: Professional error display with specific field conflict information
+- **Enhanced Validator**: Updated core/field_validator.py with uniqueness checking capabilities
+- **User Feedback**: Clear Swedish error messages for field name conflicts
+
+**Implementation Requirements**:
+- Real-time validation context updating in field configuration dialog (lines 441-443)
+- Comprehensive save-time validation in _show_validation_error_dialog method
+- Enhanced field_validator.py with current_names context management
+- Swedish error messages for duplicate field name detection
+- Integration with existing field configuration dialog validation workflow
+
+**Root Cause of Loss**: Failed to follow versioning protocol - should have committed v2.4.0 and v2.4.1 before investigating lock button issue. Git rollback during debugging destroyed uncommitted work.
+
 ## Current Bugs to Fix
 
 ### 1. Custom Field Names Not Displaying in UI (v2.3.0) ✅ **FIXED in v2.3.3**
@@ -76,10 +120,10 @@
 
 **Result**: Custom field names now persist correctly and display immediately in main UI after Apply.
 
-### 2. Font Size Bug - Händelse Only (v2.3.3)
+### 2. Font Size Bug - Händelse Only ✅ **FIXED**
 **Problem**: All font size change buttons only affect Händelse field, not Note1-3 fields.
-**Expected**: Font size buttons should change text size in all text fields (Händelse, Note1, Note2, Note3).
-**Impact**: Users cannot adjust font size for note fields, reducing usability for longer text entry.
+**Solution**: Font size buttons now correctly change text size in all text fields (Händelse, Note1, Note2, Note3).
+**Status**: Fixed - Users can now adjust font size for all note fields.
 
 ## Future Improvements
 
@@ -148,3 +192,9 @@
   - [x] Removed config deletion from field configuration apply process
   - [x] Added comprehensive debug logging for custom field name data flow
   - [x] Verified fix works for both first-time and existing users
+- [x] **Lock Buttons Missing Bug Fix (v2.4.2)**:
+  - [x] Fixed critical bug where all lock buttons (🔒 checkboxes) disappeared from main window Excel fields
+  - [x] Identified root cause: ExcelFieldManager created before lock_vars were initialized
+  - [x] Reordered initialization sequence to ensure proper timing dependency
+  - [x] Modified layout_manager.py to support delayed Excel field creation pattern
+  - [x] Verified all 17 lock buttons now appear correctly and function properly

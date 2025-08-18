@@ -4,6 +4,49 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.4.2 Lock Buttons Missing Bug Fix (2025-08-17) - Critical Bug Fix ✅
+**Achievement**: Fixed critical bug where all lock buttons (🔒 checkboxes) disappeared from main window Excel fields due to initialization timing issue.
+
+**Problem Solved**:
+- **Bug Report**: All lock buttons missing from main window Excel fields after implementing Field Name Uniqueness validation
+- **User Impact**: Lock functionality completely broken, unable to lock field values during PDF processing
+- **Investigation**: Systematic git rollback from v2.4.1 → v2.3.1 to identify exact regression point
+
+**Root Cause Analysis**:
+- **Timing Issue**: `ExcelFieldManager` created before `lock_vars` were initialized in application startup sequence
+- **Logic Failure**: Excel field creation checks `has_lock = col_name in self.parent.lock_vars` but lock_vars was empty/nonexistent
+- **Architecture Change**: Dynamic lock_vars initialization (v2.3.2+) vs hardcoded initialization (v2.3.1) created dependency ordering problem
+
+**Technical Solution Implemented**:
+- **Initialization Reordering**: Moved ExcelFieldManager creation AFTER lock_vars initialization
+- **GUI Setup Modification**: Modified layout_manager.py to support delayed Excel field creation pattern
+- **Sequence Fix**: Custom field loading → root window creation → lock_vars init → ExcelFieldManager → Excel fields creation
+- **Conditional Creation**: Added safety check in layout manager to skip Excel field creation if manager doesn't exist yet
+
+**Code Changes**:
+```python
+# OLD (broken) sequence:
+self.excel_field_manager = ExcelFieldManager(self)  # lock_vars doesn't exist yet
+self._initialize_lock_vars()  # too late
+
+# NEW (fixed) sequence:  
+self._initialize_lock_vars()  # create lock_vars first
+self.excel_field_manager = ExcelFieldManager(self)  # now has access to lock_vars
+```
+
+**Files Modified**:
+- **gui/main_window.py**: Reordered initialization sequence, moved ExcelFieldManager creation after lock_vars setup
+- **gui/layout_manager.py**: Added conditional Excel field creation to support delayed initialization pattern
+- **utils/constants.py**: Updated version to v2.4.2
+
+**Development Process Insights**:
+- **Systematic Debugging**: Used git rollback strategy to isolate exact regression commit
+- **User Feedback**: User confirmed lock buttons worked "earlier this evening", providing critical timeline
+- **Regression Testing**: Methodical testing of each git commit to find last working version
+- **Architectural Understanding**: Identified fundamental timing dependency between components
+
+**Result**: All 17 lock buttons (🔒 checkboxes) now appear correctly next to Excel field labels and function properly for locking field values during PDF processing workflows.
+
 ### v2.3.3 Field Names Display Bug Fix (2025-08-17) - Critical Bug Fix ✅
 **Achievement**: Fixed critical bug where custom field names were saved correctly but not displayed in main UI after applying changes.
 
