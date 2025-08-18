@@ -258,7 +258,6 @@ class FieldConfigDialog:
             field_frame,
             text=label_text,
             font=ctk.CTkFont(size=11, weight="bold"),
-            width=100,
             anchor="w"
         )
         field_label.grid(row=0, column=0, padx=(10, 5), pady=8, sticky="w")
@@ -294,8 +293,7 @@ class FieldConfigDialog:
                 field_frame,
                 text="0/13",
                 font=ctk.CTkFont(size=10),
-                text_color="gray50",
-                width=40
+                text_color="gray50"
             )
             char_label.grid(row=0, column=2, padx=5, pady=8)
             self.char_count_labels[field_id] = char_label
@@ -304,8 +302,7 @@ class FieldConfigDialog:
             icon_label = ctk.CTkLabel(
                 field_frame,
                 text="⚪",
-                font=ctk.CTkFont(size=14),
-                width=20
+                font=ctk.CTkFont(size=14)
             )
             icon_label.grid(row=0, column=3, padx=5, pady=8)
             self.validation_icons[field_id] = icon_label
@@ -315,7 +312,6 @@ class FieldConfigDialog:
             hide_checkbox = ctk.CTkCheckBox(
                 field_frame,
                 text="Dölj",
-                width=60,
                 command=lambda fid=field_id: self._on_hide_checkbox_changed(fid)
             )
             hide_checkbox.grid(row=0, column=4, padx=(5, 10), pady=8)
@@ -481,10 +477,9 @@ class FieldConfigDialog:
         }
 
         # Get custom field names
-        for field_id, entry in self.field_entries.items():
-            custom_name = entry.get().strip() if hasattr(entry, 'get') else ""
-            if custom_name and custom_name != field_manager.get_default_display_name(field_id):
-                field_config['custom_names'][field_id] = custom_name
+        for field_id, value in self.current_values.items():
+            if value.strip():
+                field_config['custom_names'][field_id] = value.strip()
 
         # Save the template
         try:
