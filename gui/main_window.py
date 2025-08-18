@@ -406,7 +406,7 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
 
             # Create lock variables for all lockable fields (all except 'dag' and 'inlagd')
             field_mappings = []
-            for field_id, field_def in FIELD_DEFINITIONS.items():
+            for field_id, _field_def in FIELD_DEFINITIONS.items():
                 # Skip fields that shouldn't have locks
                 if field_id in ['dag', 'inlagd']:
                     continue

@@ -24,10 +24,10 @@ class FieldStateManager:
     def can_hide_field(self, field_id: str) -> bool:
         """
         Check if a field can be hidden.
-        
+
         Args:
             field_id: Internal field identifier
-            
+
         Returns:
             True if field can be hidden, False otherwise
         """
@@ -36,12 +36,12 @@ class FieldStateManager:
     def hide_field(self, field_id: str, current_value: str = "", current_format: any = None) -> bool:
         """
         Hide a field while preserving its data.
-        
+
         Args:
             field_id: Internal field identifier
             current_value: Current field value to preserve
             current_format: Current format data (for rich text fields)
-            
+
         Returns:
             True if field was hidden, False if field cannot be hidden
         """
@@ -66,10 +66,10 @@ class FieldStateManager:
     def show_field(self, field_id: str) -> tuple[str, any]:
         """
         Show a field and return any preserved data.
-        
+
         Args:
             field_id: Internal field identifier
-            
+
         Returns:
             Tuple of (preserved_value, preserved_format) or ("", None) if no data
         """
@@ -88,10 +88,10 @@ class FieldStateManager:
     def is_field_hidden(self, field_id: str) -> bool:
         """
         Check if a field is currently hidden.
-        
+
         Args:
             field_id: Internal field identifier
-            
+
         Returns:
             True if field is hidden, False otherwise
         """
@@ -100,10 +100,10 @@ class FieldStateManager:
     def is_field_visible(self, field_id: str) -> bool:
         """
         Check if a field is currently visible.
-        
+
         Args:
             field_id: Internal field identifier
-            
+
         Returns:
             True if field is visible, False otherwise
         """
@@ -112,7 +112,7 @@ class FieldStateManager:
     def get_hidden_fields(self) -> List[str]:
         """
         Get list of currently hidden field IDs.
-        
+
         Returns:
             List of hidden field IDs
         """
@@ -121,10 +121,10 @@ class FieldStateManager:
     def get_visible_fields(self, all_fields: List[str]) -> List[str]:
         """
         Get list of visible field IDs from a list of all fields.
-        
+
         Args:
             all_fields: List of all field IDs in order
-            
+
         Returns:
             List of visible field IDs maintaining original order
         """
@@ -133,7 +133,7 @@ class FieldStateManager:
     def set_hidden_fields(self, hidden_fields: List[str]) -> None:
         """
         Set the hidden fields from a list (e.g., from config or template).
-        
+
         Args:
             hidden_fields: List of field IDs to hide
         """
@@ -151,10 +151,10 @@ class FieldStateManager:
     def get_preserved_data(self, field_id: str) -> Optional[str]:
         """
         Get preserved data for a hidden field without showing it.
-        
+
         Args:
             field_id: Internal field identifier
-            
+
         Returns:
             Preserved value or None if no data preserved
         """
@@ -163,7 +163,7 @@ class FieldStateManager:
     def clear_preserved_data(self, field_id: str = None) -> None:
         """
         Clear preserved data for a field or all fields.
-        
+
         Args:
             field_id: Specific field to clear, or None to clear all
         """
@@ -184,7 +184,7 @@ class FieldStateManager:
     def get_state_dict(self) -> Dict:
         """
         Get current state as dictionary for saving.
-        
+
         Returns:
             Dictionary containing hidden fields and preserved data
         """
@@ -197,7 +197,7 @@ class FieldStateManager:
     def load_state_dict(self, state: Dict) -> None:
         """
         Load state from dictionary.
-        
+
         Args:
             state: Dictionary containing hidden fields and preserved data
         """

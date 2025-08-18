@@ -126,9 +126,9 @@ Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamn
             ws = wb.active
             ws.title = "Timeline"
 
-            # Get current field display names (may be custom names)
+            # Get current field display names (may be custom names) - only visible fields
             from core.field_definitions import field_manager
-            headers = field_manager.get_all_display_names()
+            headers = field_manager.get_visible_display_names()
 
             # Add headers to first row
             for col_idx, header in enumerate(headers, 1):

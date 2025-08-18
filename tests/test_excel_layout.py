@@ -111,7 +111,7 @@ class TestExcelLayout:
         print("DEBUG: Toolbar frame placed at row=1, sticky='nw', pady=(2, 2)")
 
         # Add some dummy toolbar buttons
-        for i, color in enumerate(["blue", "red", "green"]):
+        for _i, color in enumerate(["blue", "red", "green"]):
             btn = ctk.CTkButton(toolbar_frame, text="B", width=30, height=25, fg_color=color)
             btn.pack(side="left", padx=2)
 

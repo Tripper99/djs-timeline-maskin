@@ -28,7 +28,7 @@ class TemplateManager:
     def _get_templates_directory(self) -> Path:
         """
         Get the templates directory path.
-        
+
         Returns:
             Path to templates directory
         """
@@ -81,7 +81,7 @@ class TemplateManager:
     def list_templates(self) -> List[str]:
         """
         Get list of available template names.
-        
+
         Returns:
             List of template names (without .json extension)
         """
@@ -103,12 +103,12 @@ class TemplateManager:
     def save_template(self, name: str, field_config: Dict, description: str = "") -> bool:
         """
         Save a field configuration as a template.
-        
+
         Args:
             name: Template name
             field_config: Dictionary with custom_names and hidden_fields
             description: Optional template description
-            
+
         Returns:
             True if saved successfully, False otherwise
         """
@@ -162,10 +162,10 @@ class TemplateManager:
     def load_template(self, name: str) -> Optional[Dict]:
         """
         Load a template by name.
-        
+
         Args:
             name: Template name
-            
+
         Returns:
             Template configuration dictionary or None if not found/invalid
         """
@@ -197,10 +197,10 @@ class TemplateManager:
     def delete_template(self, name: str) -> bool:
         """
         Delete a template.
-        
+
         Args:
             name: Template name
-            
+
         Returns:
             True if deleted successfully, False otherwise
         """
@@ -233,10 +233,10 @@ class TemplateManager:
     def get_template_info(self, name: str) -> Optional[Dict]:
         """
         Get template metadata without loading full configuration.
-        
+
         Args:
             name: Template name
-            
+
         Returns:
             Template metadata or None if not found
         """
@@ -262,10 +262,10 @@ class TemplateManager:
     def _validate_template_name(self, name: str) -> bool:
         """
         Validate template name.
-        
+
         Args:
             name: Template name to validate
-            
+
         Returns:
             True if valid, False otherwise
         """
@@ -287,10 +287,10 @@ class TemplateManager:
     def _validate_template_config(self, config: Dict) -> bool:
         """
         Validate template configuration structure.
-        
+
         Args:
             config: Configuration dictionary to validate
-            
+
         Returns:
             True if valid, False otherwise
         """
@@ -324,10 +324,10 @@ class TemplateManager:
     def _validate_loaded_template(self, template_data: Dict) -> bool:
         """
         Validate loaded template data.
-        
+
         Args:
             template_data: Full template data from file
-            
+
         Returns:
             True if valid, False otherwise
         """
@@ -344,11 +344,11 @@ class TemplateManager:
     def export_template(self, name: str, export_path: Path) -> bool:
         """
         Export a template to a specific location.
-        
+
         Args:
             name: Template name
             export_path: Path where to export the template
-            
+
         Returns:
             True if exported successfully, False otherwise
         """
@@ -370,11 +370,11 @@ class TemplateManager:
     def import_template(self, import_path: Path, new_name: Optional[str] = None) -> bool:
         """
         Import a template from a file.
-        
+
         Args:
             import_path: Path to template file to import
             new_name: Optional new name for the template
-            
+
         Returns:
             True if imported successfully, False otherwise
         """
