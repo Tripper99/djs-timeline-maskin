@@ -4,6 +4,44 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.5.7 Field Disabling Persistence Bug Fix (2025-08-18) - Startup Initialization Synchronization ✅
+**Achievement**: Fixed critical bug where field disabled states were not restored after app restart, despite being correctly saved to configuration.
+
+**Problem Identified**:
+**Issue**: Field disabled states were saved correctly and displayed correctly in field configuration dialog, but main window showed all fields as enabled after restart.
+
+**Root Cause Analysis (bug-finder-debugger agent)**:
+- **Discovery**: Application uses dual manager system for field state management
+- **field_manager**: Handles field names and basic state tracking
+- **field_state_manager**: Handles UI state decisions and data preservation
+- **Critical Finding**: During app startup, only `field_manager` was initialized with disabled field data
+- **Missing Synchronization**: `field_state_manager` remained in default state (no disabled fields)
+
+**Architecture Validation (architecture-planner agent)**:
+- **Working Pattern Found**: Field config dialog correctly initializes BOTH managers (field_config_dialog.py:374)
+- **Broken Pattern**: Main window only initialized field_manager (main_window.py:383)
+- **Pattern Consistency**: Application consistently keeps both managers synchronized everywhere except startup
+- **Risk Assessment**: Single line addition following proven pattern - minimal risk
+
+**Technical Implementation**:
+- **File Modified**: `gui/main_window.py`
+- **Line Added**: 385 - `field_state_manager.set_disabled_fields(hidden_fields)`
+- **Import Added**: `from core.field_state_manager import field_state_manager`
+- **Pattern Match**: Identical to working implementation in field_config_dialog.py
+
+**Results Achieved**:
+- ✅ **Persistence Fixed**: Disabled fields now correctly restore their state after restart
+- ✅ **Data Flow Complete**: Both managers synchronized during startup
+- ✅ **UI Consistency**: Main window and config dialog now behave identically
+- ✅ **Minimal Impact**: Single line fix with no side effects
+- ✅ **User Verified**: Tested and confirmed working by user
+
+**Development Excellence**:
+- **Systematic Investigation**: Used specialized sub-agents for thorough root cause analysis
+- **Architectural Understanding**: Identified exact failure point in dual manager system
+- **Safe Implementation**: Followed proven pattern from working code
+- **Version Control**: Created backup commit before implementation as required
+
 ### v2.5.6 Font Size Button System Fix (2025-08-18) - Complete Font Size Control Restoration ✅
 **Achievement**: Successfully resolved font size button issues using systematic sub-agent investigation and architectural analysis, restoring complete font size control functionality across all text fields.
 

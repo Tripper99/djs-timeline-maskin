@@ -179,6 +179,17 @@
 - Added comprehensive error handling and debug logging
 **Status**: ✅ COMPLETED
 
+#### 4.5 Field Disabling Persistence Bug ✅ **FIXED in v2.5.7**
+**Problem**: Field disabled states not restored after app restart despite being saved correctly to config.
+**Root Cause**: Dual manager system where `field_state_manager` was not initialized during app startup.
+**Investigation**: Used bug-finder-debugger and architecture-planner sub-agents for systematic analysis.
+**Solution**: 
+- Added missing `field_state_manager.set_disabled_fields(hidden_fields)` in main_window.py:385
+- Synchronized both field_manager and field_state_manager during startup
+- Single line fix following proven pattern from field_config_dialog.py
+**Result**: Disabled fields now correctly persist and restore their state after app restart.
+**Status**: ✅ COMPLETED
+
 ## Future Improvements
 
 ### 4. Consider async operations for file processing

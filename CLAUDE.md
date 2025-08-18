@@ -8,9 +8,9 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.5.6)
+## Current Status (v2.5.7)
 
-**Latest Achievement (v2.5.6)**: Successfully resolved font size button issues using systematic sub-agent investigation. Implemented dynamic field name resolution to restore complete font size control functionality. The A+ button now appears only on Händelse field but correctly affects ALL text fields (Händelse, Note1, Note2, Note3) regardless of field renaming, achieving clean UI design with full functionality restoration.
+**Latest Achievement (v2.5.7)**: Fixed critical field disabling persistence bug where disabled fields were not restored after app restart. Used systematic sub-agent investigation to identify missing synchronization between dual manager system (field_manager and field_state_manager) during startup. Single-line fix following proven pattern from field configuration dialog restored complete persistence functionality.
 
 **Key Features**:
 - **Field Protection Consistency**: Källa field now protected like Startdatum and Händelse (cannot be renamed or disabled)
