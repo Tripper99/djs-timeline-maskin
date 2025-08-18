@@ -545,8 +545,12 @@ class FieldConfigDialog:
             self.validation_errors.pop(field_id, None)
             return
 
-        # Get validation feedback
-        feedback = realtime_validator.get_instant_feedback(value, field_id)
+        # Get validation feedback with live context for real-time duplicate detection
+        feedback = realtime_validator.get_instant_feedback_with_context(
+            name=value,
+            original_name=field_id,
+            current_context=self.current_values
+        )
 
         # Update icon and colors
         if feedback['is_valid']:

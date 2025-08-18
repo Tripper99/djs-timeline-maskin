@@ -42,8 +42,14 @@ class FieldNameValidator:
     def __init__(self):
         self.current_names: Set[str] = set()
 
-    def validate_single_name(self, name: str, original_name: str = None) -> List[ValidationResult]:
-        """Validate a single field name."""
+    def validate_single_name(self, name: str, original_name: str = None, context_names: set = None) -> List[ValidationResult]:
+        """Validate a single field name.
+
+        Args:
+            name: The field name to validate
+            original_name: The original field name (for edit operations)
+            context_names: Optional set of current field names for real-time duplicate checking
+        """
         results = []
 
         # Empty name check
@@ -97,7 +103,9 @@ class FieldNameValidator:
             ))
 
         # Duplicate validation (exclude the current field being edited)
-        if name in self.current_names and name != original_name:
+        # Use context_names if provided (for real-time validation), otherwise use stored current_names
+        names_to_check = context_names if context_names is not None else self.current_names
+        if name in names_to_check and name != original_name:
             results.append(ValidationResult(
                 ValidationLevel.ERROR,
                 f"Fältnamn redan använt: {name}",
@@ -231,6 +239,41 @@ class RealTimeValidator:
     def get_instant_feedback(self, name: str, original_name: str = None) -> Dict[str, any]:
         """Get instant validation feedback for UI styling."""
         results = self.validator.validate_single_name(name, original_name)
+
+        has_errors = any(r.level == ValidationLevel.ERROR for r in results)
+        has_warnings = any(r.level == ValidationLevel.WARNING for r in results)
+
+        feedback = {
+            'is_valid': not has_errors,
+            'has_warnings': has_warnings,
+            'color': 'red' if has_errors else ('orange' if has_warnings else 'green'),
+            'messages': [r.message for r in results],
+            'suggestions': [r.suggestion for r in results if r.suggestion],
+            'char_count': len(name),
+            'char_limit': FieldNameValidator.MAX_LENGTH
+        }
+
+        return feedback
+
+    def get_instant_feedback_with_context(self, name: str, original_name: str = None,
+                                        current_context: Dict[str, str] = None) -> Dict[str, any]:
+        """Get instant validation feedback with real-time context for duplicate detection.
+
+        Args:
+            name: The field name to validate
+            original_name: The original field name (for edit operations)
+            current_context: Dict of all current field values for real-time duplicate checking
+        """
+        # Build context names set from current values (exclude empty values)
+        context_names = set()
+        if current_context:
+            for field_id, field_value in current_context.items():
+                if field_value and field_value.strip():
+                    # Don't include the field being edited in the context
+                    if field_id != original_name:
+                        context_names.add(field_value.strip())
+
+        results = self.validator.validate_single_name(name, original_name, context_names)
 
         has_errors = any(r.level == ValidationLevel.ERROR for r in results)
         has_warnings = any(r.level == ValidationLevel.WARNING for r in results)
