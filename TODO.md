@@ -1,5 +1,13 @@
 # TODO List - DJs Timeline-maskin
 
+## Completed - Recent Bug Fixes
+
+### v2.5.10 Field Styling Bug Fix ✅ (2025-08-19)
+- [x] Fixed critical disabled field styling bug where CTkEntry widgets appeared white instead of gray
+- [x] Root cause: Flawed widget type detection using hasattr() instead of isinstance()
+- [x] Solution: Implemented proper class-based widget detection hierarchy
+- [x] Result: All disabled CTkEntry widgets now display correct gray background (#E8E8E8)
+
 ## High Priority - Code Quality
 
 ### 1. Split main_window.py into smaller, focused modules ✅

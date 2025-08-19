@@ -8,9 +8,9 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.5.9)
+## Current Status (v2.5.10)
 
-**Latest Achievement (v2.5.9)**: Successfully resolved all field configuration dialog alignment issues through complete architectural redesign. Implemented fixed-width container architecture achieving pixel-perfect field alignment - all entry fields now have uniform width and position regardless of field type (protected, required, editable) or label length. Revolutionary solution using transparent container frames with modular helper methods provides maintainable, future-proof layout system.
+**Latest Achievement (v2.5.10)**: Fixed critical disabled field styling bug where CTkEntry widgets appeared with white backgrounds instead of expected gray styling. Root cause was flawed widget type detection logic using method-based checks (hasattr) instead of proper isinstance checks. CTkEntry widgets were being misidentified as text widgets due to shared methods. Implemented proper class-based widget detection hierarchy ensuring CTkEntry widgets receive correct fg_color styling while Text widgets continue using bg parameter styling.
 
 **Key Features**:
 - **Field Protection Consistency**: Källa field now protected like Startdatum and Händelse (cannot be renamed or disabled)
