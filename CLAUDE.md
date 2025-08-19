@@ -101,3 +101,4 @@ The application has been refactored from a single large file into a modular stru
   * If and when user says that changes works, you should do a new commit, with comments reflecting the successful code change. 
   * Never write comments about successful revisions unless the user has done test runs. 
 - When presenting a plan for code change always start the plan with saving of new version and git commit. The reason for this is that user can't approav plan if he is not sure that you will remember the backup procedure.
+- When saving a new version of project never use the old version number (e.g v2.5.11) with added text like "fix" och with an added explanation of what was done (e.g "v2.5.11-template-readability". **Always** use a new version number. Information about what changes has been done (or what changes that are planned to be done) should be added as comment to the git commit.
