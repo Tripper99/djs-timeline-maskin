@@ -22,7 +22,8 @@
       "Bash(del test_ctktextbox.py)",
       "Bash(rm:*)",
       "Bash(cp:*)",
-      "Bash(pip install:*)"
+      "Bash(pip install:*)",
+      "Bash(echo $env:APPDATA)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",
