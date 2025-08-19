@@ -224,87 +224,213 @@ class FieldConfigDialog:
             row += 1
 
     def _create_field_row(self, parent, field_id: str, row: int, column: int):
-        """Create a single field row with all controls."""
+        """Create a single field row with fixed-width container architecture for uniform alignment."""
         field_def = FIELD_DEFINITIONS[field_id]
 
-        # Field container frame
+        # Main field container frame
         field_frame = ctk.CTkFrame(parent)
         field_frame.grid(row=row, column=column, sticky="ew", padx=10, pady=2)
-        # Standardized grid system for consistent field widths
-        field_frame.grid_columnconfigure(0, minsize=120, weight=0)  # Label - fixed
-        field_frame.grid_columnconfigure(1, minsize=200, weight=1)  # Entry - expandable
-        field_frame.grid_columnconfigure(2, minsize=50, weight=0)   # Counter - fixed
-        field_frame.grid_columnconfigure(3, minsize=30, weight=0)   # Icon - fixed
-        field_frame.grid_columnconfigure(4, minsize=80, weight=0)   # Checkbox - fixed
+        field_frame.grid_propagate(False)  # Prevent container from resizing based on contents
 
-        # Field label
+        # Create fixed-width container frames for each column
+        containers = self._create_fixed_width_containers(field_frame)
+
+        # Determine field type and create appropriate components
+        if field_def.protected:
+            self._create_protected_field_components(containers, field_id, field_def)
+        elif field_id in REQUIRED_ENABLED_FIELDS:
+            self._create_required_field_components(containers, field_id, field_def)
+        else:
+            self._create_editable_field_components(containers, field_id, field_def)
+
+    def _create_fixed_width_containers(self, parent_frame):
+        """Create fixed-width container frames for uniform column alignment."""
+        containers = {}
+
+        # Column 0: Label container (140px)
+        label_container = ctk.CTkFrame(parent_frame, fg_color="transparent")
+        label_container.grid(row=0, column=0, sticky="nsw", padx=0, pady=0)
+        label_container.grid_propagate(False)
+        label_container.configure(width=140, height=40)
+        containers['label'] = label_container
+
+        # Column 1: Entry container (250px)
+        entry_container = ctk.CTkFrame(parent_frame, fg_color="transparent")
+        entry_container.grid(row=0, column=1, sticky="nsw", padx=0, pady=0)
+        entry_container.grid_propagate(False)
+        entry_container.configure(width=250, height=40)
+        containers['entry'] = entry_container
+
+        # Column 2: Counter container (55px)
+        counter_container = ctk.CTkFrame(parent_frame, fg_color="transparent")
+        counter_container.grid(row=0, column=2, sticky="nsw", padx=0, pady=0)
+        counter_container.grid_propagate(False)
+        counter_container.configure(width=55, height=40)
+        containers['counter'] = counter_container
+
+        # Column 3: Icon container (35px)
+        icon_container = ctk.CTkFrame(parent_frame, fg_color="transparent")
+        icon_container.grid(row=0, column=3, sticky="nsw", padx=0, pady=0)
+        icon_container.grid_propagate(False)
+        icon_container.configure(width=35, height=40)
+        containers['icon'] = icon_container
+
+        # Column 4: Checkbox container (85px)
+        checkbox_container = ctk.CTkFrame(parent_frame, fg_color="transparent")
+        checkbox_container.grid(row=0, column=4, sticky="nsw", padx=0, pady=0)
+        checkbox_container.grid_propagate(False)
+        checkbox_container.configure(width=85, height=40)
+        containers['checkbox'] = checkbox_container
+
+        # Configure parent frame columns to use fixed widths
+        parent_frame.grid_columnconfigure(0, weight=0, minsize=140)
+        parent_frame.grid_columnconfigure(1, weight=0, minsize=250)
+        parent_frame.grid_columnconfigure(2, weight=0, minsize=55)
+        parent_frame.grid_columnconfigure(3, weight=0, minsize=35)
+        parent_frame.grid_columnconfigure(4, weight=0, minsize=85)
+
+        return containers
+
+    def _create_protected_field_components(self, containers, field_id: str, field_def):
+        """Create components for protected fields (label + disabled entry only)."""
         display_name = field_def.default_display_name
-        label_text = f"{display_name}:"
 
+        # Field label in label container
+        label_text = f"{display_name}:"
         field_label = ctk.CTkLabel(
-            field_frame,
+            containers['label'],
             text=label_text,
             font=ctk.CTkFont(size=11, weight="bold"),
             anchor="w"
         )
-        field_label.grid(row=0, column=0, padx=(10, 5), pady=8, sticky="w")
+        field_label.pack(side="left", padx=(10, 5), pady=8, fill="y")
 
-        # Input field or protected field display
-        if field_def.protected:
-            # Protected field - greyed out display
-            protected_entry = ctk.CTkEntry(
-                field_frame,
-                placeholder_text=display_name,
-                font=ctk.CTkFont(size=12),
-                state="disabled",
-                fg_color="gray90",
-                width=300
-            )
-            protected_entry.grid(row=0, column=1, padx=5, pady=8, sticky="ew")
-        else:
-            # Editable field
-            entry = ctk.CTkEntry(
-                field_frame,
-                placeholder_text="Ange nytt namn...",
-                font=ctk.CTkFont(size=12),
-                width=300
-            )
-            entry.grid(row=0, column=1, padx=5, pady=8, sticky="ew")
+        # Protected entry in entry container
+        protected_entry = ctk.CTkEntry(
+            containers['entry'],
+            placeholder_text=display_name,
+            font=ctk.CTkFont(size=12),
+            state="disabled",
+            fg_color="gray90",
+            width=250  # Fixed width
+        )
+        protected_entry.pack(fill="both", expand=True, padx=5, pady=8)
 
-            # Bind validation events
-            entry.bind('<KeyRelease>', lambda e, fid=field_id: self._on_field_change(fid))
-            entry.bind('<FocusOut>', lambda e, fid=field_id: self._on_field_change(fid))
+        # Add invisible spacer frames for unused columns to maintain layout consistency
+        self._add_spacer_frame(containers['counter'])
+        self._add_spacer_frame(containers['icon'])
+        self._add_spacer_frame(containers['checkbox'])
 
-            self.field_entries[field_id] = entry
+    def _create_required_field_components(self, containers, field_id: str, field_def):
+        """Create components for required editable fields (no checkbox)."""
+        display_name = field_def.default_display_name
 
-            # Character counter (only for editable fields)
-            char_label = ctk.CTkLabel(
-                field_frame,
-                text="0/13",
-                font=ctk.CTkFont(size=10),
-                text_color="gray50"
-            )
-            char_label.grid(row=0, column=2, padx=5, pady=8)
-            self.char_count_labels[field_id] = char_label
+        # Field label in label container
+        label_text = f"{display_name}:"
+        field_label = ctk.CTkLabel(
+            containers['label'],
+            text=label_text,
+            font=ctk.CTkFont(size=11, weight="bold"),
+            anchor="w"
+        )
+        field_label.pack(side="left", padx=(10, 5), pady=8, fill="y")
 
-            # Validation icon
-            icon_label = ctk.CTkLabel(
-                field_frame,
-                text="⚪",
-                font=ctk.CTkFont(size=14)
-            )
-            icon_label.grid(row=0, column=3, padx=5, pady=8)
-            self.validation_icons[field_id] = icon_label
+        # Editable entry in entry container
+        entry = ctk.CTkEntry(
+            containers['entry'],
+            placeholder_text="Ange nytt namn...",
+            font=ctk.CTkFont(size=12),
+            width=250  # Fixed width
+        )
+        entry.pack(fill="both", expand=True, padx=5, pady=8)
 
-        # Hide checkbox (except for required fields)
-        if field_id not in REQUIRED_ENABLED_FIELDS:
-            hide_checkbox = ctk.CTkCheckBox(
-                field_frame,
-                text="Dölj",
-                command=lambda fid=field_id: self._on_hide_checkbox_changed(fid)
-            )
-            hide_checkbox.grid(row=0, column=4, padx=(5, 10), pady=8)
-            self.disable_checkboxes[field_id] = hide_checkbox
+        # Bind validation events
+        entry.bind('<KeyRelease>', lambda e, fid=field_id: self._on_field_change(fid))
+        entry.bind('<FocusOut>', lambda e, fid=field_id: self._on_field_change(fid))
+        self.field_entries[field_id] = entry
+
+        # Character counter in counter container
+        char_label = ctk.CTkLabel(
+            containers['counter'],
+            text="0/13",
+            font=ctk.CTkFont(size=10),
+            text_color="gray50"
+        )
+        char_label.pack(padx=5, pady=8, anchor="center")
+        self.char_count_labels[field_id] = char_label
+
+        # Validation icon in icon container
+        icon_label = ctk.CTkLabel(
+            containers['icon'],
+            text="⚪",
+            font=ctk.CTkFont(size=14)
+        )
+        icon_label.pack(padx=5, pady=8, anchor="center")
+        self.validation_icons[field_id] = icon_label
+
+        # Add invisible spacer frame for checkbox column
+        self._add_spacer_frame(containers['checkbox'])
+
+    def _create_editable_field_components(self, containers, field_id: str, field_def):
+        """Create components for fully editable fields (all components)."""
+        display_name = field_def.default_display_name
+
+        # Field label in label container
+        label_text = f"{display_name}:"
+        field_label = ctk.CTkLabel(
+            containers['label'],
+            text=label_text,
+            font=ctk.CTkFont(size=11, weight="bold"),
+            anchor="w"
+        )
+        field_label.pack(side="left", padx=(10, 5), pady=8, fill="y")
+
+        # Editable entry in entry container
+        entry = ctk.CTkEntry(
+            containers['entry'],
+            placeholder_text="Ange nytt namn...",
+            font=ctk.CTkFont(size=12),
+            width=250  # Fixed width
+        )
+        entry.pack(fill="both", expand=True, padx=5, pady=8)
+
+        # Bind validation events
+        entry.bind('<KeyRelease>', lambda e, fid=field_id: self._on_field_change(fid))
+        entry.bind('<FocusOut>', lambda e, fid=field_id: self._on_field_change(fid))
+        self.field_entries[field_id] = entry
+
+        # Character counter in counter container
+        char_label = ctk.CTkLabel(
+            containers['counter'],
+            text="0/13",
+            font=ctk.CTkFont(size=10),
+            text_color="gray50"
+        )
+        char_label.pack(padx=5, pady=8, anchor="center")
+        self.char_count_labels[field_id] = char_label
+
+        # Validation icon in icon container
+        icon_label = ctk.CTkLabel(
+            containers['icon'],
+            text="⚪",
+            font=ctk.CTkFont(size=14)
+        )
+        icon_label.pack(padx=5, pady=8, anchor="center")
+        self.validation_icons[field_id] = icon_label
+
+        # Hide checkbox in checkbox container
+        hide_checkbox = ctk.CTkCheckBox(
+            containers['checkbox'],
+            text="Dölj",
+            command=lambda fid=field_id: self._on_hide_checkbox_changed(fid)
+        )
+        hide_checkbox.pack(padx=(5, 10), pady=8, anchor="center")
+        self.disable_checkboxes[field_id] = hide_checkbox
+
+    def _add_spacer_frame(self, container):
+        """Add invisible spacer frame to maintain layout consistency."""
+        spacer = ctk.CTkFrame(container, fg_color="transparent", width=1, height=1)
+        spacer.pack(fill="both", expand=True)
 
     def _create_footer(self):
         """Create dialog footer with action buttons."""
