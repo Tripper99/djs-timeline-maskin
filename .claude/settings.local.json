@@ -23,7 +23,10 @@
       "Bash(rm:*)",
       "Bash(cp:*)",
       "Bash(pip install:*)",
-      "Bash(echo $env:APPDATA)"
+      "Bash(echo $env:APPDATA)",
+      "WebFetch(domain:customtkinter.tomschimansky.com)",
+      "WebSearch",
+      "WebFetch(domain:github.com)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",

@@ -14,14 +14,14 @@ logger = logging.getLogger(__name__)
 class FieldStyling:
     """Centralized field styling manager for disabled fields."""
 
-    # Disabled field color scheme
+    # Disabled field color scheme - Enhanced for better visibility
     DISABLED_COLORS = {
-        'entry_bg': '#F5F5F5',           # Light gray background for entries
-        'text_bg': '#F5F5F5',            # Light gray background for text fields
-        'text_color': '#888888',         # Dimmed text color
-        'border': '#D0D0D0',             # Muted border color
-        'checkbox_bg': '#F5F5F5',        # Disabled checkbox background
-        'label_color': '#888888',        # Dimmed label color
+        'entry_bg': '#E8E8E8',           # More noticeable gray background for entries
+        'text_bg': '#E8E8E8',            # More noticeable gray background for text fields
+        'text_color': '#666666',         # Darker dimmed text color for better contrast
+        'border': '#CCCCCC',             # More visible muted border color
+        'checkbox_bg': '#E8E8E8',        # Darker disabled checkbox background
+        'label_color': '#666666',        # Darker dimmed label color
     }
 
     # Enabled field colors (for reference and restoration)
@@ -38,6 +38,7 @@ class FieldStyling:
     def get_disabled_entry_style(cls) -> Dict[str, Any]:
         """
         Get styling configuration for disabled CTkEntry widgets.
+        Enhanced for better CustomTkinter compatibility.
 
         Returns:
             Dictionary of styling parameters for CTkEntry
@@ -47,8 +48,10 @@ class FieldStyling:
             'fg_color': cls.DISABLED_COLORS['entry_bg'],
             'text_color': cls.DISABLED_COLORS['text_color'],
             'border_color': cls.DISABLED_COLORS['border'],
-            'border_width': 1,
-            'corner_radius': 6
+            'border_width': 2,  # Slightly thicker border for disabled fields
+            'corner_radius': 6,
+            # Add explicit disabled color parameters for CustomTkinter
+            'placeholder_text_color': cls.DISABLED_COLORS['text_color']
         }
 
     @classmethod
@@ -186,12 +189,18 @@ class FieldStyling:
                 logger.warning(f"Unknown widget type for styling: {widget_type}")
                 return False
 
+            # Log the widget class and styling being applied for debugging
+            widget_class = widget.__class__.__name__
+            logger.info(f"Applying disabled styling to {widget_class} ({widget_type}): {style}")
+
             widget.configure(**style)
-            logger.debug(f"Applied disabled styling to {widget_type} widget")
+            logger.info(f"Successfully applied disabled styling to {widget_type} widget ({widget_class})")
             return True
 
         except Exception as e:
-            logger.error(f"Failed to apply disabled styling to {widget_type}: {e}")
+            widget_class = widget.__class__.__name__ if widget else "Unknown"
+            logger.error(f"Failed to apply disabled styling to {widget_type} ({widget_class}): {e}")
+            logger.error(f"Style attempted: {style if 'style' in locals() else 'N/A'}")
             return False
 
     @classmethod

@@ -905,3 +905,69 @@ class ExcelFieldManager:
                                           fg_color="#17a2b8", hover_color="#117a8b",
                                           font=ctk.CTkFont(size=13, weight="bold"))
         self.parent.new_excel_row_btn.pack(side="left", padx=(5, 0))
+
+    def refresh_field_styling(self):
+        """
+        Refresh the styling of existing fields based on current disabled state.
+        This is more efficient than recreating all fields.
+        """
+        try:
+            from core.field_definitions import FIELD_ORDER
+            disabled_field_ids = field_state_manager.get_disabled_fields()
+
+            logger.info(f"Refreshing field styling for {len(disabled_field_ids)} disabled fields")
+
+            # Iterate through all created fields and update their styling
+            for field_id in FIELD_ORDER:
+                is_field_disabled = field_id in disabled_field_ids
+                display_name = field_manager.get_display_name(field_id)
+
+                # Find the field widgets in parent's attributes
+                # Field entries are stored with display names as keys
+                if hasattr(self.parent, 'entries') and display_name in self.parent.entries:
+                    entry_widget = self.parent.entries[display_name]
+
+                    # Find associated label and checkbox
+                    field_widgets = {'input': entry_widget}
+
+                    # Look for label with matching text
+                    for child in self.parent.excel_fields_frame.winfo_children():
+                        if hasattr(child, 'winfo_children'):
+                            for grandchild in child.winfo_children():
+                                if (hasattr(grandchild, 'cget') and
+                                    hasattr(grandchild, 'configure') and
+                                    hasattr(grandchild, '_text')):  # CTkLabel
+                                    try:
+                                        label_text = grandchild.cget('text')
+                                        if label_text.rstrip(':') == display_name:
+                                            field_widgets['label'] = grandchild
+                                            break
+                                    except (AttributeError, TypeError):
+                                        pass
+
+                    # Look for associated checkbox (lock switch)
+                    if hasattr(self.parent, 'lock_vars') and display_name in self.parent.lock_vars:
+                        # Find checkbox widget associated with this lock_var
+                        for child in self.parent.excel_fields_frame.winfo_children():
+                            if hasattr(child, 'winfo_children'):
+                                for grandchild in child.winfo_children():
+                                    if (hasattr(grandchild, 'cget') and
+                                        hasattr(grandchild, 'configure') and
+                                        hasattr(grandchild, '_variable')):  # CTkCheckBox
+                                        try:
+                                            if grandchild.cget('variable') == self.parent.lock_vars[display_name]:
+                                                field_widgets['checkbox'] = grandchild
+                                                break
+                                        except (AttributeError, TypeError):
+                                            pass
+
+                    # Apply the appropriate styling
+                    apply_field_state(field_widgets, field_id, is_field_disabled)
+
+            logger.info("Field styling refresh completed")
+
+        except Exception as e:
+            logger.error(f"Failed to refresh field styling: {e}")
+            # Fall back to recreating fields if refresh fails
+            logger.info("Falling back to recreating Excel fields")
+            self.create_excel_fields()
