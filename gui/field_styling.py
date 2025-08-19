@@ -4,6 +4,7 @@ Provides consistent styling for disabled fields across the application.
 """
 
 import logging
+import tkinter as tk
 from typing import Any, Dict
 
 import customtkinter as ctk
@@ -254,14 +255,24 @@ class FieldStyling:
 
         # Style input widget if present
         if 'input' in field_widgets and field_widgets['input']:
-            # Determine input widget type
+            # Determine input widget type using isinstance checks
             widget = field_widgets['input']
-            if hasattr(widget, 'get') and hasattr(widget, 'insert'):
-                # Text widget (has get and insert methods)
+
+            # Check for CTkEntry first (most specific)
+            if isinstance(widget, ctk.CTkEntry):
+                widget_type = 'entry'
+            # Check for Text widget (including ScrollableText.text_widget)
+            elif isinstance(widget, tk.Text):
+                widget_type = 'text'
+            # Check for ScrollableText wrapper (access the text_widget inside)
+            elif hasattr(widget, 'text_widget') and isinstance(widget.text_widget, tk.Text):
+                widget = widget.text_widget  # Use the actual Text widget for styling
                 widget_type = 'text'
             else:
-                # Entry widget
-                widget_type = 'entry'
+                # Fallback for other widget types
+                logger.warning(f'Unknown input widget type: {widget.__class__.__name__}')
+                widget_type = 'entry'  # Default to entry styling
+
             style_function(widget, widget_type)
 
         # Style checkbox if present
