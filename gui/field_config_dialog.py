@@ -39,6 +39,8 @@ class FieldConfigDialog:
 
         # Template management
         self.current_template = "Standard"
+        self.template_name_label = None
+        self.is_template_modified = False
 
         # Field widgets storage
         self.field_entries: Dict[str, ctk.CTkEntry] = {}
@@ -151,6 +153,15 @@ class FieldConfigDialog:
             command=self._save_template_to_file
         )
         save_button.grid(row=0, column=1, padx=10, pady=15)
+
+        # Template name display
+        self.template_name_label = ctk.CTkLabel(
+            template_frame,
+            text="Aktuell mall: Standard",
+            font=ctk.CTkFont(size=12),
+            text_color="gray60"
+        )
+        self.template_name_label.grid(row=0, column=2, padx=15, pady=15)
 
         # Help button on right side
         help_button = ctk.CTkButton(
@@ -480,6 +491,10 @@ class FieldConfigDialog:
 
         logger.info(f"Config loading complete: {len(custom_names)} custom names, {len(disabled_fields)} disabled fields")
 
+        # Update template name display
+        self.is_template_modified = False  # Initial load is not a modification
+        self._update_template_name_display()
+
     def _load_template_from_file(self):
         """Load template configuration from a file dialog."""
         # Open file dialog for template selection
@@ -636,6 +651,24 @@ class FieldConfigDialog:
 
         # Update current template name for reference
         self.current_template = template_name
+        self.is_template_modified = False
+        self._update_template_name_display()
+
+    def _update_template_name_display(self):
+        """Update the template name display label."""
+        if not self.template_name_label:
+            return
+
+        base_text = f"Aktuell mall: {self.current_template}"
+
+        if self.is_template_modified:
+            display_text = f"{base_text} (ändrad)"
+            text_color = "#FF8C00"  # Orange to indicate modification
+        else:
+            display_text = base_text
+            text_color = "gray60"  # Normal gray
+
+        self.template_name_label.configure(text=display_text, text_color=text_color)
 
     def _on_field_change(self, field_id: str):
         """Handle field value changes."""
@@ -652,6 +685,10 @@ class FieldConfigDialog:
         self._update_field_validation(field_id)
         self._update_apply_button()
 
+        # Mark template as modified
+        self.is_template_modified = True
+        self._update_template_name_display()
+
     def _on_hide_checkbox_changed(self, field_id: str):
         """Handle hide checkbox changes."""
         checkbox = self.disable_checkboxes[field_id]
@@ -663,6 +700,10 @@ class FieldConfigDialog:
             self.current_disabled_fields.discard(field_id)
 
         logger.debug(f"Field {field_id} visibility changed: {'hidden' if is_checked else 'visible'}")
+
+        # Mark template as modified
+        self.is_template_modified = True
+        self._update_template_name_display()
 
     def _update_field_validation(self, field_id: str):
         """Update validation display for a specific field."""
