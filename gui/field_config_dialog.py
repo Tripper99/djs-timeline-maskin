@@ -4,7 +4,8 @@ Based on user mockup requirements with two-column layout and comprehensive templ
 """
 
 import logging
-from tkinter import messagebox
+from pathlib import Path
+from tkinter import filedialog, messagebox
 from typing import Callable, Dict, Optional
 
 import customtkinter as ctk
@@ -37,7 +38,6 @@ class FieldConfigDialog:
 
         # Template management
         self.current_template = "Standard"
-        self.template_dropdown = None
 
         # Field widgets storage
         self.field_entries: Dict[str, ctk.CTkEntry] = {}
@@ -129,62 +129,30 @@ class FieldConfigDialog:
         instruction_label.grid(row=1, column=0, pady=(0, 15))
 
     def _create_template_controls(self):
-        """Create template control row with dropdown and buttons."""
+        """Create template file dialog controls for loading and saving templates."""
         template_frame = ctk.CTkFrame(self.dialog)
         template_frame.grid(row=1, column=0, sticky="ew", padx=20, pady=10)
-        template_frame.grid_columnconfigure(5, weight=1)  # Spacer column
+        template_frame.grid_columnconfigure(2, weight=1)  # Spacer column
 
-        # Template dropdown
-        templates = template_manager.list_templates()
-        self.template_dropdown = ctk.CTkComboBox(
+        # Load template button
+        load_button = ctk.CTkButton(
             template_frame,
-            values=templates,
-            command=self._on_template_selected,
-            width=200,
-            state="readonly"
-        )
-        self.template_dropdown.grid(row=0, column=0, padx=(15, 10), pady=15)
-        self.template_dropdown.set(self.current_template)
-
-        # Template buttons
-        open_button = ctk.CTkButton(
-            template_frame,
-            text="Öppna mall",
-            width=120,
+            text="Ladda mall...",
+            width=140,
             height=32,
-            command=self._open_template
+            command=self._load_template_from_file
         )
-        open_button.grid(row=0, column=1, padx=5, pady=15)
+        load_button.grid(row=0, column=0, padx=(15, 10), pady=15)
 
-        # New save current template button
-        self.save_button = ctk.CTkButton(
+        # Save template button
+        save_button = ctk.CTkButton(
             template_frame,
-            text="Spara mall",
-            width=100,
+            text="Spara mall...",
+            width=140,
             height=32,
-            command=self._save_current_template
+            command=self._save_template_to_file
         )
-        self.save_button.grid(row=0, column=2, padx=5, pady=15)
-
-        save_as_button = ctk.CTkButton(
-            template_frame,
-            text="Spara som...",
-            width=100,
-            height=32,
-            command=self._save_as_template
-        )
-        save_as_button.grid(row=0, column=3, padx=5, pady=15)
-
-        delete_button = ctk.CTkButton(
-            template_frame,
-            text="Radera mall",
-            width=130,
-            height=32,
-            fg_color="#DC3545",
-            hover_color="#C82333",
-            command=self._delete_template
-        )
-        delete_button.grid(row=0, column=4, padx=5, pady=15)
+        save_button.grid(row=0, column=1, padx=10, pady=15)
 
         # Help button on right side
         help_button = ctk.CTkButton(
@@ -196,7 +164,7 @@ class FieldConfigDialog:
             hover_color="gray50",
             command=self._show_help
         )
-        help_button.grid(row=0, column=6, padx=(10, 15), pady=15)
+        help_button.grid(row=0, column=3, padx=(10, 15), pady=15)
 
     def _create_main_content(self):
         """Create main content area with two-column field layout."""
@@ -473,11 +441,8 @@ class FieldConfigDialog:
 
     def _load_current_configuration(self):
         """Load current field configuration and template."""
-        # Load active template
-        active_template = self.config_manager.load_active_template()
-        if active_template and active_template in template_manager.list_templates():
-            self.current_template = active_template
-            self.template_dropdown.set(active_template)
+        # Initialize with default template
+        self.current_template = "Standard"
 
         # Load current field names
         custom_names = self.config_manager.load_custom_field_names()
@@ -505,33 +470,137 @@ class FieldConfigDialog:
             is_disabled = field_id in self.current_disabled_fields
             checkbox.select() if is_disabled else checkbox.deselect()
 
-    def _on_template_selected(self, template_name: str):
-        """Handle template selection from dropdown."""
-        self.current_template = template_name
-        logger.info(f"Template selected: {template_name}")
+    def _load_template_from_file(self):
+        """Load template configuration from a file dialog."""
+        # Open file dialog for template selection
+        file_path = filedialog.askopenfilename(
+            title="Ladda fältmall",
+            filetypes=[("Template files", "*.json"), ("All files", "*.*")],
+            defaultextension=".json",
+            initialdir=str(Path.home() / "Documents")
+        )
 
-        # Update save button state - disable for Standard template
-        self._update_save_button_state()
-
-    def _update_save_button_state(self):
-        """Update save button state based on current template."""
-        if hasattr(self, 'save_button'):
-            if self.current_template == "Standard":
-                self.save_button.configure(state="disabled")
-            else:
-                self.save_button.configure(state="normal")
-
-    def _open_template(self):
-        """Open/load the selected template."""
-        if not self.current_template:
+        if not file_path:
             return
 
-        template_config = template_manager.load_template(self.current_template)
-        if not template_config:
-            self._show_error("Kunde inte ladda template", f"Template '{self.current_template}' kunde inte laddas.")
+        try:
+            # Use existing import_template method from template_manager
+            template_path = Path(file_path)
+            success = template_manager.import_template(template_path)
+
+            if not success:
+                messagebox.showerror(
+                    "Kunde inte ladda mall",
+                    "Mallens format är ogiltigt eller så inträffade ett fel vid laddning."
+                )
+                return
+
+            # Load the imported template (it gets the filename as template name)
+            template_name = template_path.stem
+            template_config = template_manager.load_template(template_name)
+
+            if not template_config:
+                messagebox.showerror(
+                    "Kunde inte ladda mall",
+                    f"Mall '{template_name}' kunde inte laddas efter import."
+                )
+                return
+
+            # Apply template configuration to dialog
+            self._apply_template_config(template_config, template_name)
+
+            messagebox.showinfo(
+                "Mall laddad",
+                f"Mall '{template_name}' har laddats från {template_path.name}"
+            )
+
+            logger.info(f"Loaded template from file: {file_path}")
+
+        except Exception as e:
+            logger.error(f"Error loading template from file: {e}")
+            messagebox.showerror(
+                "Fel vid laddning",
+                f"Kunde inte ladda mallen: {str(e)}"
+            )
+
+    def _save_template_to_file(self):
+        """Save current configuration to a file via file dialog."""
+        # Suggest filename based on first non-empty custom name or use "Fältmall"
+        suggested_name = "Fältmall"
+        for _field_id, value in self.current_values.items():
+            if value.strip():
+                # Use first few words of first custom field as suggestion
+                suggested_name = value.strip()[:20].replace(" ", "_")
+                break
+
+        # Open save file dialog
+        file_path = filedialog.asksaveasfilename(
+            title="Spara fältmall",
+            filetypes=[("Template files", "*.json"), ("All files", "*.*")],
+            defaultextension=".json",
+            initialdir=str(Path.home() / "Documents"),
+            initialfile=f"{suggested_name}.json"
+        )
+
+        if not file_path:
             return
 
-        # Apply template configuration
+        try:
+            # Prepare template configuration
+            custom_names = {}
+            for field_id, value in self.current_values.items():
+                if value.strip():
+                    custom_names[field_id] = value.strip()
+
+            field_config = {
+                'custom_names': custom_names,
+                'disabled_fields': list(self.current_disabled_fields)
+            }
+
+            # Get template name from filename
+            template_path = Path(file_path)
+            template_name = template_path.stem
+
+            # Save template internally first
+            success = template_manager.save_template(
+                template_name,
+                field_config,
+                f"Mall sparad till fil: {template_path.name}"
+            )
+
+            if not success:
+                messagebox.showerror(
+                    "Kunde inte spara mall",
+                    "Ett fel inträffade vid sparande av mallen."
+                )
+                return
+
+            # Export to chosen file location
+            export_success = template_manager.export_template(template_name, template_path)
+
+            if not export_success:
+                messagebox.showerror(
+                    "Kunde inte exportera mall",
+                    f"Kunde inte spara mallen till {file_path}"
+                )
+                return
+
+            messagebox.showinfo(
+                "Mall sparad",
+                f"Mall har sparats till {template_path.name}"
+            )
+
+            logger.info(f"Saved template to file: {file_path}")
+
+        except Exception as e:
+            logger.error(f"Error saving template to file: {e}")
+            messagebox.showerror(
+                "Fel vid sparande",
+                f"Kunde inte spara mallen: {str(e)}"
+            )
+
+    def _apply_template_config(self, template_config: dict, template_name: str):
+        """Apply loaded template configuration to the dialog."""
         custom_names = template_config.get('custom_names', {})
         disabled_fields = template_config.get('disabled_fields', template_config.get('hidden_fields', []))
 
@@ -555,126 +624,8 @@ class FieldConfigDialog:
         # Update validation
         self._update_validation()
 
-        logger.info(f"Loaded template: {self.current_template}")
-
-    def _save_current_template(self):
-        """Save changes to the currently selected template."""
-        # Check if current template is Standard (protected)
-        if self.current_template == "Standard":
-            messagebox.showwarning(
-                "Kan inte spara",
-                "Standard-mallen kan inte ändras. Använd 'Spara som...' för att skapa en ny mall."
-            )
-            return
-
-        # Show confirmation dialog
-        result = messagebox.askyesno(
-            "Bekräfta sparande",
-            f"Vill du spara ändringarna till mallen '{self.current_template}'?"
-        )
-
-        if not result:
-            return
-
-        # Prepare template configuration
-        field_config = {
-            'custom_names': {},
-            'disabled_fields': list(self.current_disabled_fields)
-        }
-
-        # Get custom field names
-        for field_id, value in self.current_values.items():
-            if value.strip():
-                field_config['custom_names'][field_id] = value.strip()
-
-        # Save the template
-        try:
-            template_manager.save_template(
-                self.current_template,
-                field_config,
-                f"Uppdaterad mall: {self.current_template}"
-            )
-
-            messagebox.showinfo(
-                "Mall sparad",
-                f"Mallen '{self.current_template}' har sparats."
-            )
-
-            logger.info(f"Saved current template: {self.current_template}")
-
-        except Exception as e:
-            logger.error(f"Error saving current template: {e}")
-            messagebox.showerror(
-                "Fel vid sparande",
-                f"Kunde inte spara mallen: {str(e)}"
-            )
-
-    def _save_as_template(self):
-        """Save current configuration as a new template."""
-        # Get template name from user
-        dialog = ctk.CTkInputDialog(
-            text="Ange namn för template:",
-            title="Spara template"
-        )
-        template_name = dialog.get_input()
-
-        if not template_name:
-            return
-
-        # Validate template name
-        if not template_manager._validate_template_name(template_name):
-            self._show_error("Ogiltigt template-namn", "Template-namnet innehåller ogiltiga tecken eller är för långt.")
-            return
-
-        # Check if template exists
-        if template_name in template_manager.list_templates():
-            if not messagebox.askyesno("Template finns", f"Template '{template_name}' finns redan. Vill du skriva över den?"):
-                return
-
-        # Prepare configuration
-        custom_names = {}
-        for field_id, value in self.current_values.items():
-            if value.strip():
-                custom_names[field_id] = value.strip()
-
-        config = {
-            'custom_names': custom_names,
-            'disabled_fields': list(self.current_disabled_fields)
-        }
-
-        # Save template
-        if template_manager.save_template(template_name, config, "Sparad från konfigurationsdialog"):
-            # Update dropdown
-            templates = template_manager.list_templates()
-            self.template_dropdown.configure(values=templates)
-            self.template_dropdown.set(template_name)
-            self.current_template = template_name
-
-            messagebox.showinfo("Template sparad", f"Template '{template_name}' har sparats.")
-            logger.info(f"Template saved: {template_name}")
-        else:
-            self._show_error("Kunde inte spara", f"Template '{template_name}' kunde inte sparas.")
-
-    def _delete_template(self):
-        """Delete the selected template."""
-        if self.current_template == "Standard":
-            messagebox.showwarning("Kan inte radera", "Standard-templaten kan inte raderas.")
-            return
-
-        if not messagebox.askyesno("Bekräfta radering", f"Är du säker på att du vill radera template '{self.current_template}'?"):
-            return
-
-        if template_manager.delete_template(self.current_template):
-            # Update dropdown
-            templates = template_manager.list_templates()
-            self.template_dropdown.configure(values=templates)
-            self.template_dropdown.set("Standard")
-            self.current_template = "Standard"
-
-            messagebox.showinfo("Template raderad", f"Template '{self.current_template}' har raderats.")
-            logger.info(f"Template deleted: {self.current_template}")
-        else:
-            self._show_error("Kunde inte radera", f"Template '{self.current_template}' kunde inte raderas.")
+        # Update current template name for reference
+        self.current_template = template_name
 
     def _on_field_change(self, field_id: str):
         """Handle field value changes."""
@@ -815,9 +766,6 @@ class FieldConfigDialog:
             # Save field visibility
             self.config_manager.save_field_state(list(self.current_disabled_fields))
 
-            # Save active template
-            self.config_manager.save_active_template(self.current_template)
-
             # Update field manager
             field_manager.set_custom_names(custom_names)
             field_manager.set_disabled_fields(list(self.current_disabled_fields))
@@ -913,14 +861,13 @@ class FieldConfigDialog:
 FUNKTIONER:
 • Anpassa namnen på Excel-fälten (max 13 tecken, inga mellanslag)
 • Dölj fält som inte behövs (vissa fält kan inte döljas)
-• Spara konfigurationer som templates för framtida användning
-• Växla mellan olika templates med dropdown-menyn
+• Spara konfigurationer som mallfiler för framtida användning och delning
 
 TEMPLATES:
-• "Standard" - standardkonfiguration som alltid finns
-• Skapa egna templates med "Spara som"-knappen
-• Ladda befintliga templates med "Öppna template"
-• Radera templates du inte längre behöver (utom Standard)
+• "Ladda mall..." - öppna mallkonfiguration från din dator
+• "Spara mall..." - spara nuvarande konfiguration till fil
+• Mallar sparas som JSON-filer som du kan organisera och dela
+• Standardplats: Dokumentmappen (men du kan välja var som helst)
 
 FÄLTREGLER:
 • Grå fält kan inte ändras (systemfält)
