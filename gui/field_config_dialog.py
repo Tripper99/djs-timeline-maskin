@@ -158,8 +158,8 @@ class FieldConfigDialog:
         self.template_name_label = ctk.CTkLabel(
             template_frame,
             text="Aktuell mall: Standard",
-            font=ctk.CTkFont(size=12),
-            text_color="gray60"
+            font=ctk.CTkFont(size=14),
+            text_color="black"
         )
         self.template_name_label.grid(row=0, column=2, padx=15, pady=15)
 
@@ -666,7 +666,7 @@ class FieldConfigDialog:
             text_color = "#FF8C00"  # Orange to indicate modification
         else:
             display_text = base_text
-            text_color = "gray60"  # Normal gray
+            text_color = "black"  # Dark text for readability
 
         self.template_name_label.configure(text=display_text, text_color=text_color)
 
