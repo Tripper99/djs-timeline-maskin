@@ -165,6 +165,75 @@
   - PDF text cleaning with sophisticated regex processing
   - Windows filename compatibility checking
 
+- **`core/template_manager.py`** (437 lines): Template management system
+  - **Dual Template Architecture**: Manages two distinct template types
+  - **Field Configuration Templates**: Save/load custom field names and visibility settings
+  - **Template Storage**: JSON files in `%APPDATA%/DJs Timeline Machine/templates/`
+  - **Template Validation**: Enhanced structure validation prevents invalid files from appearing
+  - **Template Operations**: Create, save, load, delete, import/export functionality
+  - **Backward Compatibility**: Supports both `disabled_fields` and `hidden_fields` formats
+
+### **Template System Architecture**
+
+The application implements a sophisticated **dual template system** serving different purposes:
+
+#### **1. Field Configuration Templates**
+**Purpose**: Save and restore custom field configurations
+**Location**: `%APPDATA%\DJs Timeline Machine\templates\`
+**File Format**: JSON with structured field configuration data
+**Usage**: Field configuration dialog dropdown menu
+
+**Structure**:
+```json
+{
+  "template_name": "My Custom Fields",
+  "version": "1.0",
+  "created_date": "2025-08-19T...",
+  "description": "Custom field configuration for project X",
+  "field_config": {
+    "custom_names": {
+      "kategori_id": "Project Type",
+      "person_sak_id": "Contact Person"
+    },
+    "disabled_fields": ["note2_id", "note3_id"],
+    "hidden_fields": ["note2_id", "note3_id"]  // Backward compatibility
+  }
+}
+```
+
+**Features**:
+- **Template Validation**: Enhanced `list_templates()` validates JSON structure before inclusion
+- **Default Template**: Always available "Standard" template with default configuration
+- **User Templates**: Custom templates created via "Spara som..." functionality
+- **Template Operations**: Load, save, delete, and manage via professional UI
+- **Graceful Error Handling**: Invalid/corrupted templates logged and skipped
+
+#### **2. Excel File Templates**
+**Purpose**: Create blank Excel files with proper column structure
+**Location**: User-specified via file dialog (typically desktop/documents)
+**File Format**: Standard Excel (.xlsx) files with formatted headers
+**Usage**: Excel help dialog → "Skapa mall-Excel med rätt kolumner" button
+
+**Creation Process**:
+1. User clicks template creation button in Excel help dialog
+2. System prompts for save location via file dialog (`Timeline_mall.xlsx`)
+3. Creates Excel file using current field configuration (respects custom names/visibility)
+4. Applies professional formatting (bold headers, background colors, auto-width)
+5. Optional immediate loading into application
+
+**Technical Integration**:
+- **Dynamic Headers**: Uses `field_manager.get_visible_display_names()` for column names
+- **Respects Field Config**: Hidden fields excluded, custom names included
+- **Professional Formatting**: Bold headers, gray backgrounds, optimized column widths
+- **Immediate Integration**: Option to load created template directly into application
+
+#### **Template System Benefits**:
+- **Workflow Efficiency**: Save/restore field configurations for different projects
+- **User Customization**: Flexible field naming and visibility control
+- **Data Consistency**: Excel templates always match current field configuration
+- **Professional Output**: Properly formatted Excel files ready for data entry
+- **Error Resilience**: Robust validation prevents system crashes from invalid templates
+
 ### **Data Management**
 - **Configuration Files**: JSON-based configuration with user preferences
   - Excel file paths, window geometry, theme settings
@@ -483,13 +552,20 @@ openpyxl
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                         Business Logic Layer (Core)                             │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐│
-│  │  PDF Processor  │  │ Excel Manager   │  │ Filename Parser │  │ Config Mgr   ││
-│  │ • Validation    │  │ • openpyxl      │  │ • Component     │  │ • JSON       ││
-│  │ • Page Count    │  │ • xlsxwriter    │  │   Extraction    │  │   Persistence││
-│  │ • File Ops      │  │ • Rich Text     │  │ • Construction  │  │ • Field      ││
-│  │ • Encryption    │  │ • Column Map    │  │ • Validation    │  │   Locking    ││
-│  │ • External Open │  │ • Row Creation  │  │ • Text Clean    │  │ • Geometry   ││
+│  │  PDF Processor  │  │ Excel Manager   │  │ Filename Parser │  │Template Mgr  ││
+│  │ • Validation    │  │ • openpyxl      │  │ • Component     │  │ • Dual Types ││
+│  │ • Page Count    │  │ • xlsxwriter    │  │   Extraction    │  │ • Field Config│
+│  │ • File Ops      │  │ • Rich Text     │  │ • Construction  │  │ • Excel Files││
+│  │ • Encryption    │  │ • Column Map    │  │ • Validation    │  │ • Validation ││
+│  │ • External Open │  │ • Row Creation  │  │ • Text Clean    │  │ • JSON Store ││
 │  └─────────────────┘  └─────────────────┘  └─────────────────┘  └──────────────┘│
+│  ┌─────────────────┐                                                            │
+│  │   Config Mgr    │                                                            │
+│  │ • JSON Persist  │                                                            │
+│  │ • Field Lock    │                                                            │
+│  │ • Geometry      │                                                            │
+│  │ • User Prefs    │                                                            │
+│  └─────────────────┘                                                            │
 └─────────────────────────────────────────────────────────────────────────────────┘
                                         │
 ┌─────────────────────────────────────────────────────────────────────────────────┐
