@@ -10,7 +10,7 @@ The application has been refactored from a single large file into a modular stru
 
 ## Current Status (v2.5.10)
 
-**Latest Achievement (v2.5.10)**: Fixed critical disabled field styling bug where CTkEntry widgets appeared with white backgrounds instead of expected gray styling. Root cause was flawed widget type detection logic using method-based checks (hasattr) instead of proper isinstance checks. CTkEntry widgets were being misidentified as text widgets due to shared methods. Implemented proper class-based widget detection hierarchy ensuring CTkEntry widgets receive correct fg_color styling while Text widgets continue using bg parameter styling.
+**Latest Achievement (v2.5.10)**: Fixed spurious "templates" entry appearing in template dropdown and corrected version display. Enhanced template validation system to properly validate JSON structure before inclusion in dropdown, ensuring only valid templates appear. Cleaned up orphaned `templates.json` file and updated app version from outdated v2.5.8 to current v2.5.10. Template system now robust against invalid/corrupted files with graceful error handling.
 
 **Key Features**:
 - **Field Protection Consistency**: Källa field now protected like Startdatum and Händelse (cannot be renamed or disabled)

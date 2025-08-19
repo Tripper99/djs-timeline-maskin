@@ -4,6 +4,52 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.5.10 Template Dropdown Bug Fix (2025-08-19) - Complete Success ✅
+**Achievement**: Fixed spurious "templates" entry appearing in template dropdown and corrected version display.
+
+**Problem Analysis**: 
+User reported non-selectable "templates" item appearing in template dropdown alongside valid templates. Investigation revealed orphaned `templates.json` file in templates directory with invalid structure `{"templates": [], "version": "1.0"}` - likely leftover from earlier development.
+
+**Root Cause Identified**:
+- `list_templates()` method used `glob("*.json")` without validation
+- All JSON files in templates directory were assumed to be valid templates
+- Invalid file structure bypassed template validation during listing
+
+**Technical Solution Implemented**:
+1. **Enhanced Template Validation**: Modified `list_templates()` to validate JSON structure before inclusion
+2. **Structure Checking**: Added `_validate_loaded_template()` call for each candidate file
+3. **Graceful Error Handling**: Invalid/corrupted files logged and skipped with debug messages
+4. **File Cleanup**: Renamed `templates.json` to `templates.json.invalid`
+5. **Version Correction**: Updated app version from v2.5.8 to v2.5.10
+
+**Code Changes**:
+```python
+# Enhanced template listing with validation
+for file_path in self.templates_dir.glob("*.json"):
+    try:
+        with open(file_path, encoding='utf-8') as f:
+            data = json.load(f)
+        if self._validate_loaded_template(data):
+            templates.append(file_path.stem)
+        else:
+            logger.debug(f"Skipping invalid template file: {file_path.name}")
+    except (json.JSONDecodeError, Exception) as e:
+        logger.debug(f"Skipping non-template file {file_path.name}: {e}")
+```
+
+**Results Achieved**:
+✅ **Clean Template Dropdown**: Only valid templates appear in selection list
+✅ **Robust Validation**: Invalid JSON files gracefully handled without crashes
+✅ **Correct Version Display**: App now shows v2.5.10 instead of outdated v2.5.8
+✅ **Backward Compatibility**: All existing valid templates continue to work perfectly
+✅ **Future-Proof**: Template directory can contain other JSON files without conflicts
+
+**Development Process Excellence**:
+- Systematic investigation of template loading mechanism
+- Safe implementation with validation before inclusion
+- Comprehensive error handling with detailed logging
+- Clean file management without data loss
+
 ### v2.5.9 Field Configuration Dialog Alignment Fix (2025-08-19) - Complete Success ✅
 **Achievement**: Definitively solved persistent field width inconsistency issues through complete architectural redesign.
 

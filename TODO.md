@@ -216,6 +216,18 @@
 **Result**: Pixel-perfect field alignment achieved - all fields uniform width and position
 **Status**: ✅ COMPLETED
 
+#### 4.7 Template Dropdown Spurious Entry Bug ✅ **FIXED in v2.5.10**
+**Problem**: Non-selectable "templates" entry appearing in template dropdown menu alongside valid templates.
+**Root Cause**: Invalid `templates.json` file in templates directory being listed without validation.
+**Solution Implemented**:
+- ✅ Enhanced `list_templates()` method with JSON structure validation
+- ✅ Added `_validate_loaded_template()` checking for each candidate file
+- ✅ Graceful error handling for invalid/corrupted JSON files
+- ✅ Renamed invalid file to `templates.json.invalid`
+- ✅ Updated app version display from v2.5.8 to v2.5.10
+**Result**: Clean dropdown with only valid templates, correct version display
+**Status**: ✅ COMPLETED
+
 ## Future Improvements
 
 ### 4. Consider async operations for file processing
