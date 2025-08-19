@@ -4,6 +4,7 @@ Based on user mockup requirements with two-column layout and comprehensive templ
 """
 
 import logging
+import os
 from pathlib import Path
 from tkinter import filedialog, messagebox
 from typing import Callable, Dict, Optional
@@ -73,9 +74,6 @@ class FieldConfigDialog:
         self._create_template_controls()
         self._create_main_content()
         self._create_footer()
-
-        # Initialize button states
-        self._update_save_button_state()
 
         # Load current values
         self._load_current_configuration()
@@ -446,10 +444,12 @@ class FieldConfigDialog:
 
         # Load current field names
         custom_names = self.config_manager.load_custom_field_names()
+        logger.info(f"Loading custom names: {custom_names}")
         field_manager.set_custom_names(custom_names)
 
         # Load field state
         disabled_fields = self.config_manager.load_field_state()
+        logger.info(f"Loading disabled fields: {disabled_fields}")
         field_state_manager.set_disabled_fields(disabled_fields)
         self.current_disabled_fields = set(disabled_fields)
 
@@ -458,17 +458,27 @@ class FieldConfigDialog:
             current_name = field_manager.get_display_name(field_id)
             field_def = FIELD_DEFINITIONS[field_id]
 
+            # Clear any existing content first
+            entry.delete(0, 'end')
+
             # Only show custom names (not default names)
             if current_name != field_def.default_display_name:
                 entry.insert(0, current_name)
                 self.current_values[field_id] = current_name
+                logger.debug(f"Set custom name for {field_id}: '{current_name}'")
             else:
                 self.current_values[field_id] = ""
 
         # Update disable checkboxes
         for field_id, checkbox in self.disable_checkboxes.items():
             is_disabled = field_id in self.current_disabled_fields
-            checkbox.select() if is_disabled else checkbox.deselect()
+            if is_disabled:
+                checkbox.select()
+                logger.debug(f"Set checkbox for {field_id} to disabled")
+            else:
+                checkbox.deselect()
+
+        logger.info(f"Config loading complete: {len(custom_names)} custom names, {len(disabled_fields)} disabled fields")
 
     def _load_template_from_file(self):
         """Load template configuration from a file dialog."""
@@ -477,7 +487,7 @@ class FieldConfigDialog:
             title="Ladda fältmall",
             filetypes=[("Template files", "*.json"), ("All files", "*.*")],
             defaultextension=".json",
-            initialdir=str(Path.home() / "Documents")
+            initialdir=os.getcwd()
         )
 
         if not file_path:
@@ -538,7 +548,7 @@ class FieldConfigDialog:
             title="Spara fältmall",
             filetypes=[("Template files", "*.json"), ("All files", "*.*")],
             defaultextension=".json",
-            initialdir=str(Path.home() / "Documents"),
+            initialdir=os.getcwd(),
             initialfile=f"{suggested_name}.json"
         )
 
