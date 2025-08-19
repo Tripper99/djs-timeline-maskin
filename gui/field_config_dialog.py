@@ -158,8 +158,12 @@ class FieldConfigDialog:
         self.template_name_label = ctk.CTkLabel(
             template_frame,
             text="Aktuell mall: Standard",
-            font=ctk.CTkFont(size=14),
-            text_color="black"
+            font=ctk.CTkFont(size=16, weight="bold"),
+            text_color="white",
+            fg_color="#FF8C00",  # Orange background
+            corner_radius=6,
+            padx=12,
+            pady=6
         )
         self.template_name_label.grid(row=0, column=2, padx=15, pady=15)
 
@@ -663,12 +667,14 @@ class FieldConfigDialog:
 
         if self.is_template_modified:
             display_text = f"{base_text} (ändrad)"
-            text_color = "#FF8C00"  # Orange to indicate modification
+            text_color = "white"
+            bg_color = "#DC3545"  # Red background to indicate modification
         else:
             display_text = base_text
-            text_color = "black"  # Dark text for readability
+            text_color = "white"
+            bg_color = "#FF8C00"  # Orange background for normal state
 
-        self.template_name_label.configure(text=display_text, text_color=text_color)
+        self.template_name_label.configure(text=display_text, text_color=text_color, fg_color=bg_color)
 
     def _on_field_change(self, field_id: str):
         """Handle field value changes."""
