@@ -4,6 +4,48 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.6.1 Template Name Display State Management (2025-08-19) - Significant UX Enhancement ✅
+**Achievement**: Transformed template name display from hard-to-read text to prominent visual element with complete state management.
+
+**Multi-Phase Development Process**:
+
+**Phase 1 - Template File Dialog System (v2.5.11)**:
+- **Problem**: Complex dropdown + multiple button system was restrictive
+- **User Request**: Replace with standard Windows file dialogs for better user control
+- **Solution**: Replaced dropdown with "Ladda mall..." and "Spara mall..." file dialog buttons
+- **Benefits**: User-controlled template storage, easy backup/sharing, familiar workflow
+- **Technical**: Leveraged existing `import_template()` and `export_template()` methods
+
+**Phase 2 - Template Name Visibility (v2.5.11-v2.5.12)**:
+- **Problem**: No indication of which template was currently active
+- **User Request**: Show current template name in dialog
+- **Solution**: Added template name label with state management
+- **Enhancement**: Progressed from gray text → black text → prominent colored background
+- **Final Result**: Orange background badge impossible to miss
+
+**Phase 3 - State Management Bug Fix (v2.6.1)**:
+- **Problem**: Save template didn't reset red "modified" background to orange
+- **Root Cause**: Missing state reset logic in `_save_template_to_file()` method
+- **Solution**: Added proper state reset after successful save/load operations
+- **Status**: Save operations now work correctly, load operations partially fixed
+
+**Technical Implementation Excellence**:
+- **Visual Design**: Orange background (#FF8C00) with white text, size 16 bold font
+- **State System**: Orange (normal) vs Red (modified) with "(ändrad)" indicator  
+- **File Dialog Integration**: Uses application directory, smart filename suggestions
+- **Error Handling**: Robust validation and user-friendly Swedish error messages
+
+**User Experience Transformation**:
+- **Before**: No template visibility, complex dropdown interface
+- **After**: Prominent visual element, simple file dialogs, clear state indication
+- **Impact**: Users always know template status and have full control over template files
+
+**Development Process Insights**:
+- **User-Driven Design**: Multiple iterations based on direct user feedback
+- **Progressive Enhancement**: Each phase built upon previous improvements
+- **Immediate Testing**: Quick user validation after each enhancement
+- **Technical Excellence**: Leveraged existing robust infrastructure
+
 ### v2.5.10 Template Dropdown Bug Fix (2025-08-19) - Complete Success ✅
 **Achievement**: Fixed spurious "templates" entry appearing in template dropdown and corrected version display.
 

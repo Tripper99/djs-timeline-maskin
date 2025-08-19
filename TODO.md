@@ -228,6 +228,14 @@
 **Result**: Clean dropdown with only valid templates, correct version display
 **Status**: ✅ COMPLETED
 
+#### 4.8 Template Name Display State Reset Bug ⚠️ **PARTIALLY FIXED in v2.6.1** 
+**Problem**: Template name background color doesn't reset to orange after save/load template operations
+**Status**: 
+- ✅ **"Spara mall..." (Save template)**: Background correctly resets from red to orange after successful save
+- ❌ **"Ladda mall..." (Load template)**: Background remains red and still shows "(ändrad)" after loading template
+
+**Investigation Needed**: Load template operation may not be properly calling state reset logic despite having the code in place.
+
 ## Future Improvements
 
 ### 4. Consider async operations for file processing

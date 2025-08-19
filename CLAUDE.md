@@ -8,9 +8,9 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.5.10)
+## Current Status (v2.6.1)
 
-**Latest Achievement (v2.5.10)**: Fixed spurious "templates" entry appearing in template dropdown and corrected version display. Enhanced template validation system to properly validate JSON structure before inclusion in dropdown, ensuring only valid templates appear. Cleaned up orphaned `templates.json` file and updated app version from outdated v2.5.8 to current v2.5.10. Template system now robust against invalid/corrupted files with graceful error handling.
+**Latest Achievement (v2.6.1)**: Completed major template name display transformation with prominent visual design and comprehensive state management. Replaced complex dropdown system with intuitive file dialogs, added highly visible orange-background template name display, and implemented robust state management system. Users now have complete template visibility and control with professional UI elements that clearly indicate current template and modification status.
 
 **Key Features**:
 - **Field Protection Consistency**: Källa field now protected like Startdatum and Händelse (cannot be renamed or disabled)
@@ -19,7 +19,7 @@ The application has been refactored from a single large file into a modular stru
 - **Centralized Styling System**: Professional disabled field appearance with consistent graying, italic labels, and non-interactive state
 - **Excel Safety**: Disabled fields automatically excluded from Excel operations while maintaining visual presence
 - **Backward Compatibility**: All existing functionality preserved with internal terminology updates and configuration migration
-- **Template Management**: Enhanced template system supports both old and new field state formats
+- **Template Management**: Complete file-dialog based template system with prominent visual status display
 - **Comprehensive Testing**: 120 test suite plus specialized field state validation confirms all functionality works correctly
 
 **Architecture Status**:
