@@ -89,7 +89,22 @@ class TemplateManager:
         try:
             templates = []
             for file_path in self.templates_dir.glob("*.json"):
-                templates.append(file_path.stem)
+                # Validate that this is actually a template file
+                # by checking if it can be loaded and has the correct structure
+                try:
+                    with open(file_path, encoding='utf-8') as f:
+                        data = json.load(f)
+
+                    # Check if file has the expected template structure
+                    # Must have field_config with the right structure
+                    if self._validate_loaded_template(data):
+                        templates.append(file_path.stem)
+                    else:
+                        logger.debug(f"Skipping invalid template file: {file_path.name}")
+
+                except (json.JSONDecodeError, Exception) as e:
+                    logger.debug(f"Skipping non-template file {file_path.name}: {e}")
+                    continue
 
             # Ensure default is always first
             if self.DEFAULT_TEMPLATE_NAME in templates:
