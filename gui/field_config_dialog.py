@@ -538,6 +538,11 @@ class FieldConfigDialog:
             # Apply template configuration to dialog
             self._apply_template_config(template_config, template_name)
 
+            # Ensure template state is properly reset after loading
+            self.current_template = template_name
+            self.is_template_modified = False
+            self._update_template_name_display()
+
             messagebox.showinfo(
                 "Mall laddad",
                 f"Mall '{template_name}' har laddats från {template_path.name}"
@@ -618,6 +623,11 @@ class FieldConfigDialog:
                 "Mall sparad",
                 f"Mall har sparats till {template_path.name}"
             )
+
+            # Reset template state after successful save
+            self.current_template = template_name
+            self.is_template_modified = False
+            self._update_template_name_display()
 
             logger.info(f"Saved template to file: {file_path}")
 
