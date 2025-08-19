@@ -227,10 +227,9 @@ class FieldConfigDialog:
         """Create a single field row with fixed-width container architecture for uniform alignment."""
         field_def = FIELD_DEFINITIONS[field_id]
 
-        # Main field container frame
+        # Main field container frame - don't use grid_propagate(False) on the main container
         field_frame = ctk.CTkFrame(parent)
         field_frame.grid(row=row, column=column, sticky="ew", padx=10, pady=2)
-        field_frame.grid_propagate(False)  # Prevent container from resizing based on contents
 
         # Create fixed-width container frames for each column
         containers = self._create_fixed_width_containers(field_frame)
@@ -247,47 +246,42 @@ class FieldConfigDialog:
         """Create fixed-width container frames for uniform column alignment."""
         containers = {}
 
+        # Configure parent frame columns with fixed widths and no expansion
+        parent_frame.grid_columnconfigure(0, weight=0, minsize=140)  # Label
+        parent_frame.grid_columnconfigure(1, weight=0, minsize=250)  # Entry
+        parent_frame.grid_columnconfigure(2, weight=0, minsize=55)   # Counter
+        parent_frame.grid_columnconfigure(3, weight=0, minsize=35)   # Icon
+        parent_frame.grid_columnconfigure(4, weight=0, minsize=85)   # Checkbox
+
         # Column 0: Label container (140px)
-        label_container = ctk.CTkFrame(parent_frame, fg_color="transparent")
-        label_container.grid(row=0, column=0, sticky="nsw", padx=0, pady=0)
+        label_container = ctk.CTkFrame(parent_frame, fg_color="transparent", width=140, height=40)
+        label_container.grid(row=0, column=0, sticky="w", padx=0, pady=0)
         label_container.grid_propagate(False)
-        label_container.configure(width=140, height=40)
         containers['label'] = label_container
 
         # Column 1: Entry container (250px)
-        entry_container = ctk.CTkFrame(parent_frame, fg_color="transparent")
-        entry_container.grid(row=0, column=1, sticky="nsw", padx=0, pady=0)
+        entry_container = ctk.CTkFrame(parent_frame, fg_color="transparent", width=250, height=40)
+        entry_container.grid(row=0, column=1, sticky="w", padx=0, pady=0)
         entry_container.grid_propagate(False)
-        entry_container.configure(width=250, height=40)
         containers['entry'] = entry_container
 
         # Column 2: Counter container (55px)
-        counter_container = ctk.CTkFrame(parent_frame, fg_color="transparent")
-        counter_container.grid(row=0, column=2, sticky="nsw", padx=0, pady=0)
+        counter_container = ctk.CTkFrame(parent_frame, fg_color="transparent", width=55, height=40)
+        counter_container.grid(row=0, column=2, sticky="w", padx=0, pady=0)
         counter_container.grid_propagate(False)
-        counter_container.configure(width=55, height=40)
         containers['counter'] = counter_container
 
         # Column 3: Icon container (35px)
-        icon_container = ctk.CTkFrame(parent_frame, fg_color="transparent")
-        icon_container.grid(row=0, column=3, sticky="nsw", padx=0, pady=0)
+        icon_container = ctk.CTkFrame(parent_frame, fg_color="transparent", width=35, height=40)
+        icon_container.grid(row=0, column=3, sticky="w", padx=0, pady=0)
         icon_container.grid_propagate(False)
-        icon_container.configure(width=35, height=40)
         containers['icon'] = icon_container
 
         # Column 4: Checkbox container (85px)
-        checkbox_container = ctk.CTkFrame(parent_frame, fg_color="transparent")
-        checkbox_container.grid(row=0, column=4, sticky="nsw", padx=0, pady=0)
+        checkbox_container = ctk.CTkFrame(parent_frame, fg_color="transparent", width=85, height=40)
+        checkbox_container.grid(row=0, column=4, sticky="w", padx=0, pady=0)
         checkbox_container.grid_propagate(False)
-        checkbox_container.configure(width=85, height=40)
         containers['checkbox'] = checkbox_container
-
-        # Configure parent frame columns to use fixed widths
-        parent_frame.grid_columnconfigure(0, weight=0, minsize=140)
-        parent_frame.grid_columnconfigure(1, weight=0, minsize=250)
-        parent_frame.grid_columnconfigure(2, weight=0, minsize=55)
-        parent_frame.grid_columnconfigure(3, weight=0, minsize=35)
-        parent_frame.grid_columnconfigure(4, weight=0, minsize=85)
 
         return containers
 
@@ -311,10 +305,9 @@ class FieldConfigDialog:
             placeholder_text=display_name,
             font=ctk.CTkFont(size=12),
             state="disabled",
-            fg_color="gray90",
-            width=250  # Fixed width
+            fg_color="gray90"
         )
-        protected_entry.pack(fill="both", expand=True, padx=5, pady=8)
+        protected_entry.pack(fill="both", expand=True, padx=5, pady=6)
 
         # Add invisible spacer frames for unused columns to maintain layout consistency
         self._add_spacer_frame(containers['counter'])
@@ -339,10 +332,9 @@ class FieldConfigDialog:
         entry = ctk.CTkEntry(
             containers['entry'],
             placeholder_text="Ange nytt namn...",
-            font=ctk.CTkFont(size=12),
-            width=250  # Fixed width
+            font=ctk.CTkFont(size=12)
         )
-        entry.pack(fill="both", expand=True, padx=5, pady=8)
+        entry.pack(fill="both", expand=True, padx=5, pady=6)
 
         # Bind validation events
         entry.bind('<KeyRelease>', lambda e, fid=field_id: self._on_field_change(fid))
@@ -389,10 +381,9 @@ class FieldConfigDialog:
         entry = ctk.CTkEntry(
             containers['entry'],
             placeholder_text="Ange nytt namn...",
-            font=ctk.CTkFont(size=12),
-            width=250  # Fixed width
+            font=ctk.CTkFont(size=12)
         )
-        entry.pack(fill="both", expand=True, padx=5, pady=8)
+        entry.pack(fill="both", expand=True, padx=5, pady=6)
 
         # Bind validation events
         entry.bind('<KeyRelease>', lambda e, fid=field_id: self._on_field_change(fid))
