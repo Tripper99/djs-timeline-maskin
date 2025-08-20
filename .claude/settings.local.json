@@ -26,7 +26,8 @@
       "Bash(echo $env:APPDATA)",
       "WebFetch(domain:customtkinter.tomschimansky.com)",
       "WebSearch",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:docs.anthropic.com)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",

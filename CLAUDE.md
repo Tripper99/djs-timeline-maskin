@@ -8,17 +8,19 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.6.1)
+## Current Status (v2.6.5)
 
-**Latest Achievement (v2.6.1)**: Completed major template name display transformation with prominent visual design and comprehensive state management. Replaced complex dropdown system with intuitive file dialogs, added highly visible orange-background template name display, and implemented robust state management system. Users now have complete template visibility and control with professional UI elements that clearly indicate current template and modification status.
+**Latest Achievement (v2.6.5)**: Successfully resolved critical template loading race conditions and persistent state display bugs through robust timeout-based protection system. Implemented comprehensive template loading protection that prevents field change events from interfering with template application, fixed persistent red "(ändrad)" display issues, and added sophisticated logging for debugging template state transitions. The field configuration dialog now provides rock-solid template loading with visual feedback and state consistency.
 
 **Key Features**:
+- **Robust Template Loading**: Timeout-based protection system prevents race conditions during template application
+- **Race Condition Prevention**: Field change events properly isolated during template loading with 150ms protection window
+- **State Display Reliability**: Fixed persistent red "(ändrad)" display issues through comprehensive state management
 - **Field Protection Consistency**: Källa field now protected like Startdatum and Händelse (cannot be renamed or disabled)
 - **Visual Consistency**: All fields always visible with disabled fields clearly indicated through professional grayed-out styling
 - **Layout Stability**: No more sparse, unbalanced interface when fields are disabled
 - **Centralized Styling System**: Professional disabled field appearance with consistent graying, italic labels, and non-interactive state
 - **Excel Safety**: Disabled fields automatically excluded from Excel operations while maintaining visual presence
-- **Backward Compatibility**: All existing functionality preserved with internal terminology updates and configuration migration
 - **Template Management**: Complete file-dialog based template system with prominent visual status display
 - **Comprehensive Testing**: 120 test suite plus specialized field state validation confirms all functionality works correctly
 
@@ -94,6 +96,14 @@ The application has been refactored from a single large file into a modular stru
   * Always verify that core business logic (Excel operations) remains unchanged during UI transformations
   * Test systematically after each phase rather than at the end - complex changes require incremental validation
   * Document phase completion and commit incremental progress to enable rollback if needed
+
+- **Template Loading Race Condition Prevention** (learned in v2.6.3-v2.6.5):
+  * Use timeout-based protection systems to prevent event interference during critical state transitions
+  * Implement comprehensive logging with clear visual indicators for debugging complex GUI state issues
+  * Add protection flags during template loading to prevent field change events from causing race conditions
+  * Use scheduled callbacks with adequate timeout periods (150ms) for robust event isolation
+  * Debug template state issues systematically with detailed logging at every critical transition point
+  * Test template loading operations thoroughly across different timing scenarios and user interactions
 
 - **mandatory git commit routine**
   * Before writing code you should always make a new version and commit it to git with comments on what you are about to do. 

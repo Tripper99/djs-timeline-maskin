@@ -1,0 +1,13 @@
+{
+  "template_name": "Testmall",
+  "version": "1.0",
+  "created_date": "2025-08-20T08:34:24.998353",
+  "description": "Mall sparad till fil: Testmall.json",
+  "field_config": {
+    "custom_names": {
+      "obs": "Test2"
+    },
+    "disabled_fields": [],
+    "hidden_fields": []
+  }
+}

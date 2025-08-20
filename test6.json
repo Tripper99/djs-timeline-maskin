@@ -1,0 +1,13 @@
+{
+  "template_name": "test6",
+  "version": "1.0",
+  "created_date": "2025-08-20T11:33:42.232127",
+  "description": "Mall sparad till fil: test6.json",
+  "field_config": {
+    "custom_names": {
+      "obs": "Test2"
+    },
+    "disabled_fields": [],
+    "hidden_fields": []
+  }
+}
