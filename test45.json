@@ -1,0 +1,23 @@
+{
+  "template_name": "test45",
+  "version": "1.0",
+  "created_date": "2025-08-20T18:43:55.293061",
+  "description": "Mall sparad till fil: test45.json",
+  "field_config": {
+    "custom_names": {
+      "obs": "Test45"
+    },
+    "disabled_fields": [
+      "kategori",
+      "underkategori",
+      "person_sak",
+      "special"
+    ],
+    "hidden_fields": [
+      "kategori",
+      "underkategori",
+      "person_sak",
+      "special"
+    ]
+  }
+}

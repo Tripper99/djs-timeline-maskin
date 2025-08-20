@@ -1,40 +1,7 @@
 # TODO List - DJs Timeline-maskin
 
 ## Current Bugs
-
-### 1. Template Persistence and Name Display Bug ❌ **ACTIVE**
-**Area**: Excel field configuration dialog ("Konfigurera Excel-fält")
-**Problem**: Template name always shows "Aktuell mall: Standard" when reopening dialog, regardless of what configuration is actually loaded
-**Current Behavior**:
-- When clicking "Använd dessa namn", the main window updates correctly with custom names and field visibility
-- When reopening the dialog, custom names and "Dölj" checkboxes are correctly displayed
-- However, template name always shows "Aktuell mall: Standard" instead of the actual loaded template
-**Expected Behavior**:
-- Dialog should display the name of the currently active template configuration
-- When user modifies fields/checkboxes and clicks "Använd dessa namn", they should be prompted to save the template
-- This ensures there's always a named template to display when dialog is reopened
-**Root Cause**: Template name is not persisted with the configuration; only field names and visibility states are saved
-**Proposed Solution**: 
-- Store current template name in config along with field settings
-- When applying changes with modifications, prompt user to save as named template
-- Load and display the stored template name when dialog opens
-**Impact**: User confusion about which template configuration is currently active
-
-### 2. Template Name Display State Reset Bug ✅ **RESOLVED**
-**Problem**: Template name background color doesn't reset to orange after load template operations
-**Status**: 
-- ✅ **"Spara mall..." (Save template)**: Background correctly resets from red to orange after successful save
-- ✅ **"Ladda mall..." (Load template)**: Background correctly resets and shows proper state
-
-### 2. Template State Display Bug - Reset to Standard ✅ **RESOLVED** (v2.6.6)
-**Area**: Excel custom names config dialog window
-**Problem**: "Återställ till standard" button didn't update template name display
-**Resolution**: Fixed in v2.6.6 by adding proper template state management to `_reset_to_defaults` method
-**Fix Details**: 
-- Added `self.current_template = "Standard"` to reset template name
-- Added `self.is_template_modified = False` to clear modified state
-- Added `self._update_template_name_display()` to update visual indicator
-**Verification**: User confirmed fix works correctly - template name now properly shows "Aktuell mall: Standard" with orange background after reset
+*No active bugs at this time*
 
 ## Pending Testing
 

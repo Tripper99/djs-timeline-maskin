@@ -8,21 +8,20 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.6.6)
+## Current Status (v2.6.8)
 
-**Latest Achievement (v2.6.6)**: Fixed template state display bug in the "Återställ till standard" (Reset to Standard) button. The button now properly updates the template name display to "Aktuell mall: Standard" with orange background, providing complete visual consistency when resetting field configuration to defaults. This ensures users have clear visual feedback about the current template state after reset operations.
+**Latest Achievement (v2.6.8)**: Implemented comprehensive "prompt to save when modifications are applied" feature. Users now receive a clear 3-option dialog when applying changes to modified templates, preventing accidental loss of template customizations. The feature includes robust error handling for save failures and maintains template state consistency throughout all operations.
 
 **Key Features**:
-- **Robust Template Loading**: Timeout-based protection system prevents race conditions during template application
-- **Race Condition Prevention**: Field change events properly isolated during template loading with 150ms protection window
-- **State Display Reliability**: Fixed persistent red "(ändrad)" display issues through comprehensive state management
-- **Field Protection Consistency**: Källa field now protected like Startdatum and Händelse (cannot be renamed or disabled)
-- **Visual Consistency**: All fields always visible with disabled fields clearly indicated through professional grayed-out styling
-- **Layout Stability**: No more sparse, unbalanced interface when fields are disabled
-- **Centralized Styling System**: Professional disabled field appearance with consistent graying, italic labels, and non-interactive state
-- **Excel Safety**: Disabled fields automatically excluded from Excel operations while maintaining visual presence
-- **Template Management**: Complete file-dialog based template system with prominent visual status display
-- **Comprehensive Testing**: 120 test suite plus specialized field state validation confirms all functionality works correctly
+- **Save Prompt System**: 3-option dialog prevents loss of template modifications when applying changes
+- **Template Name Persistence**: Active template name correctly saved and displayed across sessions
+- **Robust Error Handling**: Graceful recovery from save failures with clear user choices
+- **Template State Management**: Comprehensive tracking of template modifications with visual indicators
+- **Professional Dialog UX**: Swedish language dialogs with CustomTkinter styling and modal behavior
+- **Race Condition Prevention**: Field change events properly isolated during template operations
+- **Field Configuration System**: Custom field names and visibility states with template support
+- **Excel Integration**: Disabled fields automatically excluded from Excel operations
+- **Comprehensive Testing**: 120+ test suite validates all functionality
 
 **Architecture Status**:
 - **Modular Design**: Clean architecture with main_window.py reduced from 35,000+ tokens to 384 lines

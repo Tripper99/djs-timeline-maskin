@@ -135,6 +135,15 @@
   - Excel help dialog with requirements
   - Proper dialog positioning and theming
 
+- **`gui/field_config_dialog.py`** (1058 lines): Field configuration dialog with template support
+  - SavePromptChoice class for dialog return constants
+  - Comprehensive template management with save/load/apply operations
+  - Template modification tracking with visual indicators
+  - Save prompt dialog system with 3-option choices
+  - Error handling dialogs for save failures
+  - Template name persistence across sessions
+  - Field name customization and visibility controls
+
 - **`gui/utils.py`** (195 lines): GUI utilities and custom widgets
   - ScrollableFrame implementation
   - ToolTip functionality
@@ -300,6 +309,10 @@ The application maintains its sophisticated three-column layout implemented with
 
 ### Dialog Flows
 - **Excel File Selection**: File browser with validation
+- **Field Configuration Dialog**: Template management with save prompts
+  - Save prompt when applying modified templates (3 options: Save/Continue/Cancel)
+  - Template save/load operations with file dialogs
+  - Error recovery dialogs for save failures
 - **Help Dialogs**: Comprehensive Excel requirements documentation
 - **Error Handling**: User-friendly Swedish error messages
 

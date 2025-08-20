@@ -4,7 +4,54 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
-### v2.6.6 TODO.md Maintenance Cleanup (2025-08-20) - Documentation Excellence ✅
+### v2.6.8 Save Prompt Feature Implementation (2025-08-20) - User Experience Excellence ✅
+**Achievement**: Implemented comprehensive "prompt to save when modifications are applied" feature, preventing accidental loss of template customizations with professional 3-option dialog system.
+
+**Technical Implementation**:
+- **SavePromptChoice Constants**: Clean enum-style constants for dialog return values
+- **Save Prompt Dialog**: Professional CustomTkinter modal with Swedish text and clear visual hierarchy
+- **Error Recovery System**: Graceful handling of save failures and cancellations
+- **Integration Architecture**: Modified `_apply_changes()` to check `is_template_modified` before confirmation
+- **State Management**: Template consistency maintained throughout all save/cancel scenarios
+
+**User Experience Enhancements**:
+- **3-Option Dialog**: "Spara mall först" (orange) / "Fortsätt utan att spara" (blue) / "Avbryt" (gray)
+- **Clear Workflow**: Modified templates trigger save opportunity before applying changes
+- **Error Handling**: Save failures prompt "Continue anyway?" or "Cancel" choice
+- **No Breaking Changes**: Unmodified templates experience unchanged workflow
+
+**Development Excellence**:
+- **Sub-Agent Usage**: architecture-planner, bug-finder-debugger, code-writer, code-reviewer-refactorer
+- **Risk Analysis**: Comprehensive edge case evaluation with mitigation strategies
+- **Code Quality**: 197 lines added, Ruff syntax check passed
+- **Pattern Consistency**: Follows established dialog and error handling conventions
+
+### v2.6.7 Template Name Persistence Bug Fix (2025-08-20) - State Management Fix ✅
+**Problem**: Template name always showed "Aktuell mall: Standard" when reopening field configuration dialog, regardless of actual active template.
+
+**Root Cause**: Template name was not being persisted or loaded from configuration, only field names and visibility states were saved.
+
+**Solution Implementation**:
+- **Config Loading**: Modified `_load_current_configuration()` to load stored template name with fallback to "Standard"
+- **Config Saving**: Added `config_manager.save_active_template()` call in `_apply_changes()` after successful apply
+- **Minimal Changes**: Only 2 strategic code modifications leveraging existing infrastructure
+
+**Technical Excellence**:
+- **Low Risk Fix**: Used existing `load_active_template()` and `save_active_template()` methods
+- **Clean Integration**: No new infrastructure needed, leveraged proven config system
+- **Immediate Impact**: Template name now correctly persists across dialog sessions
+
+### v2.6.6 Template State Display Bug Fix (2025-08-20) - Visual Consistency ✅
+**Problem**: "Återställ till standard" (Reset to Standard) button didn't update template name display in field configuration dialog.
+
+**Solution**: Fixed by adding proper template state management to `_reset_to_defaults` method:
+- Added `self.current_template = "Standard"` to reset template name
+- Added `self.is_template_modified = False` to clear modified state  
+- Added `self._update_template_name_display()` to update visual indicator
+
+**Result**: Template name now properly shows "Aktuell mall: Standard" with orange background after reset, providing complete visual consistency.
+
+### v2.6.6 Documentation Cleanup (2025-08-20) - TODO.md Maintenance ✅
 **Achievement**: Comprehensive cleanup of oversized TODO.md file, moving completed historical items to proper documentation location.
 
 **Cleanup Scope**:
