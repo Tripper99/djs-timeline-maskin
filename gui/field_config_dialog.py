@@ -606,6 +606,7 @@ class FieldConfigDialog:
         """Apply loaded template configuration to the dialog."""
         # Set flag to prevent race conditions during template loading
         self._loading_template = True
+        logger.info(f"🔄 TEMPLATE LOADING START: {template_name} (_loading_template=True)")
         logger.debug(f"Starting template loading for: {template_name}, _loading_template=True")
 
         try:
@@ -636,6 +637,7 @@ class FieldConfigDialog:
             # Update current template name for reference - this must be done after validation
             self.current_template = template_name
             self.is_template_modified = False
+            logger.info(f"✅ TEMPLATE STATE RESET: {template_name} (is_modified=False)")
             self._update_template_name_display()
 
             logger.debug("Template config applied, scheduling flag clear with after_idle")
@@ -650,6 +652,7 @@ class FieldConfigDialog:
 
     def _clear_loading_flag(self):
         """Clear the template loading flag after all events have been processed."""
+        logger.info(f"🏁 TEMPLATE LOADING END: Clearing flag (_loading_template={self._loading_template} → False)")
         logger.debug(f"Clearing template loading flag (was {self._loading_template}, now False)")
         self._loading_template = False
         logger.debug("Template loading complete - flag cleared")
@@ -691,6 +694,7 @@ class FieldConfigDialog:
 
         # Mark template as modified (only if not currently loading a template)
         if not self._loading_template:
+            logger.info(f"📝 TEMPLATE MODIFIED by field change in {field_id}")
             logger.debug(f"Marking template as modified due to field change in {field_id}")
             self.is_template_modified = True
             self._update_template_name_display()
@@ -711,8 +715,12 @@ class FieldConfigDialog:
 
         # Mark template as modified (only if not currently loading a template)
         if not self._loading_template:
+            logger.info(f"📝 TEMPLATE MODIFIED by checkbox change in {field_id}")
+            logger.debug(f"Marking template as modified due to checkbox change in {field_id}")
             self.is_template_modified = True
             self._update_template_name_display()
+        else:
+            logger.debug(f"Ignoring checkbox change during template loading for {field_id}")
 
     def _update_field_validation(self, field_id: str):
         """Update validation display for a specific field."""
