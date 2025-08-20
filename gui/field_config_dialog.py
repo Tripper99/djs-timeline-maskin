@@ -41,6 +41,7 @@ class FieldConfigDialog:
         self.current_template = "Standard"
         self.template_name_label = None
         self.is_template_modified = False
+        self._loading_template = False  # Flag to prevent race conditions during template loading
 
         # Field widgets storage
         self.field_entries: Dict[str, ctk.CTkEntry] = {}
@@ -640,33 +641,41 @@ class FieldConfigDialog:
 
     def _apply_template_config(self, template_config: dict, template_name: str):
         """Apply loaded template configuration to the dialog."""
-        custom_names = template_config.get('custom_names', {})
-        disabled_fields = template_config.get('disabled_fields', template_config.get('hidden_fields', []))
+        # Set flag to prevent race conditions during template loading
+        self._loading_template = True
 
-        # Clear current entries
-        for entry in self.field_entries.values():
-            entry.delete(0, 'end')
-        self.current_values.clear()
+        try:
+            custom_names = template_config.get('custom_names', {})
+            disabled_fields = template_config.get('disabled_fields', template_config.get('hidden_fields', []))
 
-        # Apply custom names
-        for field_id, custom_name in custom_names.items():
-            if field_id in self.field_entries:
-                self.field_entries[field_id].insert(0, custom_name)
-                self.current_values[field_id] = custom_name
+            # Clear current entries
+            for entry in self.field_entries.values():
+                entry.delete(0, 'end')
+            self.current_values.clear()
 
-        # Apply field state
-        self.current_disabled_fields = set(disabled_fields)
-        for field_id, checkbox in self.disable_checkboxes.items():
-            is_disabled = field_id in self.current_disabled_fields
-            checkbox.select() if is_disabled else checkbox.deselect()
+            # Apply custom names
+            for field_id, custom_name in custom_names.items():
+                if field_id in self.field_entries:
+                    self.field_entries[field_id].insert(0, custom_name)
+                    self.current_values[field_id] = custom_name
 
-        # Update validation
-        self._update_validation()
+            # Apply field state
+            self.current_disabled_fields = set(disabled_fields)
+            for field_id, checkbox in self.disable_checkboxes.items():
+                is_disabled = field_id in self.current_disabled_fields
+                checkbox.select() if is_disabled else checkbox.deselect()
 
-        # Update current template name for reference
-        self.current_template = template_name
-        self.is_template_modified = False
-        self._update_template_name_display()
+            # Update validation
+            self._update_validation()
+
+            # Update current template name for reference - this must be done after validation
+            self.current_template = template_name
+            self.is_template_modified = False
+            self._update_template_name_display()
+
+        finally:
+            # Clear the loading flag
+            self._loading_template = False
 
     def _update_template_name_display(self):
         """Update the template name display label."""
@@ -701,9 +710,10 @@ class FieldConfigDialog:
         self._update_field_validation(field_id)
         self._update_apply_button()
 
-        # Mark template as modified
-        self.is_template_modified = True
-        self._update_template_name_display()
+        # Mark template as modified (only if not currently loading a template)
+        if not self._loading_template:
+            self.is_template_modified = True
+            self._update_template_name_display()
 
     def _on_hide_checkbox_changed(self, field_id: str):
         """Handle hide checkbox changes."""
@@ -717,9 +727,10 @@ class FieldConfigDialog:
 
         logger.debug(f"Field {field_id} visibility changed: {'hidden' if is_checked else 'visible'}")
 
-        # Mark template as modified
-        self.is_template_modified = True
-        self._update_template_name_display()
+        # Mark template as modified (only if not currently loading a template)
+        if not self._loading_template:
+            self.is_template_modified = True
+            self._update_template_name_display()
 
     def _update_field_validation(self, field_id: str):
         """Update validation display for a specific field."""
