@@ -5,6 +5,7 @@ Based on user mockup requirements with two-column layout and comprehensive templ
 
 import logging
 import os
+from datetime import datetime
 from pathlib import Path
 from tkinter import filedialog, messagebox
 from typing import Callable, Dict, Optional
@@ -47,8 +48,10 @@ class FieldConfigDialog:
         # Template management
         self.current_template = "Standard"
         self.template_name_label = None
+        self.save_template_button = None  # Reference to direct save button for state management
         self.is_template_modified = False
         self._loading_template = False  # Flag to prevent race conditions during template loading
+        self._last_button_update = 0  # Throttling mechanism for button state updates
 
         # Field widgets storage
         self.field_entries: Dict[str, ctk.CTkEntry] = {}
@@ -140,7 +143,7 @@ class FieldConfigDialog:
         """Create template file dialog controls for loading and saving templates."""
         template_frame = ctk.CTkFrame(self.dialog)
         template_frame.grid(row=1, column=0, sticky="ew", padx=20, pady=10)
-        template_frame.grid_columnconfigure(2, weight=1)  # Spacer column
+        template_frame.grid_columnconfigure(3, weight=1)  # Spacer column (updated for 3 buttons)
 
         # Load template button
         load_button = ctk.CTkButton(
@@ -152,15 +155,26 @@ class FieldConfigDialog:
         )
         load_button.grid(row=0, column=0, padx=(15, 10), pady=15)
 
-        # Save template button
-        save_button = ctk.CTkButton(
+        # Direct save template button (new)
+        self.save_template_button = ctk.CTkButton(
             template_frame,
-            text="Spara mall...",
+            text="Spara mall",
+            width=120,
+            height=32,
+            command=self._save_current_template,
+            state="disabled"  # Initially disabled
+        )
+        self.save_template_button.grid(row=0, column=1, padx=5, pady=15)
+
+        # Save template as button (renamed from "Spara mall...")
+        save_as_button = ctk.CTkButton(
+            template_frame,
+            text="Spara mall som...",
             width=140,
             height=32,
             command=self._save_template_to_file
         )
-        save_button.grid(row=0, column=1, padx=10, pady=15)
+        save_as_button.grid(row=0, column=2, padx=5, pady=15)
 
         # Template name display
         self.template_name_label = ctk.CTkLabel(
@@ -173,7 +187,7 @@ class FieldConfigDialog:
             padx=12,
             pady=6
         )
-        self.template_name_label.grid(row=0, column=2, padx=15, pady=15)
+        self.template_name_label.grid(row=0, column=3, padx=15, pady=15)
 
         # Help button on right side
         help_button = ctk.CTkButton(
@@ -185,7 +199,7 @@ class FieldConfigDialog:
             hover_color="gray50",
             command=self._show_help
         )
-        help_button.grid(row=0, column=3, padx=(10, 15), pady=15)
+        help_button.grid(row=0, column=4, padx=(10, 15), pady=15)
 
     def _create_main_content(self):
         """Create main content area with two-column field layout."""
@@ -471,6 +485,7 @@ class FieldConfigDialog:
         # Update template name display
         self.is_template_modified = False  # Initial load is not a modification
         self._update_template_name_display()
+        # Note: _update_template_buttons_state() is called by _update_template_name_display()
 
     def _load_template_from_file(self):
         """Load template configuration from a file dialog."""
@@ -527,6 +542,53 @@ class FieldConfigDialog:
                 "Fel vid laddning",
                 f"Kunde inte ladda mallen: {str(e)}"
             )
+
+    def _save_current_template(self):
+        """Save changes directly to the currently active template."""
+        # Safety checks
+        if not self._can_save_current_template():
+            logger.warning("Attempted to save current template when not allowed")
+            return
+
+        # Additional validation: ensure current template name is valid
+        if not self.current_template or not self.current_template.strip():
+            logger.error("Cannot save: current template name is invalid")
+            self._show_save_error("Mallnamnet är ogiltigt. Kan inte spara.")
+            return
+
+        try:
+            # Extract current configuration
+            field_config = self._get_current_field_config()
+
+            # Create descriptive save message
+            description = f"Mall uppdaterad: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+
+            # Attempt save using template manager
+            success = template_manager.save_template(
+                self.current_template,
+                field_config,
+                description
+            )
+
+            if success:
+                # Save successful - update state and provide feedback
+                self.is_template_modified = False
+                self._show_save_success()
+                logger.info(f"Successfully saved template: {self.current_template}")
+            else:
+                # Save failed - keep modified state and show error
+                self._show_save_error("Kunde inte spara mallen. Kontrollera att du har skrivrättigheter.")
+                logger.error(f"Failed to save template: {self.current_template}")
+
+        except Exception as e:
+            # Unexpected error - handle gracefully
+            self._show_save_error(f"Ett oväntat fel uppstod: {str(e)}")
+            logger.error(f"Unexpected error saving template {self.current_template}: {e}")
+
+        finally:
+            # Always update button state and display (regardless of success/failure)
+            self._update_template_buttons_state()
+            self._update_template_name_display()
 
     def _save_template_to_file(self):
         """Save current configuration to a file via file dialog."""
@@ -646,6 +708,7 @@ class FieldConfigDialog:
             self.is_template_modified = False
             logger.info(f"✅ TEMPLATE STATE RESET: {template_name} (is_modified=False)")
             self._update_template_name_display()
+            # Note: _update_template_buttons_state() is called by _update_template_name_display()
 
             logger.debug("Template config applied, scheduling flag clear with timeout protection")
             # Schedule flag clearing AFTER 150ms timeout for robust event protection
@@ -664,6 +727,98 @@ class FieldConfigDialog:
         self._loading_template = False
         logger.debug("Template loading complete - timeout protection ended")
 
+    def _can_save_current_template(self) -> bool:
+        """
+        Determine if current template can be saved directly.
+        
+        Returns:
+            True if template can be saved, False otherwise
+        """
+        # Always disabled for Standard template - cannot be overwritten
+        if self.current_template == "Standard":
+            return False
+
+        # Always disabled when loading template (race condition protection)
+        if self._loading_template:
+            return False
+
+        # Only enabled when there are modifications to save
+        return self.is_template_modified
+
+    def _update_template_buttons_state(self):
+        """Update the state and text of template save buttons."""
+        if not self.save_template_button:
+            return  # Button not created yet
+
+        # Simple throttling: avoid excessive updates (max once per 50ms)
+        import time
+        current_time = time.time() * 1000  # Convert to milliseconds
+        if current_time - self._last_button_update < 50:
+            return  # Too soon since last update
+        self._last_button_update = current_time
+
+        can_save = self._can_save_current_template()
+
+        # Update button state
+        button_state = "normal" if can_save else "disabled"
+        self.save_template_button.configure(state=button_state)
+
+        # Update button text dynamically
+        if can_save:
+            button_text = f"Spara mall: {self.current_template}"
+        else:
+            button_text = "Spara mall"
+
+        # Update button text (truncate if too long to fit button width)
+        max_length = 16  # Approximate max characters that fit in button width
+        if len(button_text) > max_length:
+            truncated_template = self.current_template[:max_length-12] + "..."
+            button_text = f"Spara mall: {truncated_template}"
+
+        self.save_template_button.configure(text=button_text)
+
+    def _get_current_field_config(self) -> Dict:
+        """
+        Extract current field configuration for template saving.
+        
+        Returns:
+            Dictionary with 'custom_names' and 'disabled_fields' keys
+        """
+        # Validate that we have current values to work with
+        if not hasattr(self, 'current_values') or self.current_values is None:
+            logger.warning("current_values not initialized, returning empty config")
+            return {'custom_names': {}, 'disabled_fields': []}
+
+        if not hasattr(self, 'current_disabled_fields') or self.current_disabled_fields is None:
+            logger.warning("current_disabled_fields not initialized, using empty set")
+            self.current_disabled_fields = set()
+
+        # Extract custom names (only include non-empty, valid values)
+        custom_names = {}
+        for field_id, value in self.current_values.items():
+            if isinstance(value, str) and value.strip():  # Only include valid, non-empty custom names
+                # Additional validation: check field_id is valid
+                if field_id in FIELD_DEFINITIONS:
+                    custom_names[field_id] = value.strip()
+                else:
+                    logger.warning(f"Ignoring invalid field_id during config extraction: {field_id}")
+
+        # Validate disabled fields list
+        disabled_fields_list = []
+        for field_id in self.current_disabled_fields:
+            if isinstance(field_id, str) and field_id in FIELD_DEFINITIONS:
+                disabled_fields_list.append(field_id)
+            else:
+                logger.warning(f"Ignoring invalid disabled field_id: {field_id}")
+
+        # Create field configuration dictionary
+        field_config = {
+            'custom_names': custom_names,
+            'disabled_fields': disabled_fields_list
+        }
+
+        return field_config
+
     def _update_template_name_display(self):
         """Update the template name display label."""
         if not self.template_name_label:
@@ -681,6 +836,9 @@ class FieldConfigDialog:
             bg_color = "#FF8C00"  # Orange background for normal state
 
         self.template_name_label.configure(text=display_text, text_color=text_color, fg_color=bg_color)
+
+        # Update button state when template name display changes
+        self._update_template_buttons_state()
 
     def _on_field_change(self, field_id: str):
         """Handle field value changes."""
@@ -705,6 +863,7 @@ class FieldConfigDialog:
             logger.debug(f"Marking template as modified due to field change in {field_id}")
             self.is_template_modified = True
             self._update_template_name_display()
+            # Note: _update_template_buttons_state() is called by _update_template_name_display()
         else:
             logger.debug(f"Ignoring field change during template loading for {field_id}")
 
@@ -726,6 +885,7 @@ class FieldConfigDialog:
             logger.debug(f"Marking template as modified due to checkbox change in {field_id}")
             self.is_template_modified = True
             self._update_template_name_display()
+            # Note: _update_template_buttons_state() is called by _update_template_name_display()
         else:
             logger.debug(f"Ignoring checkbox change during template loading for {field_id}")
 
@@ -817,6 +977,7 @@ class FieldConfigDialog:
         self.current_template = "Standard"
         self.is_template_modified = False
         self._update_template_name_display()
+        # Note: _update_template_buttons_state() is called by _update_template_name_display()
 
         # Update validation
         self._update_validation()
@@ -1056,6 +1217,95 @@ class FieldConfigDialog:
         # Wait for user response
         failure_dialog.wait_window()
         return result["continue"]
+
+    def _show_save_success(self):
+        """Show success feedback when template is saved."""
+        success_dialog = ctk.CTkToplevel(self.dialog)
+        success_dialog.title("Mall sparad")
+        success_dialog.geometry("350x150")
+        success_dialog.transient(self.dialog)
+        success_dialog.grab_set()
+
+        # Center on parent dialog
+        self.dialog.update_idletasks()
+        x = self.dialog.winfo_rootx() + 300
+        y = self.dialog.winfo_rooty() + 300
+        success_dialog.geometry(f"350x150+{x}+{y}")
+
+        # Success message
+        success_label = ctk.CTkLabel(
+            success_dialog,
+            text="✅ Mall sparad!",
+            font=ctk.CTkFont(size=14, weight="bold"),
+            text_color="#28A745"
+        )
+        success_label.pack(pady=(20, 10))
+
+        detail_label = ctk.CTkLabel(
+            success_dialog,
+            text=f"Mallen '{self.current_template}' har uppdaterats.",
+            font=ctk.CTkFont(size=12)
+        )
+        detail_label.pack(pady=(0, 20))
+
+        # OK button
+        ok_button = ctk.CTkButton(
+            success_dialog,
+            text="OK",
+            width=80,
+            height=30,
+            command=success_dialog.destroy,
+            fg_color="#28A745",
+            hover_color="#218838"
+        )
+        ok_button.pack(pady=(0, 20))
+
+        # Auto-close after 2 seconds
+        success_dialog.after(2000, success_dialog.destroy)
+
+    def _show_save_error(self, error_message: str):
+        """Show error feedback when template save fails."""
+        error_dialog = ctk.CTkToplevel(self.dialog)
+        error_dialog.title("Kunde inte spara")
+        error_dialog.geometry("400x200")
+        error_dialog.transient(self.dialog)
+        error_dialog.grab_set()
+
+        # Center on parent dialog
+        self.dialog.update_idletasks()
+        x = self.dialog.winfo_rootx() + 250
+        y = self.dialog.winfo_rooty() + 250
+        error_dialog.geometry(f"400x200+{x}+{y}")
+
+        # Error message
+        error_label = ctk.CTkLabel(
+            error_dialog,
+            text="❌ Kunde inte spara mall",
+            font=ctk.CTkFont(size=14, weight="bold"),
+            text_color="#DC3545"
+        )
+        error_label.pack(pady=(20, 10))
+
+        detail_label = ctk.CTkLabel(
+            error_dialog,
+            text=error_message,
+            font=ctk.CTkFont(size=12),
+            wraplength=350,
+            justify="center"
+        )
+        detail_label.pack(pady=(0, 20), padx=20)
+
+        # OK button
+        ok_button = ctk.CTkButton(
+            error_dialog,
+            text="OK",
+            width=80,
+            height=30,
+            command=error_dialog.destroy,
+            fg_color="#DC3545",
+            hover_color="#C82333"
+        )
+        ok_button.pack(pady=(0, 20))
 
     def _confirm_apply(self) -> bool:
         """Show confirmation dialog for applying changes."""
