@@ -313,15 +313,15 @@ class FieldConfigDialog:
         )
         protected_entry.pack(fill="both", expand=True, padx=5, pady=6)
 
-        # Add invisible spacer frames for unused columns
-        self._add_spacer_frame(containers['counter'])
-        self._add_spacer_frame(containers['icon'])
+        # Add invisible spacers for unused columns - widget-specific for proper alignment
+        self._add_counter_spacer(containers['counter'])
+        self._add_icon_spacer(containers['icon'])
 
-        # Add checkbox if field can be disabled, otherwise add spacer
+        # Add checkbox if field can be disabled, otherwise add checkbox spacer
         if can_be_disabled:
             self._create_disable_checkbox(containers['checkbox'], field_id)
         else:
-            self._add_spacer_frame(containers['checkbox'])
+            self._add_checkbox_spacer(containers['checkbox'])
 
 
     def _create_editable_field_components(self, containers, field_id: str, field_def, can_be_disabled: bool = True):
@@ -370,11 +370,11 @@ class FieldConfigDialog:
         icon_label.pack(padx=5, pady=8, anchor="center")
         self.validation_icons[field_id] = icon_label
 
-        # Add checkbox if field can be disabled, otherwise add spacer
+        # Add checkbox if field can be disabled, otherwise add checkbox spacer
         if can_be_disabled:
             self._create_disable_checkbox(containers['checkbox'], field_id)
         else:
-            self._add_spacer_frame(containers['checkbox'])
+            self._add_checkbox_spacer(containers['checkbox'])
 
     def _create_disable_checkbox(self, container, field_id: str):
         """Create a disable checkbox for the specified field."""
@@ -386,10 +386,35 @@ class FieldConfigDialog:
         hide_checkbox.pack(padx=(5, 10), pady=8, anchor="center")
         self.disable_checkboxes[field_id] = hide_checkbox
 
-    def _add_spacer_frame(self, container):
-        """Add invisible spacer frame to maintain layout consistency."""
-        spacer = ctk.CTkFrame(container, fg_color="transparent", width=1, height=1)
-        spacer.pack(fill="both", expand=True)
+    def _add_counter_spacer(self, container):
+        """Add invisible character counter spacer to match real counter dimensions."""
+        spacer = ctk.CTkLabel(
+            container,
+            text="",
+            font=ctk.CTkFont(size=10),
+            fg_color="transparent"
+        )
+        spacer.pack(padx=5, pady=8, anchor="center")
+
+    def _add_icon_spacer(self, container):
+        """Add invisible validation icon spacer to match real icon dimensions."""
+        spacer = ctk.CTkLabel(
+            container,
+            text="",
+            font=ctk.CTkFont(size=14),
+            fg_color="transparent"
+        )
+        spacer.pack(padx=5, pady=8, anchor="center")
+
+    def _add_checkbox_spacer(self, container):
+        """Add invisible checkbox spacer to match real checkbox dimensions."""
+        spacer = ctk.CTkFrame(
+            container,
+            fg_color="transparent",
+            width=85,
+            height=24
+        )
+        spacer.pack(padx=(5, 10), pady=8, anchor="center")
 
     def _create_footer(self):
         """Create dialog footer with action buttons."""
@@ -730,7 +755,7 @@ class FieldConfigDialog:
     def _can_save_current_template(self) -> bool:
         """
         Determine if current template can be saved directly.
-        
+
         Returns:
             True if template can be saved, False otherwise
         """
@@ -780,7 +805,7 @@ class FieldConfigDialog:
     def _get_current_field_config(self) -> Dict:
         """
         Extract current field configuration for template saving.
-        
+
         Returns:
             Dictionary with 'custom_names' and 'disabled_fields' keys
         """
