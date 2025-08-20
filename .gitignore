@@ -69,3 +69,6 @@ logs/
 
 # Demo files - UI interaction examples
 demos/
+
+# Saved Excel name templates - user-specific template files
+Saved excel name templates/
