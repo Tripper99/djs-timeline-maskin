@@ -504,10 +504,8 @@ class FieldConfigDialog:
             # Apply template configuration to dialog
             self._apply_template_config(template_config, template_name)
 
-            # Ensure template state is properly reset after loading
-            self.current_template = template_name
-            self.is_template_modified = False
-            self._update_template_name_display()
+            # Note: Template state is already handled in _apply_template_config()
+            # No need to duplicate the state setting here
 
             messagebox.showinfo(
                 "Mall laddad",
@@ -608,6 +606,7 @@ class FieldConfigDialog:
         """Apply loaded template configuration to the dialog."""
         # Set flag to prevent race conditions during template loading
         self._loading_template = True
+        logger.debug(f"Starting template loading for: {template_name}, _loading_template=True")
 
         try:
             custom_names = template_config.get('custom_names', {})
@@ -621,6 +620,7 @@ class FieldConfigDialog:
             # Apply custom names
             for field_id, custom_name in custom_names.items():
                 if field_id in self.field_entries:
+                    logger.debug(f"Inserting custom name for {field_id}: {custom_name}")
                     self.field_entries[field_id].insert(0, custom_name)
                     self.current_values[field_id] = custom_name
 
@@ -638,9 +638,21 @@ class FieldConfigDialog:
             self.is_template_modified = False
             self._update_template_name_display()
 
-        finally:
-            # Clear the loading flag
+            logger.debug("Template config applied, scheduling flag clear with after_idle")
+            # Schedule flag clearing AFTER all pending events are processed
+            self.dialog.after_idle(self._clear_loading_flag)
+
+        except Exception as e:
+            # Clear flag immediately on error
+            logger.error(f"Error applying template config: {e}")
             self._loading_template = False
+            raise
+
+    def _clear_loading_flag(self):
+        """Clear the template loading flag after all events have been processed."""
+        logger.debug(f"Clearing template loading flag (was {self._loading_template}, now False)")
+        self._loading_template = False
+        logger.debug("Template loading complete - flag cleared")
 
     def _update_template_name_display(self):
         """Update the template name display label."""
@@ -662,6 +674,8 @@ class FieldConfigDialog:
 
     def _on_field_change(self, field_id: str):
         """Handle field value changes."""
+        logger.debug(f"Field change event for {field_id}, _loading_template={self._loading_template}")
+
         entry = self.field_entries[field_id]
         new_value = entry.get().strip()
         self.current_values[field_id] = new_value
@@ -677,8 +691,11 @@ class FieldConfigDialog:
 
         # Mark template as modified (only if not currently loading a template)
         if not self._loading_template:
+            logger.debug(f"Marking template as modified due to field change in {field_id}")
             self.is_template_modified = True
             self._update_template_name_display()
+        else:
+            logger.debug(f"Ignoring field change during template loading for {field_id}")
 
     def _on_hide_checkbox_changed(self, field_id: str):
         """Handle hide checkbox changes."""
