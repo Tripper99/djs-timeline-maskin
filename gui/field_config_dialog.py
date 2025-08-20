@@ -420,8 +420,8 @@ class FieldConfigDialog:
 
     def _load_current_configuration(self):
         """Load current field configuration and template."""
-        # Initialize with default template
-        self.current_template = "Standard"
+        # Load active template name (fallback to "Standard")
+        self.current_template = self.config_manager.load_active_template() or "Standard"
 
         # Load current field names
         custom_names = self.config_manager.load_custom_field_names()
@@ -845,6 +845,9 @@ class FieldConfigDialog:
             field_state_manager.set_disabled_fields(list(self.current_disabled_fields))
 
             logger.info(f"Applied configuration: {len(custom_names)} custom names, {len(self.current_disabled_fields)} disabled fields")
+
+            # Save active template name for persistence
+            self.config_manager.save_active_template(self.current_template)
 
             # Call the callback to trigger application update
             if self.on_apply_callback:
