@@ -2,22 +2,35 @@
 
 ## Current Bugs
 
-### 1. Template Name Display State Reset Bug 
+### 1. Template Name Display State Reset Bug ✅ **RESOLVED**
 **Problem**: Template name background color doesn't reset to orange after load template operations
 **Status**: 
 - ✅ **"Spara mall..." (Save template)**: Background correctly resets from red to orange after successful save
-- ✅ **"Ladda mall..." (Load template)**: Background remains red and still shows "(ändrad)" after loading template
+- ✅ **"Ladda mall..." (Load template)**: Background correctly resets and shows proper state
+
+### 2. Template State Display Bug - Reset to Standard ❌ **ACTIVE**
+**Area**: Excel custom names config dialog window
+**Problem**: "Återställ till standard" button doesn't update template name display
+**Expected Behavior**: 
+- Clicking "Återställ till standard" should show "Aktuell mall: Standard" with orange background
+- All field names should reset to standard values (✅ working)
+- All "Dölj" checkmarks should be cleared (✅ working)
+**Current Behavior**: 
+- Field reset functionality works correctly
+- Template name display ("Aktuell mall:") retains old template name and styling
+- Visual template state indicator doesn't reflect the reset operation
+**Impact**: User confusion about current template state after reset operation
 
 ## Pending Testing
 
-### 2. Unit Tests for Individual Mixins
+### 3. Unit Tests for Individual Mixins
 **Implementation Strategy**: Mostly autonomous unit tests for mixin functionality
 - [ ] Test PDF Operations Mixin - file selection logic, validation, renaming
 - [ ] Test Excel Operations Mixin - row creation, column mapping
 - [ ] Test Event Handlers - event processing logic (mocked GUI interactions)
 - [ ] Test Undo/Redo - command pattern implementation
 
-### 3. Phase 3 Manual Verification Tests
+### 4. Phase 3 Manual Verification Tests
 **Implementation Strategy**: User active participation required
 - [ ] **Visual/Layout Testing**:
   - [ ] Column resizing functionality
@@ -31,12 +44,12 @@
 
 ## Future Improvements
 
-### 4. Consider async operations for file processing
+### 5. Consider async operations for file processing
 - [ ] Evaluate if PDF processing could benefit from async operations
 - [ ] Consider background processing for large Excel files
 - [ ] Implement progress indicators for long operations
 
-### 5. Field Configuration Dialog Enhancements
+### 6. Field Configuration Dialog Enhancements
 **Field Name Templates System**:
 - [ ] Add "Återställ till standard" (Restore to default names) button - clears all custom name fields
 - [ ] Add "Spara namnmall" (Save name template) button - saves current field configuration as template
@@ -52,7 +65,7 @@
 - [ ] Enhance visual feedback for template operations
 - [ ] Add template management section to dialog
 
-### 6. Add type hints throughout the codebase
+### 7. Add type hints throughout the codebase
 - [ ] Add type hints to all function signatures
 - [ ] Add type hints for class attributes
 - [ ] Use typing module for complex types
