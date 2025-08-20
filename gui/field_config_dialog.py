@@ -217,12 +217,13 @@ class FieldConfigDialog:
         containers = self._create_fixed_width_containers(field_frame)
 
         # Determine field type and create appropriate components
+        # Note: Checkbox availability is independent of field protection status
+        can_be_disabled = field_id not in REQUIRED_ENABLED_FIELDS
+
         if field_def.protected:
-            self._create_protected_field_components(containers, field_id, field_def)
-        elif field_id in REQUIRED_ENABLED_FIELDS:
-            self._create_required_field_components(containers, field_id, field_def)
+            self._create_protected_field_components(containers, field_id, field_def, can_be_disabled)
         else:
-            self._create_editable_field_components(containers, field_id, field_def)
+            self._create_editable_field_components(containers, field_id, field_def, can_be_disabled)
 
     def _create_fixed_width_containers(self, parent_frame):
         """Create fixed-width container frames for uniform column alignment."""
@@ -267,8 +268,8 @@ class FieldConfigDialog:
 
         return containers
 
-    def _create_protected_field_components(self, containers, field_id: str, field_def):
-        """Create components for protected fields (label + disabled entry only)."""
+    def _create_protected_field_components(self, containers, field_id: str, field_def, can_be_disabled: bool = False):
+        """Create components for protected fields (label + disabled entry + optional checkbox)."""
         display_name = field_def.default_display_name
 
         # Field label in label container
@@ -291,13 +292,19 @@ class FieldConfigDialog:
         )
         protected_entry.pack(fill="both", expand=True, padx=5, pady=6)
 
-        # Add invisible spacer frames for unused columns to maintain layout consistency
+        # Add invisible spacer frames for unused columns
         self._add_spacer_frame(containers['counter'])
         self._add_spacer_frame(containers['icon'])
-        self._add_spacer_frame(containers['checkbox'])
 
-    def _create_required_field_components(self, containers, field_id: str, field_def):
-        """Create components for required editable fields (no checkbox)."""
+        # Add checkbox if field can be disabled, otherwise add spacer
+        if can_be_disabled:
+            self._create_disable_checkbox(containers['checkbox'], field_id)
+        else:
+            self._add_spacer_frame(containers['checkbox'])
+
+
+    def _create_editable_field_components(self, containers, field_id: str, field_def, can_be_disabled: bool = True):
+        """Create components for fully editable fields (all components + optional checkbox)."""
         display_name = field_def.default_display_name
 
         # Field label in label container
@@ -342,58 +349,16 @@ class FieldConfigDialog:
         icon_label.pack(padx=5, pady=8, anchor="center")
         self.validation_icons[field_id] = icon_label
 
-        # Add invisible spacer frame for checkbox column
-        self._add_spacer_frame(containers['checkbox'])
+        # Add checkbox if field can be disabled, otherwise add spacer
+        if can_be_disabled:
+            self._create_disable_checkbox(containers['checkbox'], field_id)
+        else:
+            self._add_spacer_frame(containers['checkbox'])
 
-    def _create_editable_field_components(self, containers, field_id: str, field_def):
-        """Create components for fully editable fields (all components)."""
-        display_name = field_def.default_display_name
-
-        # Field label in label container
-        label_text = f"{display_name}:"
-        field_label = ctk.CTkLabel(
-            containers['label'],
-            text=label_text,
-            font=ctk.CTkFont(size=11, weight="bold"),
-            anchor="w"
-        )
-        field_label.pack(side="left", padx=(10, 5), pady=8, fill="y")
-
-        # Editable entry in entry container
-        entry = ctk.CTkEntry(
-            containers['entry'],
-            placeholder_text="Ange nytt namn...",
-            font=ctk.CTkFont(size=12)
-        )
-        entry.pack(fill="both", expand=True, padx=5, pady=6)
-
-        # Bind validation events
-        entry.bind('<KeyRelease>', lambda e, fid=field_id: self._on_field_change(fid))
-        entry.bind('<FocusOut>', lambda e, fid=field_id: self._on_field_change(fid))
-        self.field_entries[field_id] = entry
-
-        # Character counter in counter container
-        char_label = ctk.CTkLabel(
-            containers['counter'],
-            text="0/13",
-            font=ctk.CTkFont(size=10),
-            text_color="gray50"
-        )
-        char_label.pack(padx=5, pady=8, anchor="center")
-        self.char_count_labels[field_id] = char_label
-
-        # Validation icon in icon container
-        icon_label = ctk.CTkLabel(
-            containers['icon'],
-            text="⚪",
-            font=ctk.CTkFont(size=14)
-        )
-        icon_label.pack(padx=5, pady=8, anchor="center")
-        self.validation_icons[field_id] = icon_label
-
-        # Hide checkbox in checkbox container
+    def _create_disable_checkbox(self, container, field_id: str):
+        """Create a disable checkbox for the specified field."""
         hide_checkbox = ctk.CTkCheckBox(
-            containers['checkbox'],
+            container,
             text="Dölj",
             command=lambda fid=field_id: self._on_hide_checkbox_changed(fid)
         )
