@@ -640,9 +640,9 @@ class FieldConfigDialog:
             logger.info(f"✅ TEMPLATE STATE RESET: {template_name} (is_modified=False)")
             self._update_template_name_display()
 
-            logger.debug("Template config applied, scheduling flag clear with after_idle")
-            # Schedule flag clearing AFTER all pending events are processed
-            self.dialog.after_idle(self._clear_loading_flag)
+            logger.debug("Template config applied, scheduling flag clear with timeout protection")
+            # Schedule flag clearing AFTER 150ms timeout for robust event protection
+            self.dialog.after(150, self._clear_loading_flag)
 
         except Exception as e:
             # Clear flag immediately on error
@@ -651,11 +651,11 @@ class FieldConfigDialog:
             raise
 
     def _clear_loading_flag(self):
-        """Clear the template loading flag after all events have been processed."""
-        logger.info(f"🏁 TEMPLATE LOADING END: Clearing flag (_loading_template={self._loading_template} → False)")
-        logger.debug(f"Clearing template loading flag (was {self._loading_template}, now False)")
+        """Clear the template loading flag after timeout protection period."""
+        logger.info(f"🏁 TEMPLATE LOADING END: Timeout protection complete (_loading_template={self._loading_template} → False)")
+        logger.debug(f"Clearing template loading flag after timeout protection (was {self._loading_template}, now False)")
         self._loading_template = False
-        logger.debug("Template loading complete - flag cleared")
+        logger.debug("Template loading complete - timeout protection ended")
 
     def _update_template_name_display(self):
         """Update the template name display label."""
