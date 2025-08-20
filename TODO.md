@@ -8,18 +8,15 @@
 - ✅ **"Spara mall..." (Save template)**: Background correctly resets from red to orange after successful save
 - ✅ **"Ladda mall..." (Load template)**: Background correctly resets and shows proper state
 
-### 2. Template State Display Bug - Reset to Standard ❌ **ACTIVE**
+### 2. Template State Display Bug - Reset to Standard ✅ **RESOLVED** (v2.6.6)
 **Area**: Excel custom names config dialog window
-**Problem**: "Återställ till standard" button doesn't update template name display
-**Expected Behavior**: 
-- Clicking "Återställ till standard" should show "Aktuell mall: Standard" with orange background
-- All field names should reset to standard values (✅ working)
-- All "Dölj" checkmarks should be cleared (✅ working)
-**Current Behavior**: 
-- Field reset functionality works correctly
-- Template name display ("Aktuell mall:") retains old template name and styling
-- Visual template state indicator doesn't reflect the reset operation
-**Impact**: User confusion about current template state after reset operation
+**Problem**: "Återställ till standard" button didn't update template name display
+**Resolution**: Fixed in v2.6.6 by adding proper template state management to `_reset_to_defaults` method
+**Fix Details**: 
+- Added `self.current_template = "Standard"` to reset template name
+- Added `self.is_template_modified = False` to clear modified state
+- Added `self._update_template_name_display()` to update visual indicator
+**Verification**: User confirmed fix works correctly - template name now properly shows "Aktuell mall: Standard" with orange background after reset
 
 ## Pending Testing
 

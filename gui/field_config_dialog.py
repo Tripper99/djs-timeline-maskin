@@ -806,10 +806,15 @@ class FieldConfigDialog:
 
         self.current_disabled_fields.clear()
 
+        # Reset template state to Standard
+        self.current_template = "Standard"
+        self.is_template_modified = False
+        self._update_template_name_display()
+
         # Update validation
         self._update_validation()
 
-        logger.info("Configuration reset to defaults")
+        logger.info("Configuration reset to defaults with template state updated")
 
     def _apply_changes(self):
         """Apply field name changes and visibility settings."""

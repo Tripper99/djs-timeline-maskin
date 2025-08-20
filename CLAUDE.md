@@ -8,9 +8,9 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.6.5)
+## Current Status (v2.6.6)
 
-**Latest Achievement (v2.6.5)**: Successfully resolved critical template loading race conditions and persistent state display bugs through robust timeout-based protection system. Implemented comprehensive template loading protection that prevents field change events from interfering with template application, fixed persistent red "(ändrad)" display issues, and added sophisticated logging for debugging template state transitions. The field configuration dialog now provides rock-solid template loading with visual feedback and state consistency.
+**Latest Achievement (v2.6.6)**: Fixed template state display bug in the "Återställ till standard" (Reset to Standard) button. The button now properly updates the template name display to "Aktuell mall: Standard" with orange background, providing complete visual consistency when resetting field configuration to defaults. This ensures users have clear visual feedback about the current template state after reset operations.
 
 **Key Features**:
 - **Robust Template Loading**: Timeout-based protection system prevents race conditions during template application
