@@ -26,6 +26,13 @@ from core.template_manager import template_manager
 logger = logging.getLogger(__name__)
 
 
+class SavePromptChoice:
+    """Constants for save prompt dialog return values"""
+    SAVE_FIRST = "save_first"
+    CONTINUE_WITHOUT_SAVING = "continue_without_saving"
+    CANCEL = "cancel"
+
+
 class FieldConfigDialog:
     """Redesigned field configuration dialog with template support and field visibility."""
 
@@ -821,6 +828,21 @@ class FieldConfigDialog:
         if self.validation_errors:
             return  # Should not happen if button is properly disabled
 
+        # Check if template has been modified and show save prompt
+        if self.is_template_modified:
+            save_choice = self._show_save_prompt()
+
+            if save_choice == SavePromptChoice.CANCEL:
+                return  # User cancelled, keep dialog open
+            elif save_choice == SavePromptChoice.SAVE_FIRST:
+                # Attempt to save template first
+                save_success = self._save_template_with_feedback()
+                if not save_success:
+                    # Save failed or was cancelled, ask user what to do
+                    if not self._handle_save_failure():
+                        return  # User chose to cancel after save failure
+                    # If user chose to continue, proceed with apply
+
         # Show final confirmation
         if not self._confirm_apply():
             return
@@ -859,6 +881,181 @@ class FieldConfigDialog:
         except Exception as e:
             logger.error(f"Failed to apply configuration: {e}")
             self._show_error("Kunde inte tillämpa ändringar", f"Ett fel uppstod: {str(e)}")
+
+    def _show_save_prompt(self) -> str:
+        """Show save prompt dialog when template has modifications."""
+        save_dialog = ctk.CTkToplevel(self.dialog)
+        save_dialog.title("Spara ändringar?")
+        save_dialog.geometry("500x300")
+        save_dialog.transient(self.dialog)
+        save_dialog.grab_set()
+
+        # Center on parent dialog
+        self.dialog.update_idletasks()
+        x = self.dialog.winfo_rootx() + 200
+        y = self.dialog.winfo_rooty() + 200
+        save_dialog.geometry(f"500x300+{x}+{y}")
+
+        result = {"choice": SavePromptChoice.CANCEL}
+
+        # Warning icon and title
+        warning_label = ctk.CTkLabel(
+            save_dialog,
+            text="💾 SPARA ÄNDRINGAR?",
+            font=ctk.CTkFont(size=16, weight="bold"),
+            text_color="#FF8C00"
+        )
+        warning_label.pack(pady=(20, 15))
+
+        # Main message
+        message_label = ctk.CTkLabel(
+            save_dialog,
+            text=f"Du har gjort ändringar i mallen '{self.current_template}'.\n\nVad vill du göra innan ändringarna tillämpas?",
+            font=ctk.CTkFont(size=12),
+            justify="center",
+            wraplength=400
+        )
+        message_label.pack(pady=(0, 20))
+
+        # Buttons frame
+        button_frame = ctk.CTkFrame(save_dialog)
+        button_frame.pack(pady=20, padx=20, fill="x")
+
+        def on_save_first():
+            result["choice"] = SavePromptChoice.SAVE_FIRST
+            save_dialog.destroy()
+
+        def on_continue_without_saving():
+            result["choice"] = SavePromptChoice.CONTINUE_WITHOUT_SAVING
+            save_dialog.destroy()
+
+        def on_cancel():
+            result["choice"] = SavePromptChoice.CANCEL
+            save_dialog.destroy()
+
+        # Save first button (orange - primary action)
+        save_button = ctk.CTkButton(
+            button_frame,
+            text="💾 Spara mall först",
+            command=on_save_first,
+            width=140,
+            height=40,
+            fg_color="#FF8C00",
+            hover_color="#FF7F00"
+        )
+        save_button.pack(side="left", padx=(10, 5))
+
+        # Continue without saving (blue - secondary action)
+        continue_button = ctk.CTkButton(
+            button_frame,
+            text="➤ Fortsätt utan att spara",
+            command=on_continue_without_saving,
+            width=160,
+            height=40,
+            fg_color="#1f538d",
+            hover_color="#14375e"
+        )
+        continue_button.pack(side="left", padx=5)
+
+        # Cancel button (gray - cancel action)
+        cancel_button = ctk.CTkButton(
+            button_frame,
+            text="✕ Avbryt",
+            command=on_cancel,
+            width=100,
+            height=40,
+            fg_color="#666666",
+            hover_color="#555555"
+        )
+        cancel_button.pack(side="right", padx=(5, 10))
+
+        # Wait for user response
+        save_dialog.wait_window()
+        return result["choice"]
+
+    def _save_template_with_feedback(self) -> bool:
+        """Save template with feedback and return success status."""
+        try:
+            # Call existing save method
+            self._save_template_to_file()
+            # Check if template was actually saved (not cancelled)
+            return not self.is_template_modified  # If save was successful, is_template_modified should be False
+        except Exception as e:
+            logger.error(f"Save template failed: {e}")
+            return False
+
+    def _handle_save_failure(self) -> bool:
+        """Handle save failure scenario - return True to continue, False to cancel."""
+        failure_dialog = ctk.CTkToplevel(self.dialog)
+        failure_dialog.title("Kunde inte spara")
+        failure_dialog.geometry("400x200")
+        failure_dialog.transient(self.dialog)
+        failure_dialog.grab_set()
+
+        # Center on parent dialog
+        self.dialog.update_idletasks()
+        x = self.dialog.winfo_rootx() + 250
+        y = self.dialog.winfo_rooty() + 250
+        failure_dialog.geometry(f"400x200+{x}+{y}")
+
+        result = {"continue": False}
+
+        # Error message
+        error_label = ctk.CTkLabel(
+            failure_dialog,
+            text="⚠️ Kunde inte spara mallen",
+            font=ctk.CTkFont(size=14, weight="bold"),
+            text_color="#FF6B35"
+        )
+        error_label.pack(pady=(20, 10))
+
+        message_label = ctk.CTkLabel(
+            failure_dialog,
+            text="Mallen kunde inte sparas.\nVill du fortsätta ändå utan att spara?",
+            font=ctk.CTkFont(size=12),
+            justify="center"
+        )
+        message_label.pack(pady=(0, 20))
+
+        # Buttons frame
+        button_frame = ctk.CTkFrame(failure_dialog)
+        button_frame.pack(pady=10, fill="x")
+
+        def on_continue():
+            result["continue"] = True
+            failure_dialog.destroy()
+
+        def on_cancel():
+            result["continue"] = False
+            failure_dialog.destroy()
+
+        # Continue button
+        continue_button = ctk.CTkButton(
+            button_frame,
+            text="➤ Fortsätt utan att spara",
+            command=on_continue,
+            width=150,
+            height=35,
+            fg_color="#1f538d",
+            hover_color="#14375e"
+        )
+        continue_button.pack(side="left", padx=(20, 10))
+
+        # Cancel button
+        cancel_button = ctk.CTkButton(
+            button_frame,
+            text="✕ Avbryt",
+            command=on_cancel,
+            width=100,
+            height=35,
+            fg_color="#666666",
+            hover_color="#555555"
+        )
+        cancel_button.pack(side="right", padx=(10, 20))
+
+        # Wait for user response
+        failure_dialog.wait_window()
+        return result["continue"]
 
     def _confirm_apply(self) -> bool:
         """Show confirmation dialog for applying changes."""
