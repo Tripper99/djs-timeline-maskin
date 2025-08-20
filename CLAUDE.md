@@ -8,9 +8,9 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.6.9)
+## Current Status (v2.6.10)
 
-**Latest Achievement (v2.6.9)**: Implemented direct template saving with "Spara mall" button in field configuration dialog. Users can now save template modifications directly to the active template without file dialogs, with intelligent button state management and comprehensive error handling. The feature provides intuitive "Save" vs "Save As" distinction following standard desktop application patterns.
+**Latest Investigation (v2.6.10)**: Conducted comprehensive technical investigation of checkbox alignment issue in field configuration dialog. Despite sophisticated approaches using multiple specialized sub-agents and widget-specific spacer systems, the visual misalignment of "Dölj" checkboxes for protected fields remains unresolved. Issue documented for future fundamental layout architecture reconsideration.
 
 **Key Features**:
 - **Direct Template Saving**: "Spara mall" button saves directly to active template, "Spara mall som..." saves to new file
@@ -103,6 +103,14 @@ The application has been refactored from a single large file into a modular stru
   * Use scheduled callbacks with adequate timeout periods (150ms) for robust event isolation
   * Debug template state issues systematically with detailed logging at every critical transition point
   * Test template loading operations thoroughly across different timing scenarios and user interactions
+
+- **Complex Layout Investigation Methodology** (learned in v2.6.10):
+  * Use multiple specialized sub-agents (architecture-planner, bug-finder-debugger, code-writer) for comprehensive technical investigation
+  * Document failed approaches as thoroughly as successful ones to prevent repeated futile attempts
+  * Recognize when issues may require fundamental architecture changes rather than incremental fixes
+  * Professional handling of unresolved technical challenges with complete documentation for future investigation
+  * Some CustomTkinter layout behaviors may be non-obvious and require community consultation or alternative approaches
+  * Systematic investigation methodology valuable even when resolution is not achieved
 
 - **mandatory git commit routine**
   * Before writing code you should always make a new version and commit it to git with comments on what you are about to do. 
