@@ -20,7 +20,8 @@ Complete these updates in order before ending session:
 - [ ] Mark completed tasks as ✅
 - [ ] Add any new issues discovered during session
 - [ ] Update priority status for remaining tasks
-- [ ] Remove obsolete or completed items
+- [ ] Remove obsolete items
+- [ ] Move completed items to docs\DEVELOPMENT_HISTORY.md
 
 #### CLAUDE.md
 - [ ] Update "Current Status" section with latest version
@@ -28,7 +29,7 @@ Complete these updates in order before ending session:
 - [ ] Document new technical solutions or patterns
 - [ ] Update testing notes if applicable
 
-#### .claude\commands\analyze-codebase.md (if exists)
+#### docs\codebase_analysis.md
 - [ ] Update architecture changes
 - [ ] Note new technical insights
 - [ ] Document structural modifications
