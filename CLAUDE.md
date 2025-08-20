@@ -8,20 +8,20 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.6.8)
+## Current Status (v2.6.9)
 
-**Latest Achievement (v2.6.8)**: Implemented comprehensive "prompt to save when modifications are applied" feature. Users now receive a clear 3-option dialog when applying changes to modified templates, preventing accidental loss of template customizations. The feature includes robust error handling for save failures and maintains template state consistency throughout all operations.
+**Latest Achievement (v2.6.9)**: Implemented direct template saving with "Spara mall" button in field configuration dialog. Users can now save template modifications directly to the active template without file dialogs, with intelligent button state management and comprehensive error handling. The feature provides intuitive "Save" vs "Save As" distinction following standard desktop application patterns.
 
 **Key Features**:
+- **Direct Template Saving**: "Spara mall" button saves directly to active template, "Spara mall som..." saves to new file
+- **Intelligent Button States**: Dynamic enabling/disabling based on template type and modification status
+- **Template Validation**: "Standard" template protected from direct overwrites, custom templates fully supported
+- **Professional UX**: Dynamic button text shows target template, success/error dialogs provide clear feedback
+- **Race Condition Prevention**: Comprehensive protection during template loading and state transitions
 - **Save Prompt System**: 3-option dialog prevents loss of template modifications when applying changes
 - **Template Name Persistence**: Active template name correctly saved and displayed across sessions
-- **Robust Error Handling**: Graceful recovery from save failures with clear user choices
-- **Template State Management**: Comprehensive tracking of template modifications with visual indicators
-- **Professional Dialog UX**: Swedish language dialogs with CustomTkinter styling and modal behavior
-- **Race Condition Prevention**: Field change events properly isolated during template operations
 - **Field Configuration System**: Custom field names and visibility states with template support
 - **Excel Integration**: Disabled fields automatically excluded from Excel operations
-- **Comprehensive Testing**: 120+ test suite validates all functionality
 
 **Architecture Status**:
 - **Modular Design**: Clean architecture with main_window.py reduced from 35,000+ tokens to 384 lines

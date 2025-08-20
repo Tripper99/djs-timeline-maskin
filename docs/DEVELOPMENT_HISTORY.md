@@ -4,6 +4,61 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.6.9 Direct Template Save Implementation (2025-08-20) - Workflow Enhancement ✅
+**Achievement**: Implemented direct template saving functionality with "Spara mall" button in field configuration dialog, providing intuitive "Save" vs "Save As" distinction and eliminating file dialog friction for template modifications.
+
+**Problem Definition**:
+- Users requested direct template saving without file dialogs for active template modifications
+- Need to distinguish between "Save" (overwrite current) vs "Save As" (new file/name) operations
+- "Standard" template must be protected from direct overwrites (force "Save As" workflow)
+- Button states must reflect template type and modification status intelligently
+
+**Technical Implementation Architecture**:
+- **Button Architecture**: Added new "Spara mall" button between existing "Ladda mall..." and "Spara mall som..." buttons
+- **State Management**: `_can_save_current_template()` method determines button enablement with safety checks
+- **Dynamic UX**: `_update_template_buttons_state()` provides real-time button text and state updates
+- **Configuration Extraction**: `_get_current_field_config()` with comprehensive validation and error handling
+- **Direct Save Logic**: `_save_current_template()` handles template saving with robust error recovery
+- **User Feedback**: Professional success/error dialogs with auto-close and clear messaging
+
+**Button State Logic**:
+```
+"Spara mall" Button States:
+❌ DISABLED: current_template == "Standard" (always)
+❌ DISABLED: is_template_modified == False (no changes to save)
+❌ DISABLED: _loading_template == True (race condition protection)
+✅ ENABLED: current_template != "Standard" AND is_template_modified == True
+
+Dynamic Button Text:
+- Disabled: "Spara mall"
+- Enabled: "Spara mall: [Template Name]" (truncated if needed)
+```
+
+**Safety and Edge Case Protection**:
+- **Race Condition Prevention**: `_loading_template` flag prevents save during template loading
+- **Template Name Validation**: Invalid template names rejected with clear error messages
+- **Field Validation**: Configuration extraction validates field IDs and data integrity
+- **Update Throttling**: 50ms throttling prevents excessive GUI updates during rapid changes
+- **Error Recovery**: Save failures maintain template modification state for user retry
+
+**User Experience Enhancements**:
+- **Intuitive Workflow**: Standard desktop "Save/Save As" pattern implementation
+- **Visual Feedback**: Dynamic button text shows save target, red/orange template name indicators
+- **Professional Dialogs**: Success dialogs auto-close after 2 seconds, error dialogs require acknowledgment
+- **Consistent State**: Button states update across all interaction points (field changes, template loading, resets)
+
+**Development Excellence**:
+- **Sub-Agent Utilization**: architecture-planner for design analysis, bug-finder-debugger for edge case identification
+- **Systematic Implementation**: 7-phase development process with comprehensive testing at each stage
+- **Code Quality**: ~300 lines of new code, all Ruff syntax checks passed, zero regression testing
+- **Safety-First Approach**: All existing functionality preserved, additive changes only, full rollback capability
+
+**Integration Points**:
+- **State Hooks**: Button state updates integrated into 6 critical state change points
+- **Template Manager**: Leveraged existing `template_manager.save_template()` infrastructure
+- **Error Handling**: Consistent with existing dialog patterns and Swedish language standards
+- **Configuration System**: Uses established `config_manager` patterns for consistency
+
 ### v2.6.8 Save Prompt Feature Implementation (2025-08-20) - User Experience Excellence ✅
 **Achievement**: Implemented comprehensive "prompt to save when modifications are applied" feature, preventing accidental loss of template customizations with professional 3-option dialog system.
 
