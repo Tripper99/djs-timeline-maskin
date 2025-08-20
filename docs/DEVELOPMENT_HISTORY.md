@@ -4,6 +4,52 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.6.6 TODO.md Maintenance Cleanup (2025-08-20) - Documentation Excellence ✅
+**Achievement**: Comprehensive cleanup of oversized TODO.md file, moving completed historical items to proper documentation location.
+
+**Cleanup Scope**:
+- **Moved to Development History**: 85% of TODO.md content (250+ lines of completed tasks)
+- **Removed Duplicates**: Excel file reset bug, template management system, custom field names bug
+- **Restructured**: Remaining TODO.md reduced to 50 lines of current actionable items only
+- **Organized Historical Data**: All version-specific achievements properly documented chronologically
+
+**Completed Tasks Archived from TODO.md**:
+
+**Major Architectural Achievements**:
+- ✅ **Split main_window.py Modularization**: Successfully reduced from 35,000+ tokens to 384 lines using mixin architecture
+- ✅ **Comprehensive Testing Implementation**: 120 test suite (115 autonomous unit tests + 5 integration tests)
+- ✅ **Template Management System (v2.4.0)**: Full template save/load system restored after git rollback
+- ✅ **Field Name Uniqueness Validation (v2.4.1)**: Real-time context-aware validation system
+
+**Critical Bug Fixes Resolved**:
+- ✅ **Field Styling Bug Fix (v2.5.10)**: CTkEntry widgets now correctly display gray background when disabled
+- ✅ **Custom Field Names Display Bug (v2.3.3)**: Fixed config deletion bug preventing UI display of custom names
+- ✅ **Excel File Selection Reset Bug (v2.5.3)**: Fixed with regression protection
+- ✅ **Källa Field Protection (v2.5.5)**: Made Källa field non-editable like other system fields
+- ✅ **Font Size Button Fixes (v2.5.6)**: A+ button now controls all text fields, removed redundant buttons
+- ✅ **Field Disabling Persistence (v2.5.7)**: Fixed disabled states not restoring after app restart
+- ✅ **Field Configuration Dialog UI (v2.5.9)**: Perfect alignment with fixed-width container architecture
+- ✅ **Template Dropdown Spurious Entry (v2.5.10)**: Enhanced validation prevents invalid templates
+
+**UI/UX Enhancements Completed**:
+- ✅ **Resizable Columns (v2.2.0)**: Native OS-style resize handles with minimum width protection
+- ✅ **UI Space Optimization (v2.2.7-v2.2.11)**: Saved ~4 rows through inline counters, color-coded workflows
+- ✅ **Session Persistence**: Column width memory and state consistency across sessions
+- ✅ **Font Size Field Stability (v2.2.13)**: Fixed Note fields growing when changing font size
+- ✅ **Time Field Validation UX (v2.2.15)**: Made validation consistent with date fields
+- ✅ **Lock Buttons Bug Fix (v2.4.2)**: Fixed missing lock buttons through proper initialization timing
+
+**Testing Framework Completed**:
+- ✅ **Phase 1 Autonomous Testing**: 115 unit tests covering core business logic (100% automated)
+- ✅ **Phase 2 Integration Testing**: 5 semi-autonomous workflow tests with user verification
+- ✅ **TESTING_GUIDE.md**: Comprehensive documentation for future test usage
+
+**Development Process Excellence**:
+- ✅ **Modular Architecture**: Clean mixin-based design enabling independent testing and maintenance
+- ✅ **Code Quality Standards**: Ruff configuration with comprehensive linting rules
+- ✅ **Documentation Organization**: Separated current status (CLAUDE.md) from historical details
+- ✅ **Version Control Excellence**: Consistent commit practices with detailed technical insights
+
 ### v2.6.1 Template Name Display State Management (2025-08-19) - Significant UX Enhancement ✅
 **Achievement**: Transformed template name display from hard-to-read text to prominent visual element with complete state management.
 
