@@ -3,6 +3,20 @@
 ## Current Bugs
 *No active bugs at this time*
 
+## Recently Completed ✅
+
+### v2.6.9 Direct Template Save Feature (2025-08-20) ✅
+**COMPLETED**: Implemented "Spara mall" button with intelligent state management
+- ✅ Direct template saving without file dialogs for active template modifications  
+- ✅ Button state management: disabled for "Standard" template, enabled for modified custom templates
+- ✅ Dynamic button text showing target template name
+- ✅ Comprehensive error handling and user feedback dialogs
+- ✅ Race condition protection during template loading operations
+- ✅ Integration with existing template management system
+- ✅ Professional UX with Swedish language consistency
+- ✅ Zero regression - all existing functionality preserved
+- ✅ User testing completed successfully
+
 ## Pending Testing
 
 ### 3. Unit Tests for Individual Mixins
@@ -31,21 +45,22 @@
 - [ ] Consider background processing for large Excel files
 - [ ] Implement progress indicators for long operations
 
-### 6. Field Configuration Dialog Enhancements
-**Field Name Templates System**:
-- [ ] Add "Återställ till standard" (Restore to default names) button - clears all custom name fields
-- [ ] Add "Spara namnmall" (Save name template) button - saves current field configuration as template
-- [ ] Add "Ladda namnmall" (Load name template) button - loads previously saved template
-- [ ] Add "Spara namnmall som..." (Save name template as...) button - save with custom template name
-- [ ] Display current template name (if template has been saved/loaded)
-- [ ] Enable "Spara namnmall" only when at least one field has been changed from current state
-- [ ] Create template storage system (JSON files or config section)
+### 6. Field Configuration Dialog Enhancements *(Most features now completed in v2.6.9)*
+**Remaining Template System Items**:
+- ✅ ~~Add "Spara namnmall" (Save name template) button~~ → **COMPLETED as "Spara mall"**
+- ✅ ~~Add "Spara namnmall som..." button~~ → **COMPLETED as "Spara mall som..."**  
+- ✅ ~~Display current template name~~ → **COMPLETED with visual indicators**
+- ✅ ~~Enable save button only when changed~~ → **COMPLETED with intelligent state management**
+- ✅ ~~Create template storage system~~ → **COMPLETED using existing template_manager**
+- ✅ ~~Enhance visual feedback for template operations~~ → **COMPLETED with success/error dialogs**
 
-**Dialog Visual Improvements**:
-- [ ] Fix the overall look and feel of the field name config window
-- [ ] Improve button layout and spacing
-- [ ] Enhance visual feedback for template operations
-- [ ] Add template management section to dialog
+**Still Pending**:
+- [ ] Add "Återställ till standard" (Restore to default names) button - clears all custom name fields *(Note: Reset functionality exists, this would be UI enhancement)*
+
+**Dialog Visual Status**:
+- ✅ ~~Fix overall look and feel~~ → **COMPLETED with 3-button professional layout**  
+- ✅ ~~Improve button layout and spacing~~ → **COMPLETED with proper grid system**
+- ✅ ~~Add template management section~~ → **COMPLETED with full template controls**
 
 ### 7. Add type hints throughout the codebase
 - [ ] Add type hints to all function signatures
