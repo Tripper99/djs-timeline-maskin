@@ -8,9 +8,14 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.6.13)
+## Current Status (v2.6.14)
 
-**Latest Achievement (v2.6.13)**: Successfully resolved critical template save visual feedback bug in field configuration dialog. Users can now immediately see template state changes (red "(ändrad)" → orange background) when clicking "Spara mall". Replaced modal success dialog with professional non-blocking flash effect, providing immediate visual feedback while preserving all existing template functionality.
+**Latest Status (v2.6.14)**: Application reverted to stable state after failed v2.6.15 window scaling fix attempt. The comprehensive scaling solution made layout issues worse and was completely reverted. Template save visual feedback bug fix (from v2.6.13) remains intact and working.
+
+**Known Critical Issues**:
+- **Multi-Resolution Window Scaling**: Windows don't adapt properly between monitor resolutions (main window cut-off, field config dialog checkboxes invisible on 1920x1080)
+- **Checkbox Alignment**: Minor visual misalignment in field configuration dialog
+- **v2.6.15 Lesson**: Complex multi-component fixes high risk - incremental approach needed for future scaling solutions
 
 **Key Features**:
 - **Direct Template Saving**: "Spara mall" button saves directly to active template, "Spara mall som..." saves to new file
@@ -111,6 +116,15 @@ The application has been refactored from a single large file into a modular stru
   * Professional handling of unresolved technical challenges with complete documentation for future investigation
   * Some CustomTkinter layout behaviors may be non-obvious and require community consultation or alternative approaches
   * Systematic investigation methodology valuable even when resolution is not achieved
+
+- **Failed Complex Implementation Risk Management** (learned in v2.6.15):
+  * Comprehensive multi-component changes carry high risk of making problems worse
+  * Excellent technical analysis doesn't guarantee successful implementation
+  * Always implement incrementally with user validation at each step
+  * Over-engineering can disrupt working functionality even when addressing real issues
+  * User feedback is critical - technical correctness insufficient for complex UI changes
+  * When implementing fails badly, clean revert is better than attempting fixes on broken foundation
+  * Future scaling solutions should focus on minimal targeted changes rather than architectural overhauls
 
 - **mandatory git commit routine**
   * Before writing code you should always make a new version and commit it to git with comments on what you are about to do. 

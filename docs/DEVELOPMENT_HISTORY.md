@@ -4,6 +4,65 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.6.15 Multi-Resolution Window Scaling Fix Attempt (2025-08-21) - FAILED ❌
+**Attempt**: Comprehensive window scaling solution to fix layout issues on different monitor resolutions. **Result**: Implementation made problems worse, required complete revert to v2.6.14.
+
+**Problem Description**:
+- Main window content cut off when moving from 2560x1600 150% scale to 1920x1080 100% scale
+- Field config dialog checkboxes invisible on lower resolution monitors (1920x1080)  
+- Fixed dimensions (680px height, 1000x800 dialog) don't account for DPI scaling differences
+- PanedWindow constraints (300+200+200px) exceed available space on lower resolutions
+
+**Investigation Methodology**:
+- **Visual Analysis**: Examined user screenshots showing exact layout problems
+- **Code Analysis**: Identified fixed dimensions as root cause (`window_height = 680`, `geometry("1000x800")`)
+- **architecture-planner agent**: Designed comprehensive DPI-aware responsive layout system
+- **bug-finder-debugger agent**: Found exact technical root causes in layout constraints
+- **Documentation Research**: CustomTkinter DPI awareness and scaling best practices
+
+**Implementation Attempt (v2.6.15)**:
+1. **Dynamic Height Calculation**: Replaced fixed 680px with DPI-aware content-based sizing
+2. **Responsive PanedWindow**: Dynamic minsize constraints based on available width
+3. **Dialog Dynamic Sizing**: Content-aware geometry calculation with DPI adjustment
+4. **Flexible Column System**: Replaced fixed weights with responsive grid layout
+5. **Comprehensive Debug Logging**: Extensive DPI and scaling calculation tracking
+
+**Technical Changes Made**:
+```python
+# Main window - BEFORE
+window_height = 680  # Fixed
+# AFTER  
+window_height = max(minimum_height, min(dpi_adjusted_requirement, screen_constraint))
+
+# Field config - BEFORE
+self.dialog.geometry("1000x800")  # Fixed
+# AFTER
+dynamic_geometry = f"{final_width}x{final_height}"  # Calculated
+
+# Column weights - BEFORE
+parent_frame.grid_columnconfigure(4, weight=0, minsize=85)  # Fixed checkbox
+# AFTER  
+parent_frame.grid_columnconfigure(4, weight=0, minsize=checkbox_min)  # Dynamic
+```
+
+**Failure Analysis**:
+- **User Report**: "The result is much worse than before"
+- **Root Cause of Failure**: Over-engineered solution disrupted working layouts
+- **Lesson Learned**: Complex multi-component changes high risk, incremental approach needed
+- **Revert Required**: Complete git reset --hard to v2.6.14 to restore working state
+
+**Development Process Insights**:
+- **Agent Usage**: Multiple specialized agents provided excellent analysis but implementation was flawed
+- **Testing Gap**: Should have tested incrementally rather than implementing all changes at once
+- **Risk Management**: Need better validation of complex changes before full implementation
+- **User Feedback Critical**: Technical analysis insufficient without user validation
+
+**Next Attempt Strategy**:
+- **Incremental Approach**: One component at a time with user validation
+- **Minimal Changes**: Focus on specific constraints rather than architectural overhaul
+- **Better Testing**: Test each change on actual target resolutions before proceeding
+- **Simpler Solutions**: Consider basic minimum size adjustments before complex responsive layouts
+
 ### v2.6.13 Template Save Visual Feedback Bug Fix (2025-08-21) - Critical UX Fix ✅
 **Achievement**: Resolved critical visual feedback bug in template save workflow where users couldn't see template state changes due to modal dialog blocking the view. Implemented professional non-blocking flash feedback system.
 

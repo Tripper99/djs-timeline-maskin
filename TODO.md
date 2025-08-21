@@ -2,6 +2,26 @@
 
 ## Current Bugs
 
+### Multi-Resolution Window Scaling Issues (v2.6.14)
+**CRITICAL LAYOUT ISSUES**: Windows don't adapt properly between different monitor resolutions
+- **Main Window Issue**: When moving from 2560x1600 150% scale to 1920x1080 100% scale, window content is cut off at bottom and right column compressed
+- **Field Config Dialog Issue**: On lower resolution monitors (1920x1080), dialog too narrow/short causing checkboxes to become invisible
+- **Root Cause**: Fixed dimensions (680px height, 1000x800 dialog) don't account for DPI scaling differences
+- **Impact**: Users on lower resolution monitors cannot see all content or access functionality
+- **Priority**: High (affects usability on common monitor configurations)
+
+**Failed Attempts in v2.6.15**:
+- ❌ Dynamic height calculation with DPI awareness - made issues worse
+- ❌ Flexible column system for field config - caused layout problems
+- ❌ Responsive PanedWindow constraints - disrupted existing functionality
+- ❌ Complete revert to v2.6.14 required
+
+**Next Session Investigation Needed**:
+- Consider simpler, incremental approach rather than comprehensive overhaul
+- Focus on specific minimum size constraints rather than full dynamic sizing
+- Test changes more carefully on actual target resolutions before implementing
+- Research CustomTkinter DPI handling best practices
+
 ### Checkbox Alignment Issue in Field Configuration Dialog (v2.6.10)
 **CRITICAL UI BUG**: "Dölj" checkboxes are misaligned in the field configuration dialog
 - **Affected fields**: Protected fields (Inlagd, Dag, Startdatum, Starttid, Slutdatum, Sluttid) have checkboxes positioned slightly to the left
