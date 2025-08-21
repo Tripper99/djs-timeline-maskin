@@ -581,6 +581,7 @@ class FieldConfigDialog:
             self._show_save_error("Mallnamnet är ogiltigt. Kan inte spara.")
             return
 
+        success = False  # Initialize success flag
         try:
             # Extract current configuration
             field_config = self._get_current_field_config()
@@ -596,9 +597,15 @@ class FieldConfigDialog:
             )
 
             if success:
-                # Save successful - update state and provide feedback
+                # Save successful - update state first, then provide non-blocking feedback
                 self.is_template_modified = False
-                self._show_save_success()
+
+                # Update visual display immediately (now visible to user)
+                self._update_template_buttons_state()
+                self._update_template_name_display()
+
+                # Show non-blocking success feedback
+                self._show_save_success_flash()
                 logger.info(f"Successfully saved template: {self.current_template}")
             else:
                 # Save failed - keep modified state and show error
@@ -607,13 +614,15 @@ class FieldConfigDialog:
 
         except Exception as e:
             # Unexpected error - handle gracefully
+            success = False  # Ensure success is False for exception cases
             self._show_save_error(f"Ett oväntat fel uppstod: {str(e)}")
             logger.error(f"Unexpected error saving template {self.current_template}: {e}")
 
         finally:
-            # Always update button state and display (regardless of success/failure)
-            self._update_template_buttons_state()
-            self._update_template_name_display()
+            # For failed saves, ensure button state and display are updated
+            if not success:
+                self._update_template_buttons_state()
+                self._update_template_name_display()
 
     def _save_template_to_file(self):
         """Save current configuration to a file via file dialog."""
@@ -1243,50 +1252,35 @@ class FieldConfigDialog:
         failure_dialog.wait_window()
         return result["continue"]
 
-    def _show_save_success(self):
-        """Show success feedback when template is saved."""
-        success_dialog = ctk.CTkToplevel(self.dialog)
-        success_dialog.title("Mall sparad")
-        success_dialog.geometry("350x150")
-        success_dialog.transient(self.dialog)
-        success_dialog.grab_set()
+    def _show_save_success_flash(self):
+        """Show non-blocking success feedback with template label flash effect."""
+        try:
+            # Get original background color for restoration
+            original_bg = self.template_name_label.cget("fg_color")
 
-        # Center on parent dialog
-        self.dialog.update_idletasks()
-        x = self.dialog.winfo_rootx() + 300
-        y = self.dialog.winfo_rooty() + 300
-        success_dialog.geometry(f"350x150+{x}+{y}")
+            # Flash success green to indicate successful save
+            self.template_name_label.configure(fg_color="#28A745")  # Success green
 
-        # Success message
-        success_label = ctk.CTkLabel(
-            success_dialog,
-            text="✅ Mall sparad!",
-            font=ctk.CTkFont(size=14, weight="bold"),
-            text_color="#28A745"
-        )
-        success_label.pack(pady=(20, 10))
+            # Schedule restoration to correct state color after flash
+            self.dialog.after(500, lambda: self._restore_template_display_color(original_bg))
 
-        detail_label = ctk.CTkLabel(
-            success_dialog,
-            text=f"Mallen '{self.current_template}' har uppdaterats.",
-            font=ctk.CTkFont(size=12)
-        )
-        detail_label.pack(pady=(0, 20))
+            logger.debug(f"Template save success flash displayed for: {self.current_template}")
 
-        # OK button
-        ok_button = ctk.CTkButton(
-            success_dialog,
-            text="OK",
-            width=80,
-            height=30,
-            command=success_dialog.destroy,
-            fg_color="#28A745",
-            hover_color="#218838"
-        )
-        ok_button.pack(pady=(0, 20))
+        except Exception as e:
+            logger.debug(f"Flash effect failed (non-critical): {e}")
+            # Fallback: core functionality unaffected, template state still correct
 
-        # Auto-close after 2 seconds
-        success_dialog.after(2000, success_dialog.destroy)
+    def _restore_template_display_color(self, original_color):
+        """Restore template label to correct color after flash effect."""
+        try:
+            # Restore to the original color, but ensure it reflects current state
+            self.template_name_label.configure(fg_color=original_color)
+            logger.debug("Template display color restored after flash")
+
+        except Exception as e:
+            logger.debug(f"Color restoration failed (non-critical): {e}")
+            # Fallback: force update to correct state based on current template status
+            self._update_template_name_display()
 
     def _show_save_error(self, error_message: str):
         """Show error feedback when template save fails."""

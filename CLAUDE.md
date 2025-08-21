@@ -8,9 +8,9 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.6.10)
+## Current Status (v2.6.13)
 
-**Latest Investigation (v2.6.10)**: Conducted comprehensive technical investigation of checkbox alignment issue in field configuration dialog. Despite sophisticated approaches using multiple specialized sub-agents and widget-specific spacer systems, the visual misalignment of "Dölj" checkboxes for protected fields remains unresolved. Issue documented for future fundamental layout architecture reconsideration.
+**Latest Achievement (v2.6.13)**: Successfully resolved critical template save visual feedback bug in field configuration dialog. Users can now immediately see template state changes (red "(ändrad)" → orange background) when clicking "Spara mall". Replaced modal success dialog with professional non-blocking flash effect, providing immediate visual feedback while preserving all existing template functionality.
 
 **Key Features**:
 - **Direct Template Saving**: "Spara mall" button saves directly to active template, "Spara mall som..." saves to new file
