@@ -88,7 +88,7 @@ class ExcelOperationsMixin:
             excel_data['Inlagd'] = datetime.now().strftime('%Y-%m-%d')
 
         # Get filename for special handling
-        filename = excel_data.get('Källa1', '')
+        filename = excel_data.get('Källa', '')
         if not filename:
             # Only construct filename if we have actual content from PDF filename components
             date = self.date_var.get().strip()

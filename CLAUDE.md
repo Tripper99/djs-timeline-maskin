@@ -8,9 +8,9 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.6.14)
+## Current Status (v2.6.15)
 
-**Latest Status (v2.6.14)**: Application reverted to stable state after failed v2.6.15 window scaling fix attempt. The comprehensive scaling solution made layout issues worse and was completely reverted. Template save visual feedback bug fix (from v2.6.13) remains intact and working.
+**Latest Status (v2.6.15)**: Successfully fixed critical "Kopiera ned filnamnet till Excelfältet" button bug. Comprehensive codebase cleanup replaced all legacy "Källa1" references with correct "Källa" field name, restoring full copy functionality. Button now correctly populates both Startdatum and Källa fields as intended.
 
 **Known Critical Issues**:
 - **Multi-Resolution Window Scaling**: Windows don't adapt properly between monitor resolutions (main window cut-off, field config dialog checkboxes invisible on 1920x1080)

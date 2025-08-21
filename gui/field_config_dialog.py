@@ -1420,7 +1420,7 @@ FÄLTREGLER:
 
 SYNLIGHET:
 • Markera "Dölj" för att dölja fält från huvudgränssnittet
-• Vissa fält (Startdatum, Källa1, Händelse) kan aldrig döljas
+• Vissa fält (Startdatum, Källa, Händelse) kan aldrig döljas
 • Dolda fält sparas i templates
 
 Klicka "Använd dessa namn" när du är klar."""

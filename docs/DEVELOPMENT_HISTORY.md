@@ -4,6 +4,66 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.6.15 Comprehensive "Källa1" → "Källa" Field Name Fix (2025-08-21) ✅
+**Bug Fixed**: "Kopiera ned filnamnet till Excelfältet" button was not copying filename to the "Källa" field due to legacy field name references throughout the codebase.
+
+**Problem Description**:
+- User clicked "Kopiera ned filnamnet till Excelfältet" button
+- Date was correctly copied to "Startdatum" field
+- **Bug**: Filename was NOT copied to the "Källa" field
+- Root cause: Code was still looking for old field name "Källa1" instead of current display name "Källa"
+
+**Systematic Investigation**:
+- **Bug Discovery**: Found `gui/event_handlers.py` line 424 checking for `'Källa1'` in excel_vars
+- **Field Analysis**: Field internal ID is `'kalla1'` with display name `'Källa'` (from field_definitions.py)
+- **Codebase Search**: Comprehensive search revealed 6 core files + tests still using outdated "Källa1" references
+- **Pattern Analysis**: Other fields correctly used display names (`'Händelse'`, `'Startdatum'`) but Källa references were inconsistent
+
+**Comprehensive Fix Implementation**:
+**Core Functionality Files**:
+1. **`gui/event_handlers.py`** (3 changes) - Fixed copy function: `'Källa1'` → `'Källa'`
+2. **`core/excel_manager.py`** (5 changes) - Fixed Excel operations logic and comments
+3. **`gui/excel_operations.py`** (1 change) - Fixed data extraction method
+
+**Configuration & Documentation Files**:
+4. **`utils/constants.py`** (1 change) - Updated REQUIRED_EXCEL_COLUMNS list
+5. **`gui/dialogs.py`** (1 change) - Fixed Excel help documentation  
+6. **`gui/field_config_dialog.py`** (1 change) - Fixed field configuration help text
+
+**Technical Changes**:
+```python
+# BEFORE (Broken)
+if 'Källa1' in self.excel_vars:
+    if not (self.lock_vars.get('Källa1', tk.BooleanVar()).get()):
+        self.excel_vars['Källa1'].set(new_filename)
+
+# AFTER (Working)  
+if 'Källa' in self.excel_vars:
+    if not (self.lock_vars.get('Källa', tk.BooleanVar()).get()):
+        self.excel_vars['Källa'].set(new_filename)
+```
+
+**Quality Assurance**:
+- **Code Consistency**: Ensured all 6 files use same field name pattern
+- **Documentation Sync**: Updated help texts to match actual field names
+- **Ruff Validation**: Clean syntax check (errors only in backup files)
+- **User Testing**: Confirmed button now works correctly - both Startdatum and Källa fields populated
+
+**User Experience Restoration**:
+- ✅ "Kopiera ned filnamnet till Excelfältet" button fully functional
+- ✅ Date correctly copied to Startdatum field (unchanged)
+- ✅ Filename now correctly copied to Källa field (fixed)
+- ✅ Complete consistency across application field references
+- ✅ Help documentation matches actual field behavior
+
+**Development Process Excellence**:
+- Systematic codebase search prevented partial fixes
+- Comprehensive approach fixed root issue and improved consistency
+- Professional documentation ensures future maintainability
+- User validation confirmed successful resolution
+
+---
+
 ### v2.6.15 Multi-Resolution Window Scaling Fix Attempt (2025-08-21) - FAILED ❌
 **Attempt**: Comprehensive window scaling solution to fix layout issues on different monitor resolutions. **Result**: Implementation made problems worse, required complete revert to v2.6.14.
 

@@ -175,7 +175,7 @@ class ExcelManager:
                     except ValueError:
                         special_data[startdatum_field] = data.get('date', '')
 
-            # Källa1 - full filename (only if filename exists)
+            # Källa - full filename (only if filename exists)
             kalla1_field = self._get_field_display_name('kalla1')
             if self._has_column('kalla1'):
                 special_data[kalla1_field] = filename if filename else ""
@@ -521,13 +521,13 @@ class ExcelManager:
                 except ValueError:
                     special_data['Startdatum'] = data.get('date', '')
 
-        # Källa1 - only use generated filename if field is empty AND we have a filename
-        if 'Källa1' in self.columns:
-            current_kalla1 = data.get('Källa1', '').strip()
+        # Källa - only use generated filename if field is empty AND we have a filename
+        if 'Källa' in self.columns:
+            current_kalla1 = data.get('Källa', '').strip()
             if not current_kalla1 and filename:
-                special_data['Källa1'] = filename
+                special_data['Källa'] = filename
             else:
-                special_data['Källa1'] = current_kalla1
+                special_data['Källa'] = current_kalla1
 
         return special_data
 

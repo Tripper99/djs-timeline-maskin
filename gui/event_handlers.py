@@ -421,10 +421,10 @@ class EventHandlersMixin:
             if not (self.lock_vars.get('Startdatum', tk.BooleanVar()).get()):
                 self.excel_vars['Startdatum'].set(date)
 
-        if 'Källa1' in self.excel_vars:
+        if 'Källa' in self.excel_vars:
             # Only set if not locked
-            if not (self.lock_vars.get('Källa1', tk.BooleanVar()).get()):
-                self.excel_vars['Källa1'].set(new_filename)
+            if not (self.lock_vars.get('Källa', tk.BooleanVar()).get()):
+                self.excel_vars['Källa'].set(new_filename)
 
         self.excel_row_saved.set(False)
 

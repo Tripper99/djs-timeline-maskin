@@ -201,19 +201,19 @@ class LayoutManagerMixin:
         newspaper_entry.grid(row=0, column=3, sticky="w", padx=(0, 5), pady=(0, 1))
         self.enable_undo_for_widget(newspaper_entry)
 
-        # Pages
-        ctk.CTkLabel(components_frame, text="Sidor:", font=ctk.CTkFont(size=11)).grid(
-            row=0, column=4, sticky="w", padx=(0, 3), pady=(0, 1))
-        pages_entry = ctk.CTkEntry(components_frame, textvariable=self.pages_var, width=50, height=25, font=ctk.CTkFont(size=11))
-        pages_entry.grid(row=0, column=5, sticky="w", padx=(0, 5), pady=(0, 1))
-        self.enable_undo_for_widget(pages_entry)
-
         # Comment
         ctk.CTkLabel(components_frame, text="Kommentar:", font=ctk.CTkFont(size=11)).grid(
-            row=0, column=6, sticky="w", padx=(0, 3), pady=(0, 1))
+            row=0, column=4, sticky="w", padx=(0, 3), pady=(0, 1))
         comment_entry = ctk.CTkEntry(components_frame, textvariable=self.comment_var, width=250, height=25, font=ctk.CTkFont(size=11))
-        comment_entry.grid(row=0, column=7, sticky="w", padx=(0, 5), pady=(0, 1))
+        comment_entry.grid(row=0, column=5, sticky="w", padx=(0, 5), pady=(0, 1))
         self.enable_undo_for_widget(comment_entry)
+
+        # Pages
+        ctk.CTkLabel(components_frame, text="Sidor:", font=ctk.CTkFont(size=11)).grid(
+            row=0, column=6, sticky="w", padx=(0, 3), pady=(0, 1))
+        pages_entry = ctk.CTkEntry(components_frame, textvariable=self.pages_var, width=50, height=25, font=ctk.CTkFont(size=11))
+        pages_entry.grid(row=0, column=7, sticky="w", padx=(0, 5), pady=(0, 1))
+        self.enable_undo_for_widget(pages_entry)
 
         # Copy to Excel button with arrows - distinct color and larger to stand out
         self.copy_to_excel_btn = ctk.CTkButton(components_frame,

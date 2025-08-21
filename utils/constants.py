@@ -11,5 +11,5 @@ REQUIRED_EXCEL_COLUMNS = [
     'OBS', 'Inlagd', 'Kategori', 'Underkategori',
     'Person/sak', 'Special', 'Händelse', 'Dag',
     'Startdatum', 'Starttid', 'Slutdatum', 'Sluttid', 'Note1', 'Note2', 'Note3',
-    'Källa1', 'Källa2', 'Källa3', 'Övrigt'
+    'Källa', 'Källa2', 'Källa3', 'Övrigt'
 ]
