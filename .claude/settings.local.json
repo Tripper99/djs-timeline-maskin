@@ -1,13 +1,22 @@
 {
   "permissions": {
     "allow": [
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(source:*)",
+      "Bash(find:*)",
+      "Bash(tree:*)",
+      "Bash(mv:*)",
       "Bash(mkdir:*)",
       "Bash(python:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
+      "Bash(ruff:*)",
+      "Bash(touch:*)",
+      "Bash(cat:*)",
+      "Bash(ruff check:*)",
       "Bash(git push:*)",
       "Bash(ruff check:*)",
-      "Bash(find:*)",
       "Bash(true)",
       "Bash(mv:*)",
       "Bash(grep:*)",
@@ -26,6 +35,7 @@
       "Bash(echo $env:APPDATA)",
       "WebFetch(domain:customtkinter.tomschimansky.com)",
       "WebSearch",
+      "WebFetch(domain:*)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:docs.anthropic.com)"
     ],

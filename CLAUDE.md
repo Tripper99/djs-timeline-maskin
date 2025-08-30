@@ -83,6 +83,9 @@ The application has been refactored from a single large file into a modular stru
   * Always identify and document any remaining bugs with specific fix plans for next session
   * Use specialized sub-agents (architecture-planner, code-writer) for systematic implementation phases
 
+- **Don't make code backward compatible unless specifically asked for**
+  * This is a new project. Backward compatibility is not needed. 
+
 - **Critical Bug Investigation Methodology** (learned in v2.3.3 & v2.5.1):
   * Use multiple specialized subagents (bug-finder-debugger, architecture-planner, code-reviewer-refactorer) for systematic root cause analysis
   * Trace complete data flow from configuration → storage → usage to identify exact failure points

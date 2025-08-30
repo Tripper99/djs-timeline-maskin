@@ -1,10 +1,19 @@
-## Instructions for first things to do when Claude Code starts a new session 
+# Prime Context for Claude Code
 
-Read the following documents in order. 
+Use the command 'tree' to get understanding of project structure
 
-- claude md
-- global claude.md
-- docs\codebase_analysis.md
-- todo.md
+Start with reading the CLAUDE.md if it exists to get an understanding of the project.
 
-Then confirm that you have done so. 
+Read global CLAUDE.md to get an understanding of the project.
+
+Read key files in the root folder
+
+
+
+Explain back to me:
+
+* Project structure
+* Project purpose and goals
+* Key files and their purposes
+* Any important dependencies
+* Any important configuration files
