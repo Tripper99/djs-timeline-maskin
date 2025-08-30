@@ -5,9 +5,9 @@ Configuration management for the DJ Timeline application
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, List, Tuple
 
-from utils.constants import CONFIG_FILE
+from utils.constants import CONFIG_FILE, UPDATE_CHECK_DEFAULTS
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,9 @@ class ConfigManager:
             "disabled_fields": [],  # List of disabled field IDs
             "hidden_fields": [],  # Backward compatibility - aliases disabled_fields
             "active_template": "",  # Currently active template name
-            "config_version": "2.5.2"  # Track config version for migrations
+            "config_version": "2.6.17",  # Track config version for migrations
+            # Update check configuration
+            **UPDATE_CHECK_DEFAULTS
         }
 
     def load_config(self) -> Dict:
@@ -186,6 +188,84 @@ class ConfigManager:
         except Exception as e:
             logger.error(f"Failed to delete config file: {e}")
 
+    # Update check configuration methods
+    def save_update_check_config(self, enabled: bool = None, skip_versions: List[str] = None,
+                                 last_check: str = None) -> None:
+        """Save update check configuration"""
+        try:
+            current_config = self.load_config()
+
+            if enabled is not None:
+                current_config["update_check_enabled"] = enabled
+            if skip_versions is not None:
+                current_config["skip_versions"] = skip_versions
+            if last_check is not None:
+                current_config["last_update_check"] = last_check
+
+            self.save_config(current_config)
+            logger.info("Saved update check configuration")
+        except Exception as e:
+            logger.error(f"Failed to save update check config: {e}")
+
+    def load_update_check_config(self) -> Dict[str, Any]:
+        """Load update check configuration"""
+        try:
+            config = self.load_config()
+            return {
+                "enabled": config.get("update_check_enabled", UPDATE_CHECK_DEFAULTS["update_check_enabled"]),
+                "skip_versions": config.get("skip_versions", UPDATE_CHECK_DEFAULTS["skip_versions"]),
+                "last_check": config.get("last_update_check", UPDATE_CHECK_DEFAULTS["last_update_check"]),
+                "interval_days": config.get("auto_check_interval_days", UPDATE_CHECK_DEFAULTS["auto_check_interval_days"]),
+                "timeout_seconds": config.get("github_timeout_seconds", UPDATE_CHECK_DEFAULTS["github_timeout_seconds"])
+            }
+        except Exception as e:
+            logger.error(f"Failed to load update check config: {e}")
+            return {
+                "enabled": False,
+                "skip_versions": [],
+                "last_check": "",
+                "interval_days": 7,
+                "timeout_seconds": 10
+            }
+
+    def add_skipped_version(self, version: str) -> None:
+        """Add a version to the skip list"""
+        try:
+            current_config = self.load_config()
+            skip_versions = current_config.get("skip_versions", [])
+
+            if version not in skip_versions:
+                skip_versions.append(version)
+                current_config["skip_versions"] = skip_versions
+                self.save_config(current_config)
+                logger.info(f"Added version {version} to skip list")
+        except Exception as e:
+            logger.error(f"Failed to add skipped version: {e}")
+
+    def remove_skipped_version(self, version: str) -> None:
+        """Remove a version from the skip list"""
+        try:
+            current_config = self.load_config()
+            skip_versions = current_config.get("skip_versions", [])
+
+            if version in skip_versions:
+                skip_versions.remove(version)
+                current_config["skip_versions"] = skip_versions
+                self.save_config(current_config)
+                logger.info(f"Removed version {version} from skip list")
+        except Exception as e:
+            logger.error(f"Failed to remove skipped version: {e}")
+
+    def update_last_check_time(self, timestamp: str) -> None:
+        """Update the timestamp of the last update check"""
+        try:
+            current_config = self.load_config()
+            current_config["last_update_check"] = timestamp
+            self.save_config(current_config)
+            logger.debug(f"Updated last check time: {timestamp}")
+        except Exception as e:
+            logger.error(f"Failed to update last check time: {e}")
+
     def migrate_config(self, config: Dict) -> Dict:
         """Migrate configuration to latest version"""
         current_version = config.get("config_version", "2.2.15")
@@ -212,5 +292,12 @@ class ConfigManager:
             # Keep hidden_fields for backward compatibility
             config["config_version"] = "2.5.2"
             logger.info("Migrated config to v2.5.2 - added disabled fields support")
+
+        if current_version < "2.6.17":
+            # Add new fields for v2.6.17 (update check configuration)
+            for key, value in UPDATE_CHECK_DEFAULTS.items():
+                config.setdefault(key, value)
+            config["config_version"] = "2.6.17"
+            logger.info("Migrated config to v2.6.17 - added update check support")
 
         return config

@@ -435,6 +435,69 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
             logger.error(f"Failed to show field config dialog: {e}")
             messagebox.showerror("Fel", f"Kunde inte öppna fältkonfiguration: {str(e)}")
 
+    def _check_for_updates(self):
+        """Check for application updates from GitHub"""
+        try:
+            # Import update checking components
+            from datetime import datetime
+
+            from core.version_checker import VersionChecker
+            from gui.update_dialog import UpdateProgressDialog
+            from utils.constants import GITHUB_REPO_NAME, GITHUB_REPO_OWNER, VERSION
+            from utils.update_strings import get_string
+
+            logger.info("Starting manual update check")
+
+            # Check if update checking is enabled (though manual checks should always work)
+            update_config = self.config_manager.load_update_check_config()
+            skip_versions = update_config.get("skip_versions", [])
+
+            def perform_check():
+                """Perform the actual update check"""
+                try:
+                    # Create version checker
+                    checker = VersionChecker(
+                        current_version=VERSION,
+                        repo_owner=GITHUB_REPO_OWNER,
+                        repo_name=GITHUB_REPO_NAME
+                    )
+
+                    # Perform the check
+                    result = checker.check_for_updates(skip_versions=skip_versions)
+
+                    # Update last check timestamp
+                    timestamp = datetime.now().isoformat()
+                    self.config_manager.update_last_check_time(timestamp)
+
+                    return result
+
+                except Exception as e:
+                    logger.error(f"Update check failed: {e}")
+                    # Return a failed result
+                    from core.version_checker.models import UpdateCheckResult
+                    return UpdateCheckResult(
+                        success=False,
+                        update_available=False,
+                        current_version=VERSION,
+                        error_message=str(e)
+                    )
+
+            # Show progress dialog and perform check
+            progress_dialog = UpdateProgressDialog(self.root, perform_check)
+
+        except ImportError as e:
+            logger.error(f"Failed to import update checking components: {e}")
+            messagebox.showerror(
+                "Uppdateringsfel",
+                f"Kunde inte ladda uppdateringssystem: {str(e)}"
+            )
+        except Exception as e:
+            logger.error(f"Unexpected error during update check: {e}")
+            messagebox.showerror(
+                "Uppdateringsfel",
+                f"Ett oväntat fel inträffade: {str(e)}"
+            )
+
     def _on_field_config_applied(self):
         """Called when field configuration changes are applied"""
         try:

@@ -31,6 +31,8 @@ class LayoutManagerMixin:
         tools_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label="Verktyg", menu=tools_menu)
         tools_menu.add_command(label="Konfigurera fält...", command=self._show_field_config_dialog)
+        tools_menu.add_separator()
+        tools_menu.add_command(label="Sök efter uppdateringar...", command=self._check_for_updates)
 
         # Help menu
         help_menu = tk.Menu(menubar, tearoff=0)
