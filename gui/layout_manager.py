@@ -36,8 +36,6 @@ class LayoutManagerMixin:
         help_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label="Hjälp", menu=help_menu)
         help_menu.add_command(label="Om programmet", command=self.show_program_help)
-        help_menu.add_separator()
-        help_menu.add_command(label="Excel-fil krav", command=self.dialog_manager.show_excel_help)
 
     def create_simple_section(self, parent, content_func, section_color=None):
         """Create a simple, compact section with optional background color for visual separation"""

@@ -26,84 +26,79 @@ class DialogManager:
         self.parent = parent_app
 
     def show_excel_help(self):
-        """Show help dialog for Excel file requirements"""
+        """Show help dialog for Excel field configuration"""
         help_win = ctk.CTkToplevel()
-        help_win.title("Excel-fil hjälp")
-        help_win.geometry("600x600")  # Increased from 500 to 600 (20% increase)
+        help_win.title("Excel-fält information")
+        help_win.geometry("500x400")
         help_win.transient(self.parent.root)
         help_win.grab_set()
 
         # Center dialog
         help_win.update_idletasks()
-        x = (help_win.winfo_screenwidth() // 2) - (600 // 2)
-        y = (help_win.winfo_screenheight() // 2) - (600 // 2)  # Updated for new height
-        help_win.geometry(f"600x600+{x}+{y}")
+        x = (help_win.winfo_screenwidth() // 2) - (500 // 2)
+        y = (help_win.winfo_screenheight() // 2) - (400 // 2)
+        help_win.geometry(f"500x400+{x}+{y}")
 
         # Main frame
         main_frame = ctk.CTkFrame(help_win)
         main_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
         # Header
-        ctk.CTkLabel(main_frame, text="Excel-fil krav",
+        ctk.CTkLabel(main_frame, text="Flexibel Excel-hantering",
                 font=('Arial', 14, 'bold')).pack(pady=(0, 15))
 
-        # Requirements text (updated with new field name)
-        req_text = """För att applikationen ska fungera korrekt måste Excel-filen innehålla följande kolumnnamn (exakt stavning krävs):
+        # Information text
+        info_text = """DJs Timeline-maskin har nu ett flexibelt system för Excel-fält!
 
-OBLIGATORISKA KOLUMNER:
-• OBS
-• Inlagd
-• Kategori
-• Underkategori
-• Person/sak
-• Special
-• Händelse
-• Dag
-• Startdatum
-• Starttid
-• Slutdatum
-• Sluttid
-• Note1
-• Note2
-• Note3
-• Källa
-• Källa2
-• Källa3
-• Övrigt
+ANPASSA DINA EXCEL-FÄLT:
+• Du kan definiera dina egna kolumnnamn via menyn "Verktyg → Konfigurera fält..."
+• Välj vilka fält som ska vara synliga eller dolda
+• Ändra visningsnamn för att matcha dina Excel-kolumner
+• Spara dina inställningar som mallar för återanvändning
 
-VIKTIGT:
-- Kolumnnamnen måste vara exakt som ovan (inklusive stora/små bokstäver)
-- Kolumnnamnen ska finnas på första raden i Excel-filen
-- Ordningen på kolumnerna spelar ingen roll
-- Du kan ha ytterligare kolumner, de ignoreras av applikationen
+SKAPA EXCEL-DOKUMENT:
+• Klicka på "Skapa Excel" för att generera en Excel-fil
+• Filen skapas automatiskt med dina definierade kolumnnamn
+• Endast synliga fält inkluderas i Excel-filen
+• Perfekt formaterad och redo att användas
 
-Applikationen kommer automatiskt att fylla i vissa fält baserat på PDF-filnamnet."""
+TIPS:
+• Använd standardmallen som utgångspunkt
+• Skapa olika mallar för olika projekt
+• Dolda fält exkluderas automatiskt från Excel-operationer"""
 
         # Scrollable text area
         text_frame = ctk.CTkFrame(main_frame)
         text_frame.pack(fill="both", expand=True, pady=(0, 15))
 
         text_area = ctk.CTkTextbox(text_frame, wrap="word",
-                                   font=ctk.CTkFont(size=12), height=300)
+                                   font=ctk.CTkFont(size=12), height=250)
         text_area.pack(fill="both", expand=True)
-        text_area.insert("1.0", req_text)
+        text_area.insert("1.0", info_text)
         text_area.configure(state="disabled")
 
         # Buttons frame
         buttons_frame = ctk.CTkFrame(main_frame)
         buttons_frame.pack(fill="x", pady=(10, 0))
 
+        # Configure fields button
+        config_btn = ctk.CTkButton(buttons_frame, text="Konfigurera fält",
+                               command=lambda: [help_win.destroy(), self.parent._show_field_config_dialog()],
+                               width=120)
+        config_btn.pack(side="left", padx=(0, 10))
+        ToolTip(config_btn, "Öppna fältkonfigurationsdialogen för att anpassa dina Excel-kolumner")
+
         # Create template button
-        template_btn = ctk.CTkButton(buttons_frame, text="Skapa mall-Excel med rätt kolumner",
-                               command=lambda: self.create_excel_template(help_win), width=35)
+        template_btn = ctk.CTkButton(buttons_frame, text="Skapa Excel",
+                               command=lambda: self.create_excel_template(help_win),
+                               width=100)
         template_btn.pack(side="left", padx=(0, 10))
-        ToolTip(template_btn, "Skapar en ny Excel-fil med alla nödvändiga kolumner fördefinierade. " +
-                             "Filerna får rätt formatering och några exempel-formler för Dag-kolumnen.")
+        ToolTip(template_btn, "Skapa en ny Excel-fil med dina definierade kolumner")
 
         # Close button
         close_btn = ctk.CTkButton(buttons_frame, text="Stäng",
                             command=help_win.destroy,
-                            width=100)
+                            width=80)
         close_btn.pack(side="right")
 
     def create_excel_template(self, parent_window=None):
