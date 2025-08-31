@@ -49,6 +49,31 @@
 
 ## Recently Completed ✅
 
+### ✅ Build Tools & Installer Configuration (v2.6.17) - COMPLETE (2025-08-31)
+**Created build configuration for v2.6.17 release**:
+- ✅ Created PyInstaller spec file with requests library dependencies
+- ✅ Created Inno Setup installer script with proper icon handling
+- ✅ Fixed desktop shortcut icon display issue
+- ✅ Added GitHub URLs to installer configuration
+- ✅ Included all necessary dependencies for version checking feature
+
+### ✅ GitHub Version Checking System Implementation (v2.6.17) - COMPLETE (2025-08-30)
+**Implemented comprehensive update checking functionality**:
+- ✅ Secure GitHub API integration with comprehensive validation
+- ✅ CustomTkinter dialogs with Swedish language support  
+- ✅ Menu integration: "Verktyg → Sök efter uppdateringar..."
+- ✅ Version skipping functionality
+- ✅ Configuration system extensions
+- ✅ Security measures (HTTPS-only, SSL validation, domain validation)
+- ✅ Privacy-first design (disabled by default)
+- ✅ Professional UX with progress indication and error handling
+- ✅ Added requests dependency and passed Ruff validation
+- ✅ Complete documentation in DEVELOPMENT_HISTORY.md
+
+**Next Steps**: Ready for building and distribution with updated installer configuration.
+
+## Recently Completed ✅
+
 ### v2.6.13 Template Save Visual Feedback Bug Fix (2025-08-21) ✅
 **CRITICAL BUG FIXED**: Template save state visual feedback in field configuration dialog
 - ✅ **Bug Resolved**: "Spara mall" now correctly shows visual state change (red "(ändrad)" → orange background)

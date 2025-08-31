@@ -8,9 +8,9 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.6.15)
+## Current Status (v2.6.17)
 
-**Latest Status (v2.6.15)**: Successfully fixed critical "Kopiera ned filnamnet till Excelfältet" button bug. Comprehensive codebase cleanup replaced all legacy "Källa1" references with correct "Källa" field name, restoring full copy functionality. Button now correctly populates both Startdatum and Källa fields as intended.
+**Latest Status (v2.6.17)**: Successfully implemented comprehensive GitHub version checking system with security-focused architecture, Swedish language support, and CustomTkinter interface. Users can now access "Sök efter uppdateringar..." from Verktyg menu to safely check for updates via GitHub API with browser-based downloads, version skipping, and complete privacy control.
 
 **Known Critical Issues**:
 - **Multi-Resolution Window Scaling**: Windows don't adapt properly between monitor resolutions (main window cut-off, field config dialog checkboxes invisible on 1920x1080)
@@ -18,6 +18,7 @@ The application has been refactored from a single large file into a modular stru
 - **v2.6.15 Lesson**: Complex multi-component fixes high risk - incremental approach needed for future scaling solutions
 
 **Key Features**:
+- **GitHub Version Checking**: Secure update checking via "Verktyg → Sök efter uppdateringar..." with Swedish interface, version skipping, and browser-based downloads
 - **Direct Template Saving**: "Spara mall" button saves directly to active template, "Spara mall som..." saves to new file
 - **Intelligent Button States**: Dynamic enabling/disabling based on template type and modification status
 - **Template Validation**: "Standard" template protected from direct overwrites, custom templates fully supported
@@ -39,6 +40,7 @@ The application has been refactored from a single large file into a modular stru
 - Always run Ruff syntax check before committing: `ruff check . --fix`
 - Integration tests: `python -m pytest tests/test_integration_workflows.py -v -s`
 - See TESTING_GUIDE.md for complete workflow procedures
+- **Update Check Testing**: Test GitHub version checking via "Verktyg → Sök efter uppdateringar..." menu
 
 ## Documentation Management Guidelines
 
@@ -128,6 +130,15 @@ The application has been refactored from a single large file into a modular stru
   * User feedback is critical - technical correctness insufficient for complex UI changes
   * When implementing fails badly, clean revert is better than attempting fixes on broken foundation
   * Future scaling solutions should focus on minimal targeted changes rather than architectural overhauls
+
+- **Multi-Agent Security-Focused Development** (learned in v2.6.17):
+  * Use specialized sub-agents (architecture-planner, security-auditor) for comprehensive feature planning
+  * Security audit before implementation prevents vulnerabilities and guides secure design patterns
+  * Incremental implementation with progress tracking ensures quality and allows course correction
+  * Swedish localization from the start improves user experience significantly
+  * Privacy-first design principles (features disabled by default) build user trust
+  * Comprehensive error handling with localized messages improves user confidence
+  * Browser-based download approach avoids security risks of in-app update mechanisms
 
 - **mandatory git commit routine**
   * Before writing code you should always make a new version and commit it to git with comments on what you are about to do. 

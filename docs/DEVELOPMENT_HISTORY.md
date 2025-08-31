@@ -4,6 +4,96 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.6.17 Build Tools & Installer Configuration Updates (2025-08-31) ✅
+**Tasks Completed**: Created PyInstaller spec file and Inno Setup installer configuration for v2.6.17 with proper icon handling.
+
+**Problems Solved**:
+- Created missing build configuration files for v2.6.17
+- Fixed desktop shortcut icon display issue in installer
+- Added requests library dependencies for GitHub version checking
+
+**Technical Implementation**:
+- **`DJs_Timeline_Machine_v2.6.17.spec`**: Updated PyInstaller spec with requests and dependencies
+- **`installer_v2.6.17.iss`**: Fixed icon path issues, added IsWindows64 function
+- Ensured icon file explicitly included in installer distribution
+
+### v2.6.17 GitHub Version Checking Feature - Complete Security-Focused Implementation (2025-08-30) ✅
+**Feature Implemented**: Comprehensive GitHub version checking system with Swedish language support and CustomTkinter interface.
+
+**Problem Solved**: Users had no way to check for application updates, requiring manual repository monitoring.
+
+**Comprehensive Implementation**:
+
+**Core Security Architecture**:
+- **`core/version_checker/`** package with modular components:
+  - `models.py` - Data structures (UpdateInfo, UpdateAsset, UpdateCheckResult)
+  - `validator.py` - Comprehensive security validation (SSL, URL, JSON sanitization)
+  - `checker.py` - Main VersionChecker with GitHub API integration
+  - `exceptions.py` - Custom exception hierarchy for proper error handling
+- **Security Features**: HTTPS-only, SSL certificate validation, GitHub domain validation, response size limits, input sanitization
+- **No automatic downloads** - browser redirect only for maximum security
+
+**User Interface Excellence**:
+- **`gui/update_dialog.py`** - Modern CustomTkinter dialogs:
+  - UpdateProgressDialog with threaded background checking
+  - UpdateAvailableDialog with comprehensive information display
+  - Security indicators (SSL verified, official GitHub release)
+  - Version comparison, release notes, file listings
+  - Three user actions: Download, Skip Version, Close
+- **Swedish Language Support**: Complete `utils/update_strings.py` with 100+ localized strings
+- **Menu Integration**: Added "Sök efter uppdateringar..." to Verktyg menu
+
+**Configuration & Integration**:
+- **Extended `core/config.py`** with update check configuration methods
+- **Privacy-First Design**: Update checking disabled by default
+- **Version Skipping**: Users can permanently skip specific versions
+- **Configuration Migration**: Automatic config updates from v2.5.2 → v2.6.17
+- **Constants Management**: Added GitHub repo info and security limits to `utils/constants.py`
+
+**Technical Excellence**:
+```python
+# Secure version checking with comprehensive validation
+checker = VersionChecker(
+    current_version=VERSION,
+    repo_owner=GITHUB_REPO_OWNER, 
+    repo_name=GITHUB_REPO_NAME
+)
+result = checker.check_for_updates(skip_versions=skip_versions)
+```
+
+**Development Process Excellence**:
+- **Multi-Agent Architecture**: Used architecture-planner and security-auditor agents
+- **Security Audit**: Comprehensive threat analysis and mitigation strategies
+- **Incremental Implementation**: 15-step development plan with progress tracking
+- **Quality Assurance**: Ruff validation, comprehensive error handling, Swedish localization
+
+**Key Security Features**:
+- GitHub API rate limiting respect
+- SSL certificate validation (no bypass options)
+- URL validation (GitHub domains only)
+- JSON response size limits (50KB max)
+- Request timeouts (10 seconds)
+- Version string sanitization
+- No automatic downloads - browser-only access
+
+**User Experience**:
+- Professional progress indication during checking
+- Clear error messages in Swedish
+- Security indicators for user confidence
+- Version comparison with release date
+- Scrollable release notes
+- File listing with sizes
+- Three clear action options with tooltips
+
+**Configuration Extensions**:
+- `update_check_enabled: false` (privacy-first)
+- `skip_versions: []` (user preference tracking)
+- `last_update_check: ""` (timestamp management)
+- `auto_check_interval_days: 7` (future automation support)
+- `github_timeout_seconds: 10` (network configuration)
+
+This implementation provides a rock-solid foundation for safe user updates while respecting privacy and maintaining complete user control.
+
 ### v2.6.15 Comprehensive "Källa1" → "Källa" Field Name Fix (2025-08-21) ✅
 **Bug Fixed**: "Kopiera ned filnamnet till Excelfältet" button was not copying filename to the "Källa" field due to legacy field name references throughout the codebase.
 
