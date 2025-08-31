@@ -1,31 +1,21 @@
 # DJs Timeline-maskin
 
 En Python-applikation för att bearbeta PDF-filer och uppdatera Excel-filer med strukturerad information.
+Appen kan även användas för att bara lägga till nya rader i en timeline gjord i Excel. 
+Appen kan konfigureras så att excel-dokumentet skapas med de kolumnnamn användaren önskar.
+Vid inmatning kan fältinnehåll låsas så att fält som ska ha samma innehåll på flera rader inte behöver fyllas i upprepade gånger. 
 
 ## Beskrivning
 
 DJs Timeline-maskin är ett GUI-verktyg som hjälper till att:
 - Bearbeta PDF-filer och extrahera textinnehåll
 - Generera strukturerade filnamn baserat på PDF-innehåll
-- Uppdatera Excel-filer med information från PDF-filerna
+- Uppdatera Excel-filer med information från PDF-filerna alternativt bara med fältinnehåll som användaren själv fyller i.
 - Hantera konfigurationer och inställningar
 
 ## Installation
+Kör installationsfilen. 
 
-### Krav
-- Python 3.8 eller senare
-- Pip (Python package manager)
-
-### Installera dependencies
-```bash
-pip install -r requirements.txt
-```
-
-## Användning
-
-Starta applikationen genom att köra:
-```bash
-python app.py
 ```
 
 ## Projektstruktur
