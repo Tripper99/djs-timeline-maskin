@@ -18,25 +18,6 @@ DJs Timeline-maskin är ett GUI-verktyg som hjälper till att:
 ## Installation
 Kör installationsfilen. 
 
-```
-
-## Projektstruktur
-
-```
-├── app.py                    # Huvudingång för applikationen
-├── core/
-│   ├── config.py            # Konfigurationshantering
-│   ├── pdf_processor.py     # PDF-bearbetning
-│   ├── filename_parser.py   # Filnamnsparsning
-│   └── excel_manager.py     # Excel-filhantering
-├── gui/
-│   ├── main_window.py       # Huvudfönster (GUI)
-│   └── utils.py             # GUI-verktyg
-├── utils/
-│   └── constants.py         # Konstanter
-├── requirements.txt         # Python-dependencies
-└── README.md               # Denna fil
-```
 
 ## Funktioner
 
@@ -44,7 +25,6 @@ Kör installationsfilen.
 - **Filnamnsgenerering**: Skapar strukturerade filnamn från PDF-innehåll
 - **Excel-integration**: Uppdaterar Excel-filer med extraherad information
 - **Konfigurationshantering**: Sparar användarinställningar
-- **Modernt GUI**: Byggt med ttkbootstrap för modern utseende
 - **Låsning av fält**: Möjlighet att låsa fält för persistent data
 
 ## Teknisk information
