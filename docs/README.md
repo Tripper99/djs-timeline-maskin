@@ -2,30 +2,25 @@
 
 ![DJs_Timelines-maskin_1000x509](https://github.com/user-attachments/assets/1a85f44d-15b4-4d5b-a298-cbf252d9c287)
 
-En Python-applikation för att bearbeta PDF-filer och uppdatera Excel-filer med strukturerad information.
-Appen kan även användas för att bara lägga till nya rader i en timeline gjord i Excel. 
-Appen kan konfigureras så att excel-dokumentet skapas med de kolumnnamn användaren önskar.
-Vid inmatning kan fältinnehåll låsas så att fält som ska ha samma innehåll på flera rader inte behöver fyllas i upprepade gånger. 
+Den här appen hjälper dig att skapa nya rader i den tidslinje/timeline i Excel utan att du behöver öppna exceldokumentet. 
+Praktiskt för t ex grävande journalister och forskare.
 
 ## Beskrivning
 
 DJs Timeline-maskin är ett GUI-verktyg som hjälper till att:
-- Bearbeta PDF-filer och extrahera textinnehåll
-- Generera strukturerade filnamn baserat på PDF-innehåll
-- Uppdatera Excel-filer med information från PDF-filerna alternativt bara med fältinnehåll som användaren själv fyller i.
-- Hantera konfigurationer och inställningar
+- Döpa om pdf-filer
+- Använda pdf-filens namn för att automatiskt fylla i fält i en timeline i Excel.
+- Manuellt lägga till information i Excel-fält utan att behöva öppna exceldokumentet.
+- Figursy och skapa ett exceldokument med de kolumner du själv behöver i din timeline.
+- Använda fetstil och färgad text i excelfälten
+- Välja bakgrundsfärg på den nya excelraden
+- Appen fungerar utmärkt för att skapa excelrader utifrån pdf-filer skapade av systerappen DJs KB-maskin (https://github.com/Tripper99/DJs-KB-maskin).
+- Appen kan även användas utan inblandning av pdf-filer. T ex om du vill föra in många uppgifter från en bok i din timeline.
+- Fält kan låsas så att de inte behöver fyllas igen för varje rad. Om du t ex skapar många excelrader utifrån uppgifter i en bok så behöver du bara ange boken som källa en gång och låsa det fältet. Alla efterföljande rader kommer då att ha samma källa. 
+
 
 ## Installation
 Kör installationsfilen. 
-
-
-## Funktioner
-
-- **PDF-bearbetning**: Läser och validerar PDF-filer
-- **Filnamnsgenerering**: Skapar strukturerade filnamn från PDF-innehåll
-- **Excel-integration**: Uppdaterar Excel-filer med extraherad information
-- **Konfigurationshantering**: Sparar användarinställningar
-- **Låsning av fält**: Möjlighet att låsa fält för persistent data
 
 ## Teknisk information
 
@@ -41,3 +36,7 @@ Detta projekt är för personlig användning.
 ## Bidrag
 
 Detta är ett personligt projekt.
+
+Programmet är skrivet av Dan Josefsson med god hjälp nav Claude Code. 
+Rapportera gärna buggar till dan@josefsson.net.
+All användning av programmet skrer på egen risk. 
