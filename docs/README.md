@@ -1,5 +1,7 @@
 # DJs Timeline-maskin
 
+![DJs_Timelines-maskin_1000x509](https://github.com/user-attachments/assets/1a85f44d-15b4-4d5b-a298-cbf252d9c287)
+
 En Python-applikation för att bearbeta PDF-filer och uppdatera Excel-filer med strukturerad information.
 Appen kan även användas för att bara lägga till nya rader i en timeline gjord i Excel. 
 Appen kan konfigureras så att excel-dokumentet skapas med de kolumnnamn användaren önskar.
