@@ -4,6 +4,7 @@ Configuration management for the DJ Timeline application
 
 import json
 import logging
+import os
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
@@ -16,7 +17,9 @@ class ConfigManager:
     """Manages application configuration"""
 
     def __init__(self):
-        self.config_file = Path(CONFIG_FILE)
+        self.config_file = self._get_config_file_path()
+        self._ensure_config_directory_exists()
+        self._migrate_old_config_if_needed()
         self.default_config = {
             "excel_file": "",
             "last_pdf_dir": "",
@@ -33,10 +36,64 @@ class ConfigManager:
             "disabled_fields": [],  # List of disabled field IDs
             "hidden_fields": [],  # Backward compatibility - aliases disabled_fields
             "active_template": "",  # Currently active template name
-            "config_version": "2.6.17",  # Track config version for migrations
+            "config_version": "2.6.18",  # Track config version for migrations
             # Update check configuration
             **UPDATE_CHECK_DEFAULTS
         }
+
+    def _get_config_file_path(self) -> Path:
+        """
+        Get the configuration file path using platform-specific directory.
+        Uses same base directory as templates for consistency.
+
+        Returns:
+            Path: Absolute path to config file
+        """
+        # Use APPDATA on Windows
+        appdata = os.environ.get('APPDATA')
+        if appdata:
+            base_dir = Path(appdata) / "DJs Timeline Machine"
+        else:
+            # Fallback to user home directory (Linux/macOS)
+            base_dir = Path.home() / ".djs_timeline_machine"
+
+        config_path = base_dir / CONFIG_FILE
+        logger.info(f"Config file path: {config_path}")
+        return config_path
+
+    def _ensure_config_directory_exists(self) -> None:
+        """Ensure the config directory exists."""
+        try:
+            self.config_file.parent.mkdir(parents=True, exist_ok=True)
+            logger.info(f"Config directory ensured: {self.config_file.parent}")
+        except Exception as e:
+            logger.error(f"Failed to create config directory: {e}")
+
+    def _migrate_old_config_if_needed(self) -> None:
+        """
+        Migrate config file from old relative path location to new absolute path.
+        This handles the transition for existing users.
+        """
+        # If new location already has config, no migration needed
+        if self.config_file.exists():
+            logger.info("Config file already exists at new location")
+            return
+
+        # Check for old config file in current working directory
+        old_config_path = Path(CONFIG_FILE)
+        if old_config_path.exists() and old_config_path.is_file():
+            try:
+                # Copy old config to new location
+                import shutil
+                shutil.copy2(old_config_path, self.config_file)
+                logger.info(f"Migrated config from {old_config_path} to {self.config_file}")
+
+                # Optionally, rename old file to indicate it's been migrated
+                backup_path = old_config_path.with_suffix('.json.old')
+                old_config_path.rename(backup_path)
+                logger.info(f"Renamed old config to {backup_path}")
+            except Exception as e:
+                logger.warning(f"Failed to migrate old config file: {e}")
 
     def load_config(self) -> Dict:
         """Load configuration from file"""
@@ -299,5 +356,11 @@ class ConfigManager:
                 config.setdefault(key, value)
             config["config_version"] = "2.6.17"
             logger.info("Migrated config to v2.6.17 - added update check support")
+
+        if current_version < "2.6.18":
+            # v2.6.18: Config file now uses absolute path (Linux AppImage/Windows .exe persistence fix)
+            # Migration of file location is handled by _migrate_old_config_if_needed()
+            config["config_version"] = "2.6.18"
+            logger.info("Migrated config to v2.6.18 - using absolute path for config file")
 
         return config
