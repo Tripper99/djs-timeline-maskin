@@ -37,7 +37,14 @@
       "WebSearch",
       "WebFetch(domain:*)",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:docs.anthropic.com)"
+      "WebFetch(domain:docs.anthropic.com)",
+      "Read(//c/Users/dan/.claude/**)",
+      "Bash(dir /s)",
+      "Bash(dir:*)",
+      "Bash(pip3 list:*)",
+      "Bash(python3:*)",
+      "Bash(chmod:*)",
+      "Bash(update-desktop-database:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",
