@@ -311,8 +311,12 @@ class UndoManagerMixin:
         """Setup keyboard bindings for undo/redo"""
         # Bind global keyboard shortcuts
         self.root.bind_all('<Control-z>', self.global_undo)
+        # Multiple binding formats for redo (Linux compatibility)
         self.root.bind_all('<Control-y>', self.global_redo)
+        self.root.bind_all('<Control-Y>', self.global_redo)  # Capital Y
+        self.root.bind_all('<Control-Shift-z>', self.global_redo)  # Alternative redo binding
         self.root.bind_all('<Control-Shift-Z>', self.global_redo)  # Alternative redo binding
+        logger.info("Undo/redo bindings set up: Ctrl+Z (undo), Ctrl+Y/Ctrl+Shift+Z (redo)")
 
         # Add enhanced bindings for Text widgets to handle problematic operations
         self.root.bind_all('<Control-a>', self.handle_select_all_undo)
@@ -332,8 +336,17 @@ class UndoManagerMixin:
                 if self.text_widget_undo(focused_widget):
                     return "break"  # Prevent default handling
                 else:
-                    # Fallback to built-in undo
+                    # Fallback to built-in undo, but save current state for formatted redo
                     try:
+                        # Only save to redo stack if this is the FIRST undo (redo stack empty or last content differs)
+                        current_content = focused_widget.get("1.0", "end-1c")
+                        widget_id = id(focused_widget)
+                        redo_stack = self.text_redo_stacks.get(widget_id, [])
+
+                        # Only save if redo stack is empty (fresh undo sequence)
+                        if not redo_stack:
+                            self._save_to_redo_stack(focused_widget, current_content)
+
                         focused_widget.edit_undo()
                         return "break"  # Prevent default handling
                     except tk.TclError:
@@ -345,17 +358,47 @@ class UndoManagerMixin:
                     return "break"  # Prevent default handling
         return None
 
+    def _save_to_redo_stack(self, text_widget, content):
+        """Save text widget state with formatting to redo stack for formatted redo"""
+        widget_id = id(text_widget)
+
+        # Initialize stacks if not exists
+        if widget_id not in self.text_redo_stacks:
+            self.text_undo_stacks[widget_id] = []
+            self.text_redo_stacks[widget_id] = []
+
+        # Collect all formatting tags
+        tags_data = []
+        for tag in ["bold", "red", "blue", "green", "default"]:
+            tag_ranges = text_widget.tag_ranges(tag)
+            for i in range(0, len(tag_ranges), 2):
+                start_idx = str(tag_ranges[i])
+                end_idx = str(tag_ranges[i + 1])
+                tags_data.append((tag, start_idx, end_idx))
+
+        # Create state tuple with content and tags
+        state = (content, tags_data)
+
+        # Add to redo stack
+        self.text_redo_stacks[widget_id].append(state)
+
+        # Limit stack size
+        if len(self.text_redo_stacks[widget_id]) > self.max_undo_levels:
+            self.text_redo_stacks[widget_id].pop(0)
+
+        logger.debug(f"Saved formatted state to redo stack: {len(tags_data)} tags")
+
     def global_redo(self, event=None):
         """Global redo function that works on focused widget"""
         focused_widget = self.root.focus_get()
         if focused_widget and focused_widget in self.undo_widgets:
-            # For Text widgets, try custom redo first, then fallback to edit_redo
+            # For Text widgets, try custom redo first (preserves formatting), then fallback to edit_redo
             if isinstance(focused_widget, tk.Text):
-                # Try custom redo first for problematic operations
+                # Try custom redo first for formatted content
                 if self.text_widget_redo(focused_widget):
                     return "break"  # Prevent default handling
                 else:
-                    # Fallback to built-in redo
+                    # Fallback to built-in redo (no formatting)
                     try:
                         focused_widget.edit_redo()
                         return "break"  # Prevent default handling

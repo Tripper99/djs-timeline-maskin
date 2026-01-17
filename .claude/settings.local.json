@@ -47,7 +47,9 @@
       "Bash(update-desktop-database:*)",
       "Bash(./build_appimage_v2.6.18.sh:*)",
       "Bash(cd:*)",
-      "Bash(git check-ignore:*)"
+      "Bash(git check-ignore:*)",
+      "Bash(git config:*)",
+      "Bash(pkill:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",
