@@ -111,8 +111,8 @@ class UndoManagerMixin:
                     # Add edit separator after paste
                     text_widget.edit_separator()
 
-                    # Clear internal clipboard after use (single use)
-                    self.internal_clipboard = None
+                    # Keep internal clipboard for multiple pastes
+                    # Only replaced when user copies new formatted content
 
                     # Trigger character count check after formatted paste
                     self.root.after_idle(lambda: self.check_character_count_for_widget(text_widget))
@@ -223,13 +223,19 @@ class UndoManagerMixin:
                             tag_end = tag_ranges[i + 1]
                             # Check if tag overlaps with selection
                             if focused_widget.compare(tag_start, "<", end) and focused_widget.compare(tag_end, ">", start):
-                                # Calculate relative positions within selection
-                                rel_start = max(0, len(focused_widget.get(start, tag_start)))
-                                rel_end = min(len(text), len(focused_widget.get(start, tag_end)))
+                                # Calculate relative positions using count() for Unicode safety
+                                count_start = focused_widget.count(start, tag_start, "chars")
+                                rel_start = max(0, count_start[0] if count_start else 0)
+                                count_end = focused_widget.count(start, tag_end, "chars")
+                                rel_end = min(len(text), count_end[0] if count_end else len(text))
                                 tags_data.append((tag, rel_start, rel_end))
 
-                    # Store in internal clipboard
-                    self.internal_clipboard = (text, tags_data)
+                    # Only store in internal clipboard if there's actual formatting
+                    # This prevents plain text copies from overwriting formatted clipboard content
+                    if tags_data:
+                        self.internal_clipboard = (text, tags_data)
+                        logger.debug(f"Stored formatted content with {len(tags_data)} tags")
+                    # If no formatting, leave internal_clipboard unchanged - system clipboard handles plain text
 
                     # Also copy to system clipboard (plain text)
                     self.root.clipboard_clear()

@@ -44,7 +44,10 @@
       "Bash(pip3 list:*)",
       "Bash(python3:*)",
       "Bash(chmod:*)",
-      "Bash(update-desktop-database:*)"
+      "Bash(update-desktop-database:*)",
+      "Bash(./build_appimage_v2.6.18.sh:*)",
+      "Bash(cd:*)",
+      "Bash(git check-ignore:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",

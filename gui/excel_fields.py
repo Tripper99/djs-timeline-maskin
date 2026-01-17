@@ -63,7 +63,7 @@ class ExcelFieldManager:
         # Bind events
         entry_widget.bind('<KeyRelease>', on_entry_change)
         entry_widget.bind('<FocusOut>', on_entry_change)
-        string_var.trace('w', on_var_change)
+        string_var.trace_add('write', on_var_change)
 
     def _setup_date_field_focus(self, entry_widget, field_name):
         """Setup enhanced focus behavior for date fields with click-to-clear"""

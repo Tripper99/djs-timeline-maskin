@@ -314,7 +314,7 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
 
         # Bind change events to track filename changes
         for var in [self.date_var, self.newspaper_var, self.pages_var, self.comment_var]:
-            var.trace('w', self.on_filename_change)
+            var.trace_add('write', self.on_filename_change)
 
 
     def change_theme(self, theme_name: str):
