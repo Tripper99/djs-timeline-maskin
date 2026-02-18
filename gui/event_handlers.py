@@ -698,26 +698,34 @@ class EventHandlersMixin:
         # Save current output folder lock state
         self.config['output_folder_locked'] = self.output_folder_lock_var.get()
 
-        # Save Excel column sash positions
+        # Save Excel column sash positions (3 sashes for 4 columns)
         try:
             if hasattr(self, 'excel_fields_paned_window') and self.excel_fields_paned_window:
-                # Get current sash positions
                 sash_positions = []
                 total_width = self.excel_fields_paned_window.winfo_width()
 
-                for i in range(2):  # We have 2 sashes (3 columns)
+                for i in range(3):  # 3 sashes (4 columns)
                     try:
-                        pos = self.excel_fields_paned_window.sash_coord(i)[0]  # Get x coordinate
+                        pos = self.excel_fields_paned_window.sash_coord(i)[0]
                         sash_positions.append(pos)
                     except (tk.TclError, IndexError, AttributeError):
                         break
 
-                if len(sash_positions) == 2 and total_width > 100:
+                if len(sash_positions) == 3 and total_width > 100:
                     self.config['excel_sash_positions'] = sash_positions
                     self.config['excel_sash_total_width'] = total_width
                     logger.info(f"Saved Excel sash positions: {sash_positions} (width: {total_width})")
         except Exception as e:
             logger.warning(f"Error saving sash positions: {e}")
+
+        # Save PDF browse folder
+        try:
+            if hasattr(self, 'pdf_file_list_panel') and self.pdf_file_list_panel:
+                folder = self.pdf_file_list_panel.get_folder()
+                if folder:
+                    self.config['pdf_browse_folder'] = folder
+        except Exception as e:
+            logger.warning(f"Error saving PDF browse folder: {e}")
 
         self.config_manager.save_config(self.config)
 

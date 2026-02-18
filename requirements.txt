@@ -1,5 +1,7 @@
 ttkbootstrap
 PyPDF2
+PyMuPDF
+Pillow
 openpyxl
 xlsxwriter
 customtkinter

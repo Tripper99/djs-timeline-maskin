@@ -80,6 +80,17 @@ class PDFOperationsMixin:
                 self.output_folder_var.set(display_text)
                 logger.info(f"Auto-filled output folder: {pdf_folder}")
 
+            # Load PDF preview
+            if hasattr(self, 'pdf_preview_panel') and self.pdf_preview_panel:
+                self.pdf_preview_panel.load_pdf(file_path)
+
+            # Update file list: set folder to PDF's parent and highlight the file
+            if hasattr(self, 'pdf_file_list_panel') and self.pdf_file_list_panel:
+                pdf_folder = str(Path(file_path).parent)
+                if self.pdf_file_list_panel.get_folder() != pdf_folder:
+                    self.pdf_file_list_panel.set_folder(pdf_folder)
+                self.pdf_file_list_panel.highlight_file(file_path)
+
             # Update statistics
             self.stats['pdfs_opened'] += 1
             self.update_stats_display()
@@ -198,6 +209,70 @@ class PDFOperationsMixin:
             messagebox.showerror("Fel", f"Kunde inte byta namn på filen: {str(e)}")
             return False
 
+    def load_pdf_from_file_list(self, file_path: str):
+        """Load a PDF selected from the file list panel (skips file dialog)."""
+        if not file_path:
+            return
+
+        # Validate PDF file before proceeding
+        is_valid, error_msg = PDFProcessor.validate_pdf_file(file_path)
+        if not is_valid:
+            from tkinter import messagebox
+            messagebox.showerror("Ogiltig PDF-fil", f"Kan inte anv\u00E4nda vald fil:\n{error_msg}")
+            return
+
+        self.current_pdf_path = file_path
+        self.pdf_path_var.set(Path(file_path).name)
+
+        # Update last directory
+        self.config['last_pdf_dir'] = str(Path(file_path).parent)
+
+        # Get page count
+        try:
+            self.current_pdf_pages = PDFProcessor.get_pdf_page_count(file_path)
+        except ValueError as e:
+            from tkinter import messagebox
+            messagebox.showerror("PDF-fel", str(e))
+            self.current_pdf_path = ""
+            self.pdf_path_var.set("Ingen PDF vald")
+            return
+
+        # Parse filename and store original components
+        filename = Path(file_path).name
+        components = FilenameParser.parse_filename(filename)
+        self.original_filename_components = components.copy()
+
+        # Update GUI fields
+        self.date_var.set(components['date'])
+        self.newspaper_var.set(components['newspaper'])
+        self.comment_var.set(components['comment'])
+
+        if components['pages']:
+            self.pages_var.set(components['pages'])
+        else:
+            self.pages_var.set(str(self.current_pdf_pages))
+
+        # Auto-fill output folder if not locked
+        if not self.output_folder_lock_var.get():
+            pdf_folder = str(Path(file_path).parent)
+            self._actual_output_folder = pdf_folder
+            display_text = self.get_display_folder_text(pdf_folder)
+            self.output_folder_var.set(display_text)
+
+        # Load PDF preview
+        if hasattr(self, 'pdf_preview_panel') and self.pdf_preview_panel:
+            self.pdf_preview_panel.load_pdf(file_path)
+
+        # Highlight in file list
+        if hasattr(self, 'pdf_file_list_panel') and self.pdf_file_list_panel:
+            self.pdf_file_list_panel.highlight_file(file_path)
+
+        # Update statistics
+        self.stats['pdfs_opened'] += 1
+        self.update_stats_display()
+
+        logger.info(f"Loaded PDF from file list: {filename}, Pages: {self.current_pdf_pages}")
+
     def clear_pdf_and_filename_fields(self):
         """Clear PDF selection and filename components"""
         self.current_pdf_path = ""
@@ -208,3 +283,11 @@ class PDFOperationsMixin:
         self.newspaper_var.set("")
         self.comment_var.set("")
         self.pages_var.set("")
+
+        # Clear PDF preview
+        if hasattr(self, 'pdf_preview_panel') and self.pdf_preview_panel:
+            self.pdf_preview_panel.clear()
+
+        # Clear file list highlight
+        if hasattr(self, 'pdf_file_list_panel') and self.pdf_file_list_panel:
+            self.pdf_file_list_panel.highlight_file("")

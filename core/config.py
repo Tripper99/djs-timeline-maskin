@@ -23,7 +23,7 @@ class ConfigManager:
         self.default_config = {
             "excel_file": "",
             "last_pdf_dir": "",
-            "window_geometry": "1400x680",
+            "window_geometry": "1800x800",
             "theme": "simplex",
             "output_folder": "",  # Store output folder path for renamed PDFs
             "output_folder_locked": False,  # Store if output folder selection is locked
@@ -36,7 +36,8 @@ class ConfigManager:
             "disabled_fields": [],  # List of disabled field IDs
             "hidden_fields": [],  # Backward compatibility - aliases disabled_fields
             "active_template": "",  # Currently active template name
-            "config_version": "2.6.18",  # Track config version for migrations
+            "pdf_browse_folder": "",  # PDF file list browse folder
+            "config_version": "2.7.0",  # Track config version for migrations
             # Update check configuration
             **UPDATE_CHECK_DEFAULTS
         }
@@ -362,5 +363,11 @@ class ConfigManager:
             # Migration of file location is handled by _migrate_old_config_if_needed()
             config["config_version"] = "2.6.18"
             logger.info("Migrated config to v2.6.18 - using absolute path for config file")
+
+        if current_version < "2.7.0":
+            # v2.7.0: PDF preview and file list panels
+            config.setdefault("pdf_browse_folder", "")
+            config["config_version"] = "2.7.0"
+            logger.info("Migrated config to v2.7.0 - added PDF preview and file list support")
 
         return config

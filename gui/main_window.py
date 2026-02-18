@@ -38,6 +38,7 @@ from gui.formatting_manager import FormattingManagerMixin
 from gui.layout_manager import LayoutManagerMixin
 
 # Mixin imports
+from gui.pdf_file_list import PDFFileListPanel
 from gui.pdf_operations import PDFOperationsMixin
 from gui.stats_manager import StatsManagerMixin
 from gui.undo_manager import UndoManagerMixin
@@ -60,6 +61,10 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         self.current_pdf_path = ""
         self.current_pdf_pages = 0
         self.original_filename_components = {}  # Store original parsed components
+
+        # PDF preview and file list panels (set during GUI creation)
+        self.pdf_preview_panel = None
+        self.pdf_file_list_panel = None
 
         # Statistics
         self.stats = {
@@ -89,6 +94,11 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
 
         self.load_saved_excel_file()  # Load previously selected Excel file
         self.load_saved_output_folder()  # Load previously selected output folder
+
+        # Wire up PDF file list callback and load saved folder
+        if self.pdf_file_list_panel:
+            self.pdf_file_list_panel._on_file_selected = self.load_pdf_from_file_list
+            self.pdf_file_list_panel.load_folder_from_config()
 
         # Load and restore locked fields after GUI is created
         self.excel_field_manager.restore_locked_fields()
@@ -144,7 +154,7 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         # Create main window with CustomTkinter
         self.root = ctk.CTk()
         self.root.title(f"DJs Timeline-maskin {VERSION}")
-        self.root.geometry("1400x900")  # Initial size before responsive calculation
+        self.root.geometry("1800x900")  # Initial size before responsive calculation
 
         # Set application icon
         try:
@@ -163,7 +173,7 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         screen_height = self.root.winfo_screenheight()
 
         # Use content-based height instead of screen percentage
-        window_height = 680  # Fixed height based on actual content requirements
+        window_height = 800  # Fixed height to accommodate file list panel
         logger.info(f"Screen: {screen_width}x{screen_height}, using content-based window height: {window_height}")
 
         # Debug actual screen measurements after DPI fix
@@ -190,7 +200,7 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
                     # Fallback to calculated geometry
                     x = 100  # Simple left positioning with reasonable margin
                     y = 50   # Small offset from top
-                    self.root.geometry(f"1400x{window_height}+{x}+{y}")
+                    self.root.geometry(f"1800x{window_height}+{x}+{y}")
             except Exception as e:
                 logger.warning(f"Error parsing saved geometry {saved_geometry}: {e}")
                 # Fallback to calculated geometry
@@ -234,6 +244,17 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         self.create_simple_section(main_frame, self.create_group1_content, ("gray90", "gray25"))  # PDF Selection - lightest
         self.create_simple_section(main_frame, self.create_parent_content, ("gray88", "gray23"))  # Filename Editing - medium
         self.create_simple_section(main_frame, self.create_group3_content, ("gray86", "gray21"))  # Excel Integration (operations now integrated under Händelse)
+
+        # PDF File List panel (below Excel fields, above bottom frame)
+        self.pdf_file_list_panel = PDFFileListPanel(
+            content_frame,
+            on_file_selected=None,  # Will be wired up in Phase 4
+            config_manager=self.config_manager,
+            fg_color=("gray88", "gray21"),
+            corner_radius=4,
+            height=140
+        )
+        self.pdf_file_list_panel.pack(fill="x", padx=12, pady=(0, 8))
 
         # Bottom frame for statistics and version
         bottom_frame = ctk.CTkFrame(content_frame)
