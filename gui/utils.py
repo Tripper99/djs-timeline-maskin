@@ -32,9 +32,14 @@ class ToolTip:
         tw.wm_geometry(f"+{x}+{y}")
 
         # Create tooltip label with styling
+        # Use platform-appropriate font (Tahoma is Windows-only)
+        if platform.system() == 'Darwin':
+            tooltip_font = ("Helvetica", 11, "normal")
+        else:
+            tooltip_font = ("tahoma", 8, "normal")
         label = tk.Label(tw, text=self.text, justify='left',
                         background="#ffffe0", relief='solid', borderwidth=1,
-                        font=("tahoma", 8, "normal"), wraplength=300)
+                        font=tooltip_font, wraplength=300)
         label.pack(ipadx=1)
 
     def on_leave(self, event=None):
