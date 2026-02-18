@@ -53,7 +53,7 @@ class PDFFileListPanel(ctk.CTkFrame):
             anchor="w"
         )
         self._folder_label.grid(row=0, column=1, sticky="ew", padx=2)
-        ToolTip(self._folder_label, "S\u00F6kv\u00E4g till den valda mappen.")
+        self._folder_tooltip = ToolTip(self._folder_label, "S\u00F6kv\u00E4g till den valda mappen.")
 
         self._count_label = ctk.CTkLabel(
             top_frame, text="", font=ctk.CTkFont(size=10),
@@ -165,8 +165,8 @@ class PDFFileListPanel(ctk.CTkFrame):
             display = path
 
         self._folder_label.configure(text=display, text_color=("gray20", "gray80"))
-        # Update tooltip with full path
-        ToolTip(self._folder_label, self._folder_path)
+        # Update existing tooltip text (don't recreate)
+        self._folder_tooltip.update_text(self._folder_path)
 
     def _scan_folder(self):
         """Scan the current folder for PDF files."""

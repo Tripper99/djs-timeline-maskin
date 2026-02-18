@@ -19,6 +19,10 @@ class ToolTip:
         self.widget.bind("<Leave>", self.on_leave)
         self.widget.bind("<ButtonPress>", self.on_leave)
 
+    def update_text(self, text):
+        """Update the tooltip text without recreating bindings."""
+        self.text = text
+
     def on_enter(self, event=None):
         if self.tooltip_window or not self.text:
             return
@@ -31,15 +35,20 @@ class ToolTip:
         tw.wm_overrideredirect(True)
         tw.wm_geometry(f"+{x}+{y}")
 
-        # Create tooltip label with styling
-        # Use platform-appropriate font (Tahoma is Windows-only)
+        # Platform-specific styling
         if platform.system() == 'Darwin':
-            tooltip_font = ("Helvetica", 11, "normal")
+            # macOS: dark background, white text, no border - closer to native look
+            tooltip_font = (".AppleSystemUIFont", 12, "normal")
+            label = tk.Label(tw, text=self.text, justify='left',
+                            background="#2D2D2D", foreground="#EEEEEE",
+                            relief='flat', borderwidth=0,
+                            font=tooltip_font, wraplength=350,
+                            padx=8, pady=4)
         else:
             tooltip_font = ("tahoma", 8, "normal")
-        label = tk.Label(tw, text=self.text, justify='left',
-                        background="#ffffe0", relief='solid', borderwidth=1,
-                        font=tooltip_font, wraplength=300)
+            label = tk.Label(tw, text=self.text, justify='left',
+                            background="#ffffe0", relief='solid', borderwidth=1,
+                            font=tooltip_font, wraplength=300)
         label.pack(ipadx=1)
 
     def on_leave(self, event=None):

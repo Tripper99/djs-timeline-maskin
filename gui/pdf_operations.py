@@ -72,14 +72,6 @@ class PDFOperationsMixin:
             except Exception as e:
                 messagebox.showerror("Fel", f"Kunde inte öppna PDF-fil: {str(e)}")
 
-            # Auto-fill output folder if not locked (always when unlocked)
-            if not self.output_folder_lock_var.get():
-                pdf_folder = str(Path(file_path).parent)
-                self._actual_output_folder = pdf_folder
-                display_text = self.get_display_folder_text(pdf_folder)
-                self.output_folder_var.set(display_text)
-                logger.info(f"Auto-filled output folder: {pdf_folder}")
-
             # Load PDF preview
             if hasattr(self, 'pdf_preview_panel') and self.pdf_preview_panel:
                 self.pdf_preview_panel.load_pdf(file_path)
@@ -252,13 +244,6 @@ class PDFOperationsMixin:
         else:
             self.pages_var.set(str(self.current_pdf_pages))
 
-        # Auto-fill output folder if not locked
-        if not self.output_folder_lock_var.get():
-            pdf_folder = str(Path(file_path).parent)
-            self._actual_output_folder = pdf_folder
-            display_text = self.get_display_folder_text(pdf_folder)
-            self.output_folder_var.set(display_text)
-
         # Load PDF preview
         if hasattr(self, 'pdf_preview_panel') and self.pdf_preview_panel:
             self.pdf_preview_panel.load_pdf(file_path)
@@ -272,6 +257,74 @@ class PDFOperationsMixin:
         self.update_stats_display()
 
         logger.info(f"Loaded PDF from file list: {filename}, Pages: {self.current_pdf_pages}")
+
+    def move_pdf_to_output_folder(self) -> bool:
+        """Move the current PDF to the output folder (even if not renamed).
+
+        Returns True if the file was moved or was already in the target folder.
+        """
+        if not self.current_pdf_path:
+            return False
+
+        output_folder = getattr(self, '_actual_output_folder', '') or self.output_folder_var.get()
+        if not output_folder or not Path(output_folder).exists():
+            return False
+
+        old_file = Path(self.current_pdf_path)
+        if not old_file.exists():
+            return False
+
+        target_dir = Path(output_folder)
+
+        # Already in the target folder - nothing to do
+        if str(old_file.parent) == str(target_dir):
+            logger.info("PDF already in output folder, no move needed")
+            return True
+
+        # Check target directory permissions
+        can_write, perm_error = PDFProcessor.check_directory_permissions(str(target_dir))
+        if not can_write:
+            messagebox.showerror("Fel", f"Kan inte skriva till mappen '{target_dir}': {perm_error}")
+            return False
+
+        new_path = target_dir / old_file.name
+
+        # Check if target file already exists
+        if new_path.exists():
+            result = messagebox.askyesno(
+                "Filen finns redan",
+                f"Filen '{old_file.name}' finns redan i målmappen.\nVill du skriva över den?"
+            )
+            if not result:
+                return False
+
+        # Check if file is locked
+        while PDFProcessor.is_file_locked(self.current_pdf_path):
+            choice = self.show_retry_cancel_dialog(
+                "Fil låst",
+                "PDF-filen används av ett annat program. "
+                "Stäng programmet och försök igen."
+            )
+            if choice == 'cancel':
+                return False
+
+        try:
+            old_file.replace(new_path)
+            self.current_pdf_path = str(new_path)
+            logger.info(f"Moved PDF to output folder: {old_file.name} -> {target_dir}")
+
+            # Refresh file list if it shows the target folder
+            if hasattr(self, 'pdf_file_list_panel') and self.pdf_file_list_panel:
+                self.pdf_file_list_panel.refresh()
+
+            return True
+
+        except PermissionError:
+            messagebox.showerror("Fel", "Åtkomst nekad. Kontrollera behörigheter.")
+            return False
+        except Exception as e:
+            messagebox.showerror("Fel", f"Kunde inte flytta filen: {str(e)}")
+            return False
 
     def clear_pdf_and_filename_fields(self):
         """Clear PDF selection and filename components"""

@@ -432,7 +432,8 @@ class EventHandlersMixin:
         """Main save function - rename file if changed and save Excel row if data exists"""
 
         # STEP 1: Determine what operations are needed
-        needs_pdf_rename = self.current_pdf_path and self.has_filename_changed()
+        has_pdf_loaded = bool(self.current_pdf_path)
+        needs_pdf_rename = has_pdf_loaded and self.has_filename_changed()
 
         # Check if Startdatum and Händelse both have content for Excel row
         startdatum_content = ""
@@ -484,6 +485,21 @@ class EventHandlersMixin:
                 if hasattr(self.excel_vars['Händelse'], 'focus'):
                     self.excel_vars['Händelse'].focus()
             return
+
+        # STEP 2B: Force output folder selection if a PDF is loaded and no folder is set
+        if has_pdf_loaded:
+            actual_folder = getattr(self, '_actual_output_folder', '')
+            if not actual_folder or not Path(actual_folder).exists():
+                messagebox.showinfo(
+                    "Välj mapp för processade PDF-filer",
+                    "Du måste välja en mapp dit processade PDF-filer ska flyttas.\n\n"
+                    "Detta behövs för att undvika att samma fil bearbetas flera gånger."
+                )
+                self.select_output_folder()
+                # Check if user actually selected a folder
+                actual_folder = getattr(self, '_actual_output_folder', '')
+                if not actual_folder or not Path(actual_folder).exists():
+                    return  # User cancelled folder selection
 
         # STEP 3: Check if Excel file exists before proceeding (if Excel row needed)
         if needs_excel_row and self.excel_manager.excel_path and not Path(self.excel_manager.excel_path).exists():
@@ -557,6 +573,11 @@ class EventHandlersMixin:
                     messagebox.showerror("Fel", "Kunde inte spara Excel-raden")
                     return
 
+        # 4C. Auto-move PDF to output folder (even if not renamed)
+        if has_pdf_loaded and self.current_pdf_path:
+            if self.move_pdf_to_output_folder():
+                operations_performed.append("PDF-filen har flyttats till mapp för färdiga filer")
+
         # STEP 5: Clear fields
         self.excel_field_manager.clear_excel_fields()
         self.clear_pdf_and_filename_fields()
@@ -564,32 +585,12 @@ class EventHandlersMixin:
         # Reset color button visual states
         self._select_row_color("none")
 
-        # STEP 6: Show appropriate status message
-        pdf_renamed = "PDF-filen har döpts om" in operations_performed
-        excel_saved = "Excel-rad har sparats" in operations_performed
-
-        if pdf_renamed and excel_saved:
-            # Both operations performed
+        # STEP 6: Show status message listing all operations performed
+        if operations_performed:
             message = "Följande operationer genomfördes:\n• " + "\n• ".join(operations_performed)
             message += "\n• Alla fält har rensats (utom låsta och automatiska fält)"
             messagebox.showinfo("Sparat", message)
-        elif pdf_renamed and not excel_saved:
-            # Only PDF renamed
-            messagebox.showinfo(
-                "PDF namnändrad",
-                "Pdf-filen har fått sitt nya namn.\n\n" +
-                "Alla fält har rensats (utom låsta och automatiska fält)."
-            )
-        elif excel_saved and not pdf_renamed:
-            # Only Excel row saved
-            messagebox.showinfo(
-                "Excel-rad skapad",
-                "Den nya excelraden har skapats.\n" +
-                "Alla fält har rensats (utom låsta och automatiska fält).\n\n" +
-                "Grattis! Din timeline växer."
-            )
         else:
-            # This should never happen, but as fallback
             messagebox.showinfo("Klart", "Alla fält har rensats.")
 
     def clear_all_without_saving(self):
@@ -665,58 +666,45 @@ class EventHandlersMixin:
             if not result:
                 return
 
-        # Save current window geometry with height limit enforcement
+        # Save current window geometry (no height limiting - allow full screen)
         current_geometry = self.root.geometry()
-        try:
-            # Calculate maximum allowed height for this screen
-            screen_height = self.root.winfo_screenheight()
-            try:
-                available_height = self.root.winfo_height() if hasattr(self.root, 'winfo_height') else screen_height - 80
-            except Exception:
-                available_height = screen_height - 80
-            max_height = min(max(int(available_height * 0.75), 700), 800)
-
-            # Parse and limit geometry if needed using safe parser
-            parsed = self.parse_geometry(current_geometry)
-            if parsed:
-                width, height, x_pos, y_pos = parsed
-
-                if height > max_height:
-                    # Save with limited height
-                    limited_geometry = self.build_geometry(width, max_height, x_pos, y_pos)
-                    self.config['window_geometry'] = limited_geometry
-                    logger.info(f"Saved geometry with height limit: {current_geometry} -> {limited_geometry}")
-                else:
-                    self.config['window_geometry'] = current_geometry
-                    logger.info(f"Saved geometry: {current_geometry}")
-            else:
-                self.config['window_geometry'] = current_geometry
-        except Exception as e:
-            logger.warning(f"Error limiting geometry on save: {e}")
-            self.config['window_geometry'] = current_geometry
+        self.config['window_geometry'] = current_geometry
+        logger.info(f"Saved geometry: {current_geometry}")
 
         # Save current output folder lock state
         self.config['output_folder_locked'] = self.output_folder_lock_var.get()
 
-        # Save Excel column sash positions (3 sashes for 4 columns)
+        # Save Excel column sash positions (2 sashes for 3 columns)
         try:
             if hasattr(self, 'excel_fields_paned_window') and self.excel_fields_paned_window:
                 sash_positions = []
                 total_width = self.excel_fields_paned_window.winfo_width()
 
-                for i in range(3):  # 3 sashes (4 columns)
+                for i in range(2):  # 2 sashes (3 columns)
                     try:
                         pos = self.excel_fields_paned_window.sash_coord(i)[0]
                         sash_positions.append(pos)
                     except (tk.TclError, IndexError, AttributeError):
                         break
 
-                if len(sash_positions) == 3 and total_width > 100:
+                if len(sash_positions) == 2 and total_width > 100:
                     self.config['excel_sash_positions'] = sash_positions
                     self.config['excel_sash_total_width'] = total_width
                     logger.info(f"Saved Excel sash positions: {sash_positions} (width: {total_width})")
         except Exception as e:
             logger.warning(f"Error saving sash positions: {e}")
+
+        # Save outer PanedWindow sash position (fields | preview split)
+        try:
+            if hasattr(self, 'outer_paned_window') and self.outer_paned_window:
+                total_width = self.outer_paned_window.winfo_width()
+                pos = self.outer_paned_window.sash_coord(0)[0]
+                if total_width > 100:
+                    self.config['outer_sash_position'] = pos
+                    self.config['outer_sash_total_width'] = total_width
+                    logger.info(f"Saved outer sash position: {pos} (width: {total_width})")
+        except Exception as e:
+            logger.warning(f"Error saving outer sash position: {e}")
 
         # Save PDF browse folder
         try:

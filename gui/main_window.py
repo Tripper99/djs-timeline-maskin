@@ -40,9 +40,10 @@ from gui.layout_manager import LayoutManagerMixin
 # Mixin imports
 from gui.pdf_file_list import PDFFileListPanel
 from gui.pdf_operations import PDFOperationsMixin
+from gui.pdf_preview import PDFPreviewPanel
 from gui.stats_manager import StatsManagerMixin
 from gui.undo_manager import UndoManagerMixin
-from gui.utils import ScrollableFrame, ToolTip
+from gui.utils import ToolTip
 from utils.constants import VERSION
 
 # Setup logging
@@ -167,51 +168,27 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         except Exception as e:
             logger.warning(f"Could not set application icon: {e}")
 
-        # Position window - centered horizontally but very high up vertically
+        # Position window
         self.root.update_idletasks()
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
+        logger.info(f"Screen: {screen_width}x{screen_height}")
 
-        # Use content-based height instead of screen percentage
-        window_height = 800  # Fixed height to accommodate file list panel
-        logger.info(f"Screen: {screen_width}x{screen_height}, using content-based window height: {window_height}")
-
-        # Debug actual screen measurements after DPI fix
-        logger.info(f"DPI aware measurements - Screen: {self.root.winfo_screenwidth()}x{self.root.winfo_screenheight()}")
-
-        # Check if saved geometry exceeds our height limit and adjust it
+        # Restore saved geometry or use default
         saved_geometry = self.config.get('window_geometry', '')
         if saved_geometry:
             try:
-                # Parse saved geometry using safe parser
                 parsed = self.parse_geometry(saved_geometry)
                 if parsed:
-                    saved_width, saved_height, x_pos, y_pos = parsed
-
-                    if saved_height > window_height:
-                        # Reconstruct geometry with limited height
-                        limited_geometry = self.build_geometry(saved_width, window_height, x_pos, y_pos)
-                        self.root.geometry(limited_geometry)
-                        logger.info(f"Limited saved geometry: {saved_geometry} -> {limited_geometry}")
-                    else:
-                        self.root.geometry(saved_geometry)
-                        logger.info(f"Using saved geometry: {saved_geometry}")
+                    self.root.geometry(saved_geometry)
+                    logger.info(f"Using saved geometry: {saved_geometry}")
                 else:
-                    # Fallback to calculated geometry
-                    x = 100  # Simple left positioning with reasonable margin
-                    y = 50   # Small offset from top
-                    self.root.geometry(f"1800x{window_height}+{x}+{y}")
+                    self.root.geometry("1800x900+100+50")
             except Exception as e:
                 logger.warning(f"Error parsing saved geometry {saved_geometry}: {e}")
-                # Fallback to calculated geometry
-                x = 100  # Simple left positioning with reasonable margin
-                y = 50   # Small offset from top
-                self.root.geometry(f"1400x{window_height}+{x}+{y}")
+                self.root.geometry("1800x900+100+50")
         else:
-            # No saved geometry, use calculated
-            x = 100  # Simple left positioning with reasonable margin
-            y = 50   # Small offset from top
-            self.root.geometry(f"1400x{window_height}+{x}+{y}")
+            self.root.geometry("1800x900+100+50")
 
         # Create menu bar
         self.create_menu_bar()
@@ -220,45 +197,60 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         self.setup_undo_functionality()
 
         # Create main container that fills window
-        container = ctk.CTkFrame(self.root, corner_radius=0)
+        container = ctk.CTkFrame(self.root, corner_radius=0,
+                                fg_color=("gray75", "#1A1A1A"))
         container.pack(fill="both", expand=True)
-
-        # Create scrollable frame
-        self.scrollable_frame = ScrollableFrame(container)
-        self.scrollable_frame.pack(fill="both", expand=True)
-
-        # Get interior frame for content
-        content_frame = self.scrollable_frame.interior
-
-        # Set a darker background for better section contrast
-        content_frame.configure(fg_color=("gray75", "#1A1A1A"))
-
-        # Main container - removed expand=True to ensure bottom frame remains visible
-        main_frame = ctk.CTkFrame(content_frame, fg_color="transparent")
-        main_frame.pack(fill="x", expand=False, padx=12, pady=10)
 
         # Variables
         self.setup_variables()
 
-        # Create GUI groups using simple compact design with improved visual separation
-        self.create_simple_section(main_frame, self.create_group1_content, ("gray90", "gray25"))  # PDF Selection - lightest
-        self.create_simple_section(main_frame, self.create_parent_content, ("gray88", "gray23"))  # Filename Editing - medium
-        self.create_simple_section(main_frame, self.create_group3_content, ("gray86", "gray21"))  # Excel Integration (operations now integrated under Händelse)
+        # Top sections: PDF Selection, Filename Editing, Excel file bar (fixed height)
+        top_frame = ctk.CTkFrame(container, fg_color="transparent")
+        top_frame.pack(fill="x", padx=12, pady=(10, 0))
 
-        # PDF File List panel (below Excel fields, above bottom frame)
+        self.create_simple_section(top_frame, self.create_group1_content, ("gray90", "gray25"))
+        self.create_simple_section(top_frame, self.create_parent_content, ("gray88", "gray23"))
+        self.create_simple_section(top_frame, self.create_excel_file_bar_content, ("gray86", "gray21"))
+
+        # Outer horizontal PanedWindow: left (fields + file list) | right (PDF preview)
+        self.outer_paned_window = tk.PanedWindow(
+            container, orient="horizontal", sashwidth=6, bg="gray70",
+            sashrelief="raised"
+        )
+        self.outer_paned_window.pack(fill="both", expand=True, padx=12, pady=(5, 0))
+
+        # Left pane: Excel fields + file list
+        left_pane = ctk.CTkFrame(self.outer_paned_window, fg_color=("gray86", "gray21"),
+                                corner_radius=4)
+        self.outer_paned_window.add(left_pane, minsize=500)
+
+        # Excel fields frame inside left pane (expands to fill)
+        self.excel_fields_frame = ctk.CTkFrame(left_pane, fg_color="transparent")
+        self.excel_fields_frame.pack(fill="both", expand=True, pady=(1, 0))
+        self.excel_fields_frame.grid_columnconfigure(0, weight=1)
+
+        # PDF File List panel inside left pane (below fields, also expands)
         self.pdf_file_list_panel = PDFFileListPanel(
-            content_frame,
-            on_file_selected=None,  # Will be wired up in Phase 4
+            left_pane,
+            on_file_selected=None,
             config_manager=self.config_manager,
             fg_color=("gray88", "gray21"),
             corner_radius=4,
-            height=140
         )
-        self.pdf_file_list_panel.pack(fill="x", padx=12, pady=(0, 8))
+        self.pdf_file_list_panel.pack(fill="both", expand=True, padx=0, pady=(5, 4))
+
+        # Right pane: PDF Preview (full height)
+        self.pdf_preview_panel = PDFPreviewPanel(
+            self.outer_paned_window, fg_color=("gray94", "gray18")
+        )
+        self.outer_paned_window.add(self.pdf_preview_panel, minsize=200)
+
+        # Set initial outer paned window sash position
+        self.root.after(500, self._set_outer_sash_position)
 
         # Bottom frame for statistics and version
-        bottom_frame = ctk.CTkFrame(content_frame)
-        bottom_frame.pack(fill="x", padx=12, pady=(0, 8))
+        bottom_frame = ctk.CTkFrame(container)
+        bottom_frame.pack(fill="x", padx=12, pady=(5, 8))
 
         # Statistics label (left side) - compact format
         self.filename_stats_label = ctk.CTkLabel(bottom_frame, text=self.get_stats_text(),
@@ -337,6 +329,35 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         for var in [self.date_var, self.newspaper_var, self.pages_var, self.comment_var]:
             var.trace_add('write', self.on_filename_change)
 
+
+    def _set_outer_sash_position(self):
+        """Set initial sash position for outer PanedWindow (fields | preview)"""
+        try:
+            self.outer_paned_window.update_idletasks()
+            total_width = self.outer_paned_window.winfo_width()
+            if total_width < 400:
+                # Not ready yet, retry
+                self.root.after(300, self._set_outer_sash_position)
+                return
+
+            # Try to restore saved position
+            saved_pos = self.config.get('outer_sash_position', None)
+            saved_width = self.config.get('outer_sash_total_width', None)
+
+            if saved_pos and saved_width and saved_width > 0:
+                scale_factor = total_width / saved_width
+                pos = int(saved_pos * scale_factor)
+                # Clamp to reasonable range
+                pos = max(400, min(pos, total_width - 200))
+                self.outer_paned_window.sash_place(0, pos, 0)
+                logger.info(f"Restored outer sash position: {pos} (scaled from {saved_pos})")
+            else:
+                # Default: 75% for fields, 25% for preview
+                pos = int(total_width * 0.75)
+                self.outer_paned_window.sash_place(0, pos, 0)
+                logger.info(f"Set default outer sash position: {pos}")
+        except Exception as e:
+            logger.error(f"Error setting outer sash position: {e}")
 
     def change_theme(self, theme_name: str):
         """Change the application theme"""
