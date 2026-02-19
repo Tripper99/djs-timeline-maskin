@@ -5,31 +5,6 @@
 ### ~~Multi-Resolution Window Scaling Issues (v2.6.14)~~ — RESOLVED
 - Fixed by subsequent layout changes (v2.7.x series)
 
-### Checkbox Alignment Issue in Field Configuration Dialog (v2.6.10)
-**CRITICAL UI BUG**: "Dölj" checkboxes are misaligned in the field configuration dialog
-- **Affected fields**: Protected fields (Inlagd, Dag, Startdatum, Starttid, Slutdatum, Sluttid) have checkboxes positioned slightly to the left
-- **Root cause**: Unknown - appears to be fundamental CustomTkinter layout behavior with mixed widget types
-- **Impact**: Visual inconsistency, unprofessional appearance
-- **Priority**: High (affects user experience but not functionality)
-
-**Failed Attempts in v2.6.10**:
-- ❌ Padding adjustments (symmetric vs asymmetric)
-- ❌ Widget-specific spacers to match dimensions
-- ❌ Container frame modifications
-- ❌ Various CustomTkinter transparency fixes
-
-**Next Session Investigation Needed**:
-- Deep dive into CustomTkinter grid/pack layout interactions
-- Consider pure grid() layout instead of pack() inside grid()
-- Research CustomTkinter community solutions for complex layouts
-- Evaluate complete layout architecture redesign if necessary
-- Consider consulting CustomTkinter documentation for best practices
-
-**Technical Context**:
-- Current architecture: 5-column fixed-width containers with pack() inside grid()
-- Issue persists despite multiple sophisticated attempts
-- May require fundamental approach change rather than incremental fixes
-
 ---
 
 ## Security & Stability Fixes

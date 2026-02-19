@@ -12,9 +12,6 @@ The application has been refactored from a single large file into a modular stru
 
 **Latest Status (v2.7.5)**: Fixed broken undo/redo in text widgets (Händelse, Note1-3). Root cause was two competing undo systems (Tk built-in + custom stack) running simultaneously with no synchronization. Replaced with single snapshot-based custom undo system. Debounced typing snapshots (500ms) provide phrase-level undo matching VS Code/Word behavior. Formatting preserved through undo/redo cycles.
 
-**Known Issues**:
-- **Checkbox Alignment**: Minor visual misalignment in field configuration dialog
-
 **Key Features**:
 - **Single Custom Undo System**: Tk built-in undo disabled; snapshot-based undo with debounced typing (500ms), immediate saves before destructive ops, 3-second max interval between snapshots
 - **GitHub Version Checking**: Secure update checking via "Verktyg → Sök efter uppdateringar..." with Swedish interface, version skipping, and browser-based downloads
