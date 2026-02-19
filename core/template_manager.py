@@ -43,6 +43,15 @@ class TemplateManager:
         templates_dir = base_dir / "templates"
         return templates_dir
 
+    def _safe_template_path(self, name: str) -> Optional[Path]:
+        """Resolve template path and verify it stays inside the templates directory.
+        Returns None if path traversal is detected."""
+        file_path = (self.templates_dir / f"{name}.json").resolve()
+        if not str(file_path).startswith(str(self.templates_dir.resolve())):
+            logger.error(f"Path traversal attempt blocked: {name}")
+            return None
+        return file_path
+
     def _ensure_directory_exists(self) -> None:
         """Ensure the templates directory exists."""
         try:
@@ -154,8 +163,10 @@ class TemplateManager:
             "field_config": field_config_with_compat
         }
 
-        # Save to file
-        file_path = self.templates_dir / f"{name}.json"
+        # Save to file (with path traversal protection)
+        file_path = self._safe_template_path(name)
+        if file_path is None:
+            return False
 
         # Create backup if template exists
         if file_path.exists():
@@ -192,7 +203,9 @@ class TemplateManager:
         Returns:
             Template configuration dictionary or None if not found/invalid
         """
-        file_path = self.templates_dir / f"{name}.json"
+        file_path = self._safe_template_path(name)
+        if file_path is None:
+            return None
 
         if not file_path.exists():
             logger.error(f"Template not found: {name}")
@@ -239,7 +252,9 @@ class TemplateManager:
             logger.warning("Cannot delete default template")
             return False
 
-        file_path = self.templates_dir / f"{name}.json"
+        file_path = self._safe_template_path(name)
+        if file_path is None:
+            return False
 
         if not file_path.exists():
             logger.error(f"Template not found: {name}")
@@ -270,7 +285,9 @@ class TemplateManager:
         Returns:
             Template metadata or None if not found
         """
-        file_path = self.templates_dir / f"{name}.json"
+        file_path = self._safe_template_path(name)
+        if file_path is None:
+            return None
 
         if not file_path.exists():
             return None
@@ -389,7 +406,9 @@ class TemplateManager:
         Returns:
             True if exported successfully, False otherwise
         """
-        source_path = self.templates_dir / f"{name}.json"
+        source_path = self._safe_template_path(name)
+        if source_path is None:
+            return False
 
         if not source_path.exists():
             logger.error(f"Template not found: {name}")

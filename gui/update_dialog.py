@@ -75,17 +75,19 @@ class UpdateProgressDialog(ctk.CTkToplevel):
     def start_check(self):
         """Start the update check in a background thread"""
         def check_thread():
+            result = None
             try:
                 if not self.cancelled:
                     self.update_status(get_string("connecting_to_github"))
                     result = self.check_callback()
 
-                if not self.cancelled:
+                if not self.cancelled and result is not None and self.winfo_exists():
                     self.after(0, lambda: self.on_check_complete(result))
             except Exception as e:
                 logger.error(f"Update check failed: {e}")
-                if not self.cancelled:
-                    self.after(0, lambda: self.on_check_error(str(e)))
+                error_msg = str(e)
+                if not self.cancelled and self.winfo_exists():
+                    self.after(0, lambda msg=error_msg: self.on_check_error(msg))
 
         thread = threading.Thread(target=check_thread, daemon=True)
         thread.start()
@@ -434,8 +436,16 @@ class UpdateAvailableDialog(ctk.CTkToplevel):
     def on_download(self):
         """Handle download button click"""
         try:
+            # Validate URL before opening in browser
+            url = self.update_info.html_url
+            from urllib.parse import urlparse
+            parsed = urlparse(url if isinstance(url, str) else "")
+            if parsed.scheme != 'https' or not parsed.netloc.endswith('github.com'):
+                logger.error(f"Rejecting unsafe URL: {url}")
+                raise ValueError("URL must be HTTPS from github.com")
+
             # Open GitHub release page in browser
-            webbrowser.open(self.update_info.html_url)
+            webbrowser.open(url)
             self.result = "download"
             logger.info(f"Opened download page for version {self.update_info.version}")
             self.destroy()

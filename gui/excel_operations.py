@@ -109,16 +109,9 @@ class ExcelOperationsMixin:
         MAX_RETRIES = 10
         retries = 0
         while True:
-            result = self.excel_manager.add_row_with_xlsxwriter(excel_data, filename, self.row_color_var.get())
-
-            if result is True:
-                # Success
-                self.stats['excel_rows_added'] += 1
-                self.excel_row_saved.set(True)
-                self.update_stats_display()
-                logger.info(f"Added Excel row with data for: {filename}")
-                return True
-            elif result == "file_locked":
+            try:
+                result = self.excel_manager.add_row_with_xlsxwriter(excel_data, filename, self.row_color_var.get())
+            except PermissionError:
                 retries += 1
                 if retries >= MAX_RETRIES:
                     messagebox.showerror("Fel", "Kunde inte spara till Excel-filen efter flera försök. Kontrollera att filen inte är låst.")
@@ -132,6 +125,15 @@ class ExcelOperationsMixin:
                 if choice == 'cancel':
                     return False
                 # If choice == 'retry', loop continues to try again
+                continue
+
+            if result:
+                # Success
+                self.stats['excel_rows_added'] += 1
+                self.excel_row_saved.set(True)
+                self.update_stats_display()
+                logger.info(f"Added Excel row with data for: {filename}")
+                return True
             else:
                 # Other error
                 return False

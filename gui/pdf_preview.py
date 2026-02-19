@@ -278,22 +278,18 @@ class PDFPreviewPanel(ctk.CTkFrame):
     # ---- Scrolling ----
 
     def _bind_scroll(self, event=None):
-        """Bind mousewheel when cursor enters canvas."""
-        if platform.system() == "Darwin":
-            self._canvas.bind_all("<MouseWheel>", self._on_mousewheel)
-        else:
-            self._canvas.bind_all("<MouseWheel>", self._on_mousewheel)
-            self._canvas.bind_all("<Button-4>", self._on_mousewheel)
-            self._canvas.bind_all("<Button-5>", self._on_mousewheel)
+        """Bind mousewheel when cursor enters canvas (widget-specific, not global)."""
+        self._canvas.bind("<MouseWheel>", self._on_mousewheel)
+        if platform.system() != "Darwin":
+            self._canvas.bind("<Button-4>", self._on_mousewheel)
+            self._canvas.bind("<Button-5>", self._on_mousewheel)
 
     def _unbind_scroll(self, event=None):
         """Unbind mousewheel when cursor leaves canvas."""
-        if platform.system() == "Darwin":
-            self._canvas.unbind_all("<MouseWheel>")
-        else:
-            self._canvas.unbind_all("<MouseWheel>")
-            self._canvas.unbind_all("<Button-4>")
-            self._canvas.unbind_all("<Button-5>")
+        self._canvas.unbind("<MouseWheel>")
+        if platform.system() != "Darwin":
+            self._canvas.unbind("<Button-4>")
+            self._canvas.unbind("<Button-5>")
 
     def _on_mousewheel(self, event):
         """Handle mousewheel scrolling."""

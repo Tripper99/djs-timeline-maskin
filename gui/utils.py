@@ -112,7 +112,12 @@ class ScrollableText(ctk.CTkFrame):
 
     def __getattr__(self, name):
         """Delegate unknown attributes to the text widget"""
-        return getattr(self.text_widget, name)
+        # Prevent infinite recursion during initialization
+        try:
+            text_widget = object.__getattribute__(self, 'text_widget')
+        except AttributeError:
+            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'") from None
+        return getattr(text_widget, name)
 
 
 class ScrollableFrame(ctk.CTkFrame):
@@ -164,18 +169,24 @@ class ScrollableFrame(ctk.CTkFrame):
         self.canvas.itemconfig(self.canvas_frame, width=canvas_width)
 
     def bind_mouse_wheel(self):
-        """Bind mouse wheel events for scrolling"""
+        """Bind mouse wheel events for scrolling (widget-specific, not global)"""
         # Windows and MacOS
-        self.canvas.bind_all("<MouseWheel>", self.on_mouse_wheel)
+        self.canvas.bind("<MouseWheel>", self.on_mouse_wheel)
+        self.bind("<MouseWheel>", self.on_mouse_wheel)
         # Linux
-        self.canvas.bind_all("<Button-4>", self.on_mouse_wheel)
-        self.canvas.bind_all("<Button-5>", self.on_mouse_wheel)
+        self.canvas.bind("<Button-4>", self.on_mouse_wheel)
+        self.canvas.bind("<Button-5>", self.on_mouse_wheel)
+        self.bind("<Button-4>", self.on_mouse_wheel)
+        self.bind("<Button-5>", self.on_mouse_wheel)
 
     def unbind_mouse_wheel(self):
         """Unbind mouse wheel events"""
-        self.canvas.unbind_all("<MouseWheel>")
-        self.canvas.unbind_all("<Button-4>")
-        self.canvas.unbind_all("<Button-5>")
+        self.canvas.unbind("<MouseWheel>")
+        self.unbind("<MouseWheel>")
+        self.canvas.unbind("<Button-4>")
+        self.canvas.unbind("<Button-5>")
+        self.unbind("<Button-4>")
+        self.unbind("<Button-5>")
 
     def on_mouse_wheel(self, event):
         """Handle mouse wheel scrolling with platform-specific logic"""
