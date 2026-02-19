@@ -53,9 +53,9 @@
 
 ### Critical (fix first)
 
-- [ ] **C1**: Remove dead `add_row` method from `excel_manager.py` — non-atomic write, never called (only `add_row_with_xlsxwriter` is used)
-- [ ] **C2**: Add max retry count to `while True` loops in `excel_operations.py:108` and `pdf_operations.py:109,154` — prevent app freeze on permanently locked files
-- [ ] **C3**: Make `config.py:save_config` atomic — write to temp file + `os.replace()` to prevent config loss on crash
+- [x] **C1**: ~~Remove dead `add_row` method from `excel_manager.py`~~ — Fixed in v2.7.3
+- [x] **C2**: ~~Add max retry count to `while True` loops~~ — Fixed in v2.7.3
+- [x] **C3**: ~~Make `config.py:save_config` atomic~~ — Fixed in v2.7.3
 
 ### High
 
@@ -117,6 +117,7 @@
 - [ ] **F6**: Recently used Excel files dropdown
 - [ ] **F7**: Batch progress indicator ("Behandlad: 12/381")
 - [ ] **F8**: Undo last added Excel row
+- [x] **F9**: ~~Fix undo/redo in text widgets~~ — Fixed in v2.7.5 (single custom snapshot-based system)
 
 ---
 
@@ -127,7 +128,7 @@
 - [ ] Test PDF Operations Mixin - file selection logic, validation, renaming
 - [ ] Test Excel Operations Mixin - row creation, column mapping
 - [ ] Test Event Handlers - event processing logic (mocked GUI interactions)
-- [ ] Test Undo/Redo - command pattern implementation
+- [ ] Test Undo/Redo - snapshot-based system (debounce timers, paste/cut/format saves)
 
 ### Phase 3 Manual Verification Tests
 **Implementation Strategy**: User active participation required
@@ -163,6 +164,16 @@
 ---
 
 ## Recently Completed ✅
+
+### ✅ Fix Undo/Redo for Text Widgets (v2.7.5) - COMPLETE
+- ✅ Replaced dual undo system with single snapshot-based custom undo
+- ✅ Debounced typing snapshots (500ms), phrase-level undo, formatting preserved through cycles
+- ✅ Tk built-in undo disabled, synchronous state saves, 3-second max interval
+
+### ✅ Critical Security/Stability Fixes (v2.7.3) - COMPLETE
+- ✅ C1: Removed dead `add_row` method from excel_manager.py
+- ✅ C2: Added max retry count to `while True` loops
+- ✅ C3: Made config save atomic with temp file + os.replace()
 
 ### ✅ PDF Preview Panel & File List (v2.7.0-v2.7.1) - COMPLETE
 - ✅ Full-height PDF preview panel with file list
