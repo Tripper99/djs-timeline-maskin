@@ -8,32 +8,29 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.6.17)
+## Current Status (v2.7.5)
 
-**Latest Status (v2.6.17)**: Successfully implemented comprehensive GitHub version checking system with security-focused architecture, Swedish language support, and CustomTkinter interface. Users can now access "Sök efter uppdateringar..." from Verktyg menu to safely check for updates via GitHub API with browser-based downloads, version skipping, and complete privacy control.
+**Latest Status (v2.7.5)**: Fixed broken undo/redo in text widgets (Händelse, Note1-3). Root cause was two competing undo systems (Tk built-in + custom stack) running simultaneously with no synchronization. Replaced with single snapshot-based custom undo system. Debounced typing snapshots (500ms) provide phrase-level undo matching VS Code/Word behavior. Formatting preserved through undo/redo cycles.
 
 **Known Critical Issues**:
 - **Multi-Resolution Window Scaling**: Windows don't adapt properly between monitor resolutions (main window cut-off, field config dialog checkboxes invisible on 1920x1080)
 - **Checkbox Alignment**: Minor visual misalignment in field configuration dialog
-- **v2.6.15 Lesson**: Complex multi-component fixes high risk - incremental approach needed for future scaling solutions
 
 **Key Features**:
+- **Single Custom Undo System**: Tk built-in undo disabled; snapshot-based undo with debounced typing (500ms), immediate saves before destructive ops, 3-second max interval between snapshots
 - **GitHub Version Checking**: Secure update checking via "Verktyg → Sök efter uppdateringar..." with Swedish interface, version skipping, and browser-based downloads
 - **Direct Template Saving**: "Spara mall" button saves directly to active template, "Spara mall som..." saves to new file
 - **Intelligent Button States**: Dynamic enabling/disabling based on template type and modification status
 - **Template Validation**: "Standard" template protected from direct overwrites, custom templates fully supported
-- **Professional UX**: Dynamic button text shows target template, success/error dialogs provide clear feedback
 - **Race Condition Prevention**: Comprehensive protection during template loading and state transitions
-- **Save Prompt System**: 3-option dialog prevents loss of template modifications when applying changes
-- **Template Name Persistence**: Active template name correctly saved and displayed across sessions
 - **Field Configuration System**: Custom field names and visibility states with template support
 - **Excel Integration**: Disabled fields automatically excluded from Excel operations
 
 **Architecture Status**:
 - **Modular Design**: Clean architecture with main_window.py reduced from 35,000+ tokens to 384 lines
-- **Field State System**: Complete transition from "hidden" to "disabled" terminology with backward compatibility aliases
-- **Visual Styling**: New centralized field styling system (gui/field_styling.py) for consistent disabled field appearance
-- **Excel Integration**: Enhanced to show all fields while respecting field state for operations
+- **Undo System**: Single custom snapshot-based undo in `gui/undo_manager.py` — Tk undo disabled, debounce timers for typing, synchronous state saves for paste/cut/format
+- **Field State System**: Complete transition from "hidden" to "disabled" terminology
+- **Visual Styling**: Centralized field styling system (gui/field_styling.py) for consistent disabled field appearance
 
 **Testing Framework**:
 - Comprehensive test suite available: `python -m pytest tests/ -v`
