@@ -309,18 +309,24 @@ class UndoManagerMixin:
 
     def setup_undo_functionality(self):
         """Setup keyboard bindings for undo/redo"""
-        # Bind global keyboard shortcuts
+        # Bind global keyboard shortcuts (Command for macOS, Control for Windows/Linux)
+        self.root.bind_all('<Command-z>', self.global_undo)
         self.root.bind_all('<Control-z>', self.global_undo)
-        # Multiple binding formats for redo (Linux compatibility)
+        self.root.bind_all('<Command-y>', self.global_redo)
         self.root.bind_all('<Control-y>', self.global_redo)
-        self.root.bind_all('<Control-Y>', self.global_redo)  # Capital Y
-        self.root.bind_all('<Control-Shift-z>', self.global_redo)  # Alternative redo binding
-        self.root.bind_all('<Control-Shift-Z>', self.global_redo)  # Alternative redo binding
-        logger.info("Undo/redo bindings set up: Ctrl+Z (undo), Ctrl+Y/Ctrl+Shift+Z (redo)")
+        self.root.bind_all('<Control-Y>', self.global_redo)
+        self.root.bind_all('<Command-Shift-z>', self.global_redo)
+        self.root.bind_all('<Command-Shift-Z>', self.global_redo)
+        self.root.bind_all('<Control-Shift-z>', self.global_redo)
+        self.root.bind_all('<Control-Shift-Z>', self.global_redo)
+        logger.info("Undo/redo bindings set up: Cmd/Ctrl+Z (undo), Cmd/Ctrl+Y/Shift+Z (redo)")
 
-        # Add enhanced bindings for Text widgets to handle problematic operations
+        # Add enhanced bindings for Text widgets (Command for macOS, Control for Windows/Linux)
+        self.root.bind_all('<Command-a>', self.handle_select_all_undo)
         self.root.bind_all('<Control-a>', self.handle_select_all_undo)
+        self.root.bind_all('<Command-c>', self.handle_copy_with_format)
         self.root.bind_all('<Control-c>', self.handle_copy_with_format)
+        self.root.bind_all('<Command-x>', self.handle_cut_with_format)
         self.root.bind_all('<Control-x>', self.handle_cut_with_format)
         # NOTE: Paste binding removed - now handled directly on each Text widget
         self.root.bind_all('<Delete>', self.handle_delete_with_undo)

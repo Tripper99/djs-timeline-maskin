@@ -171,11 +171,16 @@ class FormattingManagerMixin:
                                font=ctk.CTkFont(size=9))
             font_btn.pack(side="left", padx=(1, 0))
 
-        # Bind keyboard shortcuts for this text widget
+        # Bind keyboard shortcuts for this text widget (Command for macOS, Control for Windows/Linux)
+        text_widget.bind('<Command-b>', lambda e: self.toggle_format(text_widget, "bold"))
         text_widget.bind('<Control-b>', lambda e: self.toggle_format(text_widget, "bold"))
+        text_widget.bind('<Command-r>', lambda e: self.toggle_format(text_widget, "red"))
         text_widget.bind('<Control-r>', lambda e: self.toggle_format(text_widget, "red"))
+        text_widget.bind('<Command-1>', lambda e: self.toggle_format(text_widget, "blue"))
         text_widget.bind('<Control-1>', lambda e: self.toggle_format(text_widget, "blue"))
+        text_widget.bind('<Command-g>', lambda e: self.toggle_format(text_widget, "green"))
         text_widget.bind('<Control-g>', lambda e: self.toggle_format(text_widget, "green"))
+        text_widget.bind('<Command-k>', lambda e: self.clear_all_formatting(text_widget))
         text_widget.bind('<Control-k>', lambda e: self.clear_all_formatting(text_widget))
 
     def toggle_format(self, text_widget, format_type):

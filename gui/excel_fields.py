@@ -612,8 +612,9 @@ class ExcelFieldManager:
             # Enable undo functionality for text widget
             self.parent.enable_undo_for_widget(text_widget)
 
-            # NUCLEAR OPTION: Direct paste binding to bypass all tkinter hierarchy issues
-            # This binds directly to the actual Text widget, not the ScrollableText wrapper
+            # Custom paste binding: Command-v for macOS, Control-v for Windows/Linux
+            # <<Paste>> is disabled since our handlers cover both platforms
+            text_widget.bind('<Command-v>', lambda e: self.parent.handle_paste_undo(text_widget))
             text_widget.bind('<Control-v>', lambda e: self.parent.handle_paste_undo(text_widget))
             text_widget.bind('<<Paste>>', lambda e: 'break')  # Disable built-in paste
 
