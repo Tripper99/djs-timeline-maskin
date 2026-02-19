@@ -42,66 +42,94 @@
 - Evaluate complete layout architecture redesign if necessary
 - Consider consulting CustomTkinter documentation for best practices
 
-**Technical Context**: 
+**Technical Context**:
 - Current architecture: 5-column fixed-width containers with pack() inside grid()
 - Issue persists despite multiple sophisticated attempts
 - May require fundamental approach change rather than incremental fixes
 
-## Recently Completed ✅
+---
 
-### ✅ Build Tools & Installer Configuration (v2.6.17) - COMPLETE (2025-08-31)
-**Created build configuration for v2.6.17 release**:
-- ✅ Created PyInstaller spec file with requests library dependencies
-- ✅ Created Inno Setup installer script with proper icon handling
-- ✅ Fixed desktop shortcut icon display issue
-- ✅ Added GitHub URLs to installer configuration
-- ✅ Included all necessary dependencies for version checking feature
+## Security & Stability Fixes
 
-### ✅ GitHub Version Checking System Implementation (v2.6.17) - COMPLETE (2025-08-30)
-**Implemented comprehensive update checking functionality**:
-- ✅ Secure GitHub API integration with comprehensive validation
-- ✅ CustomTkinter dialogs with Swedish language support  
-- ✅ Menu integration: "Verktyg → Sök efter uppdateringar..."
-- ✅ Version skipping functionality
-- ✅ Configuration system extensions
-- ✅ Security measures (HTTPS-only, SSL validation, domain validation)
-- ✅ Privacy-first design (disabled by default)
-- ✅ Professional UX with progress indication and error handling
-- ✅ Added requests dependency and passed Ruff validation
-- ✅ Complete documentation in DEVELOPMENT_HISTORY.md
+### Critical (fix first)
 
-**Next Steps**: Ready for building and distribution with updated installer configuration.
+- [ ] **C1**: Remove dead `add_row` method from `excel_manager.py` — non-atomic write, never called (only `add_row_with_xlsxwriter` is used)
+- [ ] **C2**: Add max retry count to `while True` loops in `excel_operations.py:108` and `pdf_operations.py:109,154` — prevent app freeze on permanently locked files
+- [ ] **C3**: Make `config.py:save_config` atomic — write to temp file + `os.replace()` to prevent config loss on crash
 
-## Recently Completed ✅
+### High
 
-### v2.6.13 Template Save Visual Feedback Bug Fix (2025-08-21) ✅
-**CRITICAL BUG FIXED**: Template save state visual feedback in field configuration dialog
-- ✅ **Bug Resolved**: "Spara mall" now correctly shows visual state change (red "(ändrad)" → orange background)
-- ✅ **Root Cause Identified**: Modal success dialog was blocking user's view of template state changes
-- ✅ **Solution Implemented**: Replaced modal dialog with non-blocking flash effect on template label
-- ✅ **Technical Excellence**: Ultra-thorough analysis using bug-finder-debugger, architecture-planner, and code-reviewer-refactorer agents
-- ✅ **Zero Risk Implementation**: Preserved all existing template functionality while fixing UX issue
-- ✅ **Professional UX**: Green flash effect (500ms) provides immediate, non-intrusive success feedback
-- ✅ **User Validation**: Confirmed working - users can now see template state changes immediately
+- [ ] **H1**: Fix `add_row_with_xlsxwriter` return type — returns `"file_locked"` string when `-> bool` declared. Raise exception instead
+- [ ] **H2**: Add path traversal protection to `template_manager.py` — `..` in template names could escape templates directory
+- [ ] **H3**: Fix widget-after-destruction race in `update_dialog.py` — add `winfo_exists()` guard and `_completed` flag
+- [ ] **H4**: Fix unbound `result` variable in update check thread (`update_dialog.py:77-88`) — initialize `result = None`
+- [ ] **H5**: Fix `ScrollableText.__getattr__` infinite recursion risk (`utils.py:116-118`)
+- [ ] **H6**: Replace `bind_all("<MouseWheel>")` with widget-specific bindings (`utils.py:169`, `pdf_preview.py:282`)
+- [ ] **H7**: Validate GitHub URL starts with `https://github.com/` before `webbrowser.open()` (`update_dialog.py:438`)
 
-**Technical Implementation**:
-- Replaced `_show_save_success()` modal dialog with `_show_save_success_flash()` non-blocking feedback
-- Reordered operations: visual updates now happen BEFORE success feedback
-- Added robust error handling with graceful degradation
-- Maintained all existing error handling and logging functionality
+### Medium
 
-*(For detailed development history of v2.6.9, v2.6.10 and earlier versions, see docs\DEVELOPMENT_HISTORY.md)*
+- [ ] **M1**: Add `--` separator before paths in `subprocess.run(["open", path])` calls — prevent filenames starting with `-` being interpreted as flags
+- [ ] **M2**: Use streaming or check `Content-Length` before downloading full response in version checker (`checker.py:133`)
+- [ ] **M3**: Fix hardcoded Swedish column names in `_prepare_special_data` (`excel_manager.py:491,515,525`) — use `_get_field_display_name()` instead
+- [ ] **M4**: Add proper workbook `close()` to `ExcelManager` — resource leak (`excel_manager.py:36`)
+- [ ] **M5**: Close `read_workbook` in `add_row_with_xlsxwriter` — resource leak (`excel_manager.py:298`)
+- [ ] **M6**: Fix temp file orphan when original Excel deleted (`excel_manager.py:473`) — always attempt `os.replace()`
+- [ ] **M7**: Fix `backup_path` NameError when template save fails on new template (`template_manager.py:176`)
+- [ ] **M8**: Make template writes atomic — write to temp + `os.replace()` (`template_manager.py:170`)
+- [ ] **M9**: Fix string-based version comparison in config migration — will break at v2.10+ (`config.py:331-367`)
+- [ ] **M10**: Fix load-modify-save race condition across config methods (`config.py:125+`)
+- [ ] **M11**: Fix missing `update_filename_preview` method — crash when applying field config (`main_window.py:641`)
+- [ ] **M12**: Clear undo stacks when fields are recreated — memory leak with stale widget IDs (`undo_manager.py`)
+- [ ] **M13**: Clear `undo_widgets` list on field recreation — leaks references to destroyed widgets (`undo_manager.py:414`)
+- [ ] **M14**: Cancel scheduled `after` callbacks when dialogs close (`field_config_dialog.py:1255`, `pdf_preview.py:214`)
+- [ ] **M15**: Replace all `print("DEBUG: ...")` and `logger.info("DEBUG: ...")` with `logger.debug()` across codebase
+
+### Low (cleanup)
+
+- [ ] **L1**: Remove unused SSL context method (`validator.py:245`)
+- [ ] **L2**: Add type validation for `skip_versions` from config (`config.py:276`)
+- [ ] **L3**: Guard `ctypes.windll` with `platform.system() == 'Windows'` check (`main_window.py:148`)
+- [ ] **L4**: Fix `clean_pdf_text` returning `None` instead of `""` (`filename_parser.py:109`)
+- [ ] **L5**: Fix `.pdf` removal from all positions in filename (`filename_parser.py:19`)
+- [ ] **L6**: Clamp tooltip positions to screen bounds (`utils.py:26`)
+- [ ] **L7**: Remove unreachable code after return statements (`excel_fields.py:769`)
+
+---
+
+## GUI Improvements
+
+- [ ] **G1**: Shorten "Kopiera ned filnamnet till Excelfältet" button text (e.g., "Kopiera till Excel" or icon + tooltip)
+- [ ] **G2**: Consider 2-column layout for date/time pairs (Startdatum+Starttid on same row) to save vertical space
+- [ ] **G3**: Differentiate "Rensa utan spara" button visually from "Spara allt och rensa" (muted/outlined style)
+- [ ] **G4**: Add visible selection indicator on active row color button
+- [ ] **G5**: Improve formatting toolbar button discoverability (larger targets, tooltips)
+
+---
+
+## Feature Ideas
+
+- [ ] **F1**: Search/filter box in PDF file list (biggest workflow win for large file sets)
+- [ ] **F2**: Keyboard shortcuts for common actions (Save+Clear, Next/Previous PDF)
+- [ ] **F3**: Auto-advance to next PDF in file list after "Spara allt och rensa"
+- [ ] **F4**: Drag-and-drop PDF files onto app window
+- [ ] **F5**: File list sorting options (name, date modified, size)
+- [ ] **F6**: Recently used Excel files dropdown
+- [ ] **F7**: Batch progress indicator ("Behandlad: 12/381")
+- [ ] **F8**: Undo last added Excel row
+
+---
 
 ## Pending Testing
 
-### 3. Unit Tests for Individual Mixins
+### Unit Tests for Individual Mixins
 **Implementation Strategy**: Mostly autonomous unit tests for mixin functionality
 - [ ] Test PDF Operations Mixin - file selection logic, validation, renaming
 - [ ] Test Excel Operations Mixin - row creation, column mapping
 - [ ] Test Event Handlers - event processing logic (mocked GUI interactions)
 - [ ] Test Undo/Redo - command pattern implementation
 
-### 4. Phase 3 Manual Verification Tests
+### Phase 3 Manual Verification Tests
 **Implementation Strategy**: User active participation required
 - [ ] **Visual/Layout Testing**:
   - [ ] Column resizing functionality
@@ -113,32 +141,40 @@
   - [ ] Locked Excel file scenarios
   - [ ] Invalid configuration recovery
 
+---
+
 ## Future Improvements
 
-### 5. Consider async operations for file processing
+### Consider async operations for file processing
 - [ ] Evaluate if PDF processing could benefit from async operations
 - [ ] Consider background processing for large Excel files
 - [ ] Implement progress indicators for long operations
 
-### 6. Field Configuration Dialog Enhancements *(Most features now completed in v2.6.9)*
-**Remaining Template System Items**:
-- ✅ ~~Add "Spara namnmall" (Save name template) button~~ → **COMPLETED as "Spara mall"**
-- ✅ ~~Add "Spara namnmall som..." button~~ → **COMPLETED as "Spara mall som..."**  
-- ✅ ~~Display current template name~~ → **COMPLETED with visual indicators**
-- ✅ ~~Enable save button only when changed~~ → **COMPLETED with intelligent state management**
-- ✅ ~~Create template storage system~~ → **COMPLETED using existing template_manager**
-- ✅ ~~Enhance visual feedback for template operations~~ → **COMPLETED with success/error dialogs**
-
+### Field Configuration Dialog Enhancements
 **Still Pending**:
-- [ ] Add "Återställ till standard" (Restore to default names) button - clears all custom name fields *(Note: Reset functionality exists, this would be UI enhancement)*
+- [ ] Add "Återställ till standard" (Restore to default names) button - clears all custom name fields
 
-**Dialog Visual Status**:
-- ✅ ~~Fix overall look and feel~~ → **COMPLETED with 3-button professional layout**  
-- ✅ ~~Improve button layout and spacing~~ → **COMPLETED with proper grid system**
-- ✅ ~~Add template management section~~ → **COMPLETED with full template controls**
-
-### 7. Add type hints throughout the codebase
+### Add type hints throughout the codebase
 - [ ] Add type hints to all function signatures
 - [ ] Add type hints for class attributes
 - [ ] Use typing module for complex types
 - [ ] Consider using mypy for type checking
+
+---
+
+## Recently Completed ✅
+
+### ✅ PDF Preview Panel & File List (v2.7.0-v2.7.1) - COMPLETE
+- ✅ Full-height PDF preview panel with file list
+- ✅ Auto-move PDFs, improved tooltips, layout improvements
+
+### ✅ Build Tools & Installer Configuration (v2.6.17) - COMPLETE
+- ✅ PyInstaller spec, Inno Setup installer, GitHub URLs, dependency handling
+
+### ✅ GitHub Version Checking System (v2.6.17) - COMPLETE
+- ✅ Secure GitHub API integration, Swedish UI, version skipping, privacy-first design
+
+### ✅ Template Save Visual Feedback Bug Fix (v2.6.13) - COMPLETE
+- ✅ Non-blocking flash effect replaced modal dialog for template save feedback
+
+*(For detailed development history, see docs/DEVELOPMENT_HISTORY.md)*
