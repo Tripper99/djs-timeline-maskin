@@ -4,6 +4,34 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.7.5: Fix Undo/Redo for Text Widgets (2026-02-19)
+
+**Problem**: Undo (Cmd-Z) and Redo (Cmd-Shift-Z) were broken in the large text fields (Händelse, Note1-3). Symptoms included undo removing too much text, redo jumping to stale states, and formatting changes not being undoable.
+
+**Root Cause**: Two competing undo systems running simultaneously with no synchronization:
+1. **Tkinter's built-in** (`edit_undo()`/`edit_redo()`) — tracked character inserts/deletes but NOT formatting tags (bold, colors)
+2. **Custom stack-based** (`text_undo_stacks`/`text_redo_stacks`) — saved full widget snapshots with formatting, but only during paste/cut operations
+
+When undo was triggered, `global_undo()` first tried the custom system, then fell through to Tk's built-in. These two systems tracked different operations, had different state, and produced unpredictable results when interleaved. Additionally, formatting changes (`toggle_format`) only used `edit_separator()` but never saved to custom stacks, creating further desync.
+
+**Solution**: Replaced dual system with single consistent snapshot-based undo:
+- **Disabled Tk's built-in undo** (`undo=False`) — eliminated the second system entirely
+- **Debounced typing snapshots** — saves state 500ms after typing pauses (phrase-level undo, same as VS Code/Word)
+- **Immediate snapshots before destructive ops** — paste, cut, delete-selection, format changes
+- **Synchronous state management** — removed `after_idle` for critical state saves
+- **Max 3 seconds between snapshots** — prevents losing large blocks of typing on single undo
+- **Duplicate check compares content AND tags** — allows format-only changes to be tracked
+
+**Files Changed**:
+- `gui/undo_manager.py` — Main rewrite: removed Tk undo fallback, added debounce timer system (`_schedule_undo_snapshot`, `_save_typing_snapshot`, `_cancel_undo_timer`, `_flush_undo_timer`), simplified `global_undo`/`global_redo`, removed dead methods (`_save_to_redo_stack`, `save_post_paste_state`, `handle_delete_key_undo`)
+- `gui/excel_fields.py` — Changed `undo=True, maxundo=20` to `undo=False`, removed separate Delete/BackSpace bindings for deleted handler
+- `gui/utils.py` — Removed `autoseparators=False` setting (no longer relevant)
+- `gui/formatting_manager.py` — Replaced `edit_separator()` calls in `toggle_format()` and `clear_all_formatting()` with `_flush_undo_timer` + `save_text_undo_state` (before and after formatting change)
+
+**Technical Approach**: Thorough analysis of both undo systems to identify all interaction points. Plan-mode investigation traced exact code paths for each undo scenario. Single implementation pass with all changes coordinated across 4 files.
+
+**Test Results**: All 7 test scenarios passed — phrase-level typing undo, paste-only undo, multi-step undo chain, single-step redo, format undo, formatted paste cycle, and per-widget undo isolation.
+
 ### v2.7.0 → v2.7.1: PDF Preview & File List (2026-02-18)
 
 **v2.7.0 - Initial Implementation**:
