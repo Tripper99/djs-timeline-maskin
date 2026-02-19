@@ -42,13 +42,13 @@
 
 ### High
 
-- [ ] **H1**: Fix `add_row_with_xlsxwriter` return type — returns `"file_locked"` string when `-> bool` declared. Raise exception instead
-- [ ] **H2**: Add path traversal protection to `template_manager.py` — `..` in template names could escape templates directory
-- [ ] **H3**: Fix widget-after-destruction race in `update_dialog.py` — add `winfo_exists()` guard and `_completed` flag
-- [ ] **H4**: Fix unbound `result` variable in update check thread (`update_dialog.py:77-88`) — initialize `result = None`
-- [ ] **H5**: Fix `ScrollableText.__getattr__` infinite recursion risk (`utils.py:116-118`)
-- [ ] **H6**: Replace `bind_all("<MouseWheel>")` with widget-specific bindings (`utils.py:169`, `pdf_preview.py:282`)
-- [ ] **H7**: Validate GitHub URL starts with `https://github.com/` before `webbrowser.open()` (`update_dialog.py:438`)
+- [x] **H1**: ~~Fix `add_row_with_xlsxwriter` return type~~ — Now raises PermissionError. Fixed in v2.7.6
+- [x] **H2**: ~~Add path traversal protection to `template_manager.py`~~ — `_safe_template_path()` on all ops. Fixed in v2.7.6
+- [x] **H3**: ~~Fix widget-after-destruction race in `update_dialog.py`~~ — `winfo_exists()` guard added. Fixed in v2.7.6
+- [x] **H4**: ~~Fix unbound `result` variable in update check thread~~ — Initialized `result = None`. Fixed in v2.7.6
+- [x] **H5**: ~~Fix `ScrollableText.__getattr__` infinite recursion~~ — Uses `object.__getattribute__`. Fixed in v2.7.6
+- [x] **H6**: ~~Replace `bind_all("<MouseWheel>")` with widget-specific bindings~~ — Fixed in v2.7.6
+- [x] **H7**: ~~Validate GitHub URL before `webbrowser.open()`~~ — HTTPS + github.com check. Fixed in v2.7.6
 
 ### Medium
 
