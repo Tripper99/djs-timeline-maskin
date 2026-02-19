@@ -12,8 +12,7 @@ The application has been refactored from a single large file into a modular stru
 
 **Latest Status (v2.7.5)**: Fixed broken undo/redo in text widgets (Händelse, Note1-3). Root cause was two competing undo systems (Tk built-in + custom stack) running simultaneously with no synchronization. Replaced with single snapshot-based custom undo system. Debounced typing snapshots (500ms) provide phrase-level undo matching VS Code/Word behavior. Formatting preserved through undo/redo cycles.
 
-**Known Critical Issues**:
-- **Multi-Resolution Window Scaling**: Windows don't adapt properly between monitor resolutions (main window cut-off, field config dialog checkboxes invisible on 1920x1080)
+**Known Issues**:
 - **Checkbox Alignment**: Minor visual misalignment in field configuration dialog
 
 **Key Features**:
