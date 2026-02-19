@@ -4,6 +4,38 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.7.0 → v2.7.1: PDF Preview & File List (2026-02-18)
+
+**v2.7.0 - Initial Implementation**:
+- Created `gui/pdf_preview.py`: PDF page rendering with PyMuPDF, LRU cache (5 pages), page navigation, graceful degradation
+- Created `gui/pdf_file_list.py`: Folder browsing, PDF file listing with click-to-select, config persistence
+- Integrated as 4th column in Excel fields PanedWindow + separate file list below
+- Added PyMuPDF and Pillow dependencies
+- Wired bidirectional event flow: PDF selection ↔ preview + file list
+
+**v2.7.1 - Layout Restructuring & Auto-Move**:
+
+*Problem 1: Layout height issues*
+- File list area didn't expand to fill window when maximized (white space below)
+- Worse on external monitors due to ScrollableFrame not propagating height
+
+*Problem 2: Preview should span full height*
+- Preview was constrained to the PanedWindow row alongside fields
+- User wanted preview from top to bottom, file list only below columns 1-3
+
+*Problem 3: Auto-move processed PDFs*
+- Processed PDFs stayed in working directory even after being added to Excel
+- Risk of re-processing same files repeatedly
+
+*Solution*:
+- **Layout**: Removed `ScrollableFrame` wrapper entirely. Created outer horizontal `tk.PanedWindow` splitting left (3-column fields + file list) from right (full-height PDF preview). Reverted inner fields from 4 to 3 columns.
+- **Auto-move**: New `move_pdf_to_output_folder()` in `pdf_operations.py`. Runs after Excel save in `save_all_and_clear()`. Forced folder selection when PDF is loaded but no output folder set. Removed auto-fill of output folder from PDF parent directory.
+- **Tooltips**: Fixed ghost tooltips in file list (stored reference + `update_text()` instead of recreating). Improved macOS tooltip styling (dark background, white text, system font).
+
+*Files changed*: `gui/main_window.py`, `gui/excel_fields.py`, `gui/layout_manager.py`, `gui/event_handlers.py`, `gui/pdf_operations.py`, `gui/pdf_file_list.py`, `gui/pdf_preview.py`, `gui/utils.py`
+
+*Technical approach*: Sub-agents used for codebase exploration and documentation review. Incremental implementation with user testing between changes.
+
 ### v2.6.17 Build Tools & Installer Configuration Updates (2025-08-31) ✅
 **Tasks Completed**: Created PyInstaller spec file and Inno Setup installer configuration for v2.6.17 with proper icon handling.
 
