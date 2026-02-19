@@ -154,7 +154,7 @@ gui/
 - **`ExcelOperationsMixin`**: Spreadsheet integration, row operations
 - **`LayoutManagerMixin`**: Visual organization, section creation, menu bars
 - **`EventHandlersMixin`**: Event binding, callback management
-- **`UndoManagerMixin`**: Comprehensive undo/redo system
+- **`UndoManagerMixin`**: Single custom snapshot-based undo/redo system (Tk undo disabled, debounced typing snapshots)
 - **`FormattingManagerMixin`**: Rich text formatting, styling
 - **`StatsManagerMixin`**: Usage tracking, statistics display
 

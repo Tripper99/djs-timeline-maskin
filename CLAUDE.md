@@ -8,9 +8,9 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.7.5)
+## Current Status (v2.7.6)
 
-**Latest Status (v2.7.5)**: Fixed broken undo/redo in text widgets (Händelse, Note1-3). Root cause was two competing undo systems (Tk built-in + custom stack) running simultaneously with no synchronization. Replaced with single snapshot-based custom undo system. Debounced typing snapshots (500ms) provide phrase-level undo matching VS Code/Word behavior. Formatting preserved through undo/redo cycles.
+**Latest Status (v2.7.6)**: Batch fixed 7 high-priority security/stability issues (H1-H7): return type mismatch in Excel save, path traversal protection for templates, widget-after-destruction race condition, unbound variable in update thread, `__getattr__` infinite recursion, global mouse wheel binding conflicts, and URL validation before browser open. All Critical (C1-C3) and High (H1-H7) issues from the security audit are now resolved. Previous session (v2.7.5) fixed undo/redo with single snapshot-based custom undo system.
 
 **Key Features**:
 - **Single Custom Undo System**: Tk built-in undo disabled; snapshot-based undo with debounced typing (500ms), immediate saves before destructive ops, 3-second max interval between snapshots

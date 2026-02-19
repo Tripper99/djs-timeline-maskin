@@ -4,6 +4,25 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.7.6: Batch Fix High-Priority Security/Stability Issues (2026-02-19)
+
+**Problem**: 7 high-priority issues (H1-H7) identified in the v2.7.2 security/stability audit remained unfixed.
+
+**Fixes Applied**:
+- **H1** (`core/excel_manager.py`): `add_row_with_xlsxwriter` returned `"file_locked"` string despite `-> bool` type annotation. Changed to raise `PermissionError`, caller in `gui/excel_operations.py` updated to catch it.
+- **H2** (`core/template_manager.py`): Added `_safe_template_path()` method using `Path.resolve()` to block path traversal attacks. Applied to all 5 template path construction sites (save, load, delete, get_info, export).
+- **H3** (`gui/update_dialog.py`): Added `self.winfo_exists()` guard before `self.after()` calls in background thread, preventing `RuntimeError` when user cancels during check.
+- **H4** (`gui/update_dialog.py`): Initialized `result = None` before try block and added `result is not None` check. Also fixed late-binding lambda by eagerly capturing error message string.
+- **H5** (`gui/utils.py`): `ScrollableText.__getattr__` now uses `object.__getattribute__` to safely access `text_widget`, preventing infinite recursion during initialization.
+- **H6** (`gui/utils.py`, `gui/pdf_preview.py`): Replaced `bind_all`/`unbind_all` with widget-specific `bind`/`unbind` for mouse wheel events in both `ScrollableFrame` and `PDFPreview`. Eliminates cross-widget event interference.
+- **H7** (`gui/update_dialog.py`): Added URL validation using `urlparse` — requires `https` scheme and `github.com` domain before `webbrowser.open()`.
+
+**Files Changed**: `core/excel_manager.py`, `core/template_manager.py`, `gui/excel_operations.py`, `gui/update_dialog.py`, `gui/utils.py`, `gui/pdf_preview.py`
+
+**Technical Approach**: Sub-agent used for comprehensive codebase investigation of all 7 issues. All fixes implemented in a single batch, verified with Ruff and user testing.
+
+**Status**: All Critical (C1-C3) and High (H1-H7) security/stability audit items now resolved. Medium (M1-M15) items remain for future sessions.
+
 ### v2.7.5: Fix Undo/Redo for Text Widgets (2026-02-19)
 
 **Problem**: Undo (Cmd-Z) and Redo (Cmd-Shift-Z) were broken in the large text fields (Händelse, Note1-3). Symptoms included undo removing too much text, redo jumping to stale states, and formatting changes not being undoable.
