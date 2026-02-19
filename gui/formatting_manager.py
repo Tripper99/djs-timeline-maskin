@@ -186,8 +186,10 @@ class FormattingManagerMixin:
     def toggle_format(self, text_widget, format_type):
         """Toggle formatting on selected text with undo support"""
         try:
-            # Add edit separator BEFORE formatting change
-            text_widget.edit_separator()
+            # Save state before formatting change (flush pending typing snapshot)
+            self._flush_undo_timer(text_widget)
+            content = text_widget.get("1.0", "end-1c")
+            self.save_text_undo_state(text_widget, content)
 
             # Get current selection
             try:
@@ -217,8 +219,9 @@ class FormattingManagerMixin:
                     if color_tag != format_type:
                         text_widget.tag_remove(color_tag, start, end)
 
-            # Add edit separator AFTER formatting change
-            text_widget.edit_separator()
+            # Save state after formatting change (tags differ, so duplicate check allows this)
+            new_content = text_widget.get("1.0", "end-1c")
+            self.save_text_undo_state(text_widget, new_content)
 
         except tk.TclError:
             # Handle any errors silently
@@ -227,8 +230,10 @@ class FormattingManagerMixin:
     def clear_all_formatting(self, text_widget):
         """Clear ALL formatting from selected text and restore theme-appropriate default color"""
         try:
-            # Add edit separator BEFORE formatting change
-            text_widget.edit_separator()
+            # Save state before formatting change (flush pending typing snapshot)
+            self._flush_undo_timer(text_widget)
+            content = text_widget.get("1.0", "end-1c")
+            self.save_text_undo_state(text_widget, content)
 
             # Get current selection
             try:
@@ -257,8 +262,9 @@ class FormattingManagerMixin:
             text_widget.tag_configure("default", foreground=default_color)
             text_widget.tag_add("default", start, end)
 
-            # Add edit separator AFTER formatting change
-            text_widget.edit_separator()
+            # Save state after formatting change
+            new_content = text_widget.get("1.0", "end-1c")
+            self.save_text_undo_state(text_widget, new_content)
 
             logger.debug(f"Cleared all formatting and applied theme color {default_color}")
 

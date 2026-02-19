@@ -2,16 +2,26 @@
 """
 Undo/Redo functionality for DJs Timeline-maskin
 Contains UndoManagerMixin class with all undo/redo methods
+
+Single custom snapshot-based undo system for Text widgets.
+Tk's built-in undo is disabled to prevent interference.
+Debounced typing snapshots (500ms) provide phrase-level undo.
 """
 
 # Standard library imports
 import logging
+import time
 
 # GUI imports
 import tkinter as tk
 
 # Setup logging
 logger = logging.getLogger(__name__)
+
+# Debounce interval for typing snapshots (seconds)
+TYPING_SNAPSHOT_DELAY_MS = 500
+# Maximum time between forced snapshots (seconds)
+MAX_SNAPSHOT_INTERVAL = 3.0
 
 
 class UndoManagerMixin:
@@ -37,8 +47,85 @@ class UndoManagerMixin:
         except Exception as e:
             logger.error(f"Error during verification of {field_name}: {e}")
 
+    # ── Debounce timer management ──────────────────────────────────
+
+    def _schedule_undo_snapshot(self, text_widget):
+        """Cancel pending timer, schedule new snapshot after 500ms pause.
+        Also force-save if >3 seconds since last snapshot."""
+        widget_id = id(text_widget)
+
+        # Cancel any existing timer
+        self._cancel_undo_timer(text_widget)
+
+        # Check if we need a forced save (>3 seconds since last snapshot)
+        last_save_time = getattr(self, '_last_snapshot_time', {}).get(widget_id, 0)
+        now = time.time()
+        if now - last_save_time > MAX_SNAPSHOT_INTERVAL and last_save_time > 0:
+            self._save_typing_snapshot(text_widget)
+            # Schedule a new timer for the next pause
+            timer_id = self.root.after(
+                TYPING_SNAPSHOT_DELAY_MS,
+                lambda: self._save_typing_snapshot(text_widget)
+            )
+            if not hasattr(self, '_undo_timers'):
+                self._undo_timers = {}
+            self._undo_timers[widget_id] = timer_id
+            return
+
+        # Schedule a new timer
+        timer_id = self.root.after(
+            TYPING_SNAPSHOT_DELAY_MS,
+            lambda: self._save_typing_snapshot(text_widget)
+        )
+        if not hasattr(self, '_undo_timers'):
+            self._undo_timers = {}
+        self._undo_timers[widget_id] = timer_id
+
+    def _save_typing_snapshot(self, text_widget):
+        """Save current content+formatting to undo stack (debounce callback)."""
+        widget_id = id(text_widget)
+
+        # Clear the timer reference
+        if hasattr(self, '_undo_timers') and widget_id in self._undo_timers:
+            self._undo_timers[widget_id] = None
+
+        try:
+            content = text_widget.get("1.0", "end-1c")
+            self.save_text_undo_state(text_widget, content)
+
+            # Update last snapshot time
+            if not hasattr(self, '_last_snapshot_time'):
+                self._last_snapshot_time = {}
+            self._last_snapshot_time[widget_id] = time.time()
+
+            logger.debug(f"Saved typing snapshot for widget {widget_id}")
+        except tk.TclError:
+            pass
+
+    def _cancel_undo_timer(self, text_widget):
+        """Cancel pending debounce timer without saving."""
+        widget_id = id(text_widget)
+        if hasattr(self, '_undo_timers') and widget_id in self._undo_timers:
+            timer_id = self._undo_timers[widget_id]
+            if timer_id is not None:
+                self.root.after_cancel(timer_id)
+                self._undo_timers[widget_id] = None
+
+    def _flush_undo_timer(self, text_widget):
+        """Cancel timer AND immediately save if one was pending."""
+        widget_id = id(text_widget)
+        if hasattr(self, '_undo_timers') and widget_id in self._undo_timers:
+            timer_id = self._undo_timers[widget_id]
+            if timer_id is not None:
+                self.root.after_cancel(timer_id)
+                self._undo_timers[widget_id] = None
+                # Save the snapshot now
+                self._save_typing_snapshot(text_widget)
+
+    # ── Key press handlers ─────────────────────────────────────────
+
     def handle_text_key_press_undo(self, event):
-        """Handle key press in Text widget - create undo separator for character-by-character undo"""
+        """Handle key press in Text widget - schedule debounced undo snapshot"""
         try:
             text_widget = event.widget
             if not isinstance(text_widget, tk.Text):
@@ -48,21 +135,30 @@ class UndoManagerMixin:
             if event.state & 0x4 and event.keysym != 'Tab':  # Control key pressed
                 return None
 
-            # Check if there's selected text that will be replaced
-            has_selection = bool(text_widget.tag_ranges(tk.SEL))
+            # Printable char, Return, or Tab → schedule debounced snapshot
+            if (len(event.char) == 1 and event.char.isprintable()) or event.keysym in ['Return', 'KP_Enter', 'Tab']:
+                # If there's a selection that will be replaced, save state first
+                if text_widget.tag_ranges(tk.SEL):
+                    self._flush_undo_timer(text_widget)
+                    content = text_widget.get("1.0", "end-1c")
+                    self.save_text_undo_state(text_widget, content)
+                else:
+                    self._schedule_undo_snapshot(text_widget)
+                return None
 
-            # Add separator for ANY character input or deletion
-            if (len(event.char) == 1 and event.char.isprintable()) or event.keysym in ['Delete', 'BackSpace', 'Return', 'KP_Enter', 'Tab']:
-                text_widget.edit_separator()
-
-                # Log only for selections to reduce noise
-                if has_selection:
-                    logger.debug(f"Added undo separator before '{event.keysym}' over selection")
+            # Delete/BackSpace with selection → save pre-delete state immediately
+            if event.keysym in ['Delete', 'BackSpace']:
+                if text_widget.tag_ranges(tk.SEL):
+                    self._flush_undo_timer(text_widget)
+                    content = text_widget.get("1.0", "end-1c")
+                    self.save_text_undo_state(text_widget, content)
+                else:
+                    self._schedule_undo_snapshot(text_widget)
+                return None
 
             # Allow the default key handling to proceed
             return None
         except (tk.TclError, AttributeError):
-            # Error accessing selection or widget - let default handling proceed
             return None
 
     def handle_select_all_undo(self, event):
@@ -70,7 +166,7 @@ class UndoManagerMixin:
         try:
             focused_widget = self.root.focus_get()
             if isinstance(focused_widget, tk.Text):
-                # Mark that we just did a select all - next destructive operation should add separator
+                # Mark that we just did a select all - next destructive operation should save state
                 focused_widget._select_all_pending = True
                 logger.debug("Marked select-all pending for undo tracking")
         except (tk.TclError, AttributeError):
@@ -78,13 +174,17 @@ class UndoManagerMixin:
         return None  # Allow default select-all to proceed
 
     def handle_paste_undo(self, text_widget):
-        """Handle Ctrl+V - paste with format preservation if available
-        Now called directly on specific text widgets rather than globally"""
+        """Handle Ctrl+V - paste with format preservation if available.
+        Synchronous state management — no after_idle for critical saves."""
         logger.info("Direct paste handler executed")
         try:
             if isinstance(text_widget, tk.Text):
-                # Add edit separator before paste
-                text_widget.edit_separator()
+                # Flush any pending typing snapshot
+                self._flush_undo_timer(text_widget)
+
+                # Save pre-paste state
+                pre_paste_content = text_widget.get("1.0", "end-1c")
+                self.save_text_undo_state(text_widget, pre_paste_content)
 
                 # Check if we have formatted content in internal clipboard
                 if self.internal_clipboard:
@@ -108,11 +208,9 @@ class UndoManagerMixin:
                         tag_end = f"{insert_pos} + {rel_end}c"
                         text_widget.tag_add(tag, tag_start, tag_end)
 
-                    # Add edit separator after paste
-                    text_widget.edit_separator()
-
-                    # Keep internal clipboard for multiple pastes
-                    # Only replaced when user copies new formatted content
+                    # Save post-paste state synchronously
+                    post_paste_content = text_widget.get("1.0", "end-1c")
+                    self.save_text_undo_state(text_widget, post_paste_content)
 
                     # Trigger character count check after formatted paste
                     self.root.after_idle(lambda: self.check_character_count_for_widget(text_widget))
@@ -124,37 +222,21 @@ class UndoManagerMixin:
                         # Get clipboard content
                         clipboard_content = self.root.clipboard_get()
 
-                        # Check if there's selected text that will be replaced
-                        has_selection = bool(text_widget.tag_ranges(tk.SEL))
-
-                        # Or if we just did a select-all
-                        select_all_pending = getattr(text_widget, '_select_all_pending', False)
-
-                        if has_selection or select_all_pending:
-                            # Save current content to our custom undo stack before replacing
-                            current_content = text_widget.get("1.0", "end-1c")
-                            self.save_text_undo_state(text_widget, current_content)
-
-                            logger.info("Saved undo state before paste operation")
+                        # Delete selection if exists
+                        if text_widget.tag_ranges(tk.SEL):
+                            text_widget.delete(tk.SEL_FIRST, tk.SEL_LAST)
 
                         # Clear the select-all pending flag
                         if hasattr(text_widget, '_select_all_pending'):
                             delattr(text_widget, '_select_all_pending')
 
-                        # Actually perform the paste operation
-                        if has_selection:
-                            # Delete selected text first
-                            text_widget.delete(tk.SEL_FIRST, tk.SEL_LAST)
-
                         # Insert clipboard content at cursor position
                         insert_pos = text_widget.index(tk.INSERT)
                         text_widget.insert(insert_pos, clipboard_content)
 
-                        # Schedule saving the post-paste content to our undo stack
-                        self.root.after_idle(self.save_post_paste_state, text_widget)
-
-                        # Add edit separator after paste
-                        self.root.after_idle(lambda: text_widget.edit_separator())
+                        # Save post-paste state synchronously
+                        post_paste_content = text_widget.get("1.0", "end-1c")
+                        self.save_text_undo_state(text_widget, post_paste_content)
 
                         # Trigger character count check after regular paste
                         self.root.after_idle(lambda: self.check_character_count_for_widget(text_widget))
@@ -169,25 +251,12 @@ class UndoManagerMixin:
             logger.error(f"Error in paste handler: {e}")
         return "break"  # Always prevent default for direct widget calls
 
-    def save_post_paste_state(self, text_widget):
-        """Save the state after a paste operation completes"""
-        try:
-            if isinstance(text_widget, tk.Text):
-                # Get the content after paste operation
-                post_paste_content = text_widget.get("1.0", "end-1c")
-                self.save_text_undo_state(text_widget, post_paste_content)
-                logger.info("Saved post-paste content to undo stack")
-        except (tk.TclError, AttributeError):
-            pass
-
     def check_character_count_for_widget(self, text_widget):
         """Helper method to trigger character count check for a text widget after paste"""
         try:
             # Find which column this widget belongs to by checking widget references
-            # This is needed because the paste handler doesn't know the column name
             for col_name, widgets in getattr(self, 'excel_widgets', {}).items():
                 if hasattr(widgets, 'text_widget') and widgets.text_widget == text_widget:
-                    # Create a dummy event for character count checking
                     class DummyEvent:
                         def __init__(self, widget):
                             self.widget = widget
@@ -195,10 +264,13 @@ class UndoManagerMixin:
                     self.check_character_count(DummyEvent(text_widget), col_name)
                     break
                 elif widgets == text_widget:  # Direct widget reference
+                    class DummyEvent:
+                        def __init__(self, widget):
+                            self.widget = widget
+
                     self.check_character_count(DummyEvent(text_widget), col_name)
                     break
         except (AttributeError, TypeError):
-            # If we can't determine the column, skip character count check
             pass
 
     def handle_copy_with_format(self, event):
@@ -231,11 +303,9 @@ class UndoManagerMixin:
                                 tags_data.append((tag, rel_start, rel_end))
 
                     # Only store in internal clipboard if there's actual formatting
-                    # This prevents plain text copies from overwriting formatted clipboard content
                     if tags_data:
                         self.internal_clipboard = (text, tags_data)
                         logger.debug(f"Stored formatted content with {len(tags_data)} tags")
-                    # If no formatting, leave internal_clipboard unchanged - system clipboard handles plain text
 
                     # Also copy to system clipboard (plain text)
                     self.root.clipboard_clear()
@@ -258,9 +328,17 @@ class UndoManagerMixin:
 
                 # Then delete selection with undo support
                 if focused_widget.tag_ranges(tk.SEL):
-                    focused_widget.edit_separator()
+                    # Flush timer and save pre-cut state
+                    self._flush_undo_timer(focused_widget)
+                    content = focused_widget.get("1.0", "end-1c")
+                    self.save_text_undo_state(focused_widget, content)
+
                     focused_widget.delete(tk.SEL_FIRST, tk.SEL_LAST)
-                    focused_widget.edit_separator()
+
+                    # Save post-cut state
+                    post_cut_content = focused_widget.get("1.0", "end-1c")
+                    self.save_text_undo_state(focused_widget, post_cut_content)
+
                     return "break"  # Prevent default cut
         except (tk.TclError, AttributeError):
             pass
@@ -278,7 +356,8 @@ class UndoManagerMixin:
                 select_all_pending = getattr(focused_widget, '_select_all_pending', False)
 
                 if has_selection or select_all_pending:
-                    # Save current content to our custom undo stack
+                    # Flush timer and save current content to undo stack
+                    self._flush_undo_timer(focused_widget)
                     current_content = focused_widget.get("1.0", "end-1c")
                     self.save_text_undo_state(focused_widget, current_content)
 
@@ -290,22 +369,6 @@ class UndoManagerMixin:
         except (tk.TclError, AttributeError):
             pass
         return None  # Allow default delete to proceed
-
-    def handle_delete_key_undo(self, event):
-        """Handle Delete/BackSpace key press - create undo separator when deleting selection"""
-        try:
-            text_widget = event.widget
-            if isinstance(text_widget, tk.Text):
-                # Check if there's selected text that will be deleted
-                if text_widget.tag_ranges(tk.SEL):
-                    text_widget.edit_separator()
-                    logger.info(f"Added undo separator before {event.keysym} on selection")
-
-            # Allow the default key handling to proceed
-            return None
-        except (tk.TclError, AttributeError):
-            # Error accessing selection or widget - let default handling proceed
-            return None
 
     def setup_undo_functionality(self):
         """Setup keyboard bindings for undo/redo"""
@@ -336,93 +399,49 @@ class UndoManagerMixin:
         """Global undo function that works on focused widget"""
         focused_widget = self.root.focus_get()
         if focused_widget and focused_widget in self.undo_widgets:
-            # For Text widgets, try custom undo first, then fallback to edit_undo
             if isinstance(focused_widget, tk.Text):
-                # Try custom undo first for problematic operations
+                # Flush any pending typing snapshot before undoing
+                self._flush_undo_timer(focused_widget)
                 if self.text_widget_undo(focused_widget):
-                    return "break"  # Prevent default handling
-                else:
-                    # Fallback to built-in undo, but save current state for formatted redo
-                    try:
-                        # Only save to redo stack if this is the FIRST undo (redo stack empty or last content differs)
-                        current_content = focused_widget.get("1.0", "end-1c")
-                        widget_id = id(focused_widget)
-                        redo_stack = self.text_redo_stacks.get(widget_id, [])
-
-                        # Only save if redo stack is empty (fresh undo sequence)
-                        if not redo_stack:
-                            self._save_to_redo_stack(focused_widget, current_content)
-
-                        focused_widget.edit_undo()
-                        return "break"  # Prevent default handling
-                    except tk.TclError:
-                        # No undo available
-                        pass
+                    # Cancel timer to prevent stale saves during undo sequence
+                    self._cancel_undo_timer(focused_widget)
+                    return "break"
             # For Entry widgets, use our custom undo system
             elif hasattr(focused_widget, 'get') and hasattr(focused_widget, 'delete'):
                 if self.undo_entry_widget(focused_widget):
-                    return "break"  # Prevent default handling
+                    return "break"
         return None
-
-    def _save_to_redo_stack(self, text_widget, content):
-        """Save text widget state with formatting to redo stack for formatted redo"""
-        widget_id = id(text_widget)
-
-        # Initialize stacks if not exists
-        if widget_id not in self.text_redo_stacks:
-            self.text_undo_stacks[widget_id] = []
-            self.text_redo_stacks[widget_id] = []
-
-        # Collect all formatting tags
-        tags_data = []
-        for tag in ["bold", "red", "blue", "green", "default"]:
-            tag_ranges = text_widget.tag_ranges(tag)
-            for i in range(0, len(tag_ranges), 2):
-                start_idx = str(tag_ranges[i])
-                end_idx = str(tag_ranges[i + 1])
-                tags_data.append((tag, start_idx, end_idx))
-
-        # Create state tuple with content and tags
-        state = (content, tags_data)
-
-        # Add to redo stack
-        self.text_redo_stacks[widget_id].append(state)
-
-        # Limit stack size
-        if len(self.text_redo_stacks[widget_id]) > self.max_undo_levels:
-            self.text_redo_stacks[widget_id].pop(0)
-
-        logger.debug(f"Saved formatted state to redo stack: {len(tags_data)} tags")
 
     def global_redo(self, event=None):
         """Global redo function that works on focused widget"""
         focused_widget = self.root.focus_get()
         if focused_widget and focused_widget in self.undo_widgets:
-            # For Text widgets, try custom redo first (preserves formatting), then fallback to edit_redo
             if isinstance(focused_widget, tk.Text):
-                # Try custom redo first for formatted content
+                # Cancel any pending timer
+                self._cancel_undo_timer(focused_widget)
                 if self.text_widget_redo(focused_widget):
-                    return "break"  # Prevent default handling
-                else:
-                    # Fallback to built-in redo (no formatting)
-                    try:
-                        focused_widget.edit_redo()
-                        return "break"  # Prevent default handling
-                    except tk.TclError:
-                        # No redo available
-                        pass
+                    return "break"
             # For Entry widgets, use our custom redo system
             elif hasattr(focused_widget, 'get') and hasattr(focused_widget, 'delete'):
                 if self.redo_entry_widget(focused_widget):
-                    return "break"  # Prevent default handling
+                    return "break"
         return None
 
     def enable_undo_for_widget(self, widget):
         """Enable undo/redo for a specific widget and add to tracking list"""
         if hasattr(widget, 'config'):
-            # Only enable undo for Text widgets (Entry widgets don't reliably support undo parameter)
             if isinstance(widget, tk.Text):
-                widget.configure(undo=True, maxundo=20)
+                # Disable Tk's built-in undo — we use our own snapshot system
+                widget.configure(undo=False)
+
+                # Save initial empty state to custom stack
+                widget_id = id(widget)
+                if widget_id not in self.text_undo_stacks:
+                    self.text_undo_stacks[widget_id] = []
+                    self.text_redo_stacks[widget_id] = []
+                content = widget.get("1.0", "end-1c")
+                self.text_undo_stacks[widget_id].append((content, []))
+
             elif hasattr(widget, 'get') and hasattr(widget, 'delete'):
                 # This is an Entry widget - set up custom undo tracking
                 self.setup_entry_undo(widget)
@@ -538,9 +557,11 @@ class UndoManagerMixin:
         # Create state tuple with content and tags
         state = (content, tags_data)
 
-        # Don't add duplicate content to avoid double-undo issues
-        if self.text_undo_stacks[widget_id] and self.text_undo_stacks[widget_id][-1][0] == content:
-            return
+        # Don't add duplicate state: check both content AND tags
+        if self.text_undo_stacks[widget_id]:
+            prev_content, prev_tags = self.text_undo_stacks[widget_id][-1]
+            if prev_content == content and prev_tags == tags_data:
+                return
 
         # Add to undo stack
         self.text_undo_stacks[widget_id].append(state)

@@ -604,7 +604,7 @@ class ExcelFieldManager:
             # Create scrollable text widget container
             scrollable_text = ScrollableText(parent_frame, height=height,
                                            wrap=tk.WORD, font=('Arial', 9),
-                                           undo=True, maxundo=20)
+                                           undo=False)
 
             # Get reference to the actual text widget for bindings
             text_widget = scrollable_text.text_widget
@@ -624,15 +624,9 @@ class ExcelFieldManager:
             text_widget.bind('<Button-1>',
                            lambda e, col=col_name: self.parent.root.after(1, lambda: self.parent.check_character_count(e, col)))
 
-            # Add improved undo handling for key presses that replace selected text
+            # Undo handling for key presses (debounced snapshots)
             text_widget.bind('<KeyPress>',
                            lambda e: self.parent.handle_text_key_press_undo(e))
-
-            # Specific binding for Delete key to handle selection deletion
-            text_widget.bind('<Delete>',
-                           lambda e: self.parent.handle_delete_key_undo(e))
-            text_widget.bind('<BackSpace>',
-                           lambda e: self.parent.handle_delete_key_undo(e))
 
             # Configure formatting tags for rich text
             self.parent.setup_text_formatting_tags(text_widget)

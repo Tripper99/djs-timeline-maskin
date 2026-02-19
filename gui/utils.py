@@ -64,9 +64,6 @@ class ScrollableText(ctk.CTkFrame):
         # Create frame with rounded corners
         super().__init__(parent, corner_radius=8, fg_color="transparent")
 
-        # Force autoseparators to False for better undo control
-        text_options['autoseparators'] = False
-
         # Create text widget with modern styling
         self.text_widget = tk.Text(self,
                                   relief="flat",
