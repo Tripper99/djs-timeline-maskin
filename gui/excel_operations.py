@@ -106,6 +106,8 @@ class ExcelOperationsMixin:
         excel_data['date'] = self.date_var.get()
 
         # Try to save with retry loop for file lock handling
+        MAX_RETRIES = 10
+        retries = 0
         while True:
             result = self.excel_manager.add_row_with_xlsxwriter(excel_data, filename, self.row_color_var.get())
 
@@ -117,6 +119,10 @@ class ExcelOperationsMixin:
                 logger.info(f"Added Excel row with data for: {filename}")
                 return True
             elif result == "file_locked":
+                retries += 1
+                if retries >= MAX_RETRIES:
+                    messagebox.showerror("Fel", "Kunde inte spara till Excel-filen efter flera försök. Kontrollera att filen inte är låst.")
+                    return False
                 # Excel file is locked - show retry/cancel dialog
                 choice = self.show_retry_cancel_dialog(
                     "Excel-fil låst",

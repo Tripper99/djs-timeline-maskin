@@ -106,7 +106,13 @@ class PDFOperationsMixin:
             return False
 
         # Check if file is locked by another application - with retry loop
+        MAX_RETRIES = 10
+        retries = 0
         while PDFProcessor.is_file_locked(self.current_pdf_path):
+            retries += 1
+            if retries >= MAX_RETRIES:
+                messagebox.showerror("Fel", "Filen är fortfarande låst efter flera försök.")
+                return False
             choice = self.show_retry_cancel_dialog(
                 "Fil låst",
                 "PDF-filen används av ett annat program. " +
@@ -151,7 +157,13 @@ class PDFOperationsMixin:
         # Check if target file already exists
         if new_path.exists() and str(new_path) != str(old_file):
             # Check if target file is locked - with retry loop
+            MAX_RETRIES = 10
+            retries = 0
             while PDFProcessor.is_file_locked(str(new_path)):
+                retries += 1
+                if retries >= MAX_RETRIES:
+                    messagebox.showerror("Fel", "Filen är fortfarande låst efter flera försök.")
+                    return False
                 choice = self.show_retry_cancel_dialog(
                     "Målfil låst",
                     f"Målfilen '{new_filename}' är låst av ett annat program. " +
@@ -299,7 +311,13 @@ class PDFOperationsMixin:
                 return False
 
         # Check if file is locked
+        MAX_RETRIES = 10
+        retries = 0
         while PDFProcessor.is_file_locked(self.current_pdf_path):
+            retries += 1
+            if retries >= MAX_RETRIES:
+                messagebox.showerror("Fel", "Filen är fortfarande låst efter flera försök.")
+                return False
             choice = self.show_retry_cancel_dialog(
                 "Fil låst",
                 "PDF-filen används av ett annat program. "

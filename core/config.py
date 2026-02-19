@@ -111,12 +111,19 @@ class ConfigManager:
         return self.default_config.copy()
 
     def save_config(self, config: Dict) -> None:
-        """Save configuration to file"""
+        """Save configuration to file atomically using temp-file + os.replace"""
+        temp_file = str(self.config_file) + ".tmp"
         try:
-            with open(self.config_file, 'w', encoding='utf-8') as f:
+            with open(temp_file, 'w', encoding='utf-8') as f:
                 json.dump(config, f, indent=2, ensure_ascii=False)
+            os.replace(temp_file, self.config_file)
         except OSError as e:
             logger.error(f"Failed to save config: {e}")
+            try:
+                if os.path.exists(temp_file):
+                    os.remove(temp_file)
+            except OSError:
+                pass
 
     def save_locked_fields(self, locked_states: Dict[str, bool], locked_contents: Dict[str, str], locked_formats: Dict[str, Any] = None) -> None:
         """Save locked field states, their contents, and rich text formatting"""
