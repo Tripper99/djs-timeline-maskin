@@ -64,7 +64,7 @@
 - [ ] **G3**: Differentiate "Rensa utan spara" button visually from "Spara allt och rensa" (muted/outlined style)
 - [ ] **G4**: Add visible selection indicator on active row color button
 - [ ] **G5**: Improve formatting toolbar button discoverability (larger targets, tooltips)
-- [ ] **G6**: Add "Open folder" button near file list — opens the selected PDF folder in Finder so user can see its contents without searching for it
+- [x] ~~**G6**: Add "Open folder" button near file list — opens the selected PDF folder in Finder so user can see its contents without searching for it~~ — Fixed in v2.8.2
 
 ---
 
