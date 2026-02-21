@@ -13,6 +13,7 @@ import customtkinter as ctk
 
 # Core imports
 from core.field_definitions import field_manager
+from gui.utils import ToolTip
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -129,47 +130,50 @@ class FormattingManagerMixin:
         """Create formatting toolbar with buttons and bind keyboard shortcuts"""
         # Ensure custom button styles are configured
         self.configure_button_styles()
-        # Bold button - styled with bold text using Unicode - 50% smaller
-        bold_btn = ctk.CTkButton(parent_frame, text="𝐁", width=18, height=18,
+        # Bold button
+        bold_btn = ctk.CTkButton(parent_frame, text="𝐁", width=24, height=24,
                            command=lambda: self.toggle_format(text_widget, "bold"),
-                           font=ctk.CTkFont(size=10))
+                           font=ctk.CTkFont(size=12))
         bold_btn.pack(side="left", padx=(0, 1))
+        ToolTip(bold_btn, "Fetstil (\u2318B)")
 
-        # Color buttons with fixed colors (order: Red, Green, Blue)
-        # Red button - fixed red color - 50% smaller
-        red_btn = ctk.CTkButton(parent_frame, text="●", width=18, height=18,
+        # Color buttons (Red, Green, Blue)
+        red_btn = ctk.CTkButton(parent_frame, text="●", width=24, height=24,
                           command=lambda: self.toggle_format(text_widget, "red"),
                           fg_color="#DC3545", hover_color="#C82333",
-                          font=ctk.CTkFont(size=10))
+                          font=ctk.CTkFont(size=12))
         red_btn.pack(side="left", padx=(0, 1))
+        ToolTip(red_btn, "R\u00F6d text (\u2318R)")
 
-        # Green button - fixed green color - 50% smaller
-        green_btn = ctk.CTkButton(parent_frame, text="●", width=18, height=18,
+        green_btn = ctk.CTkButton(parent_frame, text="●", width=24, height=24,
                             command=lambda: self.toggle_format(text_widget, "green"),
                             fg_color="#28A745", hover_color="#218838",
-                            font=ctk.CTkFont(size=10))
+                            font=ctk.CTkFont(size=12))
         green_btn.pack(side="left", padx=(0, 1))
+        ToolTip(green_btn, "Gr\u00F6n text (\u2318G)")
 
-        # Blue button - fixed blue color - 50% smaller
-        blue_btn = ctk.CTkButton(parent_frame, text="●", width=18, height=18,
+        blue_btn = ctk.CTkButton(parent_frame, text="●", width=24, height=24,
                            command=lambda: self.toggle_format(text_widget, "blue"),
                            fg_color="#007BFF", hover_color="#0069D9",
-                           font=ctk.CTkFont(size=10))
+                           font=ctk.CTkFont(size=12))
         blue_btn.pack(side="left", padx=(0, 1))
+        ToolTip(blue_btn, "Bl\u00E5 text (\u23181)")
 
-        # Clear formatting button - removes ALL formatting and restores theme default color - 50% smaller
-        default_btn = ctk.CTkButton(parent_frame, text="T", width=18, height=18,
+        # Clear formatting button
+        default_btn = ctk.CTkButton(parent_frame, text="T", width=24, height=24,
                               command=lambda: self.clear_all_formatting(text_widget),
                               fg_color="gray60", hover_color="gray50",
-                              font=ctk.CTkFont(size=10))
+                              font=ctk.CTkFont(size=12))
         default_btn.pack(side="left", padx=(0, 1))
+        ToolTip(default_btn, "Rensa formatering (\u2318K)")
 
-        # Font size toggle button - 50% smaller (only for Händelse field)
+        # Font size toggle button (only for Händelse field)
         if field_id == 'handelse':
-            font_btn = ctk.CTkButton(parent_frame, text="A+", width=20, height=18,
+            font_btn = ctk.CTkButton(parent_frame, text="A+", width=26, height=24,
                                command=lambda: self.toggle_text_font_size(),
-                               font=ctk.CTkFont(size=9))
+                               font=ctk.CTkFont(size=10))
             font_btn.pack(side="left", padx=(1, 0))
+            ToolTip(font_btn, "\u00C4ndra textstorlek")
 
         # Bind keyboard shortcuts for this text widget (Command for macOS, Control for Windows/Linux)
         text_widget.bind('<Command-b>', lambda e: self.toggle_format(text_widget, "bold"))

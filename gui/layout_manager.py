@@ -217,7 +217,7 @@ class LayoutManagerMixin:
 
         # Copy to Excel button with arrows - distinct color and larger to stand out
         self.copy_to_excel_btn = ctk.CTkButton(components_frame,
-                                         text="↓ Kopiera ned filnamnet till Excelfältet ↓",
+                                         text="↓ Kopiera till Excel ↓",
                                          width=220, height=30,
                                          command=self.copy_filename_to_excel,
                                          fg_color="#FF6B35", hover_color="#E55A2B",  # Orange color to stand out
@@ -378,9 +378,9 @@ class LayoutManagerMixin:
         # Update the variable
         self.row_color_var.set(selected_value)
 
-        # Update button border widths to show selection
+        # Update button borders to show selection
         for value, button in self.color_buttons.items():
             if value == selected_value:
-                button.configure(border_width=3)  # Selected state
+                button.configure(border_width=2, border_color="#000000")
             else:
-                button.configure(border_width=1)  # Normal state
+                button.configure(border_width=1, border_color="#666666")

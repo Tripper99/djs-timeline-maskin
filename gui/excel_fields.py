@@ -875,7 +875,7 @@ class ExcelFieldManager:
                 fg_color=color if value != "none" else "#FFFFFF",
                 hover_color=self.parent._get_hover_color(color),
                 text_color="#333333" if value != "none" else "#666666",
-                border_color="#666666",
+                border_color="#000000" if is_selected else "#666666",
                 border_width=2 if is_selected else 1,
                 command=lambda v=value: self.parent._select_row_color(v)
             )
@@ -902,7 +902,9 @@ class ExcelFieldManager:
 
         self.parent.new_excel_row_btn = ctk.CTkButton(buttons_container, text="Rensa utan spara", width=180, height=40,
                                           command=self.parent.clear_all_without_saving,
-                                          fg_color="#17a2b8", hover_color="#117a8b",
+                                          fg_color="transparent", hover_color=("gray85", "gray30"),
+                                          border_width=2, border_color="#17a2b8",
+                                          text_color="#17a2b8",
                                           font=ctk.CTkFont(size=13, weight="bold"))
         self.parent.new_excel_row_btn.pack(side="left", padx=(5, 0))
 
