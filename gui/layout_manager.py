@@ -156,8 +156,15 @@ class LayoutManagerMixin:
         # Select output folder button - 40% smaller
         self.select_output_folder_btn = ctk.CTkButton(pdf_path_frame, text="Välj mapp", width=70, height=25,
                                                  command=self.select_output_folder, font=ctk.CTkFont(size=11))
-        self.select_output_folder_btn.pack(side="left", padx=(0, 3))
+        self.select_output_folder_btn.pack(side="left", padx=(0, 0))
         ToolTip(self.select_output_folder_btn, "Välj en mapp för omdöpta PDF-filer.")
+
+        # Recent output folders dropdown
+        self.recent_folders_btn = ctk.CTkButton(pdf_path_frame, text="▾", width=20, height=25,
+                                           font=ctk.CTkFont(size=11))
+        self.recent_folders_btn.pack(side="left", padx=(0, 3))
+        self.recent_folders_btn.configure(command=lambda: self._show_recent_folders_menu(self.recent_folders_btn))
+        ToolTip(self.recent_folders_btn, "Visa senast använda mappar.")
 
         # Lock switch for output folder - compact with lock symbol
         self.output_folder_lock_switch = ctk.CTkCheckBox(pdf_path_frame, text="🔒", width=18,
@@ -247,9 +254,17 @@ class LayoutManagerMixin:
         self.select_excel_btn = ctk.CTkButton(excel_btn_frame, text="Välj Excel", width=70, height=25,
                                          command=self.select_excel_file,
                                          fg_color="#17a2b8", font=ctk.CTkFont(size=11))
-        self.select_excel_btn.pack(side="left", padx=(0, 2))
+        self.select_excel_btn.pack(side="left", padx=(0, 0))
         ToolTip(self.select_excel_btn, "Välj Excel-fil (.xlsx) för dataintegrering. "
                                       "Du får möjlighet att skapa en säkerhetskopia att arbeta med.")
+
+        # Recent Excel files dropdown
+        self.recent_excel_btn = ctk.CTkButton(excel_btn_frame, text="▾", width=20, height=25,
+                                         fg_color="#17a2b8", hover_color="#117a8b",
+                                         font=ctk.CTkFont(size=11))
+        self.recent_excel_btn.pack(side="left", padx=(0, 2))
+        self.recent_excel_btn.configure(command=lambda: self._show_recent_excel_menu(self.recent_excel_btn))
+        ToolTip(self.recent_excel_btn, "Visa senast använda Excel-filer.")
 
         # Open Excel button - 40% smaller
         self.open_excel_btn = ctk.CTkButton(excel_btn_frame, text="Öppna", width=60, height=25,

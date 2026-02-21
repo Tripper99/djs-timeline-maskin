@@ -39,6 +39,8 @@ class ConfigManager:
             "hidden_fields": [],  # Backward compatibility - aliases disabled_fields
             "active_template": "",  # Currently active template name
             "pdf_browse_folder": "",  # PDF file list browse folder
+            "recent_excel_files": [],  # Recently used Excel file paths (max 10)
+            "recent_output_folders": [],  # Recently used output folder paths (max 10)
             "config_version": "2.7.0",  # Track config version for migrations
             # Update check configuration
             **UPDATE_CHECK_DEFAULTS

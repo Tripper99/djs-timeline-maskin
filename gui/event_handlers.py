@@ -35,6 +35,7 @@ class EventHandlersMixin:
                 # No need to create fields - they're already created in setup_gui
                 # Enable the "Open Excel" button for previously loaded file
                 self.open_excel_btn.configure(state="normal")
+                self._add_to_recent_excel_files(excel_path)
                 logger.info(f"Loaded saved Excel file: {excel_path}")
 
     def load_saved_output_folder(self):
@@ -118,6 +119,91 @@ class EventHandlersMixin:
 
         return result['choice']
 
+    # ---- Recent files/folders management ----
+
+    def _add_to_recent_excel_files(self, path):
+        """Add a path to the recent Excel files list (max 10, most recent first)."""
+        path = str(path)
+        recent = self.config.get("recent_excel_files", [])
+        # Remove if already present, then prepend
+        recent = [p for p in recent if p != path]
+        recent.insert(0, path)
+        self.config["recent_excel_files"] = recent[:10]
+        self.config_manager.save_config(self.config)
+
+    def _add_to_recent_output_folders(self, path):
+        """Add a path to the recent output folders list (max 10, most recent first)."""
+        path = str(path)
+        recent = self.config.get("recent_output_folders", [])
+        recent = [p for p in recent if p != path]
+        recent.insert(0, path)
+        self.config["recent_output_folders"] = recent[:10]
+        self.config_manager.save_config(self.config)
+
+    def _show_recent_excel_menu(self, widget):
+        """Show a popup menu with recently used Excel files (excludes current)."""
+        current = self.config.get("excel_file", "")
+        recent = [p for p in self.config.get("recent_excel_files", []) if Path(p).exists() and p != current]
+        menu = tk.Menu(self.root, tearoff=0)
+        if recent:
+            for path in recent:
+                label = Path(path).name
+                menu.add_command(label=label, command=lambda p=path: self._load_recent_excel_file(p))
+        else:
+            menu.add_command(label="Inga senaste filer", state="disabled")
+        # Position menu below the button
+        menu.post(widget.winfo_rootx(), widget.winfo_rooty() + widget.winfo_height())
+
+    def _load_recent_excel_file(self, path):
+        """Load an Excel file from the recent files list."""
+        if not Path(path).exists():
+            messagebox.showerror("Fil saknas", f"Filen finns inte längre:\n{Path(path).name}")
+            return
+        if self.excel_manager.load_excel_file(path):
+            missing_columns = self.excel_manager.validate_excel_columns()
+            if missing_columns:
+                error_msg = (
+                    "Excel-filen saknar följande obligatoriska kolumner:\n\n"
+                    + "• " + "\n• ".join(missing_columns) + "\n\n"
+                    + "Filen kan inte användas."
+                )
+                messagebox.showerror("Kolumner saknas", error_msg)
+                return
+            self.excel_path_var.set(Path(path).name)
+            self.config["excel_file"] = path
+            self._add_to_recent_excel_files(path)
+            self.open_excel_btn.configure(state="normal")
+            logger.info(f"Loaded recent Excel file: {path}")
+        else:
+            messagebox.showerror("Fel", "Kunde inte läsa Excel-filen")
+
+    def _show_recent_folders_menu(self, widget):
+        """Show a popup menu with recently used output folders (excludes current)."""
+        current = self.config.get("output_folder", "")
+        recent = [p for p in self.config.get("recent_output_folders", []) if Path(p).is_dir() and p != current]
+        menu = tk.Menu(self.root, tearoff=0)
+        if recent:
+            for path in recent:
+                # Show folder name, with parent for context
+                p = Path(path)
+                label = f"{p.parent.name}/{p.name}" if p.parent.name else p.name
+                menu.add_command(label=label, command=lambda fp=path: self._load_recent_output_folder(fp))
+        else:
+            menu.add_command(label="Inga senaste mappar", state="disabled")
+        menu.post(widget.winfo_rootx(), widget.winfo_rooty() + widget.winfo_height())
+
+    def _load_recent_output_folder(self, path):
+        """Load an output folder from the recent folders list."""
+        if not Path(path).is_dir():
+            messagebox.showerror("Mapp saknas", f"Mappen finns inte längre:\n{path}")
+            return
+        self.config["output_folder"] = path
+        self._add_to_recent_output_folders(path)
+        display_text = self.get_display_folder_text(path)
+        self.output_folder_var.set(display_text)
+        self._actual_output_folder = path
+        logger.info(f"Loaded recent output folder: {path}")
+
     def select_output_folder(self):
         """Select output folder for renamed PDF files"""
         current_folder = self.output_folder_var.get()
@@ -131,8 +217,7 @@ class EventHandlersMixin:
         if folder_path:
             # Store actual path and update display (save folder but not lock state)
             self.config['output_folder'] = folder_path
-            # Don't save lock state - it's session-only behavior
-            self.config_manager.save_config(self.config)
+            self._add_to_recent_output_folders(folder_path)
 
             # Update display with friendly text
             display_text = self.get_display_folder_text(folder_path)
@@ -294,7 +379,7 @@ class EventHandlersMixin:
 
                 # Save Excel file path to config for persistence
                 self.config['excel_file'] = working_path
-                self.config_manager.save_config(self.config)
+                self._add_to_recent_excel_files(working_path)
                 # Enable the "Open Excel" button after successful load
                 self.open_excel_btn.configure(state="normal")
                 logger.info(f"Selected Excel file: {working_path}")
