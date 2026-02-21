@@ -252,7 +252,7 @@ class TestFilenameParser:
     def test_clean_pdf_text_empty_input(self):
         """Test cleaning of empty or None input"""
         assert FilenameParser.clean_pdf_text("") == ""
-        assert FilenameParser.clean_pdf_text(None) is None
+        assert FilenameParser.clean_pdf_text(None) == ""
 
     def test_clean_pdf_text_windows_line_endings(self):
         """Test handling of Windows line endings"""

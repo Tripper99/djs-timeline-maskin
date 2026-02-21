@@ -16,7 +16,7 @@ class FilenameParser:
     def parse_filename(filename: str) -> Dict[str, str]:
         """Parse PDF filename into components"""
         # Remove .pdf extension
-        base_name = filename.replace('.pdf', '')
+        base_name = filename.removesuffix('.pdf')
 
         # Initialize components
         date = ""
@@ -106,7 +106,7 @@ class FilenameParser:
     def clean_pdf_text(text: str) -> str:
         """Clean text that has been copied from PDF documents by removing unwanted line breaks"""
         if not text or not isinstance(text, str):
-            return text
+            return ""
 
         # Store the original for debugging
         original_text = text

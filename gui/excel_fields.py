@@ -772,11 +772,6 @@ class ExcelFieldManager:
             # Return 2 rows used for vertical layout
             return 2
 
-        # Configure column weight for proper resizing (for all field types)
-        parent_frame.grid_columnconfigure(0, weight=1)
-        if parent_frame.grid_size()[0] > 1:  # If there are multiple columns
-            parent_frame.grid_columnconfigure(1, weight=1)
-
     def _create_datetime_fields_in_subframe(self, datetime_frame):
         """Create date/time fields in a simple 2x2 grid layout"""
         # Configure grid layout: 2 columns, 2 rows

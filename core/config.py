@@ -271,13 +271,19 @@ class ConfigManager:
         except Exception as e:
             logger.error(f"Failed to save update check config: {e}")
 
+    def _validate_skip_versions(self, skip_versions) -> List[str]:
+        """Validate that skip_versions is a list of strings."""
+        if not isinstance(skip_versions, list):
+            return []
+        return [str(v) for v in skip_versions if isinstance(v, (str, int, float))]
+
     def load_update_check_config(self) -> Dict[str, Any]:
         """Load update check configuration"""
         try:
             config = self.load_config()
             return {
                 "enabled": config.get("update_check_enabled", UPDATE_CHECK_DEFAULTS["update_check_enabled"]),
-                "skip_versions": config.get("skip_versions", UPDATE_CHECK_DEFAULTS["skip_versions"]),
+                "skip_versions": self._validate_skip_versions(config.get("skip_versions", UPDATE_CHECK_DEFAULTS["skip_versions"])),
                 "last_check": config.get("last_update_check", UPDATE_CHECK_DEFAULTS["last_update_check"]),
                 "interval_days": config.get("auto_check_interval_days", UPDATE_CHECK_DEFAULTS["auto_check_interval_days"]),
                 "timeout_seconds": config.get("github_timeout_seconds", UPDATE_CHECK_DEFAULTS["github_timeout_seconds"])

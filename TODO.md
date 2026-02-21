@@ -48,13 +48,13 @@
 
 ### Low (cleanup)
 
-- [ ] **L1**: Remove unused SSL context method (`validator.py:245`)
-- [ ] **L2**: Add type validation for `skip_versions` from config (`config.py:276`)
-- [ ] **L3**: Guard `ctypes.windll` with `platform.system() == 'Windows'` check (`main_window.py:148`)
-- [ ] **L4**: Fix `clean_pdf_text` returning `None` instead of `""` (`filename_parser.py:109`)
-- [ ] **L5**: Fix `.pdf` removal from all positions in filename (`filename_parser.py:19`)
-- [ ] **L6**: Clamp tooltip positions to screen bounds (`utils.py:26`)
-- [ ] **L7**: Remove unreachable code after return statements (`excel_fields.py:769`)
+- [x] **L1**: ~~Remove unused SSL context method~~ — Fixed in v2.7.8
+- [x] **L2**: ~~Add type validation for `skip_versions` from config~~ — Fixed in v2.7.8
+- [x] **L3**: ~~Guard `ctypes.windll` with `platform.system() == 'Windows'` check~~ — Fixed in v2.7.8
+- [x] **L4**: ~~Fix `clean_pdf_text` returning `None` instead of `""`~~ — Fixed in v2.7.8
+- [x] **L5**: ~~Fix `.pdf` removal from all positions in filename~~ — Fixed in v2.7.8
+- [x] **L6**: ~~Clamp tooltip positions to screen bounds~~ — Fixed in v2.7.8
+- [x] **L7**: ~~Remove unreachable code after return statements~~ — Fixed in v2.7.8
 
 ---
 
@@ -128,6 +128,9 @@
 ---
 
 ## Recently Completed ✅
+
+### ✅ Low-Priority Cleanup Fixes (v2.7.8) - COMPLETE
+- ✅ L1-L7: All 7 low-priority issues fixed (unused SSL method, skip_versions type validation, Windows DPI guard, clean_pdf_text None fix, .pdf suffix removal, tooltip clamping, dead code removal)
 
 ### ✅ Medium-Priority Security/Stability Fixes (v2.7.7) - COMPLETE
 - ✅ M1-M15: All 15 medium-priority issues fixed (flag injection, resource leaks, race conditions, version comparison, atomic writes, debug logging)

@@ -146,9 +146,10 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         """Setup the main GUI"""
         # Fix Windows DPI scaling issues that can cause geometry problems
         try:
-            import ctypes
-            ctypes.windll.shcore.SetProcessDpiAwareness(2)  # For Windows 10
-            logger.info("DPI awareness set successfully")
+            if platform.system() == 'Windows':
+                import ctypes
+                ctypes.windll.shcore.SetProcessDpiAwareness(2)  # For Windows 10
+                logger.info("DPI awareness set successfully")
         except Exception as e:
             logger.warning(f"Could not set DPI awareness: {e}")
 

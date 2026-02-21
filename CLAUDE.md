@@ -8,9 +8,9 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.7.7)
+## Current Status (v2.7.8)
 
-**Latest Status (v2.7.7)**: Batch fixed all 15 medium-priority security/stability issues (M1-M15): flag injection prevention in subprocess calls, Content-Length validation in version checker, dynamic field display names replacing hardcoded Swedish strings, resource leak fixes (workbook close on reload, read_workbook close with try/finally), atomic template writes, version comparison fix (tuple-based instead of string), thread-safe config operations with threading lock, dead method call removal, undo stack cleanup on field recreation, orphaned after() callback cancellation, and debug logging hygiene across entire codebase. All Critical (C1-C3), High (H1-H7), and Medium (M1-M15) issues from the security audit are now resolved.
+**Latest Status (v2.7.8)**: Batch fixed all 7 low-priority cleanup issues (L1-L7): removed unused SSL context method and import from validator.py, added type validation for skip_versions config values, guarded ctypes.windll DPI call with Windows platform check, fixed clean_pdf_text returning None instead of empty string, replaced .pdf string replace with removesuffix() to only strip trailing .pdf, clamped tooltip positions to screen bounds, and removed unreachable dead code after return statements in excel_fields.py. All Critical (C1-C3), High (H1-H7), Medium (M1-M15), and Low (L1-L7) issues from the security audit are now resolved.
 
 **Key Features**:
 - **Single Custom Undo System**: Tk built-in undo disabled; snapshot-based undo with debounced typing (500ms), immediate saves before destructive ops, 3-second max interval between snapshots

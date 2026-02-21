@@ -6,7 +6,6 @@ Implements comprehensive security measures for version checking
 import json
 import logging
 import re
-import ssl
 from typing import Any, Dict
 from urllib.parse import urlparse
 
@@ -242,14 +241,3 @@ class NetworkValidator:
 
         return ''.join(safe_chars).strip()
 
-    def create_ssl_context(self) -> ssl.SSLContext:
-        """Create secure SSL context for HTTPS requests"""
-        context = ssl.create_default_context()
-        context.check_hostname = True
-        context.verify_mode = ssl.CERT_REQUIRED
-        context.minimum_version = ssl.TLSVersion.TLSv1_2
-
-        # Additional security settings
-        context.set_ciphers('HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA')
-
-        return context
