@@ -4,6 +4,25 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.7.8: Batch Fix All 7 Low-Priority Cleanup Issues (2026-02-21)
+
+**Problem**: 7 low-priority cleanup issues (L1-L7) remained from the v2.7.2 security/stability audit — the final tier after Critical, High, and Medium were all resolved.
+
+**Fixes Applied**:
+- **L1** (`core/version_checker/validator.py`): Removed unused `create_ssl_context()` method and `import ssl`. The `requests` library handles SSL internally via `verify=True`.
+- **L2** (`core/config.py`): Added `_validate_skip_versions()` method that validates `skip_versions` is a list of strings before use, protecting against corrupted config values.
+- **L3** (`gui/main_window.py`): Wrapped `ctypes.windll.shcore.SetProcessDpiAwareness(2)` in `platform.system() == 'Windows'` guard. Previously logged a harmless warning on macOS every startup.
+- **L4** (`core/filename_parser.py`): Changed `clean_pdf_text` to return `""` instead of `None` for non-string/falsy input, ensuring consistent `str` return type.
+- **L5** (`core/filename_parser.py`): Replaced `filename.replace('.pdf', '')` with `filename.removesuffix('.pdf')` to only strip trailing `.pdf` extension, fixing edge case with filenames containing `.pdf` in the middle.
+- **L6** (`gui/utils.py`): Investigated tooltip screen clamping. Initial approach using `winfo_screenwidth`/`winfo_vrootwidth` failed on macOS multi-monitor — Tk reports unreliable screen dimensions. Final solution: no clamping needed, widget-relative positioning via `winfo_rootx/rooty` is inherently correct on any monitor.
+- **L7** (`gui/excel_fields.py`): Removed 4 lines of unreachable code after if/else where all branches return.
+
+**Files Changed**: `core/version_checker/validator.py`, `core/config.py`, `gui/main_window.py`, `core/filename_parser.py`, `gui/utils.py`, `gui/excel_fields.py`, `tests/test_filename_parser.py`, `utils/constants.py`
+
+**Key Insight — L6 Tooltip Multi-Monitor**: Tk's screen dimension APIs (`winfo_screenwidth`, `winfo_vrootwidth`, `winfo_vrootheight`) are unreliable on macOS with multiple monitors. They report primary monitor dimensions or virtual desktop totals that don't match actual monitor boundaries. Clamping tooltip coordinates to these values causes tooltips to appear on wrong monitors. The correct approach is to rely solely on `winfo_rootx()`/`winfo_rooty()` which always return correct global coordinates regardless of which monitor the widget is on.
+
+**Status**: All security audit items now resolved — Critical (C1-C3), High (H1-H7), Medium (M1-M15), and Low (L1-L7). Security audit is complete.
+
 ### v2.7.6: Batch Fix High-Priority Security/Stability Issues (2026-02-19)
 
 **Problem**: 7 high-priority issues (H1-H7) identified in the v2.7.2 security/stability audit remained unfixed.
