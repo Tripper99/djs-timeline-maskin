@@ -69,8 +69,8 @@ class ExcelOperationsMixin:
 
                     # Clean PDF text for text fields that commonly contain pasted PDF content
                     if col_name in ['Händelse', 'Note1', 'Note2', 'Note3']:
-                        # If it's a RichText object, we need to handle cleaning differently
-                        if hasattr(formatted_text, '__class__') and formatted_text.__class__.__name__ == 'RichText':
+                        # If it's a CellRichText object, keep formatting intact
+                        if hasattr(formatted_text, '__class__') and formatted_text.__class__.__name__ == 'CellRichText':
                             # For RichText, we keep the formatting but clean the plain text fallback
                             excel_data[col_name] = formatted_text
                         else:

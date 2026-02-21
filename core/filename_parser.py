@@ -105,8 +105,10 @@ class FilenameParser:
     @staticmethod
     def clean_pdf_text(text: str) -> str:
         """Clean text that has been copied from PDF documents by removing unwanted line breaks"""
-        if not text or not isinstance(text, str):
+        if not text:
             return ""
+        if not isinstance(text, str):
+            return text
 
         # Store the original for debugging
         original_text = text
