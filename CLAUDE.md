@@ -8,9 +8,9 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.7.8)
+## Current Status (v2.8.1)
 
-**Latest Status (v2.7.8)**: Batch fixed all 7 low-priority cleanup issues (L1-L7): removed unused SSL context method and import from validator.py, added type validation for skip_versions config values, guarded ctypes.windll DPI call with Windows platform check, fixed clean_pdf_text returning None instead of empty string, replaced .pdf string replace with removesuffix() to only strip trailing .pdf, clamped tooltip positions to screen bounds, and removed unreachable dead code after return statements in excel_fields.py. All Critical (C1-C3), High (H1-H7), Medium (M1-M15), and Low (L1-L7) issues from the security audit are now resolved.
+**Latest Status (v2.8.1)**: Fixed critical bug where formatted text (colored) in Händelse field was lost when saving to Excel. Root cause: two interacting bugs — (1) CellRichText class name check in excel_operations.py used wrong name `'RichText'` instead of `'CellRichText'`, causing rich text detection to always fail; (2) v2.7.8 L4 fix changed clean_pdf_text to return `""` for non-string inputs, destroying CellRichText objects that previously passed through safely. Also added search/filter and sorting to PDF file list panel (v2.8.0): real-time search with clear button, sort by name/date/size with persisted preference.
 
 **Key Features**:
 - **Single Custom Undo System**: Tk built-in undo disabled; snapshot-based undo with debounced typing (500ms), immediate saves before destructive ops, 3-second max interval between snapshots
@@ -21,6 +21,7 @@ The application has been refactored from a single large file into a modular stru
 - **Race Condition Prevention**: Comprehensive protection during template loading and state transitions
 - **Field Configuration System**: Custom field names and visibility states with template support
 - **Excel Integration**: Disabled fields automatically excluded from Excel operations
+- **PDF File List**: Search/filter with real-time matching, sort by name/date/size, persisted sort preference
 
 **Architecture Status**:
 - **Modular Design**: Clean architecture with main_window.py reduced from 35,000+ tokens to 384 lines
