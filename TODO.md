@@ -5,8 +5,8 @@
 ### ~~Multi-Resolution Window Scaling Issues (v2.6.14)~~ — RESOLVED
 - Fixed by subsequent layout changes (v2.7.x series)
 
-### PDF rename/move while file is open externally (macOS)
-- [ ] **B1**: App doesn't check if a PDF is open in another program (e.g. PDF Studio) before renaming/moving. On macOS files aren't locked when open, so the rename succeeds but the external app still references the old path. Saving from the external app then creates a duplicate file with the old name. App should detect open files and warn user to close them before proceeding. Note: On Windows this is handled by OS file locking, but macOS needs an explicit check (e.g. `lsof`).
+### ~~PDF rename/move while file is open externally (macOS)~~ — RESOLVED
+- [x] **B1**: ~~Detect open PDF files before rename/move~~ — Fixed in v2.7.9
 
 ---
 
@@ -71,11 +71,11 @@
 
 ## Feature Ideas
 
-- [ ] **F1**: Search/filter box in PDF file list (biggest workflow win for large file sets)
+- [x] ~~**F1**: Search/filter box in PDF file list~~ — Fixed in v2.8.0
 - [ ] **F2**: Keyboard shortcuts for common actions (Save+Clear, Next/Previous PDF)
 - [ ] **F3**: Auto-advance to next PDF in file list after "Spara allt och rensa"
 - [ ] **F4**: Drag-and-drop PDF files onto app window
-- [ ] **F5**: File list sorting options (name, date modified, size)
+- [x] ~~**F5**: File list sorting options (name, date modified, size)~~ — Fixed in v2.8.0
 - [ ] **F6**: Recently used Excel files dropdown
 - [ ] **F7**: Batch progress indicator ("Behandlad: 12/381")
 - [ ] **F8**: Undo last added Excel row
@@ -128,6 +128,15 @@
 ---
 
 ## Recently Completed ✅
+
+### ✅ Fix Formatted Text Lost in Excel (v2.8.1) - COMPLETE
+- ✅ Fixed CellRichText class name check (`'RichText'` → `'CellRichText'`) in excel_operations.py
+- ✅ Made clean_pdf_text defensive for non-string truthy objects (v2.7.8 L4 regression)
+
+### ✅ Search/Filter and Sorting in PDF File List (v2.8.0) - COMPLETE
+- ✅ F1: Real-time search with clear button, filtered count display
+- ✅ F5: Sort by name (A-Ö/Ö-A), date (newest/oldest), size (largest/smallest)
+- ✅ Sort preference persisted in config
 
 ### ✅ Low-Priority Cleanup Fixes (v2.7.8) - COMPLETE
 - ✅ L1-L7: All 7 low-priority issues fixed (unused SSL method, skip_versions type validation, Windows DPI guard, clean_pdf_text None fix, .pdf suffix removal, tooltip clamping, dead code removal)
