@@ -61,7 +61,6 @@
 ## GUI Improvements
 
 - [ ] **G1**: Shorten "Kopiera ned filnamnet till Excelfältet" button text (e.g., "Kopiera till Excel" or icon + tooltip)
-- [ ] **G2**: Consider 2-column layout for date/time pairs (Startdatum+Starttid on same row) to save vertical space
 - [ ] **G3**: Differentiate "Rensa utan spara" button visually from "Spara allt och rensa" (muted/outlined style)
 - [ ] **G4**: Add visible selection indicator on active row color button
 - [ ] **G5**: Improve formatting toolbar button discoverability (larger targets, tooltips)
