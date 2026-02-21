@@ -6,3 +6,4 @@ openpyxl
 xlsxwriter
 customtkinter
 requests
+pyobjc-framework-Quartz; sys_platform == "darwin"

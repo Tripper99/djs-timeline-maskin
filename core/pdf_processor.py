@@ -132,41 +132,72 @@ class PDFProcessor:
 
     @staticmethod
     def is_file_open_by_other_process(file_path: str) -> tuple[bool, list[str]]:
-        """Check if file is open by another process (macOS-specific using lsof).
+        """Check if file is open by another process on macOS.
+
+        Uses two complementary methods:
+        1. CGWindowListCopyWindowInfo — checks window titles for the filename.
+           Catches Java apps (PDF Studio), Electron apps, etc. that read files
+           into memory and close the file handle.
+        2. lsof — checks open file descriptors. Catches apps like Preview/QuickLook
+           that keep the file handle open.
 
         Returns:
-            (is_open, process_names): Whether file is open and list of process names using it.
+            (is_open, process_names): Whether file is open and list of app names using it.
         """
         if platform.system() != 'Darwin':
             return (False, [])
 
+        process_names: list[str] = []
+        own_pid = os.getpid()
+        filename = Path(file_path).name  # e.g. "2025-01-20 Report (3 sid).pdf"
+
+        # Apps to exclude from window-title matching (not PDF editors)
+        ignored_window_owners = {'Finder', 'Python', 'python3'}
+
+        # Method 1: Check window titles via CoreGraphics
+        try:
+            from Quartz import (
+                CGWindowListCopyWindowInfo,
+                kCGNullWindowID,
+                kCGWindowListOptionAll,
+            )
+            windows = CGWindowListCopyWindowInfo(
+                kCGWindowListOptionAll, kCGNullWindowID,
+            )
+            for w in windows:
+                win_name = w.get('kCGWindowName', '') or ''
+                owner = w.get('kCGWindowOwnerName', '') or ''
+                owner_pid = w.get('kCGWindowOwnerPID', 0)
+                if (
+                    owner_pid != own_pid
+                    and owner not in ignored_window_owners
+                    and filename in win_name
+                    and owner not in process_names
+                ):
+                    process_names.append(owner)
+        except Exception as e:
+            logger.debug(f"CGWindowList check unavailable: {e}")
+
+        # Method 2: Check open file descriptors via lsof
         try:
             result = subprocess.run(
                 ['lsof', '--', file_path],
                 capture_output=True, text=True, timeout=5,
             )
+            if result.returncode == 0:
+                lines = result.stdout.strip().splitlines()
+                for line in lines[1:]:
+                    columns = line.split()
+                    if len(columns) >= 2:
+                        proc_name = columns[0]
+                        proc_pid = columns[1]
+                        if (
+                            proc_pid != str(own_pid)
+                            and proc_name not in process_names
+                        ):
+                            process_names.append(proc_name)
         except (subprocess.TimeoutExpired, FileNotFoundError, OSError) as e:
-            logger.warning(f"lsof check failed: {e}")
-            return (False, [])
-
-        if result.returncode != 0:
-            # lsof returns 1 when no processes have the file open
-            return (False, [])
-
-        # Parse output: first line is header, subsequent lines are processes
-        lines = result.stdout.strip().splitlines()
-        if len(lines) <= 1:
-            return (False, [])
-
-        own_pid = str(os.getpid())
-        process_names: list[str] = []
-        for line in lines[1:]:
-            columns = line.split()
-            if len(columns) >= 2:
-                proc_name = columns[0]
-                proc_pid = columns[1]
-                if proc_pid != own_pid and proc_name not in process_names:
-                    process_names.append(proc_name)
+            logger.debug(f"lsof check failed: {e}")
 
         if process_names:
             return (True, process_names)
