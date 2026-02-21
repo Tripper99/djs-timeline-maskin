@@ -128,6 +128,18 @@
 
 ## Recently Completed ✅
 
+### ✅ Recently Used Dropdowns (v2.8.4) - COMPLETE
+- ✅ F6: Recent Excel files dropdown with ▾ button
+- ✅ Recent output folders dropdown with ▾ button
+- ✅ Excludes current file/folder, persisted in config (max 10)
+
+### ✅ GUI Polish (v2.8.2–v2.8.3) - COMPLETE
+- ✅ G1: Shortened copy-to-Excel button text
+- ✅ G3: Outlined style for "Rensa utan spara" button
+- ✅ G4: Black border on selected color button
+- ✅ G5: Larger formatting toolbar buttons with tooltips
+- ✅ G6: Open folder button in PDF file list
+
 ### ✅ Fix Formatted Text Lost in Excel (v2.8.1) - COMPLETE
 - ✅ Fixed CellRichText class name check (`'RichText'` → `'CellRichText'`) in excel_operations.py
 - ✅ Made clean_pdf_text defensive for non-string truthy objects (v2.7.8 L4 regression)

@@ -4,6 +4,28 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.8.2–v2.8.4: GUI Polish and Usability Improvements (2026-02-21)
+
+**v2.8.4: Recently Used Excel Files and Output Folders Dropdowns (F6)**
+- Added "▾" dropdown buttons next to "Välj Excel" and "Välj mapp" for quick access to recently used files/folders
+- Recent lists stored in config (`recent_excel_files`, `recent_output_folders`), max 10 entries each, most recent first
+- Dropdown excludes currently active file/folder (only shows alternatives to switch to)
+- Filters out non-existent paths before displaying
+- Files: `core/config.py`, `gui/event_handlers.py`, `gui/layout_manager.py`
+
+**v2.8.3: GUI Improvements (G1, G3, G4, G5)**
+- **G1**: Shortened "Kopiera ned filnamnet till Excelfältet" button to "Kopiera till Excel" (tooltip retains full explanation)
+- **G3**: "Rensa utan spara" button changed to outlined/transparent style (cyan border + text) for clear visual hierarchy vs solid green "Spara allt och rensa"
+- **G4**: Selected color button now shows black border (`#000000`) vs gray (`#666666`) for unselected — much more visible
+- **G5**: Formatting toolbar buttons enlarged 18→24px with Swedish tooltips including keyboard shortcuts (e.g., "Fetstil (⌘B)")
+- Files: `gui/layout_manager.py`, `gui/excel_fields.py`, `gui/formatting_manager.py`
+
+**v2.8.2: Open Folder Button in PDF File List (G6)**
+- Added 📂 button next to "Välj mapp" in PDF file list panel
+- Opens current folder in macOS Finder via `subprocess.run(["open", "--", path])`
+- Disabled when no folder is selected, enabled when folder is set
+- File: `gui/pdf_file_list.py`
+
 ### v2.8.1: Fix Formatted Text Lost in Händelse When Saving to Excel (2026-02-21)
 
 **Problem**: When text in the Händelse field was formatted (e.g., colored green/red), saving to Excel via "Spara allt och rensa" caused the Händelse cell to contain ONLY the PDF filename — all user-written content above it was lost. Note1-3 with formatting kept text but lost formatting. Unformatted text saved correctly in all fields.
