@@ -60,10 +60,10 @@
 
 ## GUI Improvements
 
-- [ ] **G1**: Shorten "Kopiera ned filnamnet till Excelfältet" button text (e.g., "Kopiera till Excel" or icon + tooltip)
-- [ ] **G3**: Differentiate "Rensa utan spara" button visually from "Spara allt och rensa" (muted/outlined style)
-- [ ] **G4**: Add visible selection indicator on active row color button
-- [ ] **G5**: Improve formatting toolbar button discoverability (larger targets, tooltips)
+- [x] ~~**G1**: Shorten "Kopiera ned filnamnet till Excelfältet" button text (e.g., "Kopiera till Excel" or icon + tooltip)~~ — Fixed in v2.8.3
+- [x] ~~**G3**: Differentiate "Rensa utan spara" button visually from "Spara allt och rensa" (muted/outlined style)~~ — Fixed in v2.8.3
+- [x] ~~**G4**: Add visible selection indicator on active row color button~~ — Fixed in v2.8.3
+- [x] ~~**G5**: Improve formatting toolbar button discoverability (larger targets, tooltips)~~ — Fixed in v2.8.3
 - [x] ~~**G6**: Add "Open folder" button near file list — opens the selected PDF folder in Finder so user can see its contents without searching for it~~ — Fixed in v2.8.2
 
 ---
