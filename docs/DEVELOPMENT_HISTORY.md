@@ -4,6 +4,42 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.8.1: Fix Formatted Text Lost in Händelse When Saving to Excel (2026-02-21)
+
+**Problem**: When text in the Händelse field was formatted (e.g., colored green/red), saving to Excel via "Spara allt och rensa" caused the Händelse cell to contain ONLY the PDF filename — all user-written content above it was lost. Note1-3 with formatting kept text but lost formatting. Unformatted text saved correctly in all fields.
+
+**Root Cause — Two Interacting Bugs**:
+1. **Latent bug in `gui/excel_operations.py:73`**: CellRichText class name check used `'RichText'` but openpyxl's actual class is `CellRichText` (`__name__` = `'CellRichText'`). Rich text detection **always failed**, causing CellRichText objects to fall through to `clean_pdf_text()`.
+2. **v2.7.8 regression in `core/filename_parser.py:108` (L4 fix)**: Changed `return text` → `return ""` for non-string inputs. Before v2.7.8, CellRichText objects (truthy but not strings) passed through `clean_pdf_text()` safely. After L4, they were destroyed and replaced with `""`.
+
+**Data Flow (broken)**:
+1. User formats text → `get_formatted_text_for_excel()` returns `CellRichText` object
+2. Class name check `== 'RichText'` → **FALSE** (actual name is `'CellRichText'`)
+3. Falls to else → `clean_pdf_text(CellRichText_object)`
+4. `not isinstance(text, str)` → **TRUE** → returns `""`
+5. `_prepare_special_data()` sees empty Händelse + filename → writes only filename
+
+**Fixes Applied**:
+- **Fix 1** (`gui/excel_operations.py`): Changed `'RichText'` → `'CellRichText'` in class name check. CellRichText objects now correctly detected and preserved.
+- **Fix 2** (`core/filename_parser.py`): Split guard into two checks — `not text` returns `""`, `not isinstance(text, str)` returns original object unchanged. Defensive safety net for non-string truthy objects.
+
+**Files Changed**: `gui/excel_operations.py`, `core/filename_parser.py`, `utils/constants.py`
+
+**Key Insight — Latent Bugs Exposed by Cleanup**: The L4 fix was technically correct (ensure `str` return type) but exposed a latent bug that had been masked by the passthrough behavior. When fixing type consistency in utility functions, always trace all callers to verify no code depends on the "incorrect" behavior.
+
+### v2.8.0: Search/Filter and Sorting in PDF File List (2026-02-21)
+
+**Feature**: Users working with large PDF folders (100+ files) needed to quickly find specific files and sort by different criteria. Previously the file list only showed alphabetically sorted filenames with no filtering.
+
+**Implementation**:
+- **Search bar** (new Row 1): `CTkEntry` with placeholder "Sök bland PDF-filer..." and a ✕ clear button (appears only when text is entered). Filters in real-time via `StringVar.trace_add`.
+- **Sort dropdown** (top bar): `CTkOptionMenu` with 6 options — Namn (A-Ö), Namn (Ö-A), Datum (nyast), Datum (äldst), Storlek (störst), Storlek (minst). Compact 120px width, small font.
+- **Refactored data model**: `_all_pdf_files` stores `(path_str, filename, mtime, size)` tuples from scan. `_pdf_files` holds filtered/sorted subset of path strings.
+- **`_apply_filter_and_sort()`**: Core method — filters by search text (case-insensitive substring match on filename), sorts by selected criterion using stored metadata, repopulates listbox, updates count label (`"3/25 PDF-filer"` when filtered, `"25 PDF-filer"` when not).
+- **Sort persistence**: Sort preference saved/loaded via config key `"pdf_sort_order"`.
+
+**Files Changed**: `gui/pdf_file_list.py`, `utils/constants.py`
+
 ### v2.7.8: Batch Fix All 7 Low-Priority Cleanup Issues (2026-02-21)
 
 **Problem**: 7 low-priority cleanup issues (L1-L7) remained from the v2.7.2 security/stability audit — the final tier after Critical, High, and Medium were all resolved.
