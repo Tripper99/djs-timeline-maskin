@@ -131,6 +131,48 @@ class PDFProcessor:
             return True  # Assume locked if we can't determine
 
     @staticmethod
+    def is_file_open_by_other_process(file_path: str) -> tuple[bool, list[str]]:
+        """Check if file is open by another process (macOS-specific using lsof).
+
+        Returns:
+            (is_open, process_names): Whether file is open and list of process names using it.
+        """
+        if platform.system() != 'Darwin':
+            return (False, [])
+
+        try:
+            result = subprocess.run(
+                ['lsof', '--', file_path],
+                capture_output=True, text=True, timeout=5,
+            )
+        except (subprocess.TimeoutExpired, FileNotFoundError, OSError) as e:
+            logger.warning(f"lsof check failed: {e}")
+            return (False, [])
+
+        if result.returncode != 0:
+            # lsof returns 1 when no processes have the file open
+            return (False, [])
+
+        # Parse output: first line is header, subsequent lines are processes
+        lines = result.stdout.strip().splitlines()
+        if len(lines) <= 1:
+            return (False, [])
+
+        own_pid = str(os.getpid())
+        process_names: list[str] = []
+        for line in lines[1:]:
+            columns = line.split()
+            if len(columns) >= 2:
+                proc_name = columns[0]
+                proc_pid = columns[1]
+                if proc_pid != own_pid and proc_name not in process_names:
+                    process_names.append(proc_name)
+
+        if process_names:
+            return (True, process_names)
+        return (False, [])
+
+    @staticmethod
     def open_pdf_externally(pdf_path: str) -> None:
         """Open PDF file with default system application"""
         try:
