@@ -27,21 +27,21 @@
 
 ### Medium
 
-- [ ] **M1**: Add `--` separator before paths in `subprocess.run(["open", path])` calls — prevent filenames starting with `-` being interpreted as flags
-- [ ] **M2**: Use streaming or check `Content-Length` before downloading full response in version checker (`checker.py:133`)
-- [ ] **M3**: Fix hardcoded Swedish column names in `_prepare_special_data` (`excel_manager.py:491,515,525`) — use `_get_field_display_name()` instead
-- [ ] **M4**: Add proper workbook `close()` to `ExcelManager` — resource leak (`excel_manager.py:36`)
-- [ ] **M5**: Close `read_workbook` in `add_row_with_xlsxwriter` — resource leak (`excel_manager.py:298`)
-- [ ] **M6**: Fix temp file orphan when original Excel deleted (`excel_manager.py:473`) — always attempt `os.replace()`
-- [ ] **M7**: Fix `backup_path` NameError when template save fails on new template (`template_manager.py:176`)
-- [ ] **M8**: Make template writes atomic — write to temp + `os.replace()` (`template_manager.py:170`)
-- [ ] **M9**: Fix string-based version comparison in config migration — will break at v2.10+ (`config.py:331-367`)
-- [ ] **M10**: Fix load-modify-save race condition across config methods (`config.py:125+`)
-- [ ] **M11**: Fix missing `update_filename_preview` method — crash when applying field config (`main_window.py:641`)
-- [ ] **M12**: Clear undo stacks when fields are recreated — memory leak with stale widget IDs (`undo_manager.py`)
-- [ ] **M13**: Clear `undo_widgets` list on field recreation — leaks references to destroyed widgets (`undo_manager.py:414`)
-- [ ] **M14**: Cancel scheduled `after` callbacks when dialogs close (`field_config_dialog.py:1255`, `pdf_preview.py:214`)
-- [ ] **M15**: Replace all `print("DEBUG: ...")` and `logger.info("DEBUG: ...")` with `logger.debug()` across codebase
+- [x] **M1**: ~~Add `--` separator before paths in subprocess calls~~ — Fixed in v2.7.7
+- [x] **M2**: ~~Check Content-Length before downloading full response in version checker~~ — Fixed in v2.7.7
+- [x] **M3**: ~~Replace hardcoded Swedish column names with dynamic field display names~~ — Fixed in v2.7.7
+- [x] **M4**: ~~Close workbook on reload in ExcelManager~~ — Fixed in v2.7.7
+- [x] **M5**: ~~Close read_workbook in add_row_with_xlsxwriter~~ — Fixed in v2.7.7
+- [x] **M6**: ~~Always attempt os.replace for temp file~~ — Fixed in v2.7.7
+- [x] **M7**: ~~Fix backup_path NameError on new template~~ — Fixed in v2.7.7
+- [x] **M8**: ~~Make template writes atomic~~ — Fixed in v2.7.7
+- [x] **M9**: ~~Fix string-based version comparison in config migration~~ — Fixed in v2.7.7
+- [x] **M10**: ~~Fix load-modify-save race condition with threading lock~~ — Fixed in v2.7.7
+- [x] **M11**: ~~Remove call to nonexistent update_filename_preview method~~ — Fixed in v2.7.7
+- [x] **M12**: ~~Clear undo stacks when fields are recreated~~ — Fixed in v2.7.7
+- [x] **M13**: ~~Clear undo_widgets list on field recreation~~ — Fixed in v2.7.7
+- [x] **M14**: ~~Cancel scheduled after() callbacks on dialog close~~ — Fixed in v2.7.7
+- [x] **M15**: ~~Replace all DEBUG print/logger.info with logger.debug()~~ — Fixed in v2.7.7
 
 ### Low (cleanup)
 
@@ -122,6 +122,9 @@
 ---
 
 ## Recently Completed ✅
+
+### ✅ Medium-Priority Security/Stability Fixes (v2.7.7) - COMPLETE
+- ✅ M1-M15: All 15 medium-priority issues fixed (flag injection, resource leaks, race conditions, version comparison, atomic writes, debug logging)
 
 ### ✅ Fix Undo/Redo for Text Widgets (v2.7.5) - COMPLETE
 - ✅ Replaced dual undo system with single snapshot-based custom undo

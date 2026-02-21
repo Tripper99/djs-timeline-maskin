@@ -152,6 +152,14 @@ class PDFPreviewPanel(ctk.CTkFrame):
 
     def clear(self):
         """Clear the current preview."""
+        # Cancel pending resize callback
+        if self._resize_after_id:
+            try:
+                self.after_cancel(self._resize_after_id)
+            except Exception:
+                pass
+            self._resize_after_id = None
+
         if self._pdf_doc:
             try:
                 self._pdf_doc.close()
@@ -212,7 +220,8 @@ class PDFPreviewPanel(ctk.CTkFrame):
         canvas_width = self._canvas.winfo_width()
         if canvas_width < 50:
             # Canvas not yet sized, retry shortly
-            self.after(100, self._render_current_page)
+            if self.winfo_exists():
+                self.after(100, self._render_current_page)
             return
 
         cache_key = (self._current_path, self._current_page, canvas_width)
@@ -313,9 +322,9 @@ class PDFPreviewPanel(ctk.CTkFrame):
                 import os
                 os.startfile(self._current_path)
             elif platform.system() == "Darwin":
-                subprocess.run(["open", self._current_path])
+                subprocess.run(["open", "--", self._current_path])
             else:
-                subprocess.run(["xdg-open", self._current_path])
+                subprocess.run(["xdg-open", "--", self._current_path])
         except Exception as e:
             logger.error(f"Failed to open PDF externally: {e}")
 

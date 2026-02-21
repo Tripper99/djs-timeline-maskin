@@ -52,6 +52,8 @@ class FieldConfigDialog:
         self.is_template_modified = False
         self._loading_template = False  # Flag to prevent race conditions during template loading
         self._last_button_update = 0  # Throttling mechanism for button state updates
+        self._loading_flag_after_id = None  # Track scheduled after() callbacks
+        self._flash_after_id = None
 
         # Field widgets storage
         self.field_entries: Dict[str, ctk.CTkEntry] = {}
@@ -746,7 +748,7 @@ class FieldConfigDialog:
 
             logger.debug("Template config applied, scheduling flag clear with timeout protection")
             # Schedule flag clearing AFTER 150ms timeout for robust event protection
-            self.dialog.after(150, self._clear_loading_flag)
+            self._loading_flag_after_id = self.dialog.after(150, self._clear_loading_flag)
 
         except Exception as e:
             # Clear flag immediately on error
@@ -1262,7 +1264,7 @@ class FieldConfigDialog:
             self.template_name_label.configure(fg_color="#28A745")  # Success green
 
             # Schedule restoration to correct state color after flash
-            self.dialog.after(500, lambda: self._restore_template_display_color(original_bg))
+            self._flash_after_id = self.dialog.after(500, lambda: self._restore_template_display_color(original_bg))
 
             logger.debug(f"Template save success flash displayed for: {self.current_template}")
 
@@ -1468,6 +1470,13 @@ Klicka "Använd dessa namn" när du är klar."""
 
     def _cancel(self):
         """Cancel dialog without saving."""
+        # Cancel any pending after() callbacks before destroying
+        for after_id in [self._loading_flag_after_id, self._flash_after_id]:
+            if after_id is not None:
+                try:
+                    self.dialog.after_cancel(after_id)
+                except Exception:
+                    pass
         self.dialog.destroy()
 
     def show(self):

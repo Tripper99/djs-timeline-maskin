@@ -5,6 +5,7 @@ Configuration management for the DJ Timeline application
 import json
 import logging
 import os
+import threading
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
@@ -17,6 +18,7 @@ class ConfigManager:
     """Manages application configuration"""
 
     def __init__(self):
+        self._config_lock = threading.Lock()
         self.config_file = self._get_config_file_path()
         self._ensure_config_directory_exists()
         self._migrate_old_config_if_needed()
@@ -125,22 +127,23 @@ class ConfigManager:
             except OSError:
                 pass
 
+    def _update_config(self, update_fn) -> None:
+        """Thread-safe load-modify-save. update_fn receives and modifies the config dict."""
+        with self._config_lock:
+            config = self.load_config()
+            update_fn(config)
+            self.save_config(config)
+
     def save_locked_fields(self, locked_states: Dict[str, bool], locked_contents: Dict[str, str], locked_formats: Dict[str, Any] = None) -> None:
         """Save locked field states, their contents, and rich text formatting"""
         try:
-            # Load current config
-            current_config = self.load_config()
+            def update(config):
+                config["locked_fields"] = locked_states
+                config["locked_field_contents"] = locked_contents
+                if locked_formats is not None:
+                    config["locked_field_formats"] = locked_formats
 
-            # Update locked fields data
-            current_config["locked_fields"] = locked_states
-            current_config["locked_field_contents"] = locked_contents
-
-            # Update locked field formats if provided
-            if locked_formats is not None:
-                current_config["locked_field_formats"] = locked_formats
-
-            # Save updated config
-            self.save_config(current_config)
+            self._update_config(update)
             logger.info(f"Saved locked fields: {list(locked_states.keys())}")
             if locked_formats:
                 logger.info(f"Saved rich text formats for: {list(locked_formats.keys())}")
@@ -168,9 +171,9 @@ class ConfigManager:
     def save_custom_field_names(self, custom_names: Dict[str, str]) -> None:
         """Save custom field names"""
         try:
-            current_config = self.load_config()
-            current_config["custom_field_names"] = custom_names
-            self.save_config(current_config)
+            def update(config):
+                config["custom_field_names"] = custom_names
+            self._update_config(update)
             logger.info(f"Saved custom field names: {custom_names}")
         except Exception as e:
             logger.error(f"Failed to save custom field names: {e}")
@@ -189,16 +192,14 @@ class ConfigManager:
     def save_field_state(self, disabled_fields: list) -> None:
         """Save field state configuration"""
         try:
-            current_config = self.load_config()
-            current_config["disabled_fields"] = disabled_fields
-            # Keep both keys for backward compatibility
-            current_config["hidden_fields"] = disabled_fields
-            # Also update field_visibility dict for backward compatibility
-            current_config["field_visibility"] = {
-                field_id: field_id not in disabled_fields
-                for field_id in disabled_fields
-            }
-            self.save_config(current_config)
+            def update(config):
+                config["disabled_fields"] = disabled_fields
+                config["hidden_fields"] = disabled_fields
+                config["field_visibility"] = {
+                    field_id: field_id not in disabled_fields
+                    for field_id in disabled_fields
+                }
+            self._update_config(update)
             logger.info(f"Saved field state: {len(disabled_fields)} disabled fields")
         except Exception as e:
             logger.error(f"Failed to save field state: {e}")
@@ -228,9 +229,9 @@ class ConfigManager:
     def save_active_template(self, template_name: str) -> None:
         """Save the active template name"""
         try:
-            current_config = self.load_config()
-            current_config["active_template"] = template_name
-            self.save_config(current_config)
+            def update(config):
+                config["active_template"] = template_name
+            self._update_config(update)
             logger.info(f"Saved active template: {template_name}")
         except Exception as e:
             logger.error(f"Failed to save active template: {e}")
@@ -258,16 +259,14 @@ class ConfigManager:
                                  last_check: str = None) -> None:
         """Save update check configuration"""
         try:
-            current_config = self.load_config()
-
-            if enabled is not None:
-                current_config["update_check_enabled"] = enabled
-            if skip_versions is not None:
-                current_config["skip_versions"] = skip_versions
-            if last_check is not None:
-                current_config["last_update_check"] = last_check
-
-            self.save_config(current_config)
+            def update(config):
+                if enabled is not None:
+                    config["update_check_enabled"] = enabled
+                if skip_versions is not None:
+                    config["skip_versions"] = skip_versions
+                if last_check is not None:
+                    config["last_update_check"] = last_check
+            self._update_config(update)
             logger.info("Saved update check configuration")
         except Exception as e:
             logger.error(f"Failed to save update check config: {e}")
@@ -296,52 +295,57 @@ class ConfigManager:
     def add_skipped_version(self, version: str) -> None:
         """Add a version to the skip list"""
         try:
-            current_config = self.load_config()
-            skip_versions = current_config.get("skip_versions", [])
-
-            if version not in skip_versions:
-                skip_versions.append(version)
-                current_config["skip_versions"] = skip_versions
-                self.save_config(current_config)
-                logger.info(f"Added version {version} to skip list")
+            def update(config):
+                skip_versions = config.get("skip_versions", [])
+                if version not in skip_versions:
+                    skip_versions.append(version)
+                    config["skip_versions"] = skip_versions
+            self._update_config(update)
+            logger.info(f"Added version {version} to skip list")
         except Exception as e:
             logger.error(f"Failed to add skipped version: {e}")
 
     def remove_skipped_version(self, version: str) -> None:
         """Remove a version from the skip list"""
         try:
-            current_config = self.load_config()
-            skip_versions = current_config.get("skip_versions", [])
-
-            if version in skip_versions:
-                skip_versions.remove(version)
-                current_config["skip_versions"] = skip_versions
-                self.save_config(current_config)
-                logger.info(f"Removed version {version} from skip list")
+            def update(config):
+                skip_versions = config.get("skip_versions", [])
+                if version in skip_versions:
+                    skip_versions.remove(version)
+                    config["skip_versions"] = skip_versions
+            self._update_config(update)
+            logger.info(f"Removed version {version} from skip list")
         except Exception as e:
             logger.error(f"Failed to remove skipped version: {e}")
 
     def update_last_check_time(self, timestamp: str) -> None:
         """Update the timestamp of the last update check"""
         try:
-            current_config = self.load_config()
-            current_config["last_update_check"] = timestamp
-            self.save_config(current_config)
+            def update(config):
+                config["last_update_check"] = timestamp
+            self._update_config(update)
             logger.debug(f"Updated last check time: {timestamp}")
         except Exception as e:
             logger.error(f"Failed to update last check time: {e}")
 
+    def _parse_version(self, version_str: str) -> tuple:
+        """Parse version string like '2.7.0' into (2, 7, 0) tuple for numeric comparison."""
+        try:
+            return tuple(int(x) for x in version_str.split('.'))
+        except (ValueError, AttributeError):
+            return (0, 0, 0)
+
     def migrate_config(self, config: Dict) -> Dict:
         """Migrate configuration to latest version"""
-        current_version = config.get("config_version", "2.2.15")
+        current_version = self._parse_version(config.get("config_version", "2.2.15"))
 
-        if current_version < "2.3.0":
+        if current_version < (2, 3, 0):
             # Add new fields for v2.3.0
             config.setdefault("custom_field_names", {})
             config["config_version"] = "2.3.0"
             logger.info("Migrated config to v2.3.0")
 
-        if current_version < "2.5.0":
+        if current_version < (2, 5, 0):
             # Add new fields for v2.5.0 (field visibility and templates)
             config.setdefault("field_visibility", {})
             config.setdefault("hidden_fields", [])
@@ -349,7 +353,7 @@ class ConfigManager:
             config["config_version"] = "2.5.0"
             logger.info("Migrated config to v2.5.0")
 
-        if current_version < "2.5.2":
+        if current_version < (2, 5, 2):
             # Add new fields for v2.5.2 (disabled fields terminology)
             # Migrate hidden_fields to disabled_fields
             hidden_fields = config.get("hidden_fields", [])
@@ -358,20 +362,20 @@ class ConfigManager:
             config["config_version"] = "2.5.2"
             logger.info("Migrated config to v2.5.2 - added disabled fields support")
 
-        if current_version < "2.6.17":
+        if current_version < (2, 6, 17):
             # Add new fields for v2.6.17 (update check configuration)
             for key, value in UPDATE_CHECK_DEFAULTS.items():
                 config.setdefault(key, value)
             config["config_version"] = "2.6.17"
             logger.info("Migrated config to v2.6.17 - added update check support")
 
-        if current_version < "2.6.18":
+        if current_version < (2, 6, 18):
             # v2.6.18: Config file now uses absolute path (Linux AppImage/Windows .exe persistence fix)
             # Migration of file location is handled by _migrate_old_config_if_needed()
             config["config_version"] = "2.6.18"
             logger.info("Migrated config to v2.6.18 - using absolute path for config file")
 
-        if current_version < "2.7.0":
+        if current_version < (2, 7, 0):
             # v2.7.0: PDF preview and file list panels
             config.setdefault("pdf_browse_folder", "")
             config["config_version"] = "2.7.0"

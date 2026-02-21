@@ -130,10 +130,11 @@ class VersionChecker:
             config = self.validator.get_secure_request_config()
 
             logger.debug(f"Making request to: {self.api_url}")
-            response = requests.get(self.api_url, **config)
+            response = requests.get(self.api_url, stream=True, **config)
 
             # Handle different HTTP status codes
             if response.status_code == 404:
+                response.close()
                 logger.warning("Repository or releases not found")
                 return None
 
@@ -142,14 +143,27 @@ class VersionChecker:
                 if 'X-RateLimit-Remaining' in response.headers:
                     remaining = response.headers.get('X-RateLimit-Remaining', '0')
                     if remaining == '0':
+                        response.close()
                         raise RateLimitError("GitHub API rate limit exceeded")
+                response.close()
                 raise NetworkError("Access forbidden (HTTP 403)")
 
             elif response.status_code != 200:
+                response.close()
                 raise NetworkError(f"GitHub API returned status code: {response.status_code}")
 
+            # Check Content-Length before downloading body
+            content_length = response.headers.get('Content-Length')
+            if content_length and int(content_length) > 50 * 1024:
+                response.close()
+                raise SecurityError(f"Response too large: {content_length} bytes")
+
+            # Read the body now
+            response_text = response.text
+            response.close()
+
             # Validate and parse JSON response
-            release_data = self.validator.validate_json_response(response.text)
+            release_data = self.validator.validate_json_response(response_text)
 
             # Convert to our data model
             return self._parse_release_data(release_data)

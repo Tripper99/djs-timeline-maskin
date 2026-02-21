@@ -60,23 +60,26 @@ class TestExcelManagerSafe:
         result.append("Modified")
         assert self.manager.column_names == ["Startdatum", "Händelse", "Källa1"]
 
-    @patch('core.excel_manager.REQUIRED_EXCEL_COLUMNS', ['Col1', 'Col2', 'Col3'])
-    def test_validate_excel_columns_no_file_loaded(self):
+    @patch('core.excel_manager.field_manager')
+    def test_validate_excel_columns_no_file_loaded(self, mock_fm):
         """Test column validation when no file is loaded"""
+        mock_fm.get_visible_display_names.return_value = ['Col1', 'Col2', 'Col3']
         missing = self.manager.validate_excel_columns()
         assert missing == ['Col1', 'Col2', 'Col3']
 
-    @patch('core.excel_manager.REQUIRED_EXCEL_COLUMNS', ['Col1', 'Col2', 'Col3'])
-    def test_validate_excel_columns_all_present(self):
+    @patch('core.excel_manager.field_manager')
+    def test_validate_excel_columns_all_present(self, mock_fm):
         """Test column validation when all required columns are present"""
+        mock_fm.get_visible_display_names.return_value = ['Col1', 'Col2', 'Col3']
         self.manager.column_names = ['Col1', 'Col2', 'Col3', 'ExtraCol']
 
         missing = self.manager.validate_excel_columns()
         assert missing == []
 
-    @patch('core.excel_manager.REQUIRED_EXCEL_COLUMNS', ['Col1', 'Col2', 'Col3'])
-    def test_validate_excel_columns_some_missing(self):
+    @patch('core.excel_manager.field_manager')
+    def test_validate_excel_columns_some_missing(self, mock_fm):
         """Test column validation when some required columns are missing"""
+        mock_fm.get_visible_display_names.return_value = ['Col1', 'Col2', 'Col3']
         self.manager.column_names = ['Col1', 'ExtraCol']
 
         missing = self.manager.validate_excel_columns()
@@ -147,12 +150,12 @@ class TestExcelManagerSafe:
     def test_prepare_special_data_basic(self):
         """Test special data preparation with basic input"""
         # Mock the columns
-        self.manager.columns = {'Händelse': 1, 'Startdatum': 2, 'Källa1': 3}
+        self.manager.columns = {'Händelse': 1, 'Startdatum': 2, 'Källa': 3}
 
         data = {
             'Händelse': 'User content',
             'Startdatum': '',
-            'Källa1': '',
+            'Källa': '',
             'date': '2024-01-15'
         }
         filename = 'test.pdf'
@@ -161,16 +164,16 @@ class TestExcelManagerSafe:
 
         assert 'User content' in result['Händelse']
         assert 'test.pdf' in result['Händelse']
-        assert result['Källa1'] == 'test.pdf'
+        assert result['Källa'] == 'test.pdf'
 
     def test_prepare_special_data_no_filename(self):
         """Test special data preparation without filename"""
-        self.manager.columns = {'Händelse': 1, 'Startdatum': 2, 'Källa1': 3}
+        self.manager.columns = {'Händelse': 1, 'Startdatum': 2, 'Källa': 3}
 
         data = {
             'Händelse': 'User content only',
             'Startdatum': '2024-01-15',
-            'Källa1': ''
+            'Källa': ''
         }
         filename = ''
 
@@ -178,16 +181,16 @@ class TestExcelManagerSafe:
 
         assert result['Händelse'] == 'User content only'
         assert result['Startdatum'] == '2024-01-15'
-        assert result['Källa1'] == ''
+        assert result['Källa'] == ''
 
     def test_prepare_special_data_date_parsing(self):
         """Test special data preparation with date parsing"""
-        self.manager.columns = {'Händelse': 1, 'Startdatum': 2, 'Källa1': 3}
+        self.manager.columns = {'Händelse': 1, 'Startdatum': 2, 'Källa': 3}
 
         data = {
             'Händelse': '',
             'Startdatum': '',  # Empty, should use date from filename
-            'Källa1': '',
+            'Källa': '',
             'date': '2024-01-15'
         }
         filename = 'test.pdf'
@@ -202,12 +205,12 @@ class TestExcelManagerSafe:
 
     def test_prepare_special_data_invalid_date(self):
         """Test special data preparation with invalid date"""
-        self.manager.columns = {'Händelse': 1, 'Startdatum': 2, 'Källa1': 3}
+        self.manager.columns = {'Händelse': 1, 'Startdatum': 2, 'Källa': 3}
 
         data = {
             'Händelse': '',
             'Startdatum': '',
-            'Källa1': '',
+            'Källa': '',
             'date': 'invalid-date'
         }
         filename = 'test.pdf'
@@ -219,12 +222,12 @@ class TestExcelManagerSafe:
 
     def test_prepare_special_data_user_has_startdatum(self):
         """Test special data preparation when user already provided Startdatum"""
-        self.manager.columns = {'Händelse': 1, 'Startdatum': 2, 'Källa1': 3}
+        self.manager.columns = {'Händelse': 1, 'Startdatum': 2, 'Källa': 3}
 
         data = {
             'Händelse': '',
             'Startdatum': '2024-02-20',  # User provided date
-            'Källa1': '',
+            'Källa': '',
             'date': '2024-01-15'  # Different date from filename
         }
         filename = 'test.pdf'
@@ -236,12 +239,12 @@ class TestExcelManagerSafe:
 
     def test_prepare_special_data_user_has_kalla1(self):
         """Test special data preparation when user already provided Källa1"""
-        self.manager.columns = {'Händelse': 1, 'Startdatum': 2, 'Källa1': 3}
+        self.manager.columns = {'Händelse': 1, 'Startdatum': 2, 'Källa': 3}
 
         data = {
             'Händelse': '',
             'Startdatum': '',
-            'Källa1': 'User source',  # User provided source
+            'Källa': 'User source',  # User provided source
             'date': '2024-01-15'
         }
         filename = 'test.pdf'
@@ -249,16 +252,16 @@ class TestExcelManagerSafe:
         result = self.manager._prepare_special_data(data, filename)
 
         # Should keep user's source, not filename
-        assert result['Källa1'] == 'User source'
+        assert result['Källa'] == 'User source'
 
     def test_prepare_special_data_filename_already_in_handelse(self):
         """Test special data preparation when filename is already in Händelse"""
-        self.manager.columns = {'Händelse': 1, 'Startdatum': 2, 'Källa1': 3}
+        self.manager.columns = {'Händelse': 1, 'Startdatum': 2, 'Källa': 3}
 
         data = {
             'Händelse': 'User content with test.pdf already mentioned',
             'Startdatum': '',
-            'Källa1': '',
+            'Källa': '',
             'date': '2024-01-15'
         }
         filename = 'test.pdf'
@@ -287,12 +290,12 @@ class TestExcelManagerSafe:
 
     def test_prepare_special_data_empty_handelse_with_filename(self):
         """Test special data preparation with empty Händelse and filename"""
-        self.manager.columns = {'Händelse': 1, 'Startdatum': 2, 'Källa1': 3}
+        self.manager.columns = {'Händelse': 1, 'Startdatum': 2, 'Källa': 3}
 
         data = {
             'Händelse': '',  # Empty
             'Startdatum': '',
-            'Källa1': '',
+            'Källa': '',
             'date': '2024-01-15'
         }
         filename = 'test.pdf'
@@ -311,12 +314,12 @@ class TestExcelManagerSafe:
 
     def test_edge_cases_special_characters(self):
         """Test special data preparation with Swedish characters"""
-        self.manager.columns = {'Händelse': 1, 'Startdatum': 2, 'Källa1': 3}
+        self.manager.columns = {'Händelse': 1, 'Startdatum': 2, 'Källa': 3}
 
         data = {
             'Händelse': 'Innehåll med åäö',
             'Startdatum': '',
-            'Källa1': '',
+            'Källa': '',
             'date': '2024-01-15'
         }
         filename = 'fil_med_åäö.pdf'
@@ -340,12 +343,12 @@ class TestExcelManagerSafe:
 
     def test_prepare_special_data_preserves_other_fields(self):
         """Test that special data preparation preserves non-special fields"""
-        self.manager.columns = {'Händelse': 1, 'Startdatum': 2, 'Källa1': 3, 'OtherField': 4}
+        self.manager.columns = {'Händelse': 1, 'Startdatum': 2, 'Källa': 3, 'OtherField': 4}
 
         data = {
             'Händelse': '',
             'Startdatum': '',
-            'Källa1': '',
+            'Källa': '',
             'OtherField': 'Should be preserved',
             'date': '2024-01-15'
         }

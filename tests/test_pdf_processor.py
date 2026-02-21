@@ -246,7 +246,7 @@ class TestPDFProcessor:
 
         PDFProcessor.open_pdf_externally("test.pdf")
 
-        mock_subprocess.assert_called_once_with(['open', 'test.pdf'])
+        mock_subprocess.assert_called_once_with(['open', '--', 'test.pdf'])
 
     @patch('platform.system')
     @patch('subprocess.run')
@@ -256,7 +256,7 @@ class TestPDFProcessor:
 
         PDFProcessor.open_pdf_externally("test.pdf")
 
-        mock_subprocess.assert_called_once_with(['xdg-open', 'test.pdf'])
+        mock_subprocess.assert_called_once_with(['xdg-open', '--', 'test.pdf'])
 
     @patch('platform.system')
     @patch('os.startfile')
@@ -286,7 +286,7 @@ class TestPDFProcessor:
 
         PDFProcessor.open_excel_externally("test.xlsx")
 
-        mock_subprocess.assert_called_once_with(['open', 'test.xlsx'])
+        mock_subprocess.assert_called_once_with(['open', '--', 'test.xlsx'])
 
     @patch('platform.system')
     @patch('subprocess.run')
@@ -296,7 +296,7 @@ class TestPDFProcessor:
 
         PDFProcessor.open_excel_externally("test.xlsx")
 
-        mock_subprocess.assert_called_once_with(['xdg-open', 'test.xlsx'])
+        mock_subprocess.assert_called_once_with(['xdg-open', '--', 'test.xlsx'])
 
     @patch('platform.system')
     @patch('os.startfile')

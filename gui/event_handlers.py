@@ -167,9 +167,9 @@ class EventHandlersMixin:
             if platform.system() == 'Windows':
                 os.startfile(actual_folder)
             elif platform.system() == 'Darwin':  # macOS
-                subprocess.run(['open', actual_folder])
+                subprocess.run(['open', '--', actual_folder])
             else:  # Linux
-                subprocess.run(['xdg-open', actual_folder])
+                subprocess.run(['xdg-open', '--', actual_folder])
             logger.info(f"Opened output folder: {actual_folder}")
         except Exception as e:
             messagebox.showerror("Fel", f"Kunde inte öppna mappen: {str(e)}")

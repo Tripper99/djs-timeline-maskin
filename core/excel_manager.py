@@ -29,6 +29,12 @@ class ExcelManager:
     def load_excel_file(self, excel_path: str) -> bool:
         """Load Excel file and map columns"""
         try:
+            # Close previous workbook if open
+            if self.workbook:
+                try:
+                    self.workbook.close()
+                except Exception:
+                    pass
             self.excel_path = excel_path
             # Load with rich_text=True as per openpyxl docs for better rich text support
             self.workbook = openpyxl.load_workbook(excel_path, rich_text=True)
@@ -126,63 +132,66 @@ class ExcelManager:
 
             # Step 1: Read existing data with openpyxl (preserves formulas)
             read_workbook = openpyxl.load_workbook(self.excel_path, rich_text=True)
-            read_worksheet = read_workbook.active
+            try:
+                read_worksheet = read_workbook.active
 
-            # Get all existing data including formulas AND formatting
-            existing_data = []
-            existing_formats = []
+                # Get all existing data including formulas AND formatting
+                existing_data = []
+                existing_formats = []
 
-            for row_idx, row in enumerate(read_worksheet.iter_rows()):
-                row_data = []
-                row_formats = []
-                for col_idx, cell in enumerate(row):
-                    # Capture cell data
-                    if cell.data_type == 'f':  # Formula
-                        logger.info(f"Found formula at ({row_idx}, {col_idx}): {cell.value}")
-                        row_data.append(('formula', cell.value))
-                    elif hasattr(cell.value, '__class__') and cell.value.__class__.__name__ == 'CellRichText':
-                        # Fix corrupted CellRichText objects from openpyxl reading xlsxwriter files
-                        repaired_richtext = self._repair_corrupted_cellrichtext(cell.value)
-                        row_data.append(('richtext', repaired_richtext))
-                    else:
-                        row_data.append(('value', cell.value))
+                for row_idx, row in enumerate(read_worksheet.iter_rows()):
+                    row_data = []
+                    row_formats = []
+                    for col_idx, cell in enumerate(row):
+                        # Capture cell data
+                        if cell.data_type == 'f':  # Formula
+                            logger.info(f"Found formula at ({row_idx}, {col_idx}): {cell.value}")
+                            row_data.append(('formula', cell.value))
+                        elif hasattr(cell.value, '__class__') and cell.value.__class__.__name__ == 'CellRichText':
+                            # Fix corrupted CellRichText objects from openpyxl reading xlsxwriter files
+                            repaired_richtext = self._repair_corrupted_cellrichtext(cell.value)
+                            row_data.append(('richtext', repaired_richtext))
+                        else:
+                            row_data.append(('value', cell.value))
 
-                    # Capture cell formatting with safe color extraction
-                    def safe_color_extract(color_obj):
-                        try:
-                            if color_obj and hasattr(color_obj, 'rgb'):
-                                return str(color_obj.rgb) if color_obj.rgb else None
-                            return None
-                        except (AttributeError, TypeError, ValueError) as e:
-                            logger.warning(f"Could not extract color: {e}")
-                            return None
+                        # Capture cell formatting with safe color extraction
+                        def safe_color_extract(color_obj):
+                            try:
+                                if color_obj and hasattr(color_obj, 'rgb'):
+                                    return str(color_obj.rgb) if color_obj.rgb else None
+                                return None
+                            except (AttributeError, TypeError, ValueError) as e:
+                                logger.warning(f"Could not extract color: {e}")
+                                return None
 
-                    cell_format = {
-                        'font_bold': cell.font.bold if cell.font.bold else False,
-                        'font_italic': cell.font.italic if cell.font.italic else False,
-                        'font_color': safe_color_extract(cell.font.color),
-                        'font_size': cell.font.size if cell.font.size else None,
-                        'fill_color': safe_color_extract(cell.fill.start_color),
-                        'alignment_wrap': cell.alignment.wrap_text if cell.alignment.wrap_text else False,
-                        'alignment_horizontal': cell.alignment.horizontal if cell.alignment.horizontal else None,
-                        'alignment_vertical': cell.alignment.vertical if cell.alignment.vertical else None,
-                    }
-                    row_formats.append(cell_format)
+                        cell_format = {
+                            'font_bold': cell.font.bold if cell.font.bold else False,
+                            'font_italic': cell.font.italic if cell.font.italic else False,
+                            'font_color': safe_color_extract(cell.font.color),
+                            'font_size': cell.font.size if cell.font.size else None,
+                            'fill_color': safe_color_extract(cell.fill.start_color),
+                            'alignment_wrap': cell.alignment.wrap_text if cell.alignment.wrap_text else False,
+                            'alignment_horizontal': cell.alignment.horizontal if cell.alignment.horizontal else None,
+                            'alignment_vertical': cell.alignment.vertical if cell.alignment.vertical else None,
+                        }
+                        row_formats.append(cell_format)
 
-                existing_data.append(row_data)
-                existing_formats.append(row_formats)
+                    existing_data.append(row_data)
+                    existing_formats.append(row_formats)
 
-            # Capture column widths
-            column_widths = {}
-            for col_letter, dimension in read_worksheet.column_dimensions.items():
-                if dimension.width:
-                    column_widths[col_letter] = dimension.width
+                # Capture column widths
+                column_widths = {}
+                for col_letter, dimension in read_worksheet.column_dimensions.items():
+                    if dimension.width:
+                        column_widths[col_letter] = dimension.width
 
-            # Capture row heights
-            row_heights = {}
-            for row_num, dimension in read_worksheet.row_dimensions.items():
-                if dimension.height:
-                    row_heights[row_num] = dimension.height
+                # Capture row heights
+                row_heights = {}
+                for row_num, dimension in read_worksheet.row_dimensions.items():
+                    if dimension.height:
+                        row_heights[row_num] = dimension.height
+            finally:
+                read_workbook.close()
 
             # Step 2: Create new file with xlsxwriter
             temp_file = f"{self.excel_path}.tmp"
@@ -243,7 +252,7 @@ class ExcelManager:
                         # Convert openpyxl RichText to xlsxwriter rich string
                         # Extract row color from existing cell format to preserve background colors
                         detected_row_color = self._extract_row_color_from_format(cell_format)
-                        logger.info(f"DEBUG: Detected row color '{detected_row_color}' for existing rich text at ({row_idx}, {col_idx})")
+                        logger.debug(f"Detected row color '{detected_row_color}' for existing rich text at ({row_idx}, {col_idx})")
                         self._write_rich_text_xlsxwriter(write_worksheet, row_idx, col_idx, value, write_workbook, cell_format_obj, detected_row_color)
                     elif value is not None:
                         write_worksheet.write(row_idx, col_idx, value, cell_format_obj)
@@ -282,9 +291,11 @@ class ExcelManager:
                 value = special_data.get(col_name, '')
 
                 # Special handling for Dag column - create formula
-                if col_name == 'Dag' and not value:
+                dag_name = self._get_field_display_name('dag')
+                startdatum_name = self._get_field_display_name('startdatum')
+                if col_name == dag_name and not value:
                     # Create formula =TEXT(I{row};"ddd") where I is the Startdatum column
-                    tid_start_col_idx = self.columns.get('Startdatum', 9)  # Default to column I (9)
+                    tid_start_col_idx = self.columns.get(startdatum_name, 9)  # Default to column I (9)
                     formula = f'=TEXT({get_column_letter(tid_start_col_idx)}{next_row + 1},"ddd")'
                     logger.info(f"Creating Dag formula for new row: {formula}")
                     write_worksheet.write_formula(next_row, col_idx-1, formula, default_format)
@@ -300,8 +311,7 @@ class ExcelManager:
             write_workbook.close()
 
             # Step 4: Replace original file
-            if os.path.exists(self.excel_path):
-                os.replace(temp_file, self.excel_path)
+            os.replace(temp_file, self.excel_path)
 
             logger.info(f"Added row to Excel file using xlsxwriter hybrid approach at row {next_row + 1}")
             return True
@@ -317,47 +327,52 @@ class ExcelManager:
         """Prepare data with special column handling (extracted from original add_row)"""
         special_data = data.copy()
 
+        # Resolve display names for special fields
+        handelse_name = self._get_field_display_name('handelse')
+        startdatum_name = self._get_field_display_name('startdatum')
+        kalla_name = self._get_field_display_name('kalla1')
+
         # Händelse - preserve user content and add filename if needed
-        if 'Händelse' in self.columns:
-            current_content = data.get('Händelse', '')
+        if handelse_name in self.columns:
+            current_content = data.get(handelse_name, '')
             if hasattr(current_content, '__class__') and current_content.__class__.__name__ == 'CellRichText':
                 has_content = len(current_content) > 0
                 if has_content and filename:
-                    special_data['Händelse'] = current_content
+                    special_data[handelse_name] = current_content
                 elif not has_content:
-                    special_data['Händelse'] = filename if filename else ""
+                    special_data[handelse_name] = filename if filename else ""
                 else:
-                    special_data['Händelse'] = current_content
+                    special_data[handelse_name] = current_content
             else:
                 current_content = str(current_content).strip()
                 if current_content:
                     if filename and filename not in current_content:
-                        special_data['Händelse'] = f"{current_content}\n{filename}"
+                        special_data[handelse_name] = f"{current_content}\n{filename}"
                     else:
-                        special_data['Händelse'] = current_content
+                        special_data[handelse_name] = current_content
                 else:
                     if filename:
-                        special_data['Händelse'] = f"\n\n{filename}"
+                        special_data[handelse_name] = f"\n\n{filename}"
                     else:
-                        special_data['Händelse'] = ""
+                        special_data[handelse_name] = ""
 
         # Startdatum - use date from filename if user hasn't filled it in
-        if 'Startdatum' in self.columns and 'date' in data:
-            user_tid_start = str(special_data.get('Startdatum', '')).strip()
+        if startdatum_name in self.columns and 'date' in data:
+            user_tid_start = str(special_data.get(startdatum_name, '')).strip()
             if not user_tid_start:
                 try:
                     date_obj = datetime.strptime(data['date'], '%Y-%m-%d')
-                    special_data['Startdatum'] = date_obj.date()
+                    special_data[startdatum_name] = date_obj.date()
                 except ValueError:
-                    special_data['Startdatum'] = data.get('date', '')
+                    special_data[startdatum_name] = data.get('date', '')
 
         # Källa - only use generated filename if field is empty AND we have a filename
-        if 'Källa' in self.columns:
-            current_kalla1 = data.get('Källa', '').strip()
+        if kalla_name in self.columns:
+            current_kalla1 = data.get(kalla_name, '').strip()
             if not current_kalla1 and filename:
-                special_data['Källa'] = filename
+                special_data[kalla_name] = filename
             else:
-                special_data['Källa'] = current_kalla1
+                special_data[kalla_name] = current_kalla1
 
         return special_data
 
@@ -426,7 +441,7 @@ class ExcelManager:
 
     def _write_rich_text_xlsxwriter(self, worksheet, row, col, rich_text_obj, workbook, base_format=None, row_color=None):
         """BREAKTHROUGH METHOD: Convert openpyxl CellRichText to xlsxwriter rich string"""
-        logger.info(f"DEBUG: _write_rich_text_xlsxwriter called with row_color='{row_color}', base_format={base_format is not None}")
+        logger.debug(f"_write_rich_text_xlsxwriter called with row_color='{row_color}', base_format={base_format is not None}")
         try:
             # Extract base format properties (like background color and text wrap)
             base_format_dict = {}
@@ -444,13 +459,13 @@ class ExcelManager:
                     }
                     if row_color in color_map:
                         base_format_dict['bg_color'] = color_map[row_color]
-                        logger.info(f"DEBUG: Added bg_color '{color_map[row_color]}' to base_format_dict for row_color '{row_color}'")
+                        logger.debug(f"Added bg_color '{color_map[row_color]}' to base_format_dict for row_color '{row_color}'")
                     else:
-                        logger.warning(f"DEBUG: row_color '{row_color}' not found in color_map")
+                        logger.debug(f"row_color '{row_color}' not found in color_map")
                 else:
-                    logger.info(f"DEBUG: No background color applied - row_color='{row_color}'")
+                    logger.debug(f"No background color applied - row_color='{row_color}'")
                 base_format_dict['text_wrap'] = True  # Always include text wrap
-                logger.info(f"DEBUG: Final base_format_dict: {base_format_dict}")
+                logger.debug(f"Final base_format_dict: {base_format_dict}")
 
             if not hasattr(rich_text_obj, '__iter__'):
                 # Plain text - apply base format
@@ -478,10 +493,10 @@ class ExcelManager:
 
                     if format_dict:
                         format_obj = workbook.add_format(format_dict)
-                        logger.info(f"DEBUG: Created format object with dict: {format_dict}")
+                        logger.debug(f"Created format object with dict: {format_dict}")
                         rich_parts.extend([format_obj, part.text])
                     else:
-                        logger.info(f"DEBUG: No format applied to text part: '{part.text[:20]}...'")
+                        logger.debug(f"No format applied to text part: '{part.text[:20]}...'")
                         rich_parts.append(part.text)
                 elif isinstance(part, str):
                     # Plain text string part
@@ -493,8 +508,8 @@ class ExcelManager:
 
             # Handle rich text writing with background color support
             if rich_parts:
-                logger.info(f"DEBUG: Writing rich string with {len(rich_parts)} parts to cell ({row}, {col})")
-                logger.info(f"DEBUG: Rich parts structure: {[type(p).__name__ for p in rich_parts]}")
+                logger.debug(f"Writing rich string with {len(rich_parts)} parts to cell ({row}, {col})")
+                logger.debug(f"Rich parts structure: {[type(p).__name__ for p in rich_parts]}")
 
                 # UNIFORM FORMATTING FIX: Detect if text has uniform formatting throughout
                 # xlsxwriter write_rich_string() is designed for mixed formatting and fails with uniform formatting
@@ -503,7 +518,7 @@ class ExcelManager:
                     hasattr(rich_parts[0], '__class__') and 'Format' in str(type(rich_parts[0])) and
                     isinstance(rich_parts[1], str)):
 
-                    logger.info("DEBUG: Detected uniform formatting - using write() instead of write_rich_string()")
+                    logger.debug("Detected uniform formatting - using write() instead of write_rich_string()")
 
                     # Extract the format and text
                     format_obj = rich_parts[0]
@@ -516,22 +531,22 @@ class ExcelManager:
                         # The format_obj contains the text formatting, but we need to add background
                         # Unfortunately, we can't extract from format_obj, so we'll use write() with text format
                         # and accept that background color might not work perfectly for uniform formatting
-                        logger.info("DEBUG: Uniform formatting with background - text formatting takes priority")
+                        logger.debug("Uniform formatting with background - text formatting takes priority")
                         worksheet.write(row, col, text_content, format_obj)
                     else:
                         # No background color - simple uniform formatting works perfectly
                         worksheet.write(row, col, text_content, format_obj)
-                        logger.info("DEBUG: Applied uniform formatting without background")
+                        logger.debug("Applied uniform formatting without background")
 
                     return  # Exit early - uniform formatting handled
 
                 # Continue with normal mixed formatting logic for write_rich_string()
-                logger.info("DEBUG: Using write_rich_string() for mixed formatting")
+                logger.debug("Using write_rich_string() for mixed formatting")
 
                 # Apply background color using correct xlsxwriter API
                 if base_format_dict.get('bg_color'):
                     try:
-                        logger.info("DEBUG: Rich text with background color - using correct xlsxwriter API")
+                        logger.debug("Rich text with background color - using correct xlsxwriter API")
 
                         # Create a base format with background color for the entire cell
                         cell_bg_format = workbook.add_format({
@@ -540,11 +555,11 @@ class ExcelManager:
                         })
 
                         # Use correct xlsxwriter API: pass cell format as last parameter
-                        logger.info("DEBUG: Writing rich text with background format as parameter")
+                        logger.debug("Writing rich text with background format as parameter")
                         worksheet.write_rich_string(row, col, *rich_parts, cell_bg_format)
 
                     except Exception as e:
-                        logger.warning(f"DEBUG: Background approach failed: {e}")
+                        logger.debug(f"Background approach failed: {e}")
                         # Fallback to normal rich text without background
                         worksheet.write_rich_string(row, col, *rich_parts)
                 else:
@@ -552,7 +567,7 @@ class ExcelManager:
                     worksheet.write_rich_string(row, col, *rich_parts)
             else:
                 # Plain text handling
-                logger.info(f"DEBUG: Writing plain text to cell ({row}, {col}): '{str(rich_text_obj)[:30]}...'")
+                logger.debug(f"Writing plain text to cell ({row}, {col}): '{str(rich_text_obj)[:30]}...'")
                 if base_format:
                     worksheet.write(row, col, str(rich_text_obj), base_format)
                 else:

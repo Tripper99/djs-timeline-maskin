@@ -137,9 +137,9 @@ class PDFProcessor:
             if platform.system() == 'Windows':
                 os.startfile(pdf_path)
             elif platform.system() == 'Darwin':  # macOS
-                subprocess.run(['open', pdf_path])
+                subprocess.run(['open', '--', pdf_path])
             else:  # Linux
-                subprocess.run(['xdg-open', pdf_path])
+                subprocess.run(['xdg-open', '--', pdf_path])
         except Exception as e:
             logger.error(f"Error opening PDF externally: {e}")
             raise
@@ -151,9 +151,9 @@ class PDFProcessor:
             if platform.system() == 'Windows':
                 os.startfile(excel_path)
             elif platform.system() == 'Darwin':  # macOS
-                subprocess.run(['open', excel_path])
+                subprocess.run(['open', '--', excel_path])
             else:  # Linux
-                subprocess.run(['xdg-open', excel_path])
+                subprocess.run(['xdg-open', '--', excel_path])
         except Exception as e:
             logger.error(f"Error opening Excel externally: {e}")
             raise

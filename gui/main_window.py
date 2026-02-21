@@ -394,9 +394,9 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
             if platform.system() == 'Windows':
                 os.startfile(str(manual_path))
             elif platform.system() == 'Darwin':  # macOS
-                subprocess.run(['open', str(manual_path)])
+                subprocess.run(['open', '--', str(manual_path)])
             else:  # Linux
-                subprocess.run(['xdg-open', str(manual_path)])
+                subprocess.run(['xdg-open', '--', str(manual_path)])
 
             logger.info(f"Opened manual: {manual_path}")
 
@@ -410,14 +410,14 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
             from core.field_definitions import field_manager
             from core.field_state_manager import field_state_manager
             # Debug: Check field_manager state before loading
-            logger.debug(f"DEBUG: field_manager custom names BEFORE loading: {field_manager.get_custom_names()}")
+            logger.debug(f"field_manager custom names BEFORE loading: {field_manager.get_custom_names()}")
 
             # Load custom names
             custom_names = self.config_manager.load_custom_field_names()
-            logger.info(f"DEBUG: Loaded custom field names from config: {custom_names}")
+            logger.debug(f"Loaded custom field names from config: {custom_names}")
 
             field_manager.set_custom_names(custom_names)
-            logger.info(f"DEBUG: field_manager custom names AFTER setting: {field_manager.get_custom_names()}")
+            logger.debug(f"field_manager custom names AFTER setting: {field_manager.get_custom_names()}")
 
             # Load field visibility
             hidden_fields = self.config_manager.load_field_visibility()
@@ -431,7 +431,7 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
                 for field_id in ['obs', 'kategori', 'note1']:
                     if field_id in custom_names:
                         display_name = field_manager.get_display_name(field_id)
-                        logger.debug(f"DEBUG: field_id '{field_id}' → display_name '{display_name}'")
+                        logger.debug(f"field_id '{field_id}' → display_name '{display_name}'")
 
         except Exception as e:
             logger.error(f"Failed to load custom field names: {e}")
@@ -442,12 +442,12 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
             from core.field_definitions import FIELD_DEFINITIONS, field_manager
 
             # Debug: Check field_manager state before initialization
-            logger.debug(f"DEBUG: field_manager custom names at lock_vars init: {field_manager.get_custom_names()}")
+            logger.debug(f"field_manager custom names at lock_vars init: {field_manager.get_custom_names()}")
 
             # Clear existing lock_vars
             old_keys = list(self.lock_vars.keys())
             self.lock_vars.clear()
-            logger.debug(f"DEBUG: Cleared old lock_vars keys: {old_keys}")
+            logger.debug(f"Cleared old lock_vars keys: {old_keys}")
 
             # Create lock variables for all lockable fields (all except 'dag' and 'inlagd')
             field_mappings = []
@@ -463,8 +463,8 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
                 # Create lock variable with display name as key
                 self.lock_vars[display_name] = tk.BooleanVar()
 
-            logger.info(f"DEBUG: Field ID mappings: {field_mappings}")
-            logger.info(f"DEBUG: Initialized lock_vars with keys: {list(self.lock_vars.keys())}")
+            logger.debug(f"Field ID mappings: {field_mappings}")
+            logger.debug(f"Initialized lock_vars with keys: {list(self.lock_vars.keys())}")
         except Exception as e:
             logger.error(f"Failed to initialize lock_vars: {e}")
 
@@ -545,7 +545,7 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         try:
             from core.field_definitions import field_manager
             logger.info("Field configuration applied - performing selective reset (preserving config)")
-            logger.debug(f"DEBUG: field_manager state at START of apply: {field_manager.get_custom_names()}")
+            logger.debug(f"field_manager state at START of apply: {field_manager.get_custom_names()}")
 
             # Show progress/info message
             messagebox.showinfo(
@@ -555,13 +555,13 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
 
             # Step 1: Clear all field data
             self._clear_all_field_data()
-            logger.debug(f"DEBUG: field_manager state after clear_all_field_data: {field_manager.get_custom_names()}")
+            logger.debug(f"field_manager state after clear_all_field_data: {field_manager.get_custom_names()}")
 
             # Step 2: Reload configuration with saved field names and visibility (do not delete config)
             self.config = self.config_manager.load_config()
-            logger.debug("DEBUG: Config reloaded, now calling _load_custom_field_names()")
+            logger.debug("Config reloaded, now calling _load_custom_field_names()")
             self._load_custom_field_names()  # This now loads both names and visibility
-            logger.debug(f"DEBUG: field_manager state after _load_custom_field_names: {field_manager.get_custom_names()}")
+            logger.debug(f"field_manager state after _load_custom_field_names: {field_manager.get_custom_names()}")
 
             # Step 3: Reinitialize lock_vars with new field names
             self._initialize_lock_vars()
@@ -638,7 +638,6 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
 
             # Update UI elements
             self.update_stats_display()
-            self.update_filename_preview()
 
             logger.info("UI state reset to defaults")
 

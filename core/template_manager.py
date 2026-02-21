@@ -169,6 +169,7 @@ class TemplateManager:
             return False
 
         # Create backup if template exists
+        backup_path = None
         if file_path.exists():
             backup_path = file_path.with_suffix('.json.bak')
             try:
@@ -177,15 +178,24 @@ class TemplateManager:
             except Exception as e:
                 logger.warning(f"Failed to create backup: {e}")
 
+        # Atomic write via temp file + os.replace
+        temp_path = file_path.with_suffix('.json.tmp')
         try:
-            with open(file_path, 'w', encoding='utf-8') as f:
+            with open(temp_path, 'w', encoding='utf-8') as f:
                 json.dump(template_data, f, indent=2, ensure_ascii=False)
+            os.replace(temp_path, file_path)
             logger.info(f"Saved template: {name}")
             return True
         except Exception as e:
             logger.error(f"Failed to save template: {e}")
+            # Clean up temp file
+            if temp_path.exists():
+                try:
+                    temp_path.unlink()
+                except Exception:
+                    pass
             # Restore backup if save failed
-            if file_path.exists() and backup_path.exists():
+            if backup_path is not None and file_path.exists() and backup_path.exists():
                 try:
                     import shutil
                     shutil.move(backup_path, file_path)

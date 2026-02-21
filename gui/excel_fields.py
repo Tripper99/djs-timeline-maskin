@@ -310,6 +310,17 @@ class ExcelFieldManager:
 
     def create_excel_fields(self):
         """Create input fields for Excel columns in three-column layout"""
+        # Clear undo stacks for old widgets before recreation (M12 + M13)
+        self.parent.undo_widgets.clear()
+        self.parent.entry_undo_stacks.clear()
+        self.parent.entry_redo_stacks.clear()
+        self.parent.text_undo_stacks.clear()
+        self.parent.text_redo_stacks.clear()
+        if hasattr(self.parent, '_undo_timers'):
+            self.parent._undo_timers.clear()
+        if hasattr(self.parent, '_last_snapshot_time'):
+            self.parent._last_snapshot_time.clear()
+
         # Clear existing fields
         for widget in self.parent.excel_fields_frame.winfo_children():
             widget.destroy()
@@ -345,21 +356,21 @@ class ExcelFieldManager:
 
         # Define column groupings using field manager to get current display names
         # Get field IDs for each column and convert to display names
-        logger.debug(f"DEBUG: field_manager custom names at UI creation: {field_manager.get_custom_names()}")
+        logger.debug(f"field_manager custom names at UI creation: {field_manager.get_custom_names()}")
 
         column1_field_ids = field_manager.get_fields_by_column('column1')
         # Include ALL fields in the column, both enabled and disabled
         column1_fields = [field_manager.get_display_name(field_id) for field_id in all_field_ids
                          if field_id in column1_field_ids]
-        logger.debug(f"DEBUG: Column1 field IDs: {column1_field_ids}")
-        logger.debug(f"DEBUG: Column1 display names (all): {column1_fields}")
+        logger.debug(f"Column1 field IDs: {column1_field_ids}")
+        logger.debug(f"Column1 display names (all): {column1_fields}")
 
         column3_field_ids = field_manager.get_fields_by_column('column3')
         # Include ALL fields in the column, both enabled and disabled
         column3_fields = [field_manager.get_display_name(field_id) for field_id in all_field_ids
                          if field_id in column3_field_ids]
-        logger.debug(f"DEBUG: Column3 field IDs: {column3_field_ids}")
-        logger.debug(f"DEBUG: Column3 display names (all): {column3_fields}")
+        logger.debug(f"Column3 field IDs: {column3_field_ids}")
+        logger.debug(f"Column3 display names (all): {column3_fields}")
 
         # Create Column 1 (Left)
         col1_frame = ctk.CTkFrame(fields_container)
@@ -520,13 +531,13 @@ class ExcelFieldManager:
 
         # Check if this field is disabled
         is_field_disabled = field_state_manager.is_field_disabled(field_id)
-        logger.debug(f"DEBUG: Field '{col_name}' (field_id: {field_id}) is_disabled: {is_field_disabled}")
+        logger.debug(f"Field '{col_name}' (field_id: {field_id}) is_disabled: {is_field_disabled}")
 
         # Check if this field should have a lock switch (all except Dag and Inlagd)
         has_lock = col_name in self.parent.lock_vars
-        logger.debug(f"DEBUG: Creating field '{col_name}' (field_id: {field_id})")
-        logger.debug(f"DEBUG: Available lock_vars keys: {list(self.parent.lock_vars.keys())}")
-        logger.debug(f"DEBUG: Field '{col_name}' has_lock: {has_lock}")
+        logger.debug(f"Creating field '{col_name}' (field_id: {field_id})")
+        logger.debug(f"Available lock_vars keys: {list(self.parent.lock_vars.keys())}")
+        logger.debug(f"Field '{col_name}' has_lock: {has_lock}")
 
         # Special handling for Dag column - make it read-only with explanation
         if field_id == 'dag':
@@ -821,7 +832,7 @@ class ExcelFieldManager:
 
         # Enable undo tracking
         self.parent.enable_undo_for_widget(entry)
-        print(f"DEBUG: Validation bindings added for {field_name}")
+        logger.debug(f"Validation bindings added for {field_name}")
 
     def create_operations_box(self, parent_frame):
         """Create reorganized operations box under Händelse field with separate containers"""
