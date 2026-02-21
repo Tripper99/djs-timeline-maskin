@@ -75,7 +75,7 @@
 - [ ] **F3**: Auto-advance to next PDF in file list after "Spara allt och rensa"
 - [ ] **F4**: Drag-and-drop PDF files onto app window
 - [x] ~~**F5**: File list sorting options (name, date modified, size)~~ — Fixed in v2.8.0
-- [ ] **F6**: Recently used Excel files dropdown
+- [x] ~~**F6**: Recently used Excel files dropdown~~ — Fixed in v2.8.4 (also added recent output folders dropdown)
 - [ ] **F7**: Batch progress indicator ("Behandlad: 12/381")
 - [ ] **F8**: Undo last added Excel row
 - [ ] **F9**: Zoom in/out on PDF preview (Cmd+Mousewheel and +/- buttons)
