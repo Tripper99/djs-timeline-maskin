@@ -5,6 +5,9 @@
 ### ~~Multi-Resolution Window Scaling Issues (v2.6.14)~~ — RESOLVED
 - Fixed by subsequent layout changes (v2.7.x series)
 
+### PDF rename/move while file is open externally (macOS)
+- [ ] **B1**: App doesn't check if a PDF is open in another program (e.g. PDF Studio) before renaming/moving. On macOS files aren't locked when open, so the rename succeeds but the external app still references the old path. Saving from the external app then creates a duplicate file with the old name. App should detect open files and warn user to close them before proceeding. Note: On Windows this is handled by OS file locking, but macOS needs an explicit check (e.g. `lsof`).
+
 ---
 
 ## Security & Stability Fixes
@@ -62,6 +65,7 @@
 - [ ] **G3**: Differentiate "Rensa utan spara" button visually from "Spara allt och rensa" (muted/outlined style)
 - [ ] **G4**: Add visible selection indicator on active row color button
 - [ ] **G5**: Improve formatting toolbar button discoverability (larger targets, tooltips)
+- [ ] **G6**: Add "Open folder" button near file list — opens the selected PDF folder in Finder so user can see its contents without searching for it
 
 ---
 
@@ -75,7 +79,9 @@
 - [ ] **F6**: Recently used Excel files dropdown
 - [ ] **F7**: Batch progress indicator ("Behandlad: 12/381")
 - [ ] **F8**: Undo last added Excel row
-- [x] **F9**: ~~Fix undo/redo in text widgets~~ — Fixed in v2.7.5 (single custom snapshot-based system)
+- [ ] **F9**: Zoom in/out on PDF preview (Cmd+Mousewheel and +/- buttons)
+- [ ] **F10**: Delete single files from the file list
+- [x] ~~**F11**: Fix undo/redo in text widgets~~ — Fixed in v2.7.5 (single custom snapshot-based system)
 
 ---
 
