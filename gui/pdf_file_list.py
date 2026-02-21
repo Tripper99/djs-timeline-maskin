@@ -4,6 +4,7 @@ Shows a browsable list of PDF files from a selected folder.
 """
 
 import logging
+import subprocess
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog
@@ -47,29 +48,38 @@ class PDFFileListPanel(ctk.CTkFrame):
         # Row 0: Top bar — folder selection + sort + info
         top_frame = ctk.CTkFrame(self, fg_color="transparent")
         top_frame.grid(row=0, column=0, sticky="ew", padx=4, pady=(4, 2))
-        top_frame.grid_columnconfigure(1, weight=1)
+        top_frame.grid_columnconfigure(2, weight=1)
 
         self._folder_btn = ctk.CTkButton(
             top_frame, text="V\u00E4lj mapp", width=80, height=26,
             command=self._select_folder,
             font=ctk.CTkFont(size=11)
         )
-        self._folder_btn.grid(row=0, column=0, padx=(0, 4))
+        self._folder_btn.grid(row=0, column=0, padx=(0, 2))
         ToolTip(self._folder_btn, "V\u00E4lj en mapp med PDF-filer att visa i listan.")
+
+        self._open_folder_btn = ctk.CTkButton(
+            top_frame, text="\U0001F4C2", width=30, height=26,
+            command=self._open_folder_in_finder,
+            font=ctk.CTkFont(size=13),
+            state="disabled",
+        )
+        self._open_folder_btn.grid(row=0, column=1, padx=(0, 4))
+        ToolTip(self._open_folder_btn, "\u00D6ppna mappen i Finder.")
 
         self._folder_label = ctk.CTkLabel(
             top_frame, text="Ingen mapp vald",
             font=ctk.CTkFont(size=10), text_color="gray50",
             anchor="w"
         )
-        self._folder_label.grid(row=0, column=1, sticky="ew", padx=2)
+        self._folder_label.grid(row=0, column=2, sticky="ew", padx=2)
         self._folder_tooltip = ToolTip(self._folder_label, "S\u00F6kv\u00E4g till den valda mappen.")
 
         self._count_label = ctk.CTkLabel(
             top_frame, text="", font=ctk.CTkFont(size=10),
             text_color="gray50"
         )
-        self._count_label.grid(row=0, column=2, padx=(4, 2))
+        self._count_label.grid(row=0, column=3, padx=(4, 2))
 
         # Sort dropdown
         saved_sort = self._load_sort_preference()
@@ -84,7 +94,7 @@ class PDFFileListPanel(ctk.CTkFrame):
             dropdown_font=ctk.CTkFont(size=10),
             command=self._on_sort_changed,
         )
-        self._sort_menu.grid(row=0, column=3, padx=(2, 2))
+        self._sort_menu.grid(row=0, column=4, padx=(2, 2))
         ToolTip(self._sort_menu, "Sortera fillistan.")
 
         self._refresh_btn = ctk.CTkButton(
@@ -92,7 +102,7 @@ class PDFFileListPanel(ctk.CTkFrame):
             command=self._refresh_list,
             font=ctk.CTkFont(size=14)
         )
-        self._refresh_btn.grid(row=0, column=4, padx=(2, 0))
+        self._refresh_btn.grid(row=0, column=5, padx=(2, 0))
         ToolTip(self._refresh_btn, "Uppdatera fillistan.")
 
         # Row 1: Search bar
@@ -204,11 +214,23 @@ class PDFFileListPanel(ctk.CTkFrame):
             self._scan_folder()
             self._save_folder_to_config()
 
+    def _open_folder_in_finder(self):
+        """Open the current folder in Finder."""
+        if not self._folder_path or not Path(self._folder_path).is_dir():
+            return
+        try:
+            subprocess.run(["open", "--", self._folder_path], check=False)
+        except Exception as e:
+            logger.error(f"Failed to open folder in Finder: {e}")
+
     def _update_folder_display(self):
         """Update the folder path label with truncation."""
         if not self._folder_path:
             self._folder_label.configure(text="Ingen mapp vald", text_color="gray50")
+            self._open_folder_btn.configure(state="disabled")
             return
+
+        self._open_folder_btn.configure(state="normal")
 
         path = self._folder_path
         # Truncate long paths for display
