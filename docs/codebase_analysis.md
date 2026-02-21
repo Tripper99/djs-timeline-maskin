@@ -52,7 +52,7 @@ core/
 └── template_manager.py            # Template persistence and management
 ```
 
-### GUI Layer (`/gui/` - 12 modules, Mixin Architecture)
+### GUI Layer (`/gui/` - 13 modules, Mixin Architecture)
 ```
 gui/
 ├── main_window.py                 # Main application class (546 lines)
@@ -64,6 +64,7 @@ gui/
 ├── field_styling.py               # Centralized UI styling system
 ├── formatting_manager.py          # Rich text formatting capabilities
 ├── layout_manager.py              # Layout and visual organization
+├── pdf_file_list.py               # PDF file browser with search/filter/sort
 ├── pdf_operations.py              # PDF-related GUI operations
 ├── stats_manager.py               # Usage statistics tracking
 ├── undo_manager.py                # Undo/redo functionality
