@@ -8,9 +8,9 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.8.4)
+## Current Status (v2.8.7)
 
-**Latest Status (v2.8.4)**: GUI polish session — added recently used Excel files and output folders dropdowns (F6), open folder button in PDF file list (G6), shortened copy-to-Excel button text (G1), outlined style for "Rensa utan spara" (G3), visible color button selection indicator (G4), and improved formatting toolbar with larger buttons and tooltips (G5).
+**Latest Status (v2.8.7)**: Added "Ta bort fil" button to PDF file list toolbar — red-styled delete button moves selected PDF to macOS Trash via osascript, with confirmation dialog, auto-refresh, and preview clearing. Button disabled when no file is selected.
 
 **Key Features**:
 - **Single Custom Undo System**: Tk built-in undo disabled; snapshot-based undo with debounced typing (500ms), immediate saves before destructive ops, 3-second max interval between snapshots
@@ -21,7 +21,7 @@ The application has been refactored from a single large file into a modular stru
 - **Race Condition Prevention**: Comprehensive protection during template loading and state transitions
 - **Field Configuration System**: Custom field names and visibility states with template support
 - **Excel Integration**: Disabled fields automatically excluded from Excel operations
-- **PDF File List**: Search/filter with real-time matching, sort by name/date/size, persisted sort preference, open folder in Finder
+- **PDF File List**: Search/filter with real-time matching, sort by name/date/size, persisted sort preference, open folder in Finder, delete file to Trash
 - **Recently Used Dropdowns**: Quick-switch dropdowns for Excel files and output folders (max 10, persisted)
 
 **Architecture Status**:
