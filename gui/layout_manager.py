@@ -211,7 +211,7 @@ class LayoutManagerMixin:
         # Comment
         ctk.CTkLabel(components_frame, text="Kommentar:", font=ctk.CTkFont(size=11)).grid(
             row=0, column=4, sticky="w", padx=(0, 3), pady=(0, 1))
-        comment_entry = ctk.CTkEntry(components_frame, textvariable=self.comment_var, width=250, height=25, font=ctk.CTkFont(size=11))
+        comment_entry = ctk.CTkEntry(components_frame, textvariable=self.comment_var, width=325, height=25, font=ctk.CTkFont(size=11))
         comment_entry.grid(row=0, column=5, sticky="w", padx=(0, 5), pady=(0, 1))
         self.enable_undo_for_widget(comment_entry)
 
@@ -225,7 +225,7 @@ class LayoutManagerMixin:
         # Copy to Excel button with arrows - distinct color and larger to stand out
         self.copy_to_excel_btn = ctk.CTkButton(components_frame,
                                          text="↓ Kopiera till Excel ↓",
-                                         width=220, height=30,
+                                         width=165, height=30,
                                          command=self.copy_filename_to_excel,
                                          fg_color="#FF6B35", hover_color="#E55A2B",  # Orange color to stand out
                                          font=ctk.CTkFont(size=11, weight="bold"))

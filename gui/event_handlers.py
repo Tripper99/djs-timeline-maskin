@@ -487,10 +487,15 @@ class EventHandlersMixin:
 
         # Update specific fields based on filename components
         if 'Händelse' in self.excel_vars:
-            # Build content: comment + blankline + filename
+            # Build content: "TIDNING: Kommentar" + blankline + filename
             content_parts = []
+            first_line_parts = []
+            if newspaper.strip():
+                first_line_parts.append(newspaper.strip())
             if comment.strip():
-                content_parts.append(comment.strip())
+                first_line_parts.append(comment.strip())
+            if first_line_parts:
+                content_parts.append(": ".join(first_line_parts))
             content_parts.append("")  # This creates the blank line
             content_parts.append(new_filename)
 
