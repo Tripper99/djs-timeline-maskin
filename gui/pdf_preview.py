@@ -135,7 +135,8 @@ class PDFPreviewPanel(ctk.CTkFrame):
         # Zoom controls (center area)
         self._zoom_out_btn = ctk.CTkButton(
             nav_frame, text="\u2212", width=28, height=26,
-            command=self._zoom_out, font=ctk.CTkFont(size=14)
+            command=self._zoom_out, font=ctk.CTkFont(size=14),
+            fg_color="#D4A017", hover_color="#B8860B"
         )
         self._zoom_out_btn.pack(side="left", padx=(8, 2))
         ToolTip(self._zoom_out_btn, "Zooma ut (\u2318-)")
@@ -148,7 +149,8 @@ class PDFPreviewPanel(ctk.CTkFrame):
 
         self._zoom_in_btn = ctk.CTkButton(
             nav_frame, text="+", width=28, height=26,
-            command=self._zoom_in, font=ctk.CTkFont(size=14)
+            command=self._zoom_in, font=ctk.CTkFont(size=14),
+            fg_color="#D4A017", hover_color="#B8860B"
         )
         self._zoom_in_btn.pack(side="left", padx=(2, 4))
         ToolTip(self._zoom_in_btn, "Zooma in (\u2318=)")
