@@ -5,10 +5,13 @@ Supports zoom in/out, click-drag panning, and keyboard shortcuts.
 """
 
 import logging
+import os
 import platform
 import subprocess
+import tempfile
 import tkinter as tk
 from collections import OrderedDict
+from tkinter import messagebox
 
 import customtkinter as ctk
 
@@ -157,6 +160,15 @@ class PDFPreviewPanel(ctk.CTkFrame):
         self._fit_width_btn.pack(side="left", padx=(4, 8))
         ToolTip(self._fit_width_btn, "Anpassa till f\u00f6nsterbredd (\u23180)")
 
+        # Delete page button
+        self._delete_page_btn = ctk.CTkButton(
+            nav_frame, text="Ta bort sida", width=105, height=26,
+            command=self._delete_current_page, font=ctk.CTkFont(size=11),
+            fg_color="#dc3545", hover_color="#c82333"
+        )
+        self._delete_page_btn.pack(side="left", padx=(4, 8))
+        ToolTip(self._delete_page_btn, "Ta bort aktuell sida fr\u00e5n PDF-filen")
+
         # Open externally button (right side)
         self._open_btn = ctk.CTkButton(
             nav_frame, text="\u00D6ppna PDF", width=90, height=26,
@@ -296,11 +308,92 @@ class PDFPreviewPanel(ctk.CTkFrame):
         self._prev_btn.configure(state="normal" if has_pdf and self._current_page > 0 else "disabled")
         self._next_btn.configure(state="normal" if has_pdf and self._current_page < self._total_pages - 1 else "disabled")
         self._open_btn.configure(state="normal" if has_pdf else "disabled")
+        self._delete_page_btn.configure(state="normal" if has_pdf and self._total_pages > 1 else "disabled")
 
         if has_pdf:
             self._page_label.configure(text=f"Sida {self._current_page + 1}/{self._total_pages}")
         else:
             self._page_label.configure(text="Ingen PDF")
+
+    # ---- Delete page ----
+
+    def _delete_current_page(self):
+        """Delete the current page from the PDF file."""
+        if not self._pdf_doc or self._total_pages <= 1:
+            return
+
+        page_num = self._current_page
+        confirm = messagebox.askyesno(
+            "Ta bort sida",
+            f"Ta bort sida {page_num + 1} av {self._total_pages}?\n\n"
+            "Denna \u00e5tg\u00e4rd kan inte \u00e5ngras.",
+            icon="warning",
+        )
+        if not confirm:
+            return
+
+        pdf_path = self._current_path
+
+        try:
+            # Close the open document to release file lock
+            self._pdf_doc.close()
+            self._pdf_doc = None
+
+            # Reopen, delete page, save to temp file, replace original
+            doc = fitz.open(pdf_path)
+            doc.delete_page(page_num)
+
+            dir_name = os.path.dirname(pdf_path)
+            fd, tmp_path = tempfile.mkstemp(suffix=".pdf", dir=dir_name)
+            os.close(fd)
+
+            try:
+                doc.save(tmp_path)
+                doc.close()
+                os.replace(tmp_path, pdf_path)
+            except Exception:
+                doc.close()
+                # Clean up temp file on failure
+                if os.path.exists(tmp_path):
+                    os.remove(tmp_path)
+                raise
+
+            # Adjust current page if we deleted the last page
+            new_total = self._total_pages - 1
+            if page_num >= new_total:
+                page_num = new_total - 1
+
+            # Reload the saved file
+            self._page_cache.clear()
+            self._pdf_doc = fitz.open(pdf_path)
+            self._total_pages = len(self._pdf_doc)
+            self._current_page = max(0, page_num)
+
+            logger.info(
+                f"Deleted page {page_num + 1} from {pdf_path}, "
+                f"{self._total_pages} pages remaining"
+            )
+
+            self._render_current_page(page_changed=True)
+            self._update_nav_state()
+            self._update_zoom_btn_state()
+
+        except Exception as e:
+            logger.error(f"Failed to delete page: {e}")
+            messagebox.showerror(
+                "Fel",
+                f"Kunde inte ta bort sidan:\n{e}",
+            )
+            # Try to reload the original (unchanged) file
+            try:
+                self._pdf_doc = fitz.open(pdf_path)
+                self._total_pages = len(self._pdf_doc)
+                self._current_page = min(self._current_page, self._total_pages - 1)
+                self._page_cache.clear()
+                self._render_current_page(page_changed=True)
+                self._update_nav_state()
+            except Exception as reload_err:
+                logger.error(f"Failed to reload PDF after delete error: {reload_err}")
 
     # ---- Zoom controls ----
 
