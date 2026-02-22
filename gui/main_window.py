@@ -30,6 +30,7 @@ except ImportError as e:
 # Local imports
 from core.config import ConfigManager
 from core.excel_manager import ExcelManager
+from core.pdf_processor import PDFProcessor
 from gui.dialogs import DialogManager
 from gui.event_handlers import EventHandlersMixin
 from gui.excel_fields import ExcelFieldManager
@@ -103,6 +104,32 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
 
         # Load and restore locked fields after GUI is created
         self.excel_field_manager.restore_locked_fields()
+
+        # Check Accessibility permission after GUI is visible
+        self.root.after(1500, self._check_accessibility_permission)
+
+    def _check_accessibility_permission(self):
+        """Check if macOS Accessibility permission is granted for System Events.
+
+        Shows an informational dialog if permission is missing, explaining
+        that basic detection works but can be improved with the permission.
+        Only shows once per session.
+        """
+        if PDFProcessor.check_accessibility_permission():
+            return
+
+        messagebox.showinfo(
+            "Tips: Förbättra fildetektering",
+            "Appen kan varna dig om en PDF-visare (t.ex. PDF Studio) körs "
+            "när du byter namn på filer. Men för att kunna se exakt vilken "
+            "fil som är öppen behövs Hjälpmedel-behörighet.\n\n"
+            "Så här ger du behörighet:\n"
+            "1. Öppna Systeminställningar → Sekretess och säkerhet → "
+            "Hjälpmedel\n"
+            "2. Lägg till Terminal (eller den app du kör programmet från) "
+            "och tillåt den att styra datorn\n"
+            "3. Starta om appen",
+        )
 
     def parse_geometry(self, geometry_string):
         """

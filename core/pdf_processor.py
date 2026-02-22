@@ -130,16 +130,98 @@ class PDFProcessor:
         except Exception:
             return True  # Assume locked if we can't determine
 
+    # Known PDF viewer app bundles — maps executable names or bundle
+    # path fragments to friendly display names.
+    KNOWN_PDF_APPS: dict[str, str] = {
+        'PDF Studio 2024.app': 'PDF Studio 2024',
+        'PDF Studio 2023.app': 'PDF Studio 2023',
+        'PDF Studio 2022.app': 'PDF Studio 2022',
+        'PDF Studio.app': 'PDF Studio',
+        'Adobe Acrobat': 'Adobe Acrobat',
+        'Acrobat Reader': 'Adobe Acrobat Reader',
+        'Skim.app': 'Skim',
+        'PDF Expert.app': 'PDF Expert',
+    }
+
+    @staticmethod
+    def check_accessibility_permission() -> bool:
+        """Test if we have macOS Accessibility permission for System Events.
+
+        Tests actual window reading (not just process names), because reading
+        window properties is what requires Accessibility permission.
+        Returns True if permission is granted, False otherwise.
+        """
+        if platform.system() != 'Darwin':
+            return True
+
+        try:
+            # Read window names of Finder — this requires Accessibility
+            # permission, unlike reading process names which works without it.
+            result = subprocess.run(
+                ['osascript', '-e',
+                 'tell application "System Events" to get name of every '
+                 'window of process "Finder"'],
+                capture_output=True, text=True, timeout=5,
+            )
+            if result.returncode == 0:
+                logger.info("Accessibility permission check: granted")
+                return True
+            else:
+                logger.warning(
+                    f"Accessibility permission check failed: "
+                    f"{result.stderr.strip()}"
+                )
+                return False
+        except subprocess.TimeoutExpired:
+            logger.warning("Accessibility permission check timed out")
+            return False
+        except (FileNotFoundError, OSError) as e:
+            logger.debug(f"Accessibility permission check error: {e}")
+            return False
+
+    @staticmethod
+    def _get_running_pdf_apps() -> list[str]:
+        """Check if any known PDF viewer applications are running.
+
+        Uses 'ps aux' to find running processes matching known PDF app paths.
+        Returns list of friendly app names that are currently running.
+        """
+        running_apps: list[str] = []
+        try:
+            result = subprocess.run(
+                ['ps', 'aux'], capture_output=True, text=True, timeout=5,
+            )
+            if result.returncode != 0:
+                return []
+
+            for line in result.stdout.splitlines():
+                for bundle_fragment, friendly_name in (
+                    PDFProcessor.KNOWN_PDF_APPS.items()
+                ):
+                    if (
+                        bundle_fragment in line
+                        and friendly_name not in running_apps
+                    ):
+                        running_apps.append(friendly_name)
+        except (subprocess.TimeoutExpired, FileNotFoundError, OSError) as e:
+            logger.debug(f"ps aux check failed: {e}")
+
+        return running_apps
+
     @staticmethod
     def is_file_open_by_other_process(file_path: str) -> tuple[bool, list[str]]:
         """Check if file is open by another process on macOS.
 
-        Uses two complementary methods:
+        Uses three complementary methods:
         1. CGWindowListCopyWindowInfo — checks window titles for the filename.
-           Catches Java apps (PDF Studio), Electron apps, etc. that read files
-           into memory and close the file handle.
+           Catches apps whose window titles are visible (requires Screen Recording
+           permission for other apps' window names).
         2. lsof — checks open file descriptors. Catches apps like Preview/QuickLook
            that keep the file handle open.
+        3. Process list (ps aux) — checks if known PDF viewer apps are running.
+           Can't verify which file is open, but warns the user. Catches Java
+           apps (PDF Studio) that close file handles and don't expose window
+           titles without special permissions.
 
         Returns:
             (is_open, process_names): Whether file is open and list of app names using it.
@@ -149,7 +231,8 @@ class PDFProcessor:
 
         process_names: list[str] = []
         own_pid = os.getpid()
-        filename = Path(file_path).name  # e.g. "2025-01-20 Report (3 sid).pdf"
+        filename = Path(file_path).name
+        stem = Path(file_path).stem
 
         # Apps to exclude from window-title matching (not PDF editors)
         ignored_window_owners = {'Finder', 'Python', 'python3'}
@@ -171,7 +254,7 @@ class PDFProcessor:
                 if (
                     owner_pid != own_pid
                     and owner not in ignored_window_owners
-                    and filename in win_name
+                    and (filename in win_name or stem in win_name)
                     and owner not in process_names
                 ):
                     process_names.append(owner)
@@ -198,6 +281,64 @@ class PDFProcessor:
                             process_names.append(proc_name)
         except (subprocess.TimeoutExpired, FileNotFoundError, OSError) as e:
             logger.debug(f"lsof check failed: {e}")
+
+        # Method 3: AppleScript System Events — query window names via
+        # Accessibility permission. Precise: identifies which file is open.
+        if not process_names:
+            try:
+                escaped_filename = filename.replace('\\', '\\\\').replace('"', '\\"')
+                escaped_stem = stem.replace('\\', '\\\\').replace('"', '\\"')
+
+                applescript = f'''
+                    set matchedApps to {{}}
+                    tell application "System Events"
+                        set appProcesses to every process whose background only is false
+                        repeat with proc in appProcesses
+                            set procName to name of proc
+                            try
+                                set winList to name of every window of proc
+                                repeat with winTitle in winList
+                                    if winTitle contains "{escaped_filename}" or winTitle contains "{escaped_stem}" then
+                                        if procName is not in matchedApps then
+                                            set end of matchedApps to procName
+                                        end if
+                                    end if
+                                end repeat
+                            end try
+                        end repeat
+                    end tell
+                    set AppleScript's text item delimiters to linefeed
+                    return matchedApps as text
+                '''
+
+                result = subprocess.run(
+                    ['osascript', '-e', applescript],
+                    capture_output=True, text=True, timeout=10,
+                )
+                if result.returncode == 0 and result.stdout.strip():
+                    for app_name in result.stdout.strip().splitlines():
+                        app_name = app_name.strip()
+                        if (
+                            app_name
+                            and app_name not in ignored_window_owners
+                            and app_name not in process_names
+                        ):
+                            process_names.append(app_name)
+            except subprocess.TimeoutExpired:
+                logger.warning("AppleScript System Events timed out")
+            except (FileNotFoundError, OSError) as e:
+                logger.debug(f"AppleScript System Events check failed: {e}")
+
+        # Method 4: Check running PDF apps via process list (ps aux).
+        # Fallback when Methods 1-3 found nothing. Can't identify which
+        # file is open, but detects that a PDF viewer is running.
+        if not process_names:
+            running_pdf_apps = PDFProcessor._get_running_pdf_apps()
+            if running_pdf_apps:
+                process_names.extend(running_pdf_apps)
+                logger.info(
+                    f"PDF apps detected via process list: {running_pdf_apps}"
+                )
 
         if process_names:
             return (True, process_names)

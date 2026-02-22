@@ -105,18 +105,19 @@ class PDFOperationsMixin:
                                "Filen kan ha flyttats, tagits bort eller skadats.")
             return False
 
-        # Check if file is open by another process (macOS lsof check)
+        # Check if file is open by another process
         is_open, proc_names = PDFProcessor.is_file_open_by_other_process(
             self.current_pdf_path
         )
         if is_open:
             proc_list = ", ".join(proc_names)
             proceed = messagebox.askyesno(
-                "Filen är öppen",
-                f"PDF-filen verkar vara öppen i: {proc_list}\n\n"
-                "Om du byter namn kommer det andra programmet fortfarande "
-                "referera till det gamla filnamnet. Sparar du därifrån "
-                "skapas en dubblett med det gamla namnet.\n\n"
+                "PDF-visare körs",
+                f"Dessa program körs just nu: {proc_list}\n\n"
+                "Om PDF-filen är öppen i något av dessa program och du "
+                "byter namn, kommer programmet fortfarande referera till "
+                "det gamla filnamnet. Sparar du därifrån skapas en "
+                "dubblett med det gamla namnet.\n\n"
                 "Vill du byta namn ändå?",
             )
             if not proceed:
@@ -327,18 +328,19 @@ class PDFOperationsMixin:
             if not result:
                 return False
 
-        # Check if file is open by another process (macOS lsof check)
+        # Check if file is open by another process
         is_open, proc_names = PDFProcessor.is_file_open_by_other_process(
             self.current_pdf_path
         )
         if is_open:
             proc_list = ", ".join(proc_names)
             proceed = messagebox.askyesno(
-                "Filen är öppen",
-                f"PDF-filen verkar vara öppen i: {proc_list}\n\n"
-                "Om du flyttar filen kommer det andra programmet fortfarande "
-                "referera till den gamla sökvägen. Sparar du därifrån "
-                "skapas en dubblett på den gamla platsen.\n\n"
+                "PDF-visare körs",
+                f"Dessa program körs just nu: {proc_list}\n\n"
+                "Om PDF-filen är öppen i något av dessa program och du "
+                "flyttar filen, kommer programmet fortfarande referera "
+                "till den gamla sökvägen. Sparar du därifrån skapas en "
+                "dubblett på den gamla platsen.\n\n"
                 "Vill du flytta filen ändå?",
             )
             if not proceed:
