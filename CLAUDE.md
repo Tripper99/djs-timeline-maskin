@@ -10,7 +10,7 @@ The application has been refactored from a single large file into a modular stru
 
 ## Current Status (v2.8.9)
 
-**Latest Status (v2.8.9)**: Fix PDF Studio 2024 detection before rename/move — added AppleScript System Events method (Method 3) to detect open PDFs in Java-based apps like PDF Studio that close file handles. Also added stem matching (filename without extension) to catch apps that omit .pdf in window titles.
+**Latest Status (v2.8.9)**: PDF Studio 2024 detection + Kopiera till Excel improvements. 4-method open-file detection (CGWindowList, lsof, AppleScript System Events, ps aux fallback) with startup Hjälpmedel permission check. "Kopiera till Excel" now builds Händelse as "TIDNING: Kommentar" on first line. Wider Kommentar field, narrower copy button.
 
 **Key Features**:
 - **Single Custom Undo System**: Tk built-in undo disabled; snapshot-based undo with debounced typing (500ms), immediate saves before destructive ops, 3-second max interval between snapshots
