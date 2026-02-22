@@ -8,9 +8,9 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.8.8)
+## Current Status (v2.8.9)
 
-**Latest Status (v2.8.8)**: Auto-refresh file list and select next file after "Spara allt och rensa" — after processing a PDF, the file list refreshes automatically, selects the next file at the same index, loads its preview and fields, and shows "Inga fler PDF-filer i mappen." when the folder is empty.
+**Latest Status (v2.8.9)**: Fix PDF Studio 2024 detection before rename/move — added AppleScript System Events method (Method 3) to detect open PDFs in Java-based apps like PDF Studio that close file handles. Also added stem matching (filename without extension) to catch apps that omit .pdf in window titles.
 
 **Key Features**:
 - **Single Custom Undo System**: Tk built-in undo disabled; snapshot-based undo with debounced typing (500ms), immediate saves before destructive ops, 3-second max interval between snapshots
