@@ -7,7 +7,7 @@ import logging
 import subprocess
 import tkinter as tk
 from pathlib import Path
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 
 import customtkinter as ctk
 
@@ -102,8 +102,18 @@ class PDFFileListPanel(ctk.CTkFrame):
             command=self._refresh_list,
             font=ctk.CTkFont(size=14)
         )
-        self._refresh_btn.grid(row=0, column=5, padx=(2, 0))
+        self._refresh_btn.grid(row=0, column=5, padx=(2, 2))
         ToolTip(self._refresh_btn, "Uppdatera fillistan.")
+
+        self._delete_file_btn = ctk.CTkButton(
+            top_frame, text="Ta bort fil", width=100, height=26,
+            command=self._delete_selected_file,
+            font=ctk.CTkFont(size=11),
+            fg_color="#dc3545", hover_color="#c82333",
+            state="disabled",
+        )
+        self._delete_file_btn.grid(row=0, column=6, padx=(2, 0))
+        ToolTip(self._delete_file_btn, "Ta bort den markerade PDF-filen (flyttas till papperskorgen).")
 
         # Row 1: Search bar
         search_frame = ctk.CTkFrame(self, fg_color="transparent")
@@ -325,6 +335,9 @@ class PDFFileListPanel(ctk.CTkFrame):
         if self._current_highlight:
             self.highlight_file(self._current_highlight)
 
+        # 6. Update delete button state
+        self._update_delete_btn_state()
+
     def _refresh_list(self):
         """Refresh button handler."""
         self._scan_folder()
@@ -360,6 +373,7 @@ class PDFFileListPanel(ctk.CTkFrame):
     def _on_listbox_select(self, event):
         """Handle listbox selection."""
         selection = self._listbox.curselection()
+        self._update_delete_btn_state()
         if not selection:
             return
 
@@ -369,6 +383,66 @@ class PDFFileListPanel(ctk.CTkFrame):
             self._current_highlight = file_path
             if self._on_file_selected:
                 self._on_file_selected(file_path)
+
+    # ---- Delete file ----
+
+    def _update_delete_btn_state(self):
+        """Enable/disable the delete button based on selection."""
+        has_selection = bool(self._listbox.curselection())
+        self._delete_file_btn.configure(state="normal" if has_selection else "disabled")
+
+    def _delete_selected_file(self):
+        """Delete the selected PDF file by moving it to macOS Trash."""
+        selection = self._listbox.curselection()
+        if not selection:
+            return
+
+        index = selection[0]
+        if index >= len(self._pdf_files):
+            return
+
+        file_path = self._pdf_files[index]
+        filename = Path(file_path).name
+
+        confirm = messagebox.askyesno(
+            "Ta bort fil",
+            f"Vill du flytta denna fil till papperskorgen?\n\n{filename}",
+            icon="warning",
+        )
+        if not confirm:
+            return
+
+        try:
+            # Move to macOS Trash using osascript (reversible)
+            script = (
+                f'tell application "Finder" to delete'
+                f' (POSIX file "{file_path}" as alias)'
+            )
+            result = subprocess.run(
+                ["osascript", "-e", script],
+                capture_output=True, text=True, timeout=10,
+            )
+            if result.returncode != 0:
+                raise RuntimeError(result.stderr.strip() or "osascript failed")
+
+            logger.info(f"Moved file to Trash: {file_path}")
+
+            # Clear highlight if the deleted file was highlighted
+            if self._current_highlight == file_path:
+                self._current_highlight = None
+                if self._on_file_selected:
+                    self._on_file_selected(None)
+
+            # Refresh the file list
+            self._scan_folder()
+            self._update_delete_btn_state()
+
+        except Exception as e:
+            logger.error(f"Failed to delete file: {e}")
+            messagebox.showerror(
+                "Fel",
+                f"Kunde inte ta bort filen:\n{e}",
+            )
 
     # ---- Config persistence ----
 
