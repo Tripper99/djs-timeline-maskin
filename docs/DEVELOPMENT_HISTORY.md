@@ -4,6 +4,37 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.8.9: PDF Studio Detection, Händelse Format, UI Tweaks (2026-02-22)
+
+**PDF Studio 2024 Open-File Detection**
+- **Problem**: PDF Studio 2024 (Java-based) loads PDFs into memory and closes file handles. Neither `lsof` nor `CGWindowListCopyWindowInfo` (without Screen Recording permission) could detect it. AppleScript System Events required Accessibility ("Hjälpmedel") permission that wasn't being checked correctly.
+- **Root Cause Investigation**: Diagnostic script revealed: (1) CGWindowList returned empty `kCGWindowName` for all apps (Screen Recording missing), (2) lsof found nothing (file handle closed), (3) AppleScript permission test was testing process names (works without permission) instead of window reading (requires permission), (4) PDF Studio process appears as `JavaApplicationStub` in `ps aux`.
+- **Solution**: 4-method detection chain in `core/pdf_processor.py`:
+  - Method 1: CGWindowList with stem matching (filename without .pdf extension)
+  - Method 2: lsof for apps that keep file handles open
+  - Method 3: AppleScript System Events window name scanning (with Hjälpmedel permission)
+  - Method 4: `ps aux` fallback — detects known PDF apps (`KNOWN_PDF_APPS` dict) by process path
+- **Permission Check**: Fixed `check_accessibility_permission()` to test `get name of every window of process "Finder"` (requires actual Accessibility permission) instead of `get name of first process` (works without it)
+- **Startup Dialog**: Shows info dialog if Hjälpmedel permission is missing, with correct macOS terminology
+- **Dialog Text**: Updated warning dialogs in `gui/pdf_operations.py` to say "Dessa program körs just nu" since `ps aux` method can't confirm which specific file is open
+- **Key Insight**: macOS Accessibility permission ("Hjälpmedel") allows reading window names but NOT via `count of windows of first process whose background only is false` one-liner — must target a specific process like Finder
+- Files: `core/pdf_processor.py`, `gui/main_window.py`, `gui/pdf_operations.py`
+
+**Kopiera till Excel — Händelse Format**
+- Changed "Kopiera till Excel" to build Händelse first line as "TIDNING: Kommentar" instead of just "Kommentar"
+- Uses `: ` (colon + space) as separator; handles edge cases (only newspaper, only comment, both)
+- File: `gui/event_handlers.py`
+
+**UI Tweaks**
+- Kommentar field 30% wider (250→325 px)
+- "Kopiera till Excel" button 25% narrower (220→165 px)
+- Zoom +/− buttons in PDF preview now gold/yellow (#D4A017) to distinguish from page navigation buttons
+- Files: `gui/layout_manager.py`, `gui/pdf_preview.py`
+
+**TODO.md Cleanup**
+- Removed all completed items (183→21 lines)
+- Marked G7 (wider Kommentar), F3 (auto-advance), F10 (delete files) as done
+
 ### v2.8.2–v2.8.4: GUI Polish and Usability Improvements (2026-02-21)
 
 **v2.8.4: Recently Used Excel Files and Output Folders Dropdowns (F6)**

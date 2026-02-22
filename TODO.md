@@ -6,7 +6,7 @@
 - [ ] **F4**: Drag-and-drop PDF files onto app window
 - [ ] **F7**: Batch progress indicator ("Behandlad: 12/381")
 - [ ] **F8**: Undo last added Excel row
-- [ ] **F9**: Zoom in/out on PDF preview (Cmd+Mousewheel and +/- buttons)
+- [X] **F9**: Zoom in/out on PDF preview (Cmd+Mousewheel and +/- buttons)
 
 ---
 
