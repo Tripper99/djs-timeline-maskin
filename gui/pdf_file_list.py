@@ -207,6 +207,46 @@ class PDFFileListPanel(ctk.CTkFrame):
         """Refresh the file list from the current folder."""
         self._scan_folder()
 
+    def refresh_and_select_next(self, previous_file_path: str) -> str | None:
+        """Refresh the file list and select the next file after a processed file.
+
+        Args:
+            previous_file_path: Path of the file that was just processed/moved.
+
+        Returns:
+            Path of the newly selected file, or None if the list is empty.
+        """
+        # Find the index of the previous file before refreshing
+        previous_index = None
+        for i, path in enumerate(self._pdf_files):
+            if path == previous_file_path:
+                previous_index = i
+                break
+
+        # Refresh the file list from disk
+        self._scan_folder()
+
+        # If list is now empty, clear selection and return None
+        if not self._pdf_files:
+            self._current_highlight = None
+            return None
+
+        # Select file at the same index, or last file if index exceeds new list
+        if previous_index is not None and previous_index < len(self._pdf_files):
+            select_index = previous_index
+        else:
+            select_index = len(self._pdf_files) - 1
+
+        selected_path = self._pdf_files[select_index]
+        self._current_highlight = selected_path
+        self.highlight_file(selected_path)
+
+        # Fire the callback to load preview and populate fields
+        if self._on_file_selected:
+            self._on_file_selected(selected_path)
+
+        return selected_path
+
     # ---- Folder operations ----
 
     def _select_folder(self):

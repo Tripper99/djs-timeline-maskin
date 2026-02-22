@@ -663,17 +663,29 @@ class EventHandlersMixin:
             if self.move_pdf_to_output_folder():
                 operations_performed.append("PDF-filen har flyttats till mapp för färdiga filer")
 
-        # STEP 5: Clear fields
+        # STEP 5: Save the old PDF path before clearing, then clear fields
+        old_pdf_path = self.current_pdf_path or ""
         self.excel_field_manager.clear_excel_fields()
         self.clear_pdf_and_filename_fields()
         self.row_color_var.set("none")
         # Reset color button visual states
         self._select_row_color("none")
 
+        # STEP 5B: Auto-refresh file list and select next file
+        next_file_note = ""
+        if old_pdf_path and hasattr(self, 'pdf_file_list_panel') and self.pdf_file_list_panel:
+            next_path = self.pdf_file_list_panel.refresh_and_select_next(old_pdf_path)
+            if next_path is None:
+                next_file_note = "Inga fler PDF-filer i mappen."
+            else:
+                next_file_note = "Nästa fil har laddats."
+
         # STEP 6: Show status message listing all operations performed
         if operations_performed:
             message = "Följande operationer genomfördes:\n• " + "\n• ".join(operations_performed)
             message += "\n• Alla fält har rensats (utom låsta och automatiska fält)"
+            if next_file_note:
+                message += f"\n\n{next_file_note}"
             messagebox.showinfo("Sparat", message)
         else:
             messagebox.showinfo("Klart", "Alla fält har rensats.")
