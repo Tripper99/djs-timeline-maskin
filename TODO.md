@@ -65,6 +65,7 @@
 - [x] ~~**G4**: Add visible selection indicator on active row color button~~ — Fixed in v2.8.3
 - [x] ~~**G5**: Improve formatting toolbar button discoverability (larger targets, tooltips)~~ — Fixed in v2.8.3
 - [x] ~~**G6**: Add "Open folder" button near file list — opens the selected PDF folder in Finder so user can see its contents without searching for it~~ — Fixed in v2.8.2
+- [ ] **G7**: Make field "Kommentar" aprox 30% wider.
 
 ---
 

@@ -4,8 +4,8 @@ Constants and configuration values for the DJ Timeline application
 
 # Configuration
 CONFIG_FILE = "djs_timeline_machine_config.json"
-VERSION = "v2.8.4"
-VERSION_TUPLE = (2, 8, 4)
+VERSION = "v2.8.5"
+VERSION_TUPLE = (2, 8, 5)
 
 # GitHub Repository Information for Updates
 GITHUB_REPO_OWNER = "Tripper99"
