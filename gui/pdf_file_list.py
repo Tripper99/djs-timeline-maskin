@@ -32,6 +32,7 @@ class PDFFileListPanel(ctk.CTkFrame):
         super().__init__(parent, **kwargs)
 
         self._on_file_selected = on_file_selected
+        self._on_merge_callback = None
         self._config_manager = config_manager
         self._folder_path = ""
         self._all_pdf_files = []  # list of (path_str, filename, mtime, size) tuples
@@ -105,6 +106,16 @@ class PDFFileListPanel(ctk.CTkFrame):
         self._refresh_btn.grid(row=0, column=5, padx=(2, 2))
         ToolTip(self._refresh_btn, "Uppdatera fillistan.")
 
+        self._merge_btn = ctk.CTkButton(
+            top_frame, text="Sl\u00e5 samman...", width=100, height=26,
+            command=self._on_merge_clicked,
+            font=ctk.CTkFont(size=11),
+            fg_color="#6C63FF", hover_color="#5A52D5",
+            state="disabled",
+        )
+        self._merge_btn.grid(row=0, column=6, padx=(2, 2))
+        ToolTip(self._merge_btn, "Sl\u00e5 samman flera PDF-filer till en.")
+
         self._delete_file_btn = ctk.CTkButton(
             top_frame, text="Ta bort fil", width=100, height=26,
             command=self._delete_selected_file,
@@ -112,7 +123,7 @@ class PDFFileListPanel(ctk.CTkFrame):
             fg_color="#dc3545", hover_color="#c82333",
             state="disabled",
         )
-        self._delete_file_btn.grid(row=0, column=6, padx=(2, 0))
+        self._delete_file_btn.grid(row=0, column=7, padx=(2, 0))
         ToolTip(self._delete_file_btn, "Ta bort den markerade PDF-filen (flyttas till papperskorgen).")
 
         # Row 1: Search bar
@@ -187,6 +198,14 @@ class PDFFileListPanel(ctk.CTkFrame):
     def get_folder(self) -> str:
         """Return current folder path."""
         return self._folder_path
+
+    def get_current_file_list(self) -> list[str]:
+        """Return the currently displayed (filtered) list of PDF file paths."""
+        return list(self._pdf_files)
+
+    def set_on_merge_clicked(self, callback):
+        """Set the callback for when the merge button is clicked."""
+        self._on_merge_callback = callback
 
     def highlight_file(self, file_path: str):
         """Highlight a specific file in the list."""
@@ -375,8 +394,9 @@ class PDFFileListPanel(ctk.CTkFrame):
         if self._current_highlight:
             self.highlight_file(self._current_highlight)
 
-        # 6. Update delete button state
+        # 6. Update button states
         self._update_delete_btn_state()
+        self._update_merge_btn_state()
 
     def _refresh_list(self):
         """Refresh button handler."""
@@ -430,6 +450,18 @@ class PDFFileListPanel(ctk.CTkFrame):
         """Enable/disable the delete button based on selection."""
         has_selection = bool(self._listbox.curselection())
         self._delete_file_btn.configure(state="normal" if has_selection else "disabled")
+
+    def _update_merge_btn_state(self):
+        """Enable merge button when at least 2 files are available."""
+        has_files = len(self._pdf_files) >= 2
+        self._merge_btn.configure(state="normal" if has_files else "disabled")
+
+    def _on_merge_clicked(self):
+        """Handle merge button click — delegate to registered callback."""
+        if hasattr(self, '_on_merge_callback') and self._on_merge_callback:
+            self._on_merge_callback()
+        else:
+            logger.warning("Merge button clicked but no callback registered")
 
     def _delete_selected_file(self):
         """Delete the selected PDF file by moving it to macOS Trash."""

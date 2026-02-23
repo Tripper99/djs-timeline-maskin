@@ -100,6 +100,7 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         # Wire up PDF file list callback and load saved folder
         if self.pdf_file_list_panel:
             self.pdf_file_list_panel._on_file_selected = self.load_pdf_from_file_list
+            self.pdf_file_list_panel.set_on_merge_clicked(self._show_merge_dialog)
             self.pdf_file_list_panel.load_folder_from_config()
 
         # Load and restore locked fields after GUI is created
@@ -671,6 +672,51 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
 
         except Exception as e:
             logger.error(f"Failed to reset UI state: {e}")
+
+    def _show_merge_dialog(self):
+        """Show the PDF merge dialog."""
+        if not self.pdf_file_list_panel:
+            messagebox.showwarning("Ingen mapp", "Välj först en mapp med PDF-filer.")
+            return
+
+        folder = self.pdf_file_list_panel.get_folder()
+        if not folder:
+            messagebox.showwarning("Ingen mapp", "Välj först en mapp med PDF-filer.")
+            return
+
+        file_list = self.pdf_file_list_panel.get_current_file_list()
+        if len(file_list) < 2:
+            messagebox.showwarning(
+                "För få filer",
+                "Det behövs minst 2 PDF-filer för att slå samman."
+            )
+            return
+
+        try:
+            from gui.pdf_merge_dialog import PDFMergeDialog
+            self._merge_dialog = PDFMergeDialog(
+                parent=self.root,
+                folder_path=folder,
+                file_list=file_list,
+                on_complete=self._on_merge_complete,
+                on_clear_preview=self._on_merge_clear_preview,
+            )
+        except Exception as e:
+            logger.error(f"Failed to show merge dialog: {e}")
+            messagebox.showerror("Fel", f"Kunde inte öppna sammanslagningsdialogen:\n{e}")
+
+    def _on_merge_complete(self):
+        """Called after a successful PDF merge to refresh the file list."""
+        if self.pdf_file_list_panel:
+            self.pdf_file_list_panel.refresh()
+
+    def _on_merge_clear_preview(self, merge_files):
+        """Clear PDF preview if the currently previewed file is being merged."""
+        if self.current_pdf_path and self.current_pdf_path in merge_files:
+            if self.pdf_preview_panel:
+                self.pdf_preview_panel.clear()
+            self.current_pdf_path = ""
+            self.pdf_path_var.set("Ingen PDF vald")
 
     def run(self):
         """Start the application"""

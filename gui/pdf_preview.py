@@ -15,6 +15,7 @@ from tkinter import messagebox
 
 import customtkinter as ctk
 
+from gui.pdf_text_selection import PDFTextSelector
 from gui.utils import ToolTip
 
 logger = logging.getLogger(__name__)
@@ -62,10 +63,16 @@ class PDFPreviewPanel(ctk.CTkFrame):
         self._zoom_step = 0.10           # 10% per step
         self._max_pixmap_dim = 4096      # Max rendered pixel dimension
 
+        # Interaction mode: "pan" or "select"
+        self._interaction_mode = "pan"
+
         # Pan state
         self._pan_start_x = None
         self._pan_start_y = None
         self._is_panning = False
+
+        # Effective zoom (may be clamped below _zoom_factor for large pages)
+        self._last_effective_zoom = 1.0
 
         # Debounced zoom state (for smooth mousewheel zoom)
         self._zoom_after_id = None
@@ -162,6 +169,15 @@ class PDFPreviewPanel(ctk.CTkFrame):
         self._fit_width_btn.pack(side="left", padx=(4, 8))
         ToolTip(self._fit_width_btn, "Anpassa till f\u00f6nsterbredd (\u23180)")
 
+        # Text selection toggle button
+        self._text_select_btn = ctk.CTkButton(
+            nav_frame, text="Markera text", width=110, height=26,
+            command=self._toggle_interaction_mode, font=ctk.CTkFont(size=11),
+            fg_color="#6C63FF", hover_color="#5A52D5"
+        )
+        self._text_select_btn.pack(side="left", padx=(4, 8))
+        ToolTip(self._text_select_btn, "V\u00e4xla mellan panorering och textmarkering (\u2318T)")
+
         # Delete page button
         self._delete_page_btn = ctk.CTkButton(
             nav_frame, text="Ta bort sida", width=105, height=26,
@@ -185,6 +201,14 @@ class PDFPreviewPanel(ctk.CTkFrame):
         # Bind mousewheel and interactions on enter/leave
         self._canvas.bind("<Enter>", self._bind_interactions)
         self._canvas.bind("<Leave>", self._unbind_interactions)
+
+        # Initialize text selector
+        self._text_selector = PDFTextSelector(
+            canvas=self._canvas,
+            get_pdf_doc=lambda: self._pdf_doc,
+            get_current_page=lambda: self._current_page,
+            get_effective_zoom=lambda: self._last_effective_zoom,
+        )
 
         self._update_nav_state()
         self._update_zoom_btn_state()
@@ -611,6 +635,9 @@ class PDFPreviewPanel(ctk.CTkFrame):
         # Display on canvas
         self._photo_image = ImageTk.PhotoImage(pil_image)
         self._canvas.delete("all")
+        # Reset text selector state since canvas items are gone
+        if hasattr(self, '_text_selector') and self._text_selector:
+            self._text_selector.reset()
         self._canvas.create_image(0, 0, anchor="nw", image=self._photo_image)
         self._canvas.configure(scrollregion=(0, 0, pil_image.width, pil_image.height))
 
@@ -640,6 +667,9 @@ class PDFPreviewPanel(ctk.CTkFrame):
                     f"to stay within {self._max_pixmap_dim}px limit"
                 )
 
+            # Store effective zoom for text selection coordinate mapping
+            self._last_effective_zoom = effective_zoom
+
             mat = fitz.Matrix(effective_zoom, effective_zoom)
             pix = page.get_pixmap(matrix=mat, alpha=False)
             pil_image = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
@@ -668,28 +698,56 @@ class PDFPreviewPanel(ctk.CTkFrame):
                 self._render_current_page(page_changed=True)
             # When manually zoomed, do nothing — scrollbars handle it
 
+    # ---- Interaction mode toggle ----
+
+    def _toggle_interaction_mode(self, event=None):
+        """Toggle between pan and text-select mode."""
+        if self._interaction_mode == "pan":
+            self._interaction_mode = "select"
+            self._text_select_btn.configure(
+                text="Panorera",
+                fg_color="#D4A017", hover_color="#B8860B"
+            )
+            self._canvas.configure(cursor="cross")
+        else:
+            self._interaction_mode = "pan"
+            self._text_select_btn.configure(
+                text="Markera text",
+                fg_color="#6C63FF", hover_color="#5A52D5"
+            )
+            self._canvas.configure(cursor="")
+            if hasattr(self, '_text_selector') and self._text_selector:
+                self._text_selector.clear_selection()
+
     # ---- Interaction bindings ----
 
     def _bind_interactions(self, event=None):
-        """Bind mousewheel, keyboard shortcuts, and pan when cursor enters canvas."""
+        """Bind mousewheel, keyboard shortcuts, and pan/select when cursor enters canvas."""
         # Mousewheel
         self._canvas.bind("<MouseWheel>", self._on_mousewheel)
         if platform.system() != "Darwin":
             self._canvas.bind("<Button-4>", self._on_mousewheel)
             self._canvas.bind("<Button-5>", self._on_mousewheel)
 
-        # Pan (click-drag)
-        self._canvas.bind("<ButtonPress-1>", self._on_pan_start)
-        self._canvas.bind("<B1-Motion>", self._on_pan_motion)
-        self._canvas.bind("<ButtonRelease-1>", self._on_pan_end)
+        # Mouse drag — route based on interaction mode
+        self._canvas.bind("<ButtonPress-1>", self._on_mouse_press)
+        self._canvas.bind("<B1-Motion>", self._on_mouse_motion)
+        self._canvas.bind("<ButtonRelease-1>", self._on_mouse_release)
 
-        # Double-click to fit-to-width
-        self._canvas.bind("<Double-Button-1>", lambda e: self._fit_to_width())
+        # Double-click to fit-to-width (only in pan mode)
+        self._canvas.bind("<Double-Button-1>", self._on_double_click)
 
         # Keyboard zoom shortcuts (macOS: Command key)
         self._canvas.bind("<Command-equal>", self._zoom_in)
         self._canvas.bind("<Command-minus>", self._zoom_out)
         self._canvas.bind("<Command-0>", self._fit_to_width)
+
+        # Toggle text selection mode shortcut
+        self._canvas.bind("<Command-t>", self._toggle_interaction_mode)
+
+        # Set cursor based on current mode
+        if self._interaction_mode == "select":
+            self._canvas.configure(cursor="cross")
 
         # Make canvas focusable for keyboard events
         self._canvas.focus_set()
@@ -708,11 +766,40 @@ class PDFPreviewPanel(ctk.CTkFrame):
         self._canvas.unbind("<Command-equal>")
         self._canvas.unbind("<Command-minus>")
         self._canvas.unbind("<Command-0>")
+        self._canvas.unbind("<Command-t>")
 
         # Reset cursor if panning was interrupted
         if self._is_panning:
             self._is_panning = False
             self._canvas.configure(cursor="")
+        elif self._interaction_mode == "select":
+            self._canvas.configure(cursor="")
+
+    def _on_mouse_press(self, event):
+        """Route mouse press based on interaction mode."""
+        if self._interaction_mode == "select":
+            self._text_selector.on_select_start(event)
+        else:
+            self._on_pan_start(event)
+
+    def _on_mouse_motion(self, event):
+        """Route mouse motion based on interaction mode."""
+        if self._interaction_mode == "select":
+            self._text_selector.on_select_motion(event)
+        else:
+            self._on_pan_motion(event)
+
+    def _on_mouse_release(self, event):
+        """Route mouse release based on interaction mode."""
+        if self._interaction_mode == "select":
+            self._text_selector.on_select_end(event)
+        else:
+            self._on_pan_end(event)
+
+    def _on_double_click(self, event):
+        """Handle double-click: fit-to-width only in pan mode."""
+        if self._interaction_mode == "pan":
+            self._fit_to_width()
 
     def _on_mousewheel(self, event):
         """Handle mousewheel: Cmd+scroll = zoom, Shift+scroll = horizontal, plain = vertical."""
