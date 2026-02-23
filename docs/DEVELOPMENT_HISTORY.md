@@ -4,6 +4,30 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.9.0: PDF Text Selection & Copy + PDF Merge Dialog (2026-02-23)
+
+**PDF Text Selection & Copy**
+- **Feature**: Toggle between pan and text-select modes in PDF preview. Drag rectangle over text to extract and copy to clipboard.
+- **Implementation**: New `gui/pdf_text_selection.py` — `PDFTextSelector` class encapsulates all selection logic (start/motion/end events, coordinate mapping, text extraction, clipboard copy, toast feedback).
+- **Integration**: `gui/pdf_preview.py` gained `_interaction_mode` state ("pan"/"select"), toggle button "Markera text" (purple #6C63FF) ↔ "Panorera" (gold #D4A017), mouse event routing via `_on_mouse_press/motion/release`, keyboard shortcut Cmd+T.
+- **Coordinate Mapping**: Canvas coordinates divided by `_last_effective_zoom` (stored during render, accounts for pixmap size clamping) to get PDF-space coordinates. Uses `canvasx()`/`canvasy()` for scroll-adjusted coords.
+- **Text Extraction**: `fitz.Page.get_text("text", clip=rect)` extracts text within the selection rectangle. Toast feedback shows "Kopierat X tecken" or "Ingen text hittad i markeringen".
+- Files: `gui/pdf_text_selection.py` (new), `gui/pdf_preview.py`
+
+**PDF Merge Dialog**
+- **Feature**: Modal dialog to merge multiple PDFs into one. Accessible from Verktyg menu and file list "Slå samman..." button.
+- **Implementation**: New `gui/pdf_merge_dialog.py` — `PDFMergeDialog` class, `CTkToplevel` with dual-list interface (available files ↔ merge order), transfer buttons (>>, <<, Alla >>, << Alla), up/down reorder, filename input, validation.
+- **Merge Logic**: PyMuPDF `fitz.open()` + `insert_pdf()` for each source file. On success, moves originals to "Sammanslagna filer - kastas" subfolder via `Path.rename()` with conflict handling (append `_1`, `_2`, etc.).
+- **Integration Points**: `gui/pdf_file_list.py` gained `get_current_file_list()`, `set_on_merge_clicked()` public API + merge button state management. `gui/layout_manager.py` added Verktyg menu item. `gui/main_window.py` added `_show_merge_dialog()`, `_on_merge_complete()`, `_on_merge_clear_preview()`.
+- **CTkToplevel Bug Fix**: Dialog must be stored as instance variable (`self._merge_dialog`) to prevent garbage collection. `grab_set()` deferred 100ms via `self.after()` to ensure window is visible first. `_on_close()` releases grab before destroy.
+- **Multi-Monitor Fix**: Removed `max(0, ...)` clamping on dialog position — external monitors use negative screen coordinates, clamping pushes dialog to primary display.
+- Files: `gui/pdf_merge_dialog.py` (new), `gui/pdf_file_list.py`, `gui/layout_manager.py`, `gui/main_window.py`
+
+**Technical Insights**
+- CTkToplevel windows require stored references to prevent garbage collection — a common pitfall
+- `grab_set()` on a destroyed window leaves the grab in a broken state, blocking all further interaction with the app
+- Multi-monitor setups on macOS can have negative screen coordinates; never clamp window positions to 0
+
 ### v2.8.9: PDF Studio Detection, Händelse Format, UI Tweaks (2026-02-22)
 
 **PDF Studio 2024 Open-File Detection**

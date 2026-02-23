@@ -1,7 +1,7 @@
 # Codebase Analysis - DJs Timeline-maskin
 
-**Generated:** August 21, 2025 (updated February 22, 2026)
-**Version Analyzed:** v2.8.9
+**Generated:** August 21, 2025 (updated February 23, 2026)
+**Version Analyzed:** v2.9.0
 **Application:** DJs Timeline-maskin (DJs Timeline Machine)
 
 ## Executive Summary
@@ -52,10 +52,10 @@ core/
 └── template_manager.py            # Template persistence and management
 ```
 
-### GUI Layer (`/gui/` - 13 modules, Mixin Architecture)
+### GUI Layer (`/gui/` - 15 modules, Mixin Architecture)
 ```
 gui/
-├── main_window.py                 # Main application class (546 lines)
+├── main_window.py                 # Main application class
 ├── dialogs.py                     # Modal dialogs and user interactions
 ├── event_handlers.py              # Event binding and callback management
 ├── excel_fields.py                # Excel field UI components
@@ -65,7 +65,9 @@ gui/
 ├── formatting_manager.py          # Rich text formatting capabilities
 ├── layout_manager.py              # Layout and visual organization
 ├── pdf_file_list.py               # PDF file browser with search/filter/sort
+├── pdf_merge_dialog.py            # PDF merge dialog (combine multiple PDFs)
 ├── pdf_operations.py              # PDF-related GUI operations
+├── pdf_text_selection.py          # Text selection & copy from PDF preview
 ├── stats_manager.py               # Usage statistics tracking
 ├── undo_manager.py                # Undo/redo functionality
 └── utils.py                       # Shared GUI utilities and components

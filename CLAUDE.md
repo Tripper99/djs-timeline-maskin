@@ -8,11 +8,13 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.8.9)
+## Current Status (v2.9.0)
 
-**Latest Status (v2.8.9)**: PDF Studio 2024 detection + Kopiera till Excel improvements. 4-method open-file detection (CGWindowList, lsof, AppleScript System Events, ps aux fallback) with startup Hjälpmedel permission check. "Kopiera till Excel" now builds Händelse as "TIDNING: Kommentar" on first line. Wider Kommentar field, narrower copy button.
+**Latest Status (v2.9.0)**: PDF text selection & copy + PDF merge dialog. Toggle button "Markera text"/"Panorera" in preview nav bar with Cmd+T shortcut; drag-to-select extracts text via PyMuPDF and copies to clipboard with toast feedback. PDF merge dialog (Verktyg menu + file list button) with dual-list reorderable interface, PyMuPDF merge, source files moved to subfolder. Multi-monitor positioning fix.
 
 **Key Features**:
+- **PDF Text Selection**: Toggle between pan/select modes, drag rectangle to select text from OCR'd or native-text PDFs, auto-copy to clipboard
+- **PDF Merge**: Dual-list dialog to combine multiple PDFs into one, reorder files, move originals to "Sammanslagna filer - kastas" subfolder
 - **Single Custom Undo System**: Tk built-in undo disabled; snapshot-based undo with debounced typing (500ms), immediate saves before destructive ops, 3-second max interval between snapshots
 - **GitHub Version Checking**: Secure update checking via "Verktyg → Sök efter uppdateringar..." with Swedish interface, version skipping, and browser-based downloads
 - **Direct Template Saving**: "Spara mall" button saves directly to active template, "Spara mall som..." saves to new file
@@ -25,7 +27,7 @@ The application has been refactored from a single large file into a modular stru
 - **Recently Used Dropdowns**: Quick-switch dropdowns for Excel files and output folders (max 10, persisted)
 
 **Architecture Status**:
-- **Modular Design**: Clean architecture with main_window.py reduced from 35,000+ tokens to 384 lines
+- **Modular Design**: Clean architecture with main_window.py as central coordinator
 - **Undo System**: Single custom snapshot-based undo in `gui/undo_manager.py` — Tk undo disabled, debounce timers for typing, synchronous state saves for paste/cut/format
 - **Field State System**: Complete transition from "hidden" to "disabled" terminology
 - **Visual Styling**: Centralized field styling system (gui/field_styling.py) for consistent disabled field appearance
