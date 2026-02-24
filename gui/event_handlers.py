@@ -615,6 +615,9 @@ class EventHandlersMixin:
         # STEP 4: Perform operations
         operations_performed = []
 
+        # Capture original PDF path before rename/move changes current_pdf_path
+        original_pdf_path = self.current_pdf_path or ""
+
         # 4A. Rename PDF file if needed
         if needs_pdf_rename:
             # Check that PDF file still exists before attempting rename
@@ -668,8 +671,8 @@ class EventHandlersMixin:
             if self.move_pdf_to_output_folder():
                 operations_performed.append("PDF-filen har flyttats till mapp för färdiga filer")
 
-        # STEP 5: Save the old PDF path before clearing, then clear fields
-        old_pdf_path = self.current_pdf_path or ""
+        # STEP 5: Use original path captured before rename/move operations
+        old_pdf_path = original_pdf_path
         self.excel_field_manager.clear_excel_fields()
         self.clear_pdf_and_filename_fields()
         self.row_color_var.set("none")
