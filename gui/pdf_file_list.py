@@ -6,12 +6,18 @@ Shows a browsable list of PDF files from a selected folder.
 import logging
 import subprocess
 import tkinter as tk
+from datetime import datetime
 from pathlib import Path
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, ttk
 
 import customtkinter as ctk
 
 from gui.utils import ToolTip
+
+try:
+    import fitz  # PyMuPDF
+except ImportError:
+    fitz = None
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +28,58 @@ SORT_OPTIONS = [
     "Datum (äldst)",
     "Storlek (störst)",
     "Storlek (minst)",
+    "Sidor (flest)",
+    "Sidor (färst)",
 ]
+
+# Map sort dropdown values to (column_id, reverse) for header-click sync
+_SORT_MAP = {
+    "Namn (A-Ö)": ("filename", False),
+    "Namn (Ö-A)": ("filename", True),
+    "Datum (nyast)": ("date", True),
+    "Datum (äldst)": ("date", False),
+    "Storlek (störst)": ("size", True),
+    "Storlek (minst)": ("size", False),
+    "Sidor (flest)": ("pages", True),
+    "Sidor (färst)": ("pages", False),
+}
+
+# Reverse map: (column_id, reverse) → dropdown text
+_HEADER_TO_SORT = {v: k for k, v in _SORT_MAP.items()}
+
+
+def _get_page_count(file_path: str) -> int | None:
+    """Get PDF page count using PyMuPDF. Returns None if unavailable."""
+    if fitz is None:
+        return None
+    try:
+        with fitz.open(file_path) as doc:
+            return len(doc)
+    except Exception:
+        return None
+
+
+def _format_date(mtime: float) -> str:
+    """Format modification time as YYYY-MM-DD."""
+    try:
+        return datetime.fromtimestamp(mtime).strftime("%Y-%m-%d")
+    except (OSError, ValueError):
+        return "?"
+
+
+def _format_size(size_bytes: int) -> str:
+    """Format file size with Swedish decimal comma (e.g. '1,2 MB', '345 KB')."""
+    if size_bytes >= 1_000_000:
+        val = size_bytes / 1_000_000
+        if val >= 10:
+            return f"{val:,.0f} MB".replace(",", " ").replace(".", ",")
+        return f"{val:.1f} MB".replace(".", ",")
+    if size_bytes >= 1_000:
+        val = size_bytes / 1_000
+        if val >= 10:
+            return f"{val:.0f} KB"
+        return f"{val:.1f} KB".replace(".", ",")
+    return f"{size_bytes} B"
 
 
 class PDFFileListPanel(ctk.CTkFrame):
@@ -35,9 +92,14 @@ class PDFFileListPanel(ctk.CTkFrame):
         self._on_merge_callback = None
         self._config_manager = config_manager
         self._folder_path = ""
-        self._all_pdf_files = []  # list of (path_str, filename, mtime, size) tuples
+        self._all_pdf_files = []  # list of (path_str, filename, mtime, size, page_count) tuples
         self._pdf_files = []      # list of path_str — currently displayed subset
         self._current_highlight = None  # path of currently highlighted file
+
+        # Track current column sort state for header-click toggling
+        self._header_sort_col = None
+        self._header_sort_reverse = False
+        self._programmatic_select = False  # Guard against selection event loops
 
         self._build_ui()
 
@@ -144,7 +206,7 @@ class PDFFileListPanel(ctk.CTkFrame):
         self._search_entry.grid(row=0, column=0, sticky="ew", padx=(0, 2))
 
         self._clear_btn = ctk.CTkButton(
-            search_frame, text="✕", width=26, height=26,
+            search_frame, text="\u2715", width=26, height=26,
             command=self._clear_search,
             font=ctk.CTkFont(size=12),
             fg_color="transparent",
@@ -154,35 +216,65 @@ class PDFFileListPanel(ctk.CTkFrame):
         self._clear_btn.grid(row=0, column=1, padx=(0, 0))
         self._clear_btn.grid_remove()  # hidden until text is entered
 
-        # Row 2: File list using tk.Listbox for performance and native scrolling
+        # Row 2: File list using ttk.Treeview with columns
         list_frame = ctk.CTkFrame(self, fg_color="transparent")
         list_frame.grid(row=2, column=0, sticky="nsew", padx=4, pady=(2, 4))
         list_frame.grid_columnconfigure(0, weight=1)
         list_frame.grid_rowconfigure(0, weight=1)
 
-        self._listbox = tk.Listbox(
-            list_frame,
+        # Style the Treeview
+        style = ttk.Style()
+        style.configure(
+            "PDFList.Treeview",
             font=("Arial", 10),
-            selectmode=tk.SINGLE,
-            activestyle="none",
+            rowheight=22,
+            borderwidth=1,
             relief="flat",
-            bd=1,
-            highlightthickness=1,
-            highlightcolor="#2196F3",
-            highlightbackground="#E0E0E0",
-            selectbackground="#BBDEFB",
-            selectforeground="#000000",
         )
-        self._listbox.grid(row=0, column=0, sticky="nsew")
+        style.configure(
+            "PDFList.Treeview.Heading",
+            font=("Arial", 10, "bold"),
+        )
+        style.map(
+            "PDFList.Treeview",
+            background=[("selected", "#BBDEFB")],
+            foreground=[("selected", "#000000")],
+        )
 
-        scrollbar = tk.Scrollbar(
-            list_frame, orient="vertical", command=self._listbox.yview
+        columns = ("filename", "date", "size", "pages")
+        self._treeview = ttk.Treeview(
+            list_frame,
+            columns=columns,
+            show="headings",
+            selectmode="browse",
+            style="PDFList.Treeview",
+        )
+
+        # Configure columns
+        self._treeview.heading("filename", text="Filnamn",
+                               command=lambda: self._on_header_click("filename"))
+        self._treeview.heading("date", text="Datum",
+                               command=lambda: self._on_header_click("date"))
+        self._treeview.heading("size", text="Storlek",
+                               command=lambda: self._on_header_click("size"))
+        self._treeview.heading("pages", text="Sidor",
+                               command=lambda: self._on_header_click("pages"))
+
+        self._treeview.column("filename", stretch=True, minwidth=150)
+        self._treeview.column("date", width=90, minwidth=80, stretch=False, anchor="center")
+        self._treeview.column("size", width=80, minwidth=60, stretch=False, anchor="e")
+        self._treeview.column("pages", width=50, minwidth=40, stretch=False, anchor="center")
+
+        self._treeview.grid(row=0, column=0, sticky="nsew")
+
+        scrollbar = ttk.Scrollbar(
+            list_frame, orient="vertical", command=self._treeview.yview
         )
         scrollbar.grid(row=0, column=1, sticky="ns")
-        self._listbox.configure(yscrollcommand=scrollbar.set)
+        self._treeview.configure(yscrollcommand=scrollbar.set)
 
-        # Bind click events
-        self._listbox.bind("<<ListboxSelect>>", self._on_listbox_select)
+        # Bind selection event
+        self._treeview.bind("<<TreeviewSelect>>", self._on_treeview_select)
 
     # ---- Public API ----
 
@@ -211,15 +303,17 @@ class PDFFileListPanel(ctk.CTkFrame):
         """Highlight a specific file in the list."""
         self._current_highlight = file_path
         if not file_path:
-            self._listbox.selection_clear(0, tk.END)
+            self._treeview.selection_remove(*self._treeview.selection())
             return
 
         filename = Path(file_path).name
-        for i in range(self._listbox.size()):
-            if self._listbox.get(i) == filename:
-                self._listbox.selection_clear(0, tk.END)
-                self._listbox.selection_set(i)
-                self._listbox.see(i)
+        for item_id in self._treeview.get_children():
+            values = self._treeview.item(item_id, "values")
+            if values and values[0] == filename:
+                self._programmatic_select = True
+                self._treeview.selection_set(item_id)
+                self._treeview.see(item_id)
+                self._programmatic_select = False
                 return
 
     def refresh(self):
@@ -319,7 +413,7 @@ class PDFFileListPanel(ctk.CTkFrame):
 
         if not self._folder_path or not Path(self._folder_path).is_dir():
             self._pdf_files = []
-            self._listbox.delete(0, tk.END)
+            self._treeview.delete(*self._treeview.get_children())
             self._count_label.configure(text="")
             return
 
@@ -329,8 +423,9 @@ class PDFFileListPanel(ctk.CTkFrame):
                 if f.suffix.lower() == ".pdf" and f.is_file():
                     try:
                         stat = f.stat()
+                        page_count = _get_page_count(str(f))
                         self._all_pdf_files.append(
-                            (str(f), f.name, stat.st_mtime, stat.st_size)
+                            (str(f), f.name, stat.st_mtime, stat.st_size, page_count)
                         )
                     except OSError:
                         # File may have been deleted between iterdir and stat
@@ -349,7 +444,7 @@ class PDFFileListPanel(ctk.CTkFrame):
             self._count_label.configure(text="Fel vid l\u00E4sning")
 
     def _apply_filter_and_sort(self):
-        """Filter by search text and sort by selected criterion, then repopulate listbox."""
+        """Filter by search text and sort by selected criterion, then repopulate treeview."""
         # 1. Filter
         search_text = self._search_var.get().strip().lower()
         if search_text:
@@ -374,13 +469,21 @@ class PDFFileListPanel(ctk.CTkFrame):
             filtered.sort(key=lambda e: e[3], reverse=True)
         elif sort_choice == "Storlek (minst)":
             filtered.sort(key=lambda e: e[3])
+        elif sort_choice == "Sidor (flest)":
+            filtered.sort(key=lambda e: e[4] if e[4] is not None else -1, reverse=True)
+        elif sort_choice == "Sidor (färst)":
+            filtered.sort(key=lambda e: e[4] if e[4] is not None else 999999)
 
         # 3. Update displayed list
         self._pdf_files = [entry[0] for entry in filtered]  # path strings
 
-        self._listbox.delete(0, tk.END)
+        self._treeview.delete(*self._treeview.get_children())
         for entry in filtered:
-            self._listbox.insert(tk.END, entry[1])  # filename
+            pages_str = str(entry[4]) if entry[4] is not None else "?"
+            self._treeview.insert(
+                "", tk.END,
+                values=(entry[1], _format_date(entry[2]), _format_size(entry[3]), pages_str),
+            )
 
         # 4. Update count label
         total = len(self._all_pdf_files)
@@ -425,21 +528,48 @@ class PDFFileListPanel(ctk.CTkFrame):
     def _on_sort_changed(self, _choice):
         """Handle sort dropdown change."""
         self._save_sort_preference()
+        # Sync header sort state from dropdown
+        mapping = _SORT_MAP.get(self._sort_var.get())
+        if mapping:
+            self._header_sort_col, self._header_sort_reverse = mapping
         if self._all_pdf_files:
             self._apply_filter_and_sort()
 
+    def _on_header_click(self, col_id: str):
+        """Handle clicking a column header to sort by that column."""
+        if self._header_sort_col == col_id:
+            # Toggle direction
+            self._header_sort_reverse = not self._header_sort_reverse
+        else:
+            # New column: default to ascending (except date/size/pages default descending)
+            self._header_sort_col = col_id
+            self._header_sort_reverse = col_id in ("date", "size", "pages")
+
+        # Map back to dropdown value and set it
+        dropdown_key = _HEADER_TO_SORT.get((col_id, self._header_sort_reverse))
+        if dropdown_key:
+            self._sort_var.set(dropdown_key)
+            self._save_sort_preference()
+            if self._all_pdf_files:
+                self._apply_filter_and_sort()
+
     # ---- Selection handling ----
 
-    def _on_listbox_select(self, event):
-        """Handle listbox selection."""
-        selection = self._listbox.curselection()
+    def _on_treeview_select(self, event):
+        """Handle treeview selection."""
+        selection = self._treeview.selection()
         self._update_delete_btn_state()
         if not selection:
             return
 
-        index = selection[0]
-        if index < len(self._pdf_files):
-            file_path = self._pdf_files[index]
+        item_id = selection[0]
+        item_index = self._treeview.index(item_id)
+        if item_index < len(self._pdf_files):
+            file_path = self._pdf_files[item_index]
+            # Skip if already highlighted — prevents infinite loop from
+            # programmatic selection_set() triggering <<TreeviewSelect>>
+            if file_path == self._current_highlight:
+                return
             self._current_highlight = file_path
             if self._on_file_selected:
                 self._on_file_selected(file_path)
@@ -448,7 +578,7 @@ class PDFFileListPanel(ctk.CTkFrame):
 
     def _update_delete_btn_state(self):
         """Enable/disable the delete button based on selection."""
-        has_selection = bool(self._listbox.curselection())
+        has_selection = bool(self._treeview.selection())
         self._delete_file_btn.configure(state="normal" if has_selection else "disabled")
 
     def _update_merge_btn_state(self):
@@ -465,15 +595,16 @@ class PDFFileListPanel(ctk.CTkFrame):
 
     def _delete_selected_file(self):
         """Delete the selected PDF file by moving it to macOS Trash."""
-        selection = self._listbox.curselection()
+        selection = self._treeview.selection()
         if not selection:
             return
 
-        index = selection[0]
-        if index >= len(self._pdf_files):
+        item_id = selection[0]
+        item_index = self._treeview.index(item_id)
+        if item_index >= len(self._pdf_files):
             return
 
-        file_path = self._pdf_files[index]
+        file_path = self._pdf_files[item_index]
         filename = Path(file_path).name
 
         confirm = messagebox.askyesno(
