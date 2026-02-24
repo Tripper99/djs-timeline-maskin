@@ -4,6 +4,35 @@ This file contains the detailed development history and version milestones for t
 
 ## Recent Major Releases
 
+### v2.9.3–v2.9.4: PDF File List Metadata Columns + Bug Fixes (2026-02-24)
+
+**PDF File List Treeview Upgrade**
+- **Feature**: Replaced `tk.Listbox` with `ttk.Treeview` showing 4 sortable columns: Filnamn, Datum, Storlek, Sidor.
+- **Page Counting**: Uses `fitz.open()` (PyMuPDF) to extract page count per file. Graceful fallback to "?" if fitz unavailable or file unreadable.
+- **Formatting**: Swedish decimal comma for file sizes (`_format_size`: "1,2 MB", "345 KB"), ISO date format (`_format_date`: "YYYY-MM-DD").
+- **Column Header Sorting**: Clicking column headers toggles ascending/descending sort, synced bidirectionally with the sort dropdown via `_SORT_MAP` / `_HEADER_TO_SORT` lookup tables.
+- **New Sort Options**: Added "Sidor (flest)" and "Sidor (färst)" to `SORT_OPTIONS`.
+- **Treeview Styling**: Custom `PDFList.Treeview` style matching previous Listbox appearance (selection colors, font, row height).
+- Files: `gui/pdf_file_list.py`
+
+**Infinite Loop Fix (Treeview Selection)**
+- **Problem**: App entered infinite loop on startup, repeating "PDF preview loaded" thousands of times.
+- **Root Cause**: `ttk.Treeview` fires `<<TreeviewSelect>>` asynchronously when `selection_set()` is called programmatically (unlike `tk.Listbox`). This created a cycle: `highlight_file()` → `selection_set()` → `<<TreeviewSelect>>` → callback → `highlight_file()` → ...
+- **Failed Approach**: Synchronous guard flag (`_programmatic_select = True/False`) didn't work because Treeview events are queued in the event loop and fire after the flag is reset.
+- **Solution**: Deduplication check in `_on_treeview_select` — skip callback if `file_path == self._current_highlight`. Works because `highlight_file()` sets `_current_highlight` before `selection_set()`.
+- **Key Insight**: `tk.Listbox` does NOT fire `<<ListboxSelect>>` on programmatic `selection_set()`, but `ttk.Treeview` DOES fire `<<TreeviewSelect>>` asynchronously. Guard flags don't work for async events.
+
+**Next-File Selection Sort Order Bug**
+- **Problem**: After "Spara allt och rensa", next file selection ignored current sort order (always behaved as if A-Ö).
+- **Root Cause**: `move_pdf_to_output_folder()` updates `self.current_pdf_path` to the new location (output folder). Then `old_pdf_path = self.current_pdf_path` captured the NEW path, which `refresh_and_select_next()` couldn't find in `_pdf_files`. With `previous_index = None`, it fell back to `len(self._pdf_files) - 1` (last file).
+- **Solution**: Capture `original_pdf_path = self.current_pdf_path` BEFORE any rename/move operations in `save_all_and_clear()`.
+- Files: `gui/event_handlers.py`
+
+**UI Tweaks**
+- Renamed "Kopiera till Excel" button to "Kopiera ned" (kept arrows), reduced size from 165×30 to 120×26
+- Widened Kommentar field from 325 to 405 pixels (~25% wider)
+- Files: `gui/layout_manager.py`
+
 ### v2.9.0: PDF Text Selection & Copy + PDF Merge Dialog (2026-02-23)
 
 **PDF Text Selection & Copy**

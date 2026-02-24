@@ -1,7 +1,7 @@
 # Codebase Analysis - DJs Timeline-maskin
 
-**Generated:** August 21, 2025 (updated February 23, 2026)
-**Version Analyzed:** v2.9.0
+**Generated:** August 21, 2025 (updated February 24, 2026)
+**Version Analyzed:** v2.9.4
 **Application:** DJs Timeline-maskin (DJs Timeline Machine)
 
 ## Executive Summary
@@ -64,7 +64,7 @@ gui/
 ├── field_styling.py               # Centralized UI styling system
 ├── formatting_manager.py          # Rich text formatting capabilities
 ├── layout_manager.py              # Layout and visual organization
-├── pdf_file_list.py               # PDF file browser with search/filter/sort
+├── pdf_file_list.py               # PDF file browser (Treeview) with columns, search/filter/sort
 ├── pdf_merge_dialog.py            # PDF merge dialog (combine multiple PDFs)
 ├── pdf_operations.py              # PDF-related GUI operations
 ├── pdf_text_selection.py          # Text selection & copy from PDF preview

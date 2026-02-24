@@ -8,11 +8,12 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-## Current Status (v2.9.0)
+## Current Status (v2.9.4)
 
-**Latest Status (v2.9.0)**: PDF text selection & copy + PDF merge dialog. Toggle button "Markera text"/"Panorera" in preview nav bar with Cmd+T shortcut; drag-to-select extracts text via PyMuPDF and copies to clipboard with toast feedback. PDF merge dialog (Verktyg menu + file list button) with dual-list reorderable interface, PyMuPDF merge, source files moved to subfolder. Multi-monitor positioning fix.
+**Latest Status (v2.9.4)**: PDF file list upgraded from tk.Listbox to ttk.Treeview with 4 sortable columns: Filnamn, Datum, Storlek, Sidor. Page count extracted via PyMuPDF. Clickable column headers for sorting (synced with dropdown). Fixed next-file selection bug after save-all when sort order was not A-Ö. UI tweak: "Kopiera ned" button smaller, Kommentar field wider.
 
 **Key Features**:
+- **PDF File List (Treeview)**: 4-column display (Filnamn, Datum, Storlek, Sidor), clickable column headers for sorting, search/filter, sort by name/date/size/pages, persisted sort preference, open folder in Finder, delete file to Trash
 - **PDF Text Selection**: Toggle between pan/select modes, drag rectangle to select text from OCR'd or native-text PDFs, auto-copy to clipboard
 - **PDF Merge**: Dual-list dialog to combine multiple PDFs into one, reorder files, move originals to "Sammanslagna filer - kastas" subfolder
 - **Single Custom Undo System**: Tk built-in undo disabled; snapshot-based undo with debounced typing (500ms), immediate saves before destructive ops, 3-second max interval between snapshots
@@ -23,7 +24,6 @@ The application has been refactored from a single large file into a modular stru
 - **Race Condition Prevention**: Comprehensive protection during template loading and state transitions
 - **Field Configuration System**: Custom field names and visibility states with template support
 - **Excel Integration**: Disabled fields automatically excluded from Excel operations
-- **PDF File List**: Search/filter with real-time matching, sort by name/date/size, persisted sort preference, open folder in Finder, delete file to Trash
 - **Recently Used Dropdowns**: Quick-switch dropdowns for Excel files and output folders (max 10, persisted)
 
 **Architecture Status**:
