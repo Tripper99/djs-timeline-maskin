@@ -146,7 +146,7 @@ class PDFPreviewPanel(ctk.CTkFrame):
             fg_color="#D4A017", hover_color="#B8860B"
         )
         self._zoom_out_btn.pack(side="left", padx=(8, 2))
-        ToolTip(self._zoom_out_btn, "Zooma ut (\u2318-)")
+        ToolTip(self._zoom_out_btn, "Zooma ut (\u2303-)")
 
         self._zoom_label = ctk.CTkLabel(
             nav_frame, text="\u2014", width=50, font=ctk.CTkFont(size=11)
@@ -160,7 +160,7 @@ class PDFPreviewPanel(ctk.CTkFrame):
             fg_color="#D4A017", hover_color="#B8860B"
         )
         self._zoom_in_btn.pack(side="left", padx=(2, 4))
-        ToolTip(self._zoom_in_btn, "Zooma in (\u2318=)")
+        ToolTip(self._zoom_in_btn, "Zooma in (\u2303=)")
 
         self._fit_width_btn = ctk.CTkButton(
             nav_frame, text="Anpassa bredd", width=110, height=26,
@@ -737,10 +737,10 @@ class PDFPreviewPanel(ctk.CTkFrame):
         # Double-click to fit-to-width (only in pan mode)
         self._canvas.bind("<Double-Button-1>", self._on_double_click)
 
-        # Keyboard zoom shortcuts (macOS: Command key)
-        self._canvas.bind("<Command-equal>", self._zoom_in)
-        self._canvas.bind("<Command-minus>", self._zoom_out)
-        self._canvas.bind("<Command-0>", self._fit_to_width)
+        # Keyboard zoom shortcuts (Control key)
+        self._canvas.bind("<Control-equal>", self._zoom_in)
+        self._canvas.bind("<Control-minus>", self._zoom_out)
+        self._canvas.bind("<Control-0>", self._fit_to_width)
 
         # Toggle text selection mode shortcut
         self._canvas.bind("<Command-t>", self._toggle_interaction_mode)
@@ -805,8 +805,8 @@ class PDFPreviewPanel(ctk.CTkFrame):
         """Handle mousewheel: Cmd+scroll = zoom, Shift+scroll = horizontal, plain = vertical."""
         if platform.system() == "Darwin":
             # macOS: Check modifier keys in event.state
-            # Bit 0x8 = Command key on macOS
-            if event.state & 0x8:
+            # Bit 0x4 = Control key on macOS
+            if event.state & 0x4:
                 self._zoom_at_cursor(event)
                 return
             # Bit 0x1 = Shift key
