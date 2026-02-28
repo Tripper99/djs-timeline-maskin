@@ -101,7 +101,7 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
         if self.pdf_file_list_panel:
             self.pdf_file_list_panel._on_file_selected = self.load_pdf_from_file_list
             self.pdf_file_list_panel.set_on_merge_clicked(self._show_merge_dialog)
-            self.pdf_file_list_panel.load_folder_from_config()
+            self.root.after(100, self.pdf_file_list_panel.load_folder_from_config)
 
         # Load and restore locked fields after GUI is created
         self.excel_field_manager.restore_locked_fields()
