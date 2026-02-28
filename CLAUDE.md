@@ -2,52 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
-
-This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline Machine). It is designed to help investigative journalists and researchers to quickly renaming pdf files and/or create timelines i excel. The first part of the app processes PDF files extracts different parts of the filename. User can then edit these parts and rename the file. It is also possible to copy the old or new file name to the second part of the app: The excel integration. Here the user can add information to a number of fields. By cklicking a button user can then both rename the pdf-file and add a row to a selected excel-document. 
-A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
-The application has been refactored from a single large file into a modular structure.
-
-## Current Status (v2.9.4)
-
-**Latest Status (v2.9.4)**: PDF file list upgraded from tk.Listbox to ttk.Treeview with 4 sortable columns: Filnamn, Datum, Storlek, Sidor. Page count extracted via PyMuPDF. Clickable column headers for sorting (synced with dropdown). Fixed next-file selection bug after save-all when sort order was not A-Ö. UI tweak: "Kopiera ned" button smaller, Kommentar field wider.
-
-**Key Features**:
-- **PDF File List (Treeview)**: 4-column display (Filnamn, Datum, Storlek, Sidor), clickable column headers for sorting, search/filter, sort by name/date/size/pages, persisted sort preference, open folder in Finder, delete file to Trash
-- **PDF Text Selection**: Toggle between pan/select modes, drag rectangle to select text from OCR'd or native-text PDFs, auto-copy to clipboard
-- **PDF Merge**: Dual-list dialog to combine multiple PDFs into one, reorder files, move originals to "Sammanslagna filer - kastas" subfolder
-- **Single Custom Undo System**: Tk built-in undo disabled; snapshot-based undo with debounced typing (500ms), immediate saves before destructive ops, 3-second max interval between snapshots
-- **GitHub Version Checking**: Secure update checking via "Verktyg → Sök efter uppdateringar..." with Swedish interface, version skipping, and browser-based downloads
-- **Direct Template Saving**: "Spara mall" button saves directly to active template, "Spara mall som..." saves to new file
-- **Intelligent Button States**: Dynamic enabling/disabling based on template type and modification status
-- **Template Validation**: "Standard" template protected from direct overwrites, custom templates fully supported
-- **Race Condition Prevention**: Comprehensive protection during template loading and state transitions
-- **Field Configuration System**: Custom field names and visibility states with template support
-- **Excel Integration**: Disabled fields automatically excluded from Excel operations
-- **Recently Used Dropdowns**: Quick-switch dropdowns for Excel files and output folders (max 10, persisted)
-
-**Architecture Status**:
-- **Modular Design**: Clean architecture with main_window.py as central coordinator
-- **Undo System**: Single custom snapshot-based undo in `gui/undo_manager.py` — Tk undo disabled, debounce timers for typing, synchronous state saves for paste/cut/format
-- **Field State System**: Complete transition from "hidden" to "disabled" terminology
-- **Visual Styling**: Centralized field styling system (gui/field_styling.py) for consistent disabled field appearance
-
-**Testing Framework**:
-- Comprehensive test suite available: `python -m pytest tests/ -v`
-- Always run Ruff syntax check before committing: `ruff check . --fix`
-- Integration tests: `python -m pytest tests/test_integration_workflows.py -v -s`
-- See TESTING_GUIDE.md for complete workflow procedures
-- **Update Check Testing**: Test GitHub version checking via "Verktyg → Sök efter uppdateringar..." menu
-
 ## Documentation Management Guidelines
 
 **CLAUDE.md Content Strategy**:
-- Keep CLAUDE.md focused on current status and working principles only
-- Include only the very latest development achievement (current version) in Current Status section
-- Remove older development history when adding new entries to prevent document growth
-- For detailed development history, technical analysis, and version milestones → use `docs\DEVELOPMENT_HISTORY.md`
+- Keep CLAUDE.md focused on working principles only
+- For development history, technical analysis, and version milestones → use `docs\DEVELOPMENT_HISTORY.md`
 - Always reference DEVELOPMENT_HISTORY.md for comprehensive historical details
-- Maintain clean, actionable guidance rather than extensive historical records
 
 **Development History Documentation**:
 - Comprehensive technical details, root cause analyses, and implementation insights go in `docs\DEVELOPMENT_HISTORY.md`
