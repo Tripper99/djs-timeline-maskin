@@ -207,7 +207,8 @@ class ExcelFieldManager:
                             content = var.get("1.0", "end-1c")  # Get all text except final newline
 
                             # Collect rich text formatting for text fields
-                            if field_name in self.text_fields and content.strip():
+                            field_id = self._get_field_id_from_display_name(field_name)
+                            if field_id in self.text_field_ids and content.strip():
                                 format_data = self.serialize_text_widget_formatting(var)
                                 if format_data:
                                     locked_formats[field_name] = format_data
@@ -256,7 +257,8 @@ class ExcelFieldManager:
                         var.insert("1.0", content)
 
                         # Restore rich text formatting for text fields
-                        if field_name in self.text_fields and field_name in locked_formats:
+                        field_id = self._get_field_id_from_display_name(field_name)
+                        if field_id in self.text_field_ids and field_name in locked_formats:
                             format_data = locked_formats[field_name]
                             self.restore_text_widget_formatting(var, format_data)
                             logger.debug(f"Restored {len(format_data)} format tags for {field_name}")
