@@ -187,6 +187,115 @@ class FormattingManagerMixin:
         text_widget.bind('<Command-k>', lambda e: self.clear_all_formatting(text_widget))
         text_widget.bind('<Control-k>', lambda e: self.clear_all_formatting(text_widget))
 
+    def create_shared_formatting_toolbar(self, parent_frame):
+        """Create single shared formatting toolbar for all text fields"""
+        self._toolbar_buttons = []
+
+        # Bold button
+        bold_btn = ctk.CTkButton(parent_frame, text="\U0001d401", width=28, height=28,
+                           command=lambda: self._toolbar_toggle_format("bold"),
+                           font=ctk.CTkFont(size=12), state="disabled")
+        bold_btn.pack(side="left", padx=(0, 2))
+        ToolTip(bold_btn, "Fetstil (\u2318B)")
+        self._toolbar_buttons.append(bold_btn)
+
+        # Red button
+        red_btn = ctk.CTkButton(parent_frame, text="\u25cf", width=28, height=28,
+                          command=lambda: self._toolbar_toggle_format("red"),
+                          fg_color="#DC3545", hover_color="#C82333",
+                          font=ctk.CTkFont(size=12), state="disabled")
+        red_btn.pack(side="left", padx=(0, 2))
+        ToolTip(red_btn, "R\u00f6d text (\u2318R)")
+        self._toolbar_buttons.append(red_btn)
+
+        # Green button
+        green_btn = ctk.CTkButton(parent_frame, text="\u25cf", width=28, height=28,
+                            command=lambda: self._toolbar_toggle_format("green"),
+                            fg_color="#28A745", hover_color="#218838",
+                            font=ctk.CTkFont(size=12), state="disabled")
+        green_btn.pack(side="left", padx=(0, 2))
+        ToolTip(green_btn, "Gr\u00f6n text (\u2318G)")
+        self._toolbar_buttons.append(green_btn)
+
+        # Blue button
+        blue_btn = ctk.CTkButton(parent_frame, text="\u25cf", width=28, height=28,
+                           command=lambda: self._toolbar_toggle_format("blue"),
+                           fg_color="#007BFF", hover_color="#0069D9",
+                           font=ctk.CTkFont(size=12), state="disabled")
+        blue_btn.pack(side="left", padx=(0, 2))
+        ToolTip(blue_btn, "Bl\u00e5 text (\u23181)")
+        self._toolbar_buttons.append(blue_btn)
+
+        # Clear formatting button
+        default_btn = ctk.CTkButton(parent_frame, text="T", width=28, height=28,
+                              command=lambda: self._toolbar_clear_formatting(),
+                              fg_color="gray60", hover_color="gray50",
+                              font=ctk.CTkFont(size=12), state="disabled")
+        default_btn.pack(side="left", padx=(0, 4))
+        ToolTip(default_btn, "Rensa formatering (\u2318K)")
+        self._toolbar_buttons.append(default_btn)
+
+        # Font size toggle button (always visible, applies globally)
+        font_btn = ctk.CTkButton(parent_frame, text="A+", width=30, height=28,
+                           command=lambda: self.toggle_text_font_size(),
+                           font=ctk.CTkFont(size=10))
+        font_btn.pack(side="left", padx=(2, 0))
+        ToolTip(font_btn, "\u00c4ndra textstorlek (9/12/15pt)")
+
+    def bind_formatting_shortcuts(self, text_widget):
+        """Bind keyboard shortcuts for formatting to a specific text widget"""
+        text_widget.bind('<Command-b>', lambda e: self.toggle_format(text_widget, "bold"))
+        text_widget.bind('<Control-b>', lambda e: self.toggle_format(text_widget, "bold"))
+        text_widget.bind('<Command-r>', lambda e: self.toggle_format(text_widget, "red"))
+        text_widget.bind('<Control-r>', lambda e: self.toggle_format(text_widget, "red"))
+        text_widget.bind('<Command-1>', lambda e: self.toggle_format(text_widget, "blue"))
+        text_widget.bind('<Control-1>', lambda e: self.toggle_format(text_widget, "blue"))
+        text_widget.bind('<Command-g>', lambda e: self.toggle_format(text_widget, "green"))
+        text_widget.bind('<Control-g>', lambda e: self.toggle_format(text_widget, "green"))
+        text_widget.bind('<Command-k>', lambda e: self.clear_all_formatting(text_widget))
+        text_widget.bind('<Control-k>', lambda e: self.clear_all_formatting(text_widget))
+
+    def _toolbar_toggle_format(self, format_type):
+        """Shared toolbar action: apply format to currently active text widget"""
+        if self.active_formatting_widget:
+            self.toggle_format(self.active_formatting_widget, format_type)
+
+    def _toolbar_clear_formatting(self):
+        """Shared toolbar action: clear formatting on currently active text widget"""
+        if self.active_formatting_widget:
+            self.clear_all_formatting(self.active_formatting_widget)
+
+    def _on_formatting_widget_focus_in(self, text_widget, field_id):
+        """Called when any formatting-capable text widget gains focus"""
+        self.active_formatting_widget = text_widget
+        self.active_formatting_field_id = field_id
+        self._update_shared_toolbar_state()
+
+    def _on_formatting_widget_focus_out(self):
+        """Called when a formatting-capable text widget loses focus"""
+        # Delay check to allow next FocusIn to fire first (prevents flicker when tabbing)
+        self.root.after(50, self._check_if_still_focused)
+
+    def _check_if_still_focused(self):
+        """Delayed check: if no text widget reclaimed focus, deactivate toolbar"""
+        try:
+            focused = self.root.focus_get()
+            if focused not in self._formatting_text_widgets:
+                self.active_formatting_widget = None
+                self.active_formatting_field_id = None
+                self._update_shared_toolbar_state()
+        except Exception:
+            pass
+
+    def _update_shared_toolbar_state(self):
+        """Update shared toolbar button states based on active widget"""
+        if not hasattr(self, '_toolbar_buttons'):
+            return
+
+        state = "normal" if self.active_formatting_widget else "disabled"
+        for btn in self._toolbar_buttons:
+            btn.configure(state=state)
+
     def toggle_format(self, text_widget, format_type):
         """Toggle formatting on selected text with undo support"""
         try:

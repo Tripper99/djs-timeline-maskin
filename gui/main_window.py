@@ -253,6 +253,12 @@ class PDFProcessorApp(PDFOperationsMixin, ExcelOperationsMixin, LayoutManagerMix
                                 corner_radius=4)
         self.outer_paned_window.add(left_pane, minsize=500)
 
+        # Initialize shared formatting toolbar tracking
+        self.active_formatting_widget = None
+        self.active_formatting_field_id = None
+        self._formatting_text_widgets = set()
+        self._toolbar_buttons = []
+
         # Excel fields frame inside left pane (expands to fill)
         self.excel_fields_frame = ctk.CTkFrame(left_pane, fg_color="transparent")
         self.excel_fields_frame.pack(fill="both", expand=True, pady=(1, 0))

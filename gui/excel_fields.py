@@ -321,6 +321,13 @@ class ExcelFieldManager:
         if hasattr(self.parent, '_last_snapshot_time'):
             self.parent._last_snapshot_time.clear()
 
+        # Reset shared formatting toolbar state (old widgets being destroyed)
+        self.parent.active_formatting_widget = None
+        self.parent.active_formatting_field_id = None
+        self.parent._formatting_text_widgets.clear()
+        if hasattr(self.parent, '_update_shared_toolbar_state'):
+            self.parent._update_shared_toolbar_state()
+
         # Clear existing fields
         for widget in self.parent.excel_fields_frame.winfo_children():
             widget.destroy()
@@ -349,6 +356,20 @@ class ExcelFieldManager:
             from datetime import datetime
             today_date = datetime.now().strftime('%Y-%m-%d')
             self.parent.excel_vars[inlagd_display_name].set(today_date)
+
+        # Shared formatting toolbar centered above columns 2-3 (Händelse + Notes)
+        toolbar_container = ctk.CTkFrame(self.parent.excel_fields_frame, fg_color="transparent")
+        toolbar_container.pack(fill="x", pady=(3, 0))
+        toolbar_container.grid_columnconfigure(0, weight=30, minsize=150)  # Left column spacer
+        toolbar_container.grid_columnconfigure(1, weight=70)  # Händelse + Notes area
+
+        spacer = ctk.CTkFrame(toolbar_container, fg_color="transparent", height=1)
+        spacer.grid(row=0, column=0, sticky="ew")
+
+        toolbar_frame = ctk.CTkFrame(toolbar_container, fg_color=("gray90", "gray20"),
+                                     corner_radius=4, height=36)
+        toolbar_frame.grid(row=0, column=1)
+        self.parent.create_shared_formatting_toolbar(toolbar_frame)
 
         # Create resizable PanedWindow for Excel fields
         fields_container = tk.PanedWindow(self.parent.excel_fields_frame, orient="horizontal")
@@ -392,7 +413,7 @@ class ExcelFieldManager:
         # Create Column 2 (Middle) - Exclusively for Händelse
         col2_frame = ctk.CTkFrame(fields_container)
         col2_frame.grid_columnconfigure(0, weight=1)  # Content takes full width
-        col2_frame.grid_rowconfigure(2, weight=1)  # Text widget row expands to fill available space
+        col2_frame.grid_rowconfigure(1, weight=1)  # Text widget row expands to fill available space
 
         # Create Händelse field directly in the column (using current display name)
         handelse_display_name = field_manager.get_display_name('handelse')
@@ -642,23 +663,24 @@ class ExcelFieldManager:
             # Configure formatting tags for rich text
             self.parent.setup_text_formatting_tags(text_widget)
 
-            # Row 2.5: Formatting toolbar (compact)
-            toolbar_frame = ctk.CTkFrame(parent_frame, fg_color="transparent")
-            toolbar_frame.grid(row=row+1, column=0, columnspan=2, sticky="nw", padx=(10, 5), pady=(2, 2))
-            self.parent.create_formatting_toolbar(toolbar_frame, text_widget, col_name, field_id)
+            # Register for shared formatting toolbar and bind keyboard shortcuts
+            self.parent._formatting_text_widgets.add(text_widget)
+            text_widget.bind('<FocusIn>',
+                lambda e, tw=text_widget, fid=field_id: self.parent._on_formatting_widget_focus_in(tw, fid),
+                add='+')
+            text_widget.bind('<FocusOut>',
+                lambda e: self.parent._on_formatting_widget_focus_out(),
+                add='+')
+            self.parent.bind_formatting_shortcuts(text_widget)
 
-            # Move scrollable text container to row+2 to make room for toolbar
-            # Make Händelse expand vertically to fill available space
+            # Place scrollable text container directly after header (no per-field toolbar)
             if field_id == 'handelse':
-                scrollable_text.grid(row=row+2, column=0, columnspan=2, sticky="new", padx=(3, 3), pady=(0, 1))
-                # Configure the text widget row to expand vertically
-                parent_frame.grid_rowconfigure(row+2, weight=1)
+                scrollable_text.grid(row=row+1, column=0, columnspan=2, sticky="new", padx=(3, 3), pady=(0, 1))
+                parent_frame.grid_rowconfigure(row+1, weight=1)
             else:
-                scrollable_text.grid(row=row+2, column=0, columnspan=2, sticky="ew", padx=(3, 3), pady=(0, 1))
-                # FIX: Configure Note field rows to maintain fixed physical size regardless of font size
-                # This prevents the fields from growing when font size increases
+                scrollable_text.grid(row=row+1, column=0, columnspan=2, sticky="ew", padx=(3, 3), pady=(0, 1))
                 if field_id in ['note1', 'note2', 'note3']:
-                    parent_frame.grid_rowconfigure(row+2, weight=1)
+                    parent_frame.grid_rowconfigure(row+1, weight=1)
 
             # Store reference to scrollable text container (delegation will handle method calls)
             self.parent.excel_vars[col_name] = scrollable_text
@@ -670,8 +692,8 @@ class ExcelFieldManager:
                     field_widgets['checkbox'] = lock_switch
                 apply_field_state(field_widgets, field_id, is_field_disabled)
 
-            # Return the number of rows used (3 rows for text fields: header, toolbar, text - counter is now inline)
-            return 3
+            # Return the number of rows used (2 rows: header + text widget)
+            return 2
 
         # Layout depends on column type and field type
         elif column_type == "column1":
