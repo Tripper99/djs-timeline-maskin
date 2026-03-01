@@ -7,7 +7,7 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-**Latest Status (v2.9.4)**: PDF file list upgraded from tk.Listbox to ttk.Treeview with 4 sortable columns: Filnamn, Datum, Storlek, Sidor. Page count extracted via PyMuPDF. Clickable column headers for sorting (synced with dropdown). Fixed next-file selection bug after save-all when sort order was not A-Ö. UI tweak: "Kopiera ned" button smaller, Kommentar field wider.
+**Latest Status (v2.9.6)**: Consolidated 4 identical formatting toolbars into 1 shared toolbar with dynamic focus tracking. Fixed pre-existing locked field save bug caused by undefined `self.text_fields` attribute. Net ~90px vertical space reclaimed.
 
 **Key Features**:
 - **PDF File List (Treeview)**: 4-column display (Filnamn, Datum, Storlek, Sidor), clickable column headers for sorting, search/filter, sort by name/date/size/pages, persisted sort preference, open folder in Finder, delete file to Trash
@@ -22,6 +22,7 @@ The application has been refactored from a single large file into a modular stru
 - **Field Configuration System**: Custom field names and visibility states with template support
 - **Excel Integration**: Disabled fields automatically excluded from Excel operations
 - **Recently Used Dropdowns**: Quick-switch dropdowns for Excel files and output folders (max 10, persisted)
+- **Shared Formatting Toolbar**: Single toolbar with dynamic focus tracking replaces 4 per-field toolbars, saves ~90px vertical space
 
 **Architecture Status**:
 - **Modular Design**: Clean architecture with main_window.py as central coordinator
@@ -35,6 +36,32 @@ The application has been refactored from a single large file into a modular stru
 - Integration tests: `python -m pytest tests/test_integration_workflows.py -v -s`
 - See TESTING_GUIDE.md for complete workflow procedures
 - **Update Check Testing**: Test GitHub version checking via "Verktyg → Sök efter uppdateringar..." menu
+
+### v2.9.5–v2.9.6: Shared Formatting Toolbar + Locked Field Bug Fix (2026-03-01)
+
+**Shared Formatting Toolbar (v2.9.6)**
+- **Problem**: 4 identical formatting toolbars (Bold, Red, Green, Blue, Clear, A+) were displayed above each text field (Händelse, Note1, Note2, Note3), wasting ~90px of vertical space.
+- **Solution**: Consolidated into a single shared toolbar that dynamically targets whichever text field has focus.
+- **Implementation**:
+  - Added focus tracking via `<FocusIn>`/`<FocusOut>` events with 50ms delayed FocusOut check to prevent flicker when tabbing between fields.
+  - Toolbar buttons use `_toolbar_toggle_format()` which guards on `self.active_formatting_widget` before delegating to existing formatting methods.
+  - Keyboard shortcuts (Cmd+B/R/G/1/K) remain per-widget via closures — unchanged behavior.
+  - A+ (font size toggle) always enabled as it applies globally.
+  - Toolbar positioned via grid container with 30/70 weight split, centered above Händelse and Note1 columns.
+  - Toolbar lives inside `excel_fields_frame` but is recreated on field configuration changes.
+- **Files**: `gui/formatting_manager.py`, `gui/excel_fields.py`, `gui/main_window.py`
+- **Iterative positioning**: 3 rounds of user feedback to get toolbar placement right (full-width → grid split → refined 30/70 with label removed).
+
+**Locked Field Save Bug Fix (v2.9.6)**
+- **Problem**: Locked field content (text fields with "Save" checkbox checked) was not persisted to JSON config on app close. All locked fields appeared empty on restart.
+- **Root Cause**: `excel_fields.py` lines 210 and 259 referenced `self.text_fields` which was never defined — the actual attribute is `self.text_field_ids`. The `AttributeError` was silently caught by a broad `except Exception` handler, causing `collect_locked_field_data()` to return empty dicts.
+- **Fix**: Used `self._get_field_id_from_display_name(field_name)` to convert display names to internal IDs before comparing against `self.text_field_ids`.
+- **Note**: This was a pre-existing bug, not introduced by the toolbar refactoring.
+
+**Startup Freeze Fix (v2.9.5)**
+- **Problem**: App froze on startup when PDF folder contained many files due to blocking PDF page counting on the main thread.
+- **Fix**: Moved page count extraction to background thread.
+- **File**: `gui/pdf_file_list.py`
 
 ### v2.9.3–v2.9.4: PDF File List Metadata Columns + Bug Fixes (2026-02-24)
 
