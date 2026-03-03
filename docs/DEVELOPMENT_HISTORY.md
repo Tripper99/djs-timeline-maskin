@@ -7,7 +7,7 @@ This is a Python desktop application called "DJs Timeline-maskin" (DJs Timeline 
 A third way to use the app is by manually add content to excel-fields and create a new excel row without any pdf file selected or renamed. This is practical for researchers whon for example is picking information from books or other sources. 
 The application has been refactored from a single large file into a modular structure.
 
-**Latest Status (v2.9.6)**: Consolidated 4 identical formatting toolbars into 1 shared toolbar with dynamic focus tracking. Fixed pre-existing locked field save bug caused by undefined `self.text_fields` attribute. Net ~90px vertical space reclaimed.
+**Latest Status (v2.9.13)**: Clear text selection on regular click + PDF help button with Swedish control descriptions.
 
 **Key Features**:
 - **PDF File List (Treeview)**: 4-column display (Filnamn, Datum, Storlek, Sidor), clickable column headers for sorting, search/filter, sort by name/date/size/pages, persisted sort preference, open folder in Finder, delete file to Trash
@@ -36,6 +36,17 @@ The application has been refactored from a single large file into a modular stru
 - Integration tests: `python -m pytest tests/test_integration_workflows.py -v -s`
 - See TESTING_GUIDE.md for complete workflow procedures
 - **Update Check Testing**: Test GitHub version checking via "Verktyg → Sök efter uppdateringar..." menu
+
+### v2.9.13: Clear selection on click + PDF help button (2026-03-03)
+
+**Clear Selection on Click**
+- **Problem**: After Cmd+drag text selection, the blue highlight rectangle persisted until user scrolled or zoomed — clicking elsewhere did not clear it.
+- **Fix**: Added `self._text_selector.clear_selection()` call in `_on_mouse_press` when entering pan mode (no Cmd held). One-line change in `gui/pdf_preview.py`.
+
+**PDF Help Button**
+- **Feature**: Added a blue "?" button in the nav bar between "Ta bort sida" and "Öppna PDF".
+- **Implementation**: Uses `messagebox.showinfo` with Swedish text explaining all PDF preview controls: scroll zoom, click-drag pan, Cmd+drag text select, double-click fit-to-width, keyboard shortcuts, and button controls.
+- **File**: `gui/pdf_preview.py`
 
 ### v2.9.5–v2.9.6: Shared Formatting Toolbar + Locked Field Bug Fix (2026-03-01)
 
