@@ -63,8 +63,8 @@ class PDFPreviewPanel(ctk.CTkFrame):
         self._zoom_step = 0.10           # 10% per step
         self._max_pixmap_dim = 4096      # Max rendered pixel dimension
 
-        # Interaction mode: "pan" or "select"
-        self._interaction_mode = "pan"
+        # Active drag type: "pan", "select", or None (no drag in progress)
+        self._active_drag = None
 
         # Pan state
         self._pan_start_x = None
@@ -167,16 +167,7 @@ class PDFPreviewPanel(ctk.CTkFrame):
             command=self._fit_to_width, font=ctk.CTkFont(size=11)
         )
         self._fit_width_btn.pack(side="left", padx=(4, 8))
-        ToolTip(self._fit_width_btn, "Anpassa till f\u00f6nsterbredd (\u23180)")
-
-        # Text selection toggle button
-        self._text_select_btn = ctk.CTkButton(
-            nav_frame, text="Markera text", width=110, height=26,
-            command=self._toggle_interaction_mode, font=ctk.CTkFont(size=11),
-            fg_color="#6C63FF", hover_color="#5A52D5"
-        )
-        self._text_select_btn.pack(side="left", padx=(4, 8))
-        ToolTip(self._text_select_btn, "V\u00e4xla mellan panorering och textmarkering (\u2318T)")
+        ToolTip(self._fit_width_btn, "Anpassa till f\u00f6nsterbredd (\u23030)")
 
         # Delete page button
         self._delete_page_btn = ctk.CTkButton(
@@ -437,6 +428,7 @@ class PDFPreviewPanel(ctk.CTkFrame):
         """Reset zoom to fit canvas width."""
         self._is_fit_to_width = True
         self._page_cache.clear()  # Clear cache since fit-to-width recalculates
+        self._canvas.update_idletasks()
         self._render_current_page(page_changed=True)
 
     def _zoom_at_cursor(self, event):
@@ -586,16 +578,19 @@ class PDFPreviewPanel(ctk.CTkFrame):
 
     # ---- Rendering ----
 
-    def _render_current_page(self, page_changed=True):
+    def _render_current_page(self, page_changed=True, _retry_count=0):
         """Render the current page to the canvas."""
         if not self._pdf_doc or self._total_pages == 0:
             return
 
+        # Force geometry processing so canvas reports actual laid-out width
+        self._canvas.update_idletasks()
+
         canvas_width = self._canvas.winfo_width()
         if canvas_width < 50:
-            # Canvas not yet sized, retry shortly
-            if self.winfo_exists():
-                self.after(100, lambda: self._render_current_page(page_changed))
+            # Canvas not yet sized, retry shortly (max 5 retries)
+            if self.winfo_exists() and _retry_count < 5:
+                self.after(100, lambda: self._render_current_page(page_changed, _retry_count + 1))
             return
 
         # Get page intrinsic dimensions for fit-to-width calculation
@@ -698,43 +693,29 @@ class PDFPreviewPanel(ctk.CTkFrame):
                 self._render_current_page(page_changed=True)
             # When manually zoomed, do nothing — scrollbars handle it
 
-    # ---- Interaction mode toggle ----
-
-    def _toggle_interaction_mode(self, event=None):
-        """Toggle between pan and text-select mode."""
-        if self._interaction_mode == "pan":
-            self._interaction_mode = "select"
-            self._text_select_btn.configure(
-                text="Panorera",
-                fg_color="#D4A017", hover_color="#B8860B"
-            )
-            self._canvas.configure(cursor="cross")
-        else:
-            self._interaction_mode = "pan"
-            self._text_select_btn.configure(
-                text="Markera text",
-                fg_color="#6C63FF", hover_color="#5A52D5"
-            )
-            self._canvas.configure(cursor="")
-            if hasattr(self, '_text_selector') and self._text_selector:
-                self._text_selector.clear_selection()
-
     # ---- Interaction bindings ----
+
+    @staticmethod
+    def _is_command_held(event):
+        """Check if Command (macOS) or Control (Windows/Linux) is held."""
+        if platform.system() == "Darwin":
+            return bool(event.state & 0x8)  # Command key on macOS
+        return bool(event.state & 0x4)  # Control key on Windows/Linux
 
     def _bind_interactions(self, event=None):
         """Bind mousewheel, keyboard shortcuts, and pan/select when cursor enters canvas."""
-        # Mousewheel
+        # Mousewheel — always zooms (no scroll)
         self._canvas.bind("<MouseWheel>", self._on_mousewheel)
         if platform.system() != "Darwin":
             self._canvas.bind("<Button-4>", self._on_mousewheel)
             self._canvas.bind("<Button-5>", self._on_mousewheel)
 
-        # Mouse drag — route based on interaction mode
+        # Mouse drag — route based on Command key at press time
         self._canvas.bind("<ButtonPress-1>", self._on_mouse_press)
         self._canvas.bind("<B1-Motion>", self._on_mouse_motion)
         self._canvas.bind("<ButtonRelease-1>", self._on_mouse_release)
 
-        # Double-click to fit-to-width (only in pan mode)
+        # Double-click to fit-to-width
         self._canvas.bind("<Double-Button-1>", self._on_double_click)
 
         # Keyboard zoom shortcuts (Control key)
@@ -742,12 +723,17 @@ class PDFPreviewPanel(ctk.CTkFrame):
         self._canvas.bind("<Control-minus>", self._zoom_out)
         self._canvas.bind("<Control-0>", self._fit_to_width)
 
-        # Toggle text selection mode shortcut
-        self._canvas.bind("<Command-t>", self._toggle_interaction_mode)
-
-        # Set cursor based on current mode
-        if self._interaction_mode == "select":
-            self._canvas.configure(cursor="cross")
+        # Command key cursor feedback (macOS Meta, others Control)
+        if platform.system() == "Darwin":
+            self._canvas.bind("<KeyPress-Meta_L>", self._on_command_press)
+            self._canvas.bind("<KeyPress-Meta_R>", self._on_command_press)
+            self._canvas.bind("<KeyRelease-Meta_L>", self._on_command_release)
+            self._canvas.bind("<KeyRelease-Meta_R>", self._on_command_release)
+        else:
+            self._canvas.bind("<KeyPress-Control_L>", self._on_command_press)
+            self._canvas.bind("<KeyPress-Control_R>", self._on_command_press)
+            self._canvas.bind("<KeyRelease-Control_L>", self._on_command_release)
+            self._canvas.bind("<KeyRelease-Control_R>", self._on_command_release)
 
         # Make canvas focusable for keyboard events
         self._canvas.focus_set()
@@ -763,64 +749,76 @@ class PDFPreviewPanel(ctk.CTkFrame):
         self._canvas.unbind("<B1-Motion>")
         self._canvas.unbind("<ButtonRelease-1>")
         self._canvas.unbind("<Double-Button-1>")
-        self._canvas.unbind("<Command-equal>")
-        self._canvas.unbind("<Command-minus>")
-        self._canvas.unbind("<Command-0>")
-        self._canvas.unbind("<Command-t>")
+        self._canvas.unbind("<Control-equal>")
+        self._canvas.unbind("<Control-minus>")
+        self._canvas.unbind("<Control-0>")
 
-        # Reset cursor if panning was interrupted
+        if platform.system() == "Darwin":
+            self._canvas.unbind("<KeyPress-Meta_L>")
+            self._canvas.unbind("<KeyPress-Meta_R>")
+            self._canvas.unbind("<KeyRelease-Meta_L>")
+            self._canvas.unbind("<KeyRelease-Meta_R>")
+        else:
+            self._canvas.unbind("<KeyPress-Control_L>")
+            self._canvas.unbind("<KeyPress-Control_R>")
+            self._canvas.unbind("<KeyRelease-Control_L>")
+            self._canvas.unbind("<KeyRelease-Control_R>")
+
+        # Reset cursor and drag state
         if self._is_panning:
             self._is_panning = False
-            self._canvas.configure(cursor="")
-        elif self._interaction_mode == "select":
+        self._active_drag = None
+        self._canvas.configure(cursor="")
+
+    def _on_command_press(self, event):
+        """Show cross cursor when Command/Ctrl pressed (only when not mid-drag)."""
+        if self._active_drag is None:
+            self._canvas.configure(cursor="cross")
+
+    def _on_command_release(self, event):
+        """Restore default cursor when Command/Ctrl released (only when not mid-drag)."""
+        if self._active_drag is None:
             self._canvas.configure(cursor="")
 
     def _on_mouse_press(self, event):
-        """Route mouse press based on interaction mode."""
-        if self._interaction_mode == "select":
+        """Route mouse press: Command held → text select, otherwise → pan.
+        Locks drag type at press time so mid-drag modifier changes are ignored."""
+        if self._is_command_held(event):
+            self._active_drag = "select"
             self._text_selector.on_select_start(event)
         else:
+            self._active_drag = "pan"
             self._on_pan_start(event)
 
     def _on_mouse_motion(self, event):
-        """Route mouse motion based on interaction mode."""
-        if self._interaction_mode == "select":
+        """Route mouse motion based on drag type locked at press time."""
+        if self._active_drag == "select":
             self._text_selector.on_select_motion(event)
-        else:
+        elif self._active_drag == "pan":
             self._on_pan_motion(event)
 
     def _on_mouse_release(self, event):
-        """Route mouse release based on interaction mode."""
-        if self._interaction_mode == "select":
+        """Route mouse release based on drag type locked at press time."""
+        if self._active_drag == "select":
             self._text_selector.on_select_end(event)
-        else:
+        elif self._active_drag == "pan":
             self._on_pan_end(event)
+        self._active_drag = None
 
     def _on_double_click(self, event):
-        """Handle double-click: fit-to-width only in pan mode."""
-        if self._interaction_mode == "pan":
-            self._fit_to_width()
+        """Handle double-click: fit-to-width."""
+        self._fit_to_width()
 
     def _on_mousewheel(self, event):
-        """Handle mousewheel: Cmd+scroll = zoom, Shift+scroll = horizontal, plain = vertical."""
+        """Handle mousewheel: always zoom at cursor position."""
         if platform.system() == "Darwin":
-            # macOS: Check modifier keys in event.state
-            # Bit 0x4 = Control key on macOS
-            if event.state & 0x4:
-                self._zoom_at_cursor(event)
-                return
-            # Bit 0x1 = Shift key
-            if event.state & 0x1:
-                self._canvas.xview_scroll(int(-1 * event.delta), "units")
-                return
-            # Plain scroll = vertical
-            self._canvas.yview_scroll(int(-1 * event.delta), "units")
-        elif event.num == 4:
-            self._canvas.yview_scroll(-3, "units")
-        elif event.num == 5:
-            self._canvas.yview_scroll(3, "units")
+            self._zoom_at_cursor(event)
+        elif event.num in (4, 5):
+            # Linux Button-4/5: synthesize event.delta for _zoom_at_cursor
+            event.delta = 120 if event.num == 4 else -120
+            self._zoom_at_cursor(event)
         else:
-            self._canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+            self._zoom_at_cursor(event)
 
     # ---- Pan / drag ----
 
