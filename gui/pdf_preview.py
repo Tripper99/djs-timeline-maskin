@@ -90,9 +90,6 @@ class PDFPreviewPanel(ctk.CTkFrame):
         self._image_offset_x = 0
         self._image_offset_y = 0
 
-        # Deferred render callback ID
-        self._deferred_render_id = None
-
         self._build_ui()
 
     def _build_ui(self):
@@ -255,10 +252,7 @@ class PDFPreviewPanel(ctk.CTkFrame):
             self._page_intrinsic_height = 0.0
 
             logger.info(f"PDF preview loaded: {file_path} ({self._total_pages} pages)")
-            # Defer render to let layout engine finalize canvas dimensions
-            self._deferred_render_id = self.after(
-                50, lambda: self._render_current_page(page_changed=True)
-            )
+            self._render_current_page(page_changed=True)
             self._update_nav_state()
         except Exception as e:
             logger.error(f"Failed to load PDF for preview: {e}")
@@ -281,13 +275,6 @@ class PDFPreviewPanel(ctk.CTkFrame):
                 pass
             self._zoom_after_id = None
             self._zoom_batch_start = None
-
-        if self._deferred_render_id:
-            try:
-                self.after_cancel(self._deferred_render_id)
-            except Exception:
-                pass
-            self._deferred_render_id = None
 
         if self._pdf_doc:
             try:
@@ -631,6 +618,11 @@ class PDFPreviewPanel(ctk.CTkFrame):
         if self._is_fit_to_width:
             self._fit_to_width_zoom = (canvas_width - 4) / self._page_intrinsic_width
             self._zoom_factor = self._fit_to_width_zoom
+            logger.info(
+                f"[FTW] canvas_w={canvas_width}, "
+                f"page=({self._page_intrinsic_width:.0f}x{self._page_intrinsic_height:.0f}), "
+                f"zoom={self._zoom_factor:.4f}"
+            )
             self._update_zoom_label()
             self._update_zoom_btn_state()
 
@@ -648,6 +640,29 @@ class PDFPreviewPanel(ctk.CTkFrame):
             self._page_cache[cache_key] = pil_image
             while len(self._page_cache) > self.MAX_CACHE_SIZE:
                 self._page_cache.popitem(last=False)
+
+        # Verify fit-to-width: guarantee image fills canvas width
+        # Use FRESH canvas width — the value from update_idletasks() may be stale
+        if self._is_fit_to_width and pil_image.width > 0:
+            fresh_canvas_w = self._canvas.winfo_width()
+            expected_width = max(1, int(fresh_canvas_w - 4))
+            if abs(pil_image.width - expected_width) > 2:
+                logger.info(
+                    f"[FTW-FIX] Mismatch: img={pil_image.width}px, expected={expected_width}px "
+                    f"(stale_canvas_w={canvas_width}, fresh_canvas_w={fresh_canvas_w}, "
+                    f"page=({self._page_intrinsic_width:.0f}x{self._page_intrinsic_height:.0f}), "
+                    f"zoom={self._zoom_factor:.4f}, eff_zoom={self._last_effective_zoom:.4f})"
+                )
+                scale = expected_width / pil_image.width
+                new_h = max(1, int(pil_image.height * scale))
+                pil_image = pil_image.resize((expected_width, new_h), Image.LANCZOS)
+                self._last_effective_zoom = self._zoom_factor
+                # Recalculate zoom to match corrected width
+                self._zoom_factor = expected_width / self._page_intrinsic_width
+                self._fit_to_width_zoom = self._zoom_factor
+                self._update_zoom_label()
+                # Update cache with corrected image
+                self._page_cache[cache_key] = pil_image
 
         # Display on canvas — center image when smaller than viewport
         self._photo_image = ImageTk.PhotoImage(pil_image)
@@ -702,6 +717,13 @@ class PDFPreviewPanel(ctk.CTkFrame):
 
             mat = fitz.Matrix(effective_zoom, effective_zoom)
             pix = page.get_pixmap(matrix=mat, alpha=False)
+
+            logger.info(
+                f"[RENDER] page {page_num}: pdf=({page_width:.0f}x{page_height:.0f}), "
+                f"zoom={zoom_factor:.4f}, eff={effective_zoom:.4f}, "
+                f"pixmap=({pix.width}x{pix.height}), clamped={effective_zoom != zoom_factor}"
+            )
+
             pil_image = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
 
             return pil_image
