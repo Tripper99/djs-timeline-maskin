@@ -187,6 +187,17 @@ class UndoManagerMixin:
                 self.save_text_undo_state(text_widget, pre_paste_content)
 
                 # Check if we have formatted content in internal clipboard
+                # Verify system clipboard still matches — if not, newer content
+                # was copied (e.g. from PDF text selection) and internal is stale
+                if self.internal_clipboard:
+                    text, tags_data = self.internal_clipboard
+                    try:
+                        system_clip = self.root.clipboard_get()
+                        if system_clip != text:
+                            self.internal_clipboard = None
+                    except tk.TclError:
+                        self.internal_clipboard = None
+
                 if self.internal_clipboard:
                     text, tags_data = self.internal_clipboard
 

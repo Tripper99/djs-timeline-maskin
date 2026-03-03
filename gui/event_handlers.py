@@ -461,10 +461,10 @@ class EventHandlersMixin:
             if not result:
                 return
 
-        # Get current filename components
+        # Get current filename components (strip internal linebreaks from OCR text)
         date = self.date_var.get()
-        newspaper = self.newspaper_var.get()
-        comment = self.comment_var.get()
+        newspaper = " ".join(self.newspaper_var.get().split())
+        comment = " ".join(self.comment_var.get().split())
         pages = self.pages_var.get()
 
         # Construct the new filename
