@@ -24,11 +24,13 @@ class PDFTextSelector:
     from the preview panel without tight coupling.
     """
 
-    def __init__(self, canvas, get_pdf_doc, get_current_page, get_effective_zoom):
+    def __init__(self, canvas, get_pdf_doc, get_current_page, get_effective_zoom,
+                 get_image_offset=None):
         self._canvas = canvas
         self._get_pdf_doc = get_pdf_doc
         self._get_current_page = get_current_page
         self._get_effective_zoom = get_effective_zoom
+        self._get_image_offset = get_image_offset or (lambda: (0, 0))
 
         self._start_x = 0
         self._start_y = 0
@@ -117,11 +119,12 @@ class PDFTextSelector:
         try:
             page = doc[page_num]
 
-            # Canvas coords → PDF coords by dividing by effective zoom
-            pdf_x0 = x0 / zoom
-            pdf_y0 = y0 / zoom
-            pdf_x1 = x1 / zoom
-            pdf_y1 = y1 / zoom
+            # Canvas coords → PDF coords: subtract image offset, then divide by zoom
+            offset_x, offset_y = self._get_image_offset()
+            pdf_x0 = (x0 - offset_x) / zoom
+            pdf_y0 = (y0 - offset_y) / zoom
+            pdf_x1 = (x1 - offset_x) / zoom
+            pdf_y1 = (y1 - offset_y) / zoom
 
             rect = fitz.Rect(pdf_x0, pdf_y0, pdf_x1, pdf_y1)
             text = page.get_text("text", clip=rect)

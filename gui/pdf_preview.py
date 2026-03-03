@@ -86,6 +86,13 @@ class PDFPreviewPanel(ctk.CTkFrame):
         self._page_intrinsic_width = 0.0
         self._page_intrinsic_height = 0.0
 
+        # Image centering offset (when image is smaller than canvas)
+        self._image_offset_x = 0
+        self._image_offset_y = 0
+
+        # Deferred render callback ID
+        self._deferred_render_id = None
+
         self._build_ui()
 
     def _build_ui(self):
@@ -199,6 +206,7 @@ class PDFPreviewPanel(ctk.CTkFrame):
             get_pdf_doc=lambda: self._pdf_doc,
             get_current_page=lambda: self._current_page,
             get_effective_zoom=lambda: self._last_effective_zoom,
+            get_image_offset=lambda: (self._image_offset_x, self._image_offset_y),
         )
 
         self._update_nav_state()
@@ -247,7 +255,10 @@ class PDFPreviewPanel(ctk.CTkFrame):
             self._page_intrinsic_height = 0.0
 
             logger.info(f"PDF preview loaded: {file_path} ({self._total_pages} pages)")
-            self._render_current_page(page_changed=True)
+            # Defer render to let layout engine finalize canvas dimensions
+            self._deferred_render_id = self.after(
+                50, lambda: self._render_current_page(page_changed=True)
+            )
             self._update_nav_state()
         except Exception as e:
             logger.error(f"Failed to load PDF for preview: {e}")
@@ -271,6 +282,13 @@ class PDFPreviewPanel(ctk.CTkFrame):
             self._zoom_after_id = None
             self._zoom_batch_start = None
 
+        if self._deferred_render_id:
+            try:
+                self.after_cancel(self._deferred_render_id)
+            except Exception:
+                pass
+            self._deferred_render_id = None
+
         if self._pdf_doc:
             try:
                 self._pdf_doc.close()
@@ -289,6 +307,8 @@ class PDFPreviewPanel(ctk.CTkFrame):
         self._is_fit_to_width = True
         self._page_intrinsic_width = 0.0
         self._page_intrinsic_height = 0.0
+        self._image_offset_x = 0
+        self._image_offset_y = 0
 
         if hasattr(self, "_canvas"):
             self._canvas.delete("all")
@@ -466,9 +486,11 @@ class PDFPreviewPanel(ctk.CTkFrame):
             self._zoom_batch_start = self._zoom_factor
             self._zoom_batch_anchor_x = event.x
             self._zoom_batch_anchor_y = event.y
-            # Record the PDF-space point under cursor before any zoom changes
-            self._zoom_batch_pdf_x = self._canvas.canvasx(event.x) / self._zoom_factor
-            self._zoom_batch_pdf_y = self._canvas.canvasy(event.y) / self._zoom_factor
+            # Record the PDF-space point under cursor (subtract image offset first)
+            img_x = self._canvas.canvasx(event.x) - self._image_offset_x
+            img_y = self._canvas.canvasy(event.y) - self._image_offset_y
+            self._zoom_batch_pdf_x = max(0, min(img_x / self._zoom_factor, self._page_intrinsic_width))
+            self._zoom_batch_pdf_y = max(0, min(img_y / self._zoom_factor, self._page_intrinsic_height))
 
         # Accumulate zoom factor immediately (no render yet)
         self._zoom_factor = new_zoom
@@ -512,8 +534,8 @@ class PDFPreviewPanel(ctk.CTkFrame):
                 sr_height = float(parts[3]) if len(parts) > 3 else 0
 
                 if sr_width > 0 and sr_height > 0:
-                    new_canvas_x = pdf_x * self._zoom_factor
-                    new_canvas_y = pdf_y * self._zoom_factor
+                    new_canvas_x = pdf_x * self._zoom_factor + self._image_offset_x
+                    new_canvas_y = pdf_y * self._zoom_factor + self._image_offset_y
                     self._canvas.xview_moveto(max(0, (new_canvas_x - anchor_x) / sr_width))
                     self._canvas.yview_moveto(max(0, (new_canvas_y - anchor_y) / sr_height))
 
@@ -529,8 +551,8 @@ class PDFPreviewPanel(ctk.CTkFrame):
         pdf_anchor_x = None
         pdf_anchor_y = None
         if anchor_canvas_x is not None and old_zoom > 0:
-            canvas_scroll_x = self._canvas.canvasx(anchor_canvas_x)
-            canvas_scroll_y = self._canvas.canvasy(anchor_canvas_y)
+            canvas_scroll_x = self._canvas.canvasx(anchor_canvas_x) - self._image_offset_x
+            canvas_scroll_y = self._canvas.canvasy(anchor_canvas_y) - self._image_offset_y
             pdf_anchor_x = canvas_scroll_x / old_zoom
             pdf_anchor_y = canvas_scroll_y / old_zoom
 
@@ -547,8 +569,8 @@ class PDFPreviewPanel(ctk.CTkFrame):
                 sr_height = float(parts[3]) if len(parts) > 3 else 0
 
                 if sr_width > 0 and sr_height > 0:
-                    new_canvas_x = pdf_anchor_x * new_zoom
-                    new_canvas_y = pdf_anchor_y * new_zoom
+                    new_canvas_x = pdf_anchor_x * new_zoom + self._image_offset_x
+                    new_canvas_y = pdf_anchor_y * new_zoom + self._image_offset_y
 
                     target_xfrac = max(0, (new_canvas_x - anchor_canvas_x) / sr_width)
                     target_yfrac = max(0, (new_canvas_y - anchor_canvas_y) / sr_height)
@@ -627,14 +649,27 @@ class PDFPreviewPanel(ctk.CTkFrame):
             while len(self._page_cache) > self.MAX_CACHE_SIZE:
                 self._page_cache.popitem(last=False)
 
-        # Display on canvas
+        # Display on canvas — center image when smaller than viewport
         self._photo_image = ImageTk.PhotoImage(pil_image)
         self._canvas.delete("all")
         # Reset text selector state since canvas items are gone
         if hasattr(self, '_text_selector') and self._text_selector:
             self._text_selector.reset()
-        self._canvas.create_image(0, 0, anchor="nw", image=self._photo_image)
-        self._canvas.configure(scrollregion=(0, 0, pil_image.width, pil_image.height))
+
+        img_w, img_h = pil_image.width, pil_image.height
+        canvas_w = self._canvas.winfo_width()
+        canvas_h = self._canvas.winfo_height()
+
+        self._image_offset_x = (canvas_w - img_w) // 2 if img_w < canvas_w else 0
+        self._image_offset_y = (canvas_h - img_h) // 2 if img_h < canvas_h else 0
+
+        self._canvas.create_image(
+            self._image_offset_x, self._image_offset_y,
+            anchor="nw", image=self._photo_image
+        )
+        self._canvas.configure(scrollregion=(
+            0, 0, max(img_w, canvas_w), max(img_h, canvas_h)
+        ))
 
         # Only reset scroll to top on page changes, not zoom changes
         if page_changed:
