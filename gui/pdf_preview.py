@@ -182,6 +182,15 @@ class PDFPreviewPanel(ctk.CTkFrame):
         self._delete_page_btn.pack(side="left", padx=(4, 8))
         ToolTip(self._delete_page_btn, "Ta bort aktuell sida fr\u00e5n PDF-filen")
 
+        # Help button
+        self._help_btn = ctk.CTkButton(
+            nav_frame, text="?", width=28, height=26,
+            command=self._show_preview_help, font=ctk.CTkFont(size=13, weight="bold"),
+            fg_color="#4A90D9", hover_color="#357ABD"
+        )
+        self._help_btn.pack(side="left", padx=(0, 8))
+        ToolTip(self._help_btn, "Visa hj\u00e4lp f\u00f6r PDF-f\u00f6rhandsgranskning")
+
         # Open externally button (right side)
         self._open_btn = ctk.CTkButton(
             nav_frame, text="\u00D6ppna PDF", width=90, height=26,
@@ -845,6 +854,7 @@ class PDFPreviewPanel(ctk.CTkFrame):
             self._text_selector.on_select_start(event)
         else:
             self._active_drag = "pan"
+            self._text_selector.clear_selection()
             self._on_pan_start(event)
 
     def _on_mouse_motion(self, event):
@@ -918,6 +928,20 @@ class PDFPreviewPanel(ctk.CTkFrame):
         """End panning on mouse release."""
         self._is_panning = False
         self._canvas.configure(cursor="")
+
+    # ---- Help dialog ----
+
+    def _show_preview_help(self):
+        """Show help dialog explaining PDF preview controls."""
+        messagebox.showinfo(
+            "PDF-f\u00f6rhandsgranskning \u2013 Hj\u00e4lp",
+            "Scrollhjul: zoomar in/ut vid muspekaren\n\n"
+            "Klicka och dra: panorera runt i dokumentet\n\n"
+            "\u2318+dra (Cmd+dra): markera text (kopieras automatiskt)\n\n"
+            "Dubbelklick: anpassa till f\u00f6nsterbredd\n\n"
+            "Tangentbord: \u2303+/\u2303\u2212 f\u00f6r zoom, \u23030 f\u00f6r anpassa bredd\n\n"
+            "Knappar: sidnavigering, zoom, ta bort sida, \u00f6ppna externt",
+        )
 
     # ---- External open ----
 
